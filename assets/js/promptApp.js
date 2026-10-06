@@ -11,8 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const levelFilterModeSelect = document.getElementById('levelFilterModeSelect');
   const levelSelectionRow = document.getElementById('levelSelectionRow');
-  const levelPresetSelect = document.getElementById('levelPresetSelect');
-  const levelCustomInput = document.getElementById('levelCustomInput');
+  const examTypeSelect = document.getElementById('examTypeSelect');
+  const examScoreInput = document.getElementById('examScoreInput');
+  const scoreChipsWrapper = document.getElementById('scoreChipsWrapper');
+  const scoreChipsList = document.getElementById('scoreChipsList');
 
   const posNoun = document.getElementById('posNoun');
   const posVerb = document.getElementById('posVerb');
@@ -52,71 +54,24 @@ document.addEventListener('DOMContentLoaded', () => {
   let saveTimer = null;
   let currentMode = 'text'; // 'text' | 'topic'
 
-  // 언어별 추천 등급 프리셋 및 기본 예시 필드 (관광통역안내사 공인어학성적 기준 및 국제 기준 반영)
-  const LEVEL_PRESETS = {
-    zh: {
-      levels: [
-        'HSK 3급',
-        'HSK 4급',
-        'HSK 5급 (관광통역안내사 기준)',
-        'HSK 6급 (최고급)',
-        'HSK 1급 (기초)',
-        'HSK 2급 (초급)',
-        'BCT(B) 181점 이상 (관광통역)',
-        'TOCFL 5급(대만·관광통역)',
-        'CPT 750점 이상 (관광통역)',
-        'FLEX 776점 이상 (관광통역)'
-      ],
-      defaultLevel: 'HSK 3급',
-      defaultFields: [
-        { name: '[품사]한국어', sample: '[명사]안녕, 안녕하세요' },
-        { name: '중국어', sample: '你好' },
-        { name: '병음', sample: 'nǐ hǎo' }
-      ],
-      sampleRows: [
-        ['[명사]안녕, 안녕하세요', '你好', 'nǐ hǎo'],
-        ['[동사]감사하다, 고맙다', '谢谢', 'xièxie'],
-        ['[형용사]기쁘다, 즐겁다', '高兴', 'gāoxìng']
-      ]
-    },
-    ja: {
-      levels: [
-        'JLPT N4 (초급)',
-        'JLPT N3 (중급)',
-        'JLPT N2 (중상급)',
-        'JLPT N1 (관광통역안내사 기준)',
-        'JLPT N5 (입문)',
-        'JPT 740점 이상 (관광통역)',
-        'FLEX 776점 이상 (관광통역)'
-      ],
-      defaultLevel: 'JLPT N4',
-      defaultFields: [
-        { name: '[품사]한국어', sample: '[명사]벚꽃' },
-        { name: '일본어', sample: '桜' },
-        { name: '후리가나/발음', sample: 'さくら' }
-      ],
-      sampleRows: [
-        ['[명사]벚꽃', '桜', 'さくら'],
-        ['[동사]먹다', '食べる', 'たべる'],
-        ['[형용사]예쁘다, 아름답다', '美しい', 'うつくしい']
-      ]
-    },
+  // 언어별 공인 시험 및 난이도 기준 프리셋
+  // (실제 공인시험이 존재하는 12개 주요 언어에만 검증된 시험을 배치하고, 그 외 언어는 일반 난이도(초급/중급/고급) 및 직접 입력만 제공)
+  const EXAM_PRESETS = {
     en: {
-      levels: [
-        '중학 필수 (기초)',
-        '수능/고교 필수 (CEFR B1-B2)',
-        '토익 760점 (관광통역안내사 기준)',
-        '토익 850점 이상 (상급)',
-        '토플 iBT 81점 (관광통역안내사)',
-        'IELTS 5.0 (관광통역안내사)',
-        'TEPS 372점 (관광통역안내사)',
-        'G-TELP 레벨2 74점 (관광통역)',
-        'FLEX 776점 이상 (관광통역)',
-        'CEFR B1 (중급)',
-        'CEFR B2 (중상급)',
-        'CEFR C1 (고급/토플)'
+      exams: [
+        { name: '토익', label: '토익 (TOEIC)', defaultScore: '760점', scoreChips: ['600점', '700점', '760점', '800점', '850점', '900점'] },
+        { name: '토플 IBT', label: '토플 (TOEFL IBT)', defaultScore: '81점', scoreChips: ['60점', '71점', '81점', '90점', '100점'] },
+        { name: '토플 PBT', label: '토플 (TOEFL PBT)', defaultScore: '584점', scoreChips: ['500점', '550점', '584점', '600점'] },
+        { name: '텝스', label: '텝스 (TEPS)', defaultScore: '372점', scoreChips: ['300점', '340점', '372점', '400점', '450점'] },
+        { name: '지텔프', label: '지텔프 (G-TELP)', defaultScore: '레벨2 74점', scoreChips: ['레벨2 65점', '레벨2 74점', '레벨2 80점'] },
+        { name: '아이엘츠', label: '아이엘츠 (IELTS)', defaultScore: '5.0', scoreChips: ['4.5', '5.0', '5.5', '6.0', '6.5', '7.0'] },
+        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
+        { name: '수능/교과', label: '수능/교과 어휘', defaultScore: '수능 필수', scoreChips: ['중학 필수', '고교 기본', '수능 필수'] },
+        { name: '일반 난이도', label: '일반 난이도', defaultScore: '중급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
       ],
-      defaultLevel: '중학 필수',
+      defaultExam: '토익',
+      defaultScore: '760점',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]사과' },
         { name: '영어', sample: 'apple' },
@@ -128,16 +83,62 @@ document.addEventListener('DOMContentLoaded', () => {
         ['[형용사]중요한', 'crucial', 'Water is crucial for all living things.']
       ]
     },
-    fr: {
-      levels: [
-        'DELF B2 (관광통역안내사 기준)',
-        'DELF B1 (중급)',
-        'DELF A2 (초급)',
-        'DELF A1 (입문)',
-        'DALF C1 (고급)',
-        'FLEX 776점 이상 (관광통역)'
+    ja: {
+      exams: [
+        { name: 'JLPT', label: '일본어능력시험 (JLPT)', defaultScore: 'N1', scoreChips: ['N5', 'N4', 'N3', 'N2', 'N1'] },
+        { name: 'JPT', label: 'JPT', defaultScore: '740점', scoreChips: ['550점', '650점', '740점', '800점', '900점'] },
+        { name: '日檢(NIKKEN)', label: '일본어검정시험 (日檢 NIKKEN)', defaultScore: '750점', scoreChips: ['600점', '700점', '750점', '800점'] },
+        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
+        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
       ],
-      defaultLevel: 'DELF A2 (초급)',
+      defaultExam: 'JLPT',
+      defaultScore: 'N1',
+      defaultFields: [
+        { name: '[품사]한국어', sample: '[명사]벚꽃' },
+        { name: '일본어', sample: '桜' },
+        { name: '후리가나/발음', sample: 'さくら' }
+      ],
+      sampleRows: [
+        ['[명사]벚꽃', '桜', 'さくら'],
+        ['[동사]먹다', '食べる', 'たべる'],
+        ['[형용사]예쁘다, 아름답다', '美しい', 'うつくしい']
+      ]
+    },
+    zh: {
+      exams: [
+        { name: 'HSK', label: '한어수평고시 (HSK)', defaultScore: '3급', scoreChips: ['1급', '2급', '3급', '4급', '5급', '6급'] },
+        { name: '신HSK', label: '신HSK (3.0)', defaultScore: '3급', scoreChips: ['1급', '2급', '3급', '4급', '5급', '6급', '7-9급'] },
+        { name: 'BCT', label: '실용중국어시험 (BCT)', defaultScore: '(B) 181점', scoreChips: ['(A)', '(B) 181점', '(B) L&R 601점'] },
+        { name: 'CPT', label: '중국어실용능력시험 (CPT)', defaultScore: '750점', scoreChips: ['600점', '700점', '750점', '800점'] },
+        { name: 'TOCFL', label: '대만중국어능력시험 (TOCFL)', defaultScore: '5급', scoreChips: ['1급', '2급', '3급', '4급', '5급', '6급'] },
+        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
+        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
+      ],
+      defaultExam: 'HSK',
+      defaultScore: '3급',
+      defaultFields: [
+        { name: '[품사]한국어', sample: '[명사]안녕, 안녕하세요' },
+        { name: '중국어', sample: '你好' },
+        { name: '병음', sample: 'nǐ hǎo' }
+      ],
+      sampleRows: [
+        ['[명사]안녕, 안녕하세요', '你好', 'nǐ hǎo'],
+        ['[동사]감사하다, 고맙다', '谢谢', 'xièxie'],
+        ['[형용사]기쁘다, 즐겁다', '高兴', 'gāoxìng']
+      ]
+    },
+    fr: {
+      exams: [
+        { name: 'DELF', label: '델프 (DELF)', defaultScore: 'B2', scoreChips: ['A1', 'A2', 'B1', 'B2'] },
+        { name: 'DALF', label: '달프 (DALF)', defaultScore: 'C1', scoreChips: ['C1', 'C2'] },
+        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
+        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
+      ],
+      defaultExam: 'DELF',
+      defaultScore: 'B2',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
         { name: '프랑스어 단어', sample: 'Bonjour' },
@@ -150,15 +151,14 @@ document.addEventListener('DOMContentLoaded', () => {
       ]
     },
     de: {
-      levels: [
-        'Goethe B1(ZD) (관광통역안내사 기준)',
-        'Goethe B2 (중상급)',
-        'Goethe A2 (초급)',
-        'Goethe A1 (입문)',
-        'Goethe C1 (고급)',
-        'FLEX 776점 이상 (관광통역)'
+      exams: [
+        { name: '괴테어학검정(Goethe)', label: '괴테어학검정시험 (Goethe)', defaultScore: 'B1(ZD)', scoreChips: ['A1', 'A2', 'B1(ZD)', 'B2', 'C1'] },
+        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
+        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
       ],
-      defaultLevel: 'Goethe A2 (초급)',
+      defaultExam: '괴테어학검정(Goethe)',
+      defaultScore: 'B1(ZD)',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
         { name: '독일어 단어', sample: 'Guten Tag' },
@@ -171,15 +171,14 @@ document.addEventListener('DOMContentLoaded', () => {
       ]
     },
     es: {
-      levels: [
-        'DELE B2 (관광통역안내사 기준)',
-        'DELE B1 (중급)',
-        'DELE A2 (초급)',
-        'DELE A1 (입문)',
-        'DELE C1 (고급)',
-        'FLEX 776점 이상 (관광통역)'
+      exams: [
+        { name: 'DELE', label: '델레 (DELE)', defaultScore: 'B2', scoreChips: ['A1', 'A2', 'B1', 'B2', 'C1'] },
+        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
+        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
       ],
-      defaultLevel: 'DELE A2 (초급)',
+      defaultExam: 'DELE',
+      defaultScore: 'B2',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]감사합니다' },
         { name: '스페인어 단어', sample: 'Gracias' },
@@ -192,15 +191,14 @@ document.addEventListener('DOMContentLoaded', () => {
       ]
     },
     ru: {
-      levels: [
-        'TORFL 1단계(B1) (관광통역안내사 기준)',
-        'TORFL 2단계(B2)',
-        'TORFL 기본(A2)',
-        'TORFL 기초(A1)',
-        'TORFL 3단계(C1)',
-        'FLEX 776점 이상 (관광통역)'
+      exams: [
+        { name: '토르플(TORFL)', label: '토르플 (TORFL)', defaultScore: '1단계', scoreChips: ['기초', '기본', '1단계', '2단계', '3단계'] },
+        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
+        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
       ],
-      defaultLevel: 'TORFL 기본(A2)',
+      defaultExam: '토르플(TORFL)',
+      defaultScore: '1단계',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
         { name: '러시아어 단어', sample: 'Здравствуйте' },
@@ -213,15 +211,15 @@ document.addEventListener('DOMContentLoaded', () => {
       ]
     },
     it: {
-      levels: [
-        'CILS B2 (관광통역안내사 기준)',
-        'CELI 3 (관광통역안내사 기준)',
-        'CILS B1 (중급)',
-        'CILS A2 (초급)',
-        'CILS A1 (입문)',
-        'CILS C1 (고급)'
+      exams: [
+        { name: '칠스(CILS)', label: '칠스 (CILS)', defaultScore: 'B2', scoreChips: ['A1', 'A2', 'B1', 'B2', 'C1'] },
+        { name: '첼리(CELI)', label: '첼리 (CELI)', defaultScore: '3', scoreChips: ['1', '2', '3', '4'] },
+        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
+        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
       ],
-      defaultLevel: 'CILS A2 (초급)',
+      defaultExam: '칠스(CILS)',
+      defaultScore: 'B2',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
         { name: '이탈리아어 단어', sample: 'Buongiorno' },
@@ -233,33 +231,14 @@ document.addEventListener('DOMContentLoaded', () => {
         ['[형용사]아름다운', 'Bello', 'La vita è bella.']
       ]
     },
-    vi: {
-      levels: [
-        'FLEX 600점 (관광통역안내사 기준)',
-        'VSL 1~2급 (초급/A1-A2)',
-        'VSL 3~4급 (중급/B1-B2)',
-        'VSL 5~6급 (고급/C1-C2)'
-      ],
-      defaultLevel: 'VSL 1~2급 (초급/A1-A2)',
-      defaultFields: [
-        { name: '[품사]한국어', sample: '[명사]안녕하세요' },
-        { name: '베트남어 단어', sample: 'Xin chào' },
-        { name: '예문', sample: 'Xin chào, rất vui được gặp bạn.' }
-      ],
-      sampleRows: [
-        ['[명사]안녕하세요', 'Xin chào', 'Xin chào, rất vui được gặp bạn.'],
-        ['[동사]감사하다', 'Cảm ơn', 'Cảm ơn bạn rất nhiều.'],
-        ['[형용사]맛있는', 'Ngon', 'Món ăn này rất ngon.']
-      ]
-    },
     th: {
-      levels: [
-        'FLEX 600점 (관광통역안내사 기준)',
-        '초급 (기초 생활 회화)',
-        '중급 (일상 및 여행 어휘)',
-        '고급 (시사 및 전문 어휘)'
+      exams: [
+        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '600점', scoreChips: ['500점', '600점', '700점', '776점'] },
+        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
       ],
-      defaultLevel: '초급 (기초 생활 회화)',
+      defaultExam: 'FLEX',
+      defaultScore: '600점',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
         { name: '태국어 단어', sample: 'สวัสดี' },
@@ -271,14 +250,33 @@ document.addEventListener('DOMContentLoaded', () => {
         ['[형용사]맛있다', 'อร่อย', 'à-rɔ̀y']
       ]
     },
-    id: {
-      levels: [
-        'FLEX 600점 (관광통역안내사 기준)',
-        'UKBI 초급 (Semenjana)',
-        'UKBI 중급 (Madya)',
-        'UKBI 고급 (Unggul)'
+    vi: {
+      exams: [
+        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '600점', scoreChips: ['500점', '600점', '700점', '776점'] },
+        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
       ],
-      defaultLevel: 'UKBI 초급 (Semenjana)',
+      defaultExam: 'FLEX',
+      defaultScore: '600점',
+      defaultFields: [
+        { name: '[품사]한국어', sample: '[명사]안녕하세요' },
+        { name: '베트남어 단어', sample: 'Xin chào' },
+        { name: '예문', sample: 'Xin chào, rất vui được gặp bạn.' }
+      ],
+      sampleRows: [
+        ['[명사]안녕하세요', 'Xin chào', 'Xin chào, rất vui được gặp bạn.'],
+        ['[동사]감사하다', 'Cảm ơn', 'Cảm ơn bạn rất nhiều.'],
+        ['[형용사]맛있는', 'Ngon', 'Món ăn này rất ngon.']
+      ]
+    },
+    id: {
+      exams: [
+        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '600점', scoreChips: ['500점', '600점', '700점', '776점'] },
+        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
+      ],
+      defaultExam: 'FLEX',
+      defaultScore: '600점',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
         { name: '인도네시아어 단어', sample: 'Halo' },
@@ -291,13 +289,13 @@ document.addEventListener('DOMContentLoaded', () => {
       ]
     },
     ar: {
-      levels: [
-        'FLEX 600점 (관광통역안내사 기준)',
-        '초급 (CEFR A1-A2)',
-        '중급 (CEFR B1-B2)',
-        '고급 (CEFR C1)'
+      exams: [
+        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '600점', scoreChips: ['500점', '600점', '700점', '776점'] },
+        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
       ],
-      defaultLevel: '초급 (CEFR A1-A2)',
+      defaultExam: 'FLEX',
+      defaultScore: '600점',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
         { name: '아랍어 단어', sample: 'مرحبا' },
@@ -310,15 +308,12 @@ document.addEventListener('DOMContentLoaded', () => {
       ]
     },
     default: {
-      levels: [
-        'CEFR A1 (입문 기초)',
-        'CEFR A2 (초급)',
-        'CEFR B1 (중급 일상 회화)',
-        'CEFR B2 (중상급)',
-        'CEFR C1 (고급 학술/시사)',
-        'FLEX 600점 (관광통역안내사 기준)'
+      exams: [
+        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
       ],
-      defaultLevel: 'CEFR A2 (초급)',
+      defaultExam: '일반 난이도',
+      defaultScore: '초급',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
         { name: '원문 단어', sample: 'Word' },
@@ -347,40 +342,48 @@ document.addEventListener('DOMContentLoaded', () => {
       const option = document.createElement('option');
       option.value = lang.id;
       option.textContent = lang.name;
-      if (lang.id === 'zh') {
-        option.selected = true; // 기본값: 중국어
-      }
       promptLangSelect.appendChild(option);
     });
 
-    updateLanguagePreset(false);
+    if (!promptLangSelect.value) {
+      promptLangSelect.value = 'zh'; // 기본값: 중국어
+    }
+
+    updateExamOptions(false);
   }
 
-  // 2. 언어별 등급 프리셋 갱신
-  function updateLanguagePreset(isUserManualLangChange = true) {
+  // 2. 언어별 시험 및 점수 프리셋/칩 갱신
+  function updateExamOptions(isUserManualLangChange = true) {
     const langId = promptLangSelect.value;
-    const preset = LEVEL_PRESETS[langId] || LEVEL_PRESETS['default'];
+    const preset = EXAM_PRESETS[langId] || EXAM_PRESETS['default'];
 
-    levelPresetSelect.innerHTML = '';
-    preset.levels.forEach(lvl => {
+    const previousExam = examTypeSelect.value;
+    examTypeSelect.innerHTML = '';
+
+    let matchedExamObj = null;
+
+    preset.exams.forEach(ex => {
       const opt = document.createElement('option');
-      opt.value = lvl;
-      opt.textContent = lvl;
-      if (lvl === preset.defaultLevel) {
+      opt.value = ex.name;
+      opt.textContent = ex.label || ex.name;
+      if (previousExam && ex.name === previousExam) {
         opt.selected = true;
+        matchedExamObj = ex;
       }
-      levelPresetSelect.appendChild(opt);
+      examTypeSelect.appendChild(opt);
     });
 
-    const customOpt = document.createElement('option');
-    customOpt.value = 'custom';
-    customOpt.textContent = '✏️ 직접 입력';
-    levelPresetSelect.appendChild(customOpt);
+    if (!matchedExamObj) {
+      matchedExamObj = preset.exams.find(e => e.name === preset.defaultExam) || preset.exams[0];
+      if (matchedExamObj) {
+        examTypeSelect.value = matchedExamObj.name;
+      }
+    }
 
     if (isUserManualLangChange) {
-      levelCustomInput.value = preset.defaultLevel;
+      examScoreInput.value = matchedExamObj ? matchedExamObj.defaultScore : '';
 
-      // 만약 기본 3개 필드 상태라면 해당 언어의 기본 필드로 자동 추천 변경
+      // 기본 3개 필드 상태라면 해당 언어의 기본 필드로 자동 추천 변경
       if (fields.length === 3 && (fields[0].name === '[품사]한국어')) {
         fields = preset.defaultFields.map((f, i) => ({
           id: `f_${Date.now()}_${i}`,
@@ -390,6 +393,70 @@ document.addEventListener('DOMContentLoaded', () => {
         renderFields();
       }
     }
+
+    const chips = matchedExamObj ? (matchedExamObj.scoreChips || []) : [];
+    renderScoreChips(chips, examScoreInput.value);
+  }
+
+  // 점수 / 급수 빠른 선택 칩 렌더링
+  function renderScoreChips(chips, currentScore) {
+    if (!scoreChipsList || !scoreChipsWrapper) return;
+    scoreChipsList.innerHTML = '';
+    if (!chips || chips.length === 0) {
+      scoreChipsWrapper.style.display = 'none';
+      return;
+    }
+    scoreChipsWrapper.style.display = '';
+
+    const cur = (currentScore || '').trim();
+    chips.forEach(chipText => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip-btn' + (chipText === cur ? ' active' : '');
+      btn.textContent = chipText;
+      btn.addEventListener('click', () => {
+        examScoreInput.value = chipText;
+        updateActiveChip(chipText);
+        updatePromptAndPreview();
+      });
+      scoreChipsList.appendChild(btn);
+    });
+  }
+
+  function updateActiveChip(scoreVal) {
+    if (!scoreChipsList) return;
+    const target = (scoreVal || '').trim();
+    const buttons = scoreChipsList.querySelectorAll('.chip-btn');
+    buttons.forEach(btn => {
+      if (btn.textContent.trim() === target) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+  }
+
+  // 목표 레벨/등급 최종 텍스트 계산
+  function getTargetLevelString() {
+    const exam = examTypeSelect ? examTypeSelect.value.trim() : '';
+    const score = examScoreInput ? examScoreInput.value.trim() : '';
+
+    if (exam === '직접 입력' || exam === '일반 난이도' || exam === '수능/교과') {
+      return score;
+    }
+    if (!exam && !score) {
+      return '';
+    }
+    if (!score) {
+      return exam;
+    }
+    if (!exam) {
+      return score;
+    }
+    if (score.toLowerCase().startsWith(exam.toLowerCase())) {
+      return score;
+    }
+    return `${exam} ${score}`;
   }
 
   // 3. 필드 렌더링
@@ -497,17 +564,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const delim = getDelimiterInfo();
     const formatFormula = fields.map(f => f.name.trim() || '항목').join(delim.display);
 
-    // 난이도 조건절
+    // 난이도 / 시험 조건절
     const filterMode = levelFilterModeSelect.value;
-    const levelText = levelCustomInput.value.trim() || '해당';
+    const targetLevel = getTargetLevelString();
 
     let conditionClause = '';
-    if (filterMode === 'below') {
-      conditionClause = `${levelText} 이하 수준의 단어는 제외하고, `;
-    } else if (filterMode === 'above') {
-      conditionClause = `${levelText} 이상 수준의 단어만 선별하여, `;
-    } else if (filterMode === 'exact') {
-      conditionClause = `${levelText} 수준에 해당하는 단어만 선별하여, `;
+    if (filterMode !== 'none' && targetLevel) {
+      if (filterMode === 'below') {
+        conditionClause = `${targetLevel} 이하 수준의 단어는 제외하고, `;
+      } else if (filterMode === 'above') {
+        conditionClause = `${targetLevel} 이상 수준의 단어만 선별하여, `;
+      } else if (filterMode === 'exact') {
+        conditionClause = `${targetLevel} 수준에 해당하는 단어만 선별하여, `;
+      }
     }
 
     // 품사 텍스트
@@ -584,7 +653,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function generateSampleCsv() {
     const delim = getDelimiterInfo();
     const langId = promptLangSelect.value;
-    const preset = LEVEL_PRESETS[langId] || LEVEL_PRESETS['default'];
+    const preset = EXAM_PRESETS[langId] || EXAM_PRESETS['default'];
 
     // 3줄의 예시 데이터 조립
     const sampleRowsData = preset.sampleRows || [
@@ -646,15 +715,15 @@ document.addEventListener('DOMContentLoaded', () => {
   function saveSettingsToStorage() {
     try {
       const data = {
-        version: 1,
+        version: 2,
         savedAt: new Date().toISOString(),
         langId: promptLangSelect.value,
         mode: currentMode,
         sourceText: sourceTextInput.value,
         sourceTopic: sourceTopicInput.value,
         levelFilterMode: levelFilterModeSelect.value,
-        levelCustom: levelCustomInput.value,
-        levelPreset: levelPresetSelect.value,
+        examType: examTypeSelect.value,
+        examScore: examScoreInput.value,
         pos: {
           noun: posNoun.checked,
           verb: posVerb.checked,
@@ -691,7 +760,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (data.langId) {
         promptLangSelect.value = data.langId;
-        updateLanguagePreset(false);
+        updateExamOptions(false);
       }
 
       if (data.mode) {
@@ -701,8 +770,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (data.sourceTopic !== undefined) sourceTopicInput.value = data.sourceTopic;
 
       if (data.levelFilterMode !== undefined) levelFilterModeSelect.value = data.levelFilterMode;
-      if (data.levelPreset !== undefined) levelPresetSelect.value = data.levelPreset;
-      if (data.levelCustom !== undefined) levelCustomInput.value = data.levelCustom;
+      if (data.examType !== undefined) examTypeSelect.value = data.examType;
+      if (data.examScore !== undefined) {
+        examScoreInput.value = data.examScore;
+      } else if (data.levelCustom !== undefined) {
+        // 하위 호환
+        examScoreInput.value = data.levelCustom;
+      }
 
       if (data.pos) {
         posNoun.checked = Boolean(data.pos.noun);
@@ -732,6 +806,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
       }
 
+      const langId = promptLangSelect.value;
+      const preset = EXAM_PRESETS[langId] || EXAM_PRESETS['default'];
+      const curExam = preset.exams.find(e => e.name === examTypeSelect.value);
+      const chips = curExam ? (curExam.scoreChips || []) : [];
+      renderScoreChips(chips, examScoreInput.value);
+      syncLevelRowState();
+
       return true;
     } catch (e) {
       console.warn('localStorage 복원 실패:', e);
@@ -755,8 +836,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     levelFilterModeSelect.value = 'below';
     syncLevelRowState();
-    updateLanguagePreset(false);
-    levelCustomInput.value = 'HSK 3급';
+    updateExamOptions(false);
+    examTypeSelect.value = 'HSK';
+    examScoreInput.value = '3급';
+
+    const langId = promptLangSelect.value;
+    const preset = EXAM_PRESETS[langId] || EXAM_PRESETS['default'];
+    const curExam = preset.exams.find(e => e.name === 'HSK');
+    renderScoreChips(curExam ? curExam.scoreChips : [], '3급');
 
     posNoun.checked = true;
     posVerb.checked = true;
@@ -808,14 +895,21 @@ document.addEventListener('DOMContentLoaded', () => {
   function syncLevelRowState() {
     const isNone = (levelFilterModeSelect.value === 'none');
     levelSelectionRow.style.opacity = isNone ? '0.45' : '1';
-    levelPresetSelect.disabled = isNone;
-    levelCustomInput.disabled = isNone;
+    examTypeSelect.disabled = isNone;
+    examScoreInput.disabled = isNone;
+    if (scoreChipsWrapper) {
+      if (isNone) {
+        scoreChipsWrapper.classList.add('disabled');
+      } else {
+        scoreChipsWrapper.classList.remove('disabled');
+      }
+    }
   }
 
   // 9. 컨트롤 이벤트 바인딩
   function initEventListeners() {
     promptLangSelect.addEventListener('change', () => {
-      updateLanguagePreset(true);
+      updateExamOptions(true);
       updatePromptAndPreview();
     });
 
@@ -830,17 +924,29 @@ document.addEventListener('DOMContentLoaded', () => {
       updatePromptAndPreview();
     });
 
-    levelPresetSelect.addEventListener('change', () => {
-      if (levelPresetSelect.value === 'custom') {
-        levelCustomInput.focus();
-        levelCustomInput.select();
+    examTypeSelect.addEventListener('change', () => {
+      const langId = promptLangSelect.value;
+      const preset = EXAM_PRESETS[langId] || EXAM_PRESETS['default'];
+      const curExamName = examTypeSelect.value;
+      const examObj = preset.exams.find(e => e.name === curExamName);
+
+      if (curExamName === '직접 입력') {
+        renderScoreChips([], '');
+        examScoreInput.focus();
+        examScoreInput.select();
+      } else if (examObj) {
+        examScoreInput.value = examObj.defaultScore;
+        renderScoreChips(examObj.scoreChips, examObj.defaultScore);
       } else {
-        levelCustomInput.value = levelPresetSelect.value;
+        renderScoreChips([], examScoreInput.value);
       }
       updatePromptAndPreview();
     });
 
-    levelCustomInput.addEventListener('input', () => updatePromptAndPreview());
+    examScoreInput.addEventListener('input', () => {
+      updateActiveChip(examScoreInput.value);
+      updatePromptAndPreview();
+    });
 
     // 품사 및 수량 체크박스
     [posNoun, posVerb, posAdj, posAdv, posIdiom].forEach(chk => {
@@ -858,10 +964,11 @@ document.addEventListener('DOMContentLoaded', () => {
       chk.addEventListener('change', () => updatePromptAndPreview());
     });
 
-    // 추천 필드 빠른 추가 칩 버튼
-    document.querySelectorAll('.chip-btn').forEach(btn => {
+    // 추천 필드 빠른 추가 칩 버튼 (Step 4)
+    document.querySelectorAll('.quick-chips-wrapper button[data-name]').forEach(btn => {
       btn.addEventListener('click', () => {
         const name = btn.dataset.name;
+        if (!name) return;
         const sample = btn.dataset.sample || '';
         fields.push({
           id: `f_${Date.now()}_${fields.length}`,
@@ -1008,11 +1115,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const restored = loadSettingsFromStorage();
   if (!restored) {
-    updateLanguagePreset(false);
+    updateExamOptions(false);
   }
 
   syncLevelRowState();
   renderFields();
   updatePromptAndPreview(false);
 });
-

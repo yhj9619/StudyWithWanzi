@@ -1858,6 +1858,17 @@ body {
   transform: scale(0.97);
 }
 
+.chip-btn.active {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.quick-chips-wrapper.disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
 .prompt-field-list {
   display: flex;
   flex-direction: column;

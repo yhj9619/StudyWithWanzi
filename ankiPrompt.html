@@ -109,30 +109,41 @@
         <div class="card-section">
           <div class="section-title">
             <span class="step-num">2</span>
-            <h2>난이도 / 수준 필터링 설정</h2>
+            <h2>난이도 / 어학 시험 수준 설정</h2>
           </div>
-          <p class="section-desc">너무 쉬운 기초 단어를 걸러내거나, 특정 등급 이상의 핵심 어휘만 쏙 뽑아냅니다.</p>
+          <p class="section-desc">목표하는 어학시험이나 난이도 수준을 지정하여 기초 단어를 제외하거나 핵심 단어를 선별합니다. (선택 사항)</p>
 
           <div class="grid-2-col" id="levelSelectionRow">
             <div class="form-group">
-              <label for="levelPresetSelect" class="form-label">추천 기준 등급</label>
-              <select id="levelPresetSelect" class="form-select">
-                <!-- JS에서 언어별 프리셋 동적 갱신 (예: HSK 1~6급, JLPT N5~N1 등) -->
+              <label for="examTypeSelect" class="form-label">어학시험 / 기준 종류 <span class="helper-text" style="display:inline; margin-left:4px;">(선택)</span></label>
+              <select id="examTypeSelect" class="form-select">
+                <!-- JS에서 언어별 시험 목록 동적 갱신 -->
               </select>
             </div>
             <div class="form-group">
-              <label for="levelCustomInput" class="form-label">기준 등급 직접 편집</label>
-              <input type="text" id="levelCustomInput" class="form-input" value="HSK 3급" placeholder="예: HSK 3급, JLPT N3, 기초 수준">
+              <label for="examScoreInput" class="form-label">목표 급수 / 점수 입력 <span class="helper-text" style="display:inline; margin-left:4px;">(선택)</span></label>
+              <input type="text" id="examScoreInput" class="form-input" value="3급" placeholder="예: 3급, 760점, B2, N3 등 직접 입력 가능">
+            </div>
+          </div>
+
+          <!-- 점수 / 급수 빠른 선택 칩 -->
+          <div class="quick-chips-wrapper" id="scoreChipsWrapper">
+            <div class="quick-chips-title">
+              <span>⚡ 빠른 급수/점수 선택:</span>
+              <span class="helper-text" style="font-weight: normal; margin-left: 4px;">(클릭 시 즉시 입력됩니다)</span>
+            </div>
+            <div class="quick-chips-list" id="scoreChipsList">
+              <!-- JS에서 선택된 시험 종류에 맞는 급수/점수 칩 동적 생성 -->
             </div>
           </div>
 
           <div class="form-group">
             <label for="levelFilterModeSelect" class="form-label">필터링 조건</label>
             <select id="levelFilterModeSelect" class="form-select">
-              <option value="below" selected>선택한 등급 이하 단어는 제외하고 (너무 쉬운 기초 단어 빼기 - 기본 추천)</option>
-              <option value="above">선택한 등급 이상 단어만 선별하여 (중고급 핵심 단어 위주)</option>
-              <option value="exact">선택한 등급에 해당하는 단어만 선별하여 (해당 등급 집중 학습)</option>
-              <option value="none">수준 필터 없음 (모든 수준의 단어 포함)</option>
+              <option value="below" selected>선택한 기준 이하 단어는 제외하고 (너무 쉬운 기초 단어 빼기 - 기본 추천)</option>
+              <option value="above">선택한 기준 이상 단어만 선별하여 (중고급 핵심 단어 위주)</option>
+              <option value="exact">선택한 기준에 해당하는 단어만 선별하여 (해당 등급 집중 학습)</option>
+              <option value="none">수준 필터 적용 안 함 (모든 수준의 단어 포함)</option>
             </select>
           </div>
         </div>
