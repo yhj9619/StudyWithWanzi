@@ -77,6 +77,36 @@ body {
   color: var(--text-muted);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-outline-danger {
+  background: #ffffff;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.btn-outline-danger:hover {
+  background-color: #fee2e2;
+  border-color: #ef4444;
+}
+
+.btn-outline-danger:active {
+  transform: scale(0.97);
+}
+
 /* Main Layout */
 .app-main {
   max-width: 1320px;
@@ -1004,17 +1034,18 @@ body {
   }
 
   .header-container {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.4rem;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
   }
 
   .logo-title {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
   }
 
-  .header-badges {
-    display: none; /* Hide header badges on small screens to save space */
+  .logo-subtitle {
+    display: none; /* 모바일 헤더 높이 최소화 */
   }
 
   .app-main {

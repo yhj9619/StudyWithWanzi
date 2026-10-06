@@ -555,6 +555,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    // 전체 설정 초기화 버튼
+    const resetAllSettingsBtn = document.getElementById('resetAllSettingsBtn');
+    if (resetAllSettingsBtn) {
+      resetAllSettingsBtn.addEventListener('click', resetAllSettings);
+    }
+
     if (window.innerWidth <= 768) {
       showMobileEditView();
     }
@@ -713,7 +719,7 @@ a {
   }
 
   // 8. 전체 동기화 및 코드 갱신
-  function updateAll() {
+  function updateAll(shouldSave = true) {
     const frontCode = generateFrontTemplate();
     const backCode = generateBackTemplate();
     const cssCode = generateCssTemplate();
@@ -723,6 +729,170 @@ a {
     codeCssText.textContent = cssCode;
 
     renderPreview();
+
+    if (shouldSave) {
+      saveSettingsToStorage();
+    }
+  }
+
+  // 9. 로컬 스토리지 (localStorage) 자동 저장 및 복원 기능
+  const STORAGE_KEY = 'anki_card_editor_settings';
+
+  function saveSettingsToStorage() {
+    try {
+      const data = {
+        langId: languageSelect.value,
+        dictApplyTarget: dictApplyTarget.value,
+        dictUrl: dictUrlInput.value,
+        linkNewTab: linkNewTab.checked,
+        linkUnderline: linkUnderline.checked,
+        showHrAnswer: showHrAnswer.checked,
+        keepFrontOnBack: keepFrontOnBack.checked,
+        centerAlign: centerAlign.checked,
+        rtlForce: rtlForce.checked,
+        fields: fields.map(f => ({
+          name: f.nameInput.value,
+          sample: f.sampleInput.value,
+          showFront: f.showFront.checked,
+          showBack: f.showBack.checked,
+          size: f.sizeSlider.value,
+          weight: f.weightSelect.value,
+          color: f.colorInput.value,
+        }))
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (err) {
+      console.warn('localStorage 저장 실패:', err);
+    }
+  }
+
+  function loadSettingsFromStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      const data = JSON.parse(raw);
+      if (!data) return false;
+
+      // 언어 복원
+      if (data.langId) {
+        languageSelect.value = data.langId;
+        const lang = getSelectedLanguage();
+        if (langSearchInput) langSearchInput.value = lang.name;
+        dictNameTag.textContent = lang.dictName;
+      }
+
+      if (data.dictApplyTarget !== undefined) dictApplyTarget.value = data.dictApplyTarget;
+      if (data.dictUrl !== undefined) dictUrlInput.value = data.dictUrl;
+      if (data.linkNewTab !== undefined) linkNewTab.checked = data.linkNewTab;
+      if (data.linkUnderline !== undefined) linkUnderline.checked = data.linkUnderline;
+
+      if (data.showHrAnswer !== undefined) showHrAnswer.checked = data.showHrAnswer;
+      if (data.keepFrontOnBack !== undefined) keepFrontOnBack.checked = data.keepFrontOnBack;
+      if (data.centerAlign !== undefined) centerAlign.checked = data.centerAlign;
+      if (data.rtlForce !== undefined) rtlForce.checked = data.rtlForce;
+
+      // 필드 설정 복원
+      if (Array.isArray(data.fields)) {
+        data.fields.forEach((fData, idx) => {
+          const f = fields[idx];
+          if (!f || !fData) return;
+          if (fData.name !== undefined) f.nameInput.value = fData.name;
+          if (fData.sample !== undefined) f.sampleInput.value = fData.sample;
+          if (fData.showFront !== undefined) f.showFront.checked = fData.showFront;
+          if (fData.showBack !== undefined) f.showBack.checked = fData.showBack;
+
+          if (fData.size !== undefined) {
+            f.sizeSlider.value = fData.size;
+            f.sizeNum.value = fData.size;
+            f.sizeVal.textContent = fData.size;
+          }
+          if (fData.weight !== undefined) f.weightSelect.value = fData.weight;
+          if (fData.color !== undefined) {
+            f.colorInput.value = fData.color;
+            f.colorText.value = fData.color;
+          }
+        });
+      }
+
+      return true;
+    } catch (err) {
+      console.warn('localStorage 복원 실패:', err);
+      return false;
+    }
+  }
+
+  // 10. 전체 설정 초기화 (기본값으로 복원)
+  function resetAllSettings() {
+    if (!confirm('입력하신 모든 설정을 처음 기본값으로 초기화하시겠습니까?')) {
+      return;
+    }
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {}
+
+    // 1. 언어 기본값 (중국어)
+    languageSelect.value = 'zh';
+    const lang = getSelectedLanguage();
+    if (langSearchInput) langSearchInput.value = lang.name;
+    dictUrlInput.value = lang.dictUrl;
+    dictNameTag.textContent = lang.dictName;
+    dictApplyTarget.value = 'field2';
+    linkNewTab.checked = true;
+    linkUnderline.checked = false;
+
+    // 공통 레이아웃
+    showHrAnswer.checked = true;
+    keepFrontOnBack.checked = true;
+    centerAlign.checked = true;
+    rtlForce.checked = false;
+    rtlNotice.classList.add('hidden');
+
+    // 필드 1 기본값 (Front / 한국어 뜻)
+    fields[0].nameInput.value = 'Front';
+    fields[0].sampleInput.value = '안녕, 안녕하세요';
+    fields[0].showFront.checked = true;
+    fields[0].showBack.checked = false;
+    fields[0].sizeSlider.value = 24;
+    fields[0].sizeNum.value = 24;
+    fields[0].sizeVal.textContent = '24';
+    fields[0].weightSelect.value = 'bold';
+    fields[0].colorInput.value = '#202124';
+    fields[0].colorText.value = '#202124';
+
+    // 필드 2 기본값 (Back / 외국어 단어 · 사전 링크)
+    fields[1].nameInput.value = 'Back';
+    fields[1].sampleInput.value = '你好';
+    fields[1].showFront.checked = false;
+    fields[1].showBack.checked = true;
+    fields[1].sizeSlider.value = 24;
+    fields[1].sizeNum.value = 24;
+    fields[1].sizeVal.textContent = '24';
+    fields[1].weightSelect.value = 'bold';
+    fields[1].colorInput.value = '#1a73e8';
+    fields[1].colorText.value = '#1a73e8';
+
+    // 필드 3 기본값 (pinyin / 병음)
+    fields[2].nameInput.value = 'pinyin';
+    fields[2].sampleInput.value = 'nǐ hǎo';
+    fields[2].showFront.checked = false;
+    fields[2].showBack.checked = true;
+    fields[2].sizeSlider.value = 20;
+    fields[2].sizeNum.value = 20;
+    fields[2].sizeVal.textContent = '20';
+    fields[2].weightSelect.value = 'normal';
+    fields[2].colorInput.value = '#5f6368';
+    fields[2].colorText.value = '#5f6368';
+
+    const f1Badge = document.getElementById('f1_badge');
+    const f2Badge = document.getElementById('f2_badge');
+    const f3Badge = document.getElementById('f3_badge');
+    if (f1Badge) f1Badge.textContent = '1번째 필드 (앞면 / 한국어 뜻)';
+    if (f2Badge) f2Badge.textContent = '2번째 필드 (뒷면 / 외국어 학습 단어 · 사전 링크)';
+    if (f3Badge) f3Badge.textContent = '3번째 필드 (병음 pinyin)';
+
+    updateAll(false);
+    saveSettingsToStorage();
+    showToast('모든 설정이 기본값으로 초기화되었습니다.');
   }
 
   // 클립보드 복사 헬퍼
@@ -774,5 +944,12 @@ a {
   // 초기화 실행
   initLanguageSelect();
   initEventListeners();
-  updateAll();
+  const restored = loadSettingsFromStorage();
+  if (restored) {
+    const curLang = getSelectedLanguage();
+    if (curLang.isRTL && rtlForce.checked) {
+      rtlNotice.classList.remove('hidden');
+    }
+  }
+  updateAll(false);
 });
