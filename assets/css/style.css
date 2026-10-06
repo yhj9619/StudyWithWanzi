@@ -77,28 +77,6 @@ body {
   color: var(--text-muted);
 }
 
-.header-badges {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.badge {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.25rem 0.65rem;
-  border-radius: 9999px;
-}
-
-.badge-accent {
-  background-color: #dbeafe;
-  color: #1d4ed8;
-}
-
-.badge-ghost {
-  background-color: #f1f5f9;
-  color: #475569;
-}
-
 /* Main Layout */
 .app-main {
   max-width: 1320px;
