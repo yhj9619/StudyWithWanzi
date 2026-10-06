@@ -375,12 +375,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 필드 이벤트 바인딩 헬퍼 (초기 1, 2번째 필드 및 동적 추가 필드 공통)
   function bindFieldEvents(f) {
-    // 필드명 변경 시 3번 사전 링크 체크리스트 및 서식 즉시 갱신
+    // 필드명 변경 시 배지 및 3번 사전 링크 체크리스트, 서식 즉시 갱신
     f.nameInput.addEventListener('input', () => {
+      updateFieldBadges();
       updateDictFieldChecklist();
       updateAll();
     });
     f.nameInput.addEventListener('change', () => {
+      updateFieldBadges();
       updateDictFieldChecklist();
       updateAll();
     });
@@ -389,8 +391,14 @@ document.addEventListener('DOMContentLoaded', () => {
     f.sampleInput.addEventListener('change', () => updateAll());
 
     // 노출 체크박스
-    f.showFront.addEventListener('change', () => updateAll());
-    f.showBack.addEventListener('change', () => updateAll());
+    f.showFront.addEventListener('change', () => {
+      updateFieldBadges();
+      updateAll();
+    });
+    f.showBack.addEventListener('change', () => {
+      updateFieldBadges();
+      updateAll();
+    });
 
     // 사전 링크 체크박스 (헤더 미니 토글)
     if (f.dictLinkCheck) {
@@ -1007,25 +1015,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 각 필드의 헤더 배지 라벨 동적 갱신
+  // 각 필드의 헤더 배지 라벨 동적 갱신 (노출 위치 및 필드명과 동적 조합)
   function updateFieldBadges() {
-    const currentLang = getSelectedLanguage();
     fields.forEach((f, idx) => {
       if (!f.badgeEl) return;
-      let badgeText = '';
-      if (idx === 0) {
-        badgeText = '1번째 필드 (앞면 / 한국어 뜻)';
-      } else if (idx === 1) {
-        badgeText = '2번째 필드 (뒷면 / 외국어 단어)';
-      } else if (idx === 2) {
-        if (currentLang.id === 'zh') {
-          badgeText = '3번째 필드 (병음 pinyin)';
-        } else {
-          badgeText = '3번째 필드 (예문 Example)';
-        }
-      } else {
-        badgeText = `${idx + 1}번째 필드 (추가 선택 필드)`;
+      const fNum = idx + 1;
+      const fName = f.nameInput.value.trim() || (idx === 0 ? 'Front' : (idx === 1 ? 'Back' : `Field${fNum}`));
+
+      let sideText = '미노출';
+      if (f.showFront.checked && f.showBack.checked) {
+        sideText = '앞·뒷면';
+      } else if (f.showFront.checked) {
+        sideText = '앞면';
+      } else if (f.showBack.checked) {
+        sideText = '뒷면';
       }
+
+      let badgeText = `${fNum}번째 필드 (${sideText} / ${fName})`;
 
       if (f.hasDictLink) {
         badgeText += ' · 🔗 사전 링크';
@@ -1191,7 +1197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnMobilePreviewTab) btnMobilePreviewTab.classList.remove('active');
         if (btnFloatToPreview) btnFloatToPreview.style.display = 'inline-flex';
         if (btnFloatToEdit) btnFloatToEdit.style.display = 'none';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo(0, 0);
       }
     }
 
@@ -1203,7 +1209,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnMobilePreviewTab) btnMobilePreviewTab.classList.add('active');
         if (btnFloatToPreview) btnFloatToPreview.style.display = 'none';
         if (btnFloatToEdit) btnFloatToEdit.style.display = 'inline-flex';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo(0, 0);
       }
     }
 

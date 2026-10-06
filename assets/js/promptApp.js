@@ -988,7 +988,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnMobilePreviewTab) btnMobilePreviewTab.classList.remove('active');
         if (btnFloatToPromptOutput) btnFloatToPromptOutput.style.display = 'inline-flex';
         if (btnFloatToPromptSettings) btnFloatToPromptSettings.style.display = 'none';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo(0, 0);
       }
     }
 
@@ -1000,7 +1000,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnMobilePreviewTab) btnMobilePreviewTab.classList.add('active');
         if (btnFloatToPromptOutput) btnFloatToPromptOutput.style.display = 'none';
         if (btnFloatToPromptSettings) btnFloatToPromptSettings.style.display = 'inline-flex';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo(0, 0);
       }
     }
 
