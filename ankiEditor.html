@@ -8,7 +8,7 @@
   <!-- Google Fonts for global language scripts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+Arabic:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&family=Nanum+Gothic:wght@400;700&family=Inter:wght@400;600;700&family=Caveat:wght@600&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+Arabic:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -178,6 +178,24 @@
               </div>
 
               <div class="control-item">
+                <label for="f1_font" class="sub-label">글꼴 (폰트)</label>
+                <select id="f1_font" class="form-select small-select">
+                  <option value="inherit" selected>(기본 글꼴 따름)</option>
+                  <option value="system">시스템 기본 고딕</option>
+                  <option value="noto-sans-kr">본고딕 (Noto Sans KR)</option>
+                  <option value="noto-serif-kr">명조체 (Noto Serif KR)</option>
+                  <option value="nanum-gothic">나눔고딕</option>
+                  <option value="inter">Inter (영문 고딕)</option>
+                  <option value="noto-sans-jp">Noto Sans JP (일본어)</option>
+                  <option value="noto-sans-sc">Noto Sans SC (중국어)</option>
+                  <option value="monospace">고정폭 (코딩체)</option>
+                  <option value="cursive">손글씨 (필기체)</option>
+                  <option value="custom">직접 입력...</option>
+                </select>
+                <input type="text" id="f1_font_custom" class="form-input font-custom-input hidden" placeholder="폰트명 입력 (예: Pretendard)">
+              </div>
+
+              <div class="control-item">
                 <label for="f1_color" class="sub-label">색상</label>
                 <div class="color-picker-group">
                   <input type="color" id="f1_color" value="#202124" class="form-color">
@@ -245,6 +263,24 @@
               </div>
 
               <div class="control-item">
+                <label for="f2_font" class="sub-label">글꼴 (폰트)</label>
+                <select id="f2_font" class="form-select small-select">
+                  <option value="inherit" selected>(기본 글꼴 따름)</option>
+                  <option value="system">시스템 기본 고딕</option>
+                  <option value="noto-sans-kr">본고딕 (Noto Sans KR)</option>
+                  <option value="noto-serif-kr">명조체 (Noto Serif KR)</option>
+                  <option value="nanum-gothic">나눔고딕</option>
+                  <option value="inter">Inter (영문 고딕)</option>
+                  <option value="noto-sans-jp">Noto Sans JP (일본어)</option>
+                  <option value="noto-sans-sc">Noto Sans SC (중국어)</option>
+                  <option value="monospace">고정폭 (코딩체)</option>
+                  <option value="cursive">손글씨 (필기체)</option>
+                  <option value="custom">직접 입력...</option>
+                </select>
+                <input type="text" id="f2_font_custom" class="form-input font-custom-input hidden" placeholder="폰트명 입력 (예: Pretendard)">
+              </div>
+
+              <div class="control-item">
                 <label for="f2_color" class="sub-label">색상</label>
                 <div class="color-picker-group">
                   <input type="color" id="f2_color" value="#1a73e8" class="form-color">
@@ -284,11 +320,41 @@
           </div>
         </div>
 
-        <!-- 3. 카드 공통 레이아웃 및 사전 링크 설정 -->
+        <!-- 3. 카드 공통 서식 & 사전 링크 설정 -->
         <div class="card-section">
           <div class="section-title">
             <span class="step-num">3</span>
-            <h2>카드 공통 레이아웃 및 사전 링크 설정</h2>
+            <h2>카드 공통 서식 & 레이아웃 설정</h2>
+          </div>
+
+          <!-- 카드 전반 폰트 및 줄간격 설정 -->
+          <div class="card-global-style-box">
+            <div class="grid-2-col">
+              <div class="form-group">
+                <label for="cardBaseFont" class="form-label">카드 기본 글꼴 (Font Family)</label>
+                <select id="cardBaseFont" class="form-select">
+                  <option value="system" selected>시스템 기본 고딕 (System Sans-serif)</option>
+                  <option value="noto-sans-kr">본고딕 (Noto Sans KR / 모던)</option>
+                  <option value="noto-serif-kr">명조체 (Noto Serif KR / 도서·신문체)</option>
+                  <option value="nanum-gothic">나눔고딕 (부드러운 고딕)</option>
+                  <option value="inter">Inter / Roboto (영문 깔끔 고딕)</option>
+                  <option value="noto-sans-jp">Noto Sans JP (일본어 최적화)</option>
+                  <option value="noto-sans-sc">Noto Sans SC (중국어 간체)</option>
+                  <option value="monospace">고정폭 코딩체 (Consolas / Menlo)</option>
+                  <option value="cursive">손글씨 / 필기체 (Caveat)</option>
+                  <option value="custom">직접 입력 (사용자 지정 폰트명)</option>
+                </select>
+                <input type="text" id="cardBaseFontCustom" class="form-input font-custom-input hidden" placeholder="예: Pretendard, RIDIBatang, Gmarket Sans" style="margin-top: 0.5rem;">
+              </div>
+
+              <div class="form-group">
+                <label for="cardLineHeight" class="form-label">카드 줄간격 (행간): <span id="cardLineHeightVal">1.5</span>배</label>
+                <div class="slider-with-number" style="margin-top: 0.35rem;">
+                  <input type="range" id="cardLineHeight" min="1.0" max="2.4" step="0.1" value="1.5" class="form-range">
+                  <input type="number" id="cardLineHeightNum" min="1.0" max="2.4" step="0.1" value="1.5" class="num-input">
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="checkbox-list">

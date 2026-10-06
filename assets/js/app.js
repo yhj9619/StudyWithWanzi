@@ -18,11 +18,76 @@ document.addEventListener('DOMContentLoaded', () => {
   const linkNewTab = document.getElementById('linkNewTab');
   const linkUnderline = document.getElementById('linkUnderline');
 
-  // Common Layout Options
+  // Common Layout & Typography Options
   const showHrAnswer = document.getElementById('showHrAnswer');
   const keepFrontOnBack = document.getElementById('keepFrontOnBack');
   const centerAlign = document.getElementById('centerAlign');
   const rtlForce = document.getElementById('rtlForce');
+
+  const cardBaseFont = document.getElementById('cardBaseFont');
+  const cardBaseFontCustom = document.getElementById('cardBaseFontCustom');
+  const cardLineHeight = document.getElementById('cardLineHeight');
+  const cardLineHeightNum = document.getElementById('cardLineHeightNum');
+  const cardLineHeightVal = document.getElementById('cardLineHeightVal');
+
+  // Font Presets Definition
+  const FONT_PRESETS = {
+    'system': {
+      name: '시스템 기본 고딕',
+      css: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif'
+    },
+    'noto-sans-kr': {
+      name: '본고딕 (Noto Sans KR)',
+      css: '"Noto Sans KR", -apple-system, BlinkMacSystemFont, sans-serif'
+    },
+    'noto-serif-kr': {
+      name: '명조체 (Noto Serif KR)',
+      css: '"Noto Serif KR", "Nanum Myeongjo", "Batang", serif'
+    },
+    'nanum-gothic': {
+      name: '나눔고딕',
+      css: '"Nanum Gothic", "Malgun Gothic", sans-serif'
+    },
+    'inter': {
+      name: 'Inter (영문 고딕)',
+      css: '"Inter", "Roboto", -apple-system, sans-serif'
+    },
+    'noto-sans-jp': {
+      name: 'Noto Sans JP (일본어)',
+      css: '"Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif'
+    },
+    'noto-sans-sc': {
+      name: 'Noto Sans SC (중국어 간체)',
+      css: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif'
+    },
+    'monospace': {
+      name: '고정폭 (코딩체)',
+      css: 'Consolas, Menlo, Monaco, "Courier New", monospace'
+    },
+    'cursive': {
+      name: '손글씨 (필기체)',
+      css: 'Caveat, "Nanum Pen Script", cursive, sans-serif'
+    }
+  };
+
+  function getFontFamilyCss(key, customVal) {
+    if (key === 'custom') {
+      const trimmed = (customVal || '').trim();
+      return trimmed ? `"${trimmed}", sans-serif` : FONT_PRESETS['system'].css;
+    }
+    if (FONT_PRESETS[key]) {
+      return FONT_PRESETS[key].css;
+    }
+    return FONT_PRESETS['system'].css;
+  }
+
+  function getFieldFontCss(field) {
+    if (!field || !field.fontSelect) return '';
+    const val = field.fontSelect.value;
+    if (val === 'inherit') return '';
+    const custom = field.fontCustomInput ? field.fontCustomInput.value : '';
+    return getFontFamilyCss(val, custom);
+  }
 
   // Field Elements
   const box1 = document.getElementById('boxField1');
@@ -41,6 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
       sizeNum: document.getElementById('f1_size_num'),
       sizeVal: document.getElementById('f1_size_val'),
       weightSelect: document.getElementById('f1_weight'),
+      fontSelect: document.getElementById('f1_font'),
+      fontCustomInput: document.getElementById('f1_font_custom'),
       colorInput: document.getElementById('f1_color'),
       colorText: document.getElementById('f1_color_text'),
       deleteBtn: null,
@@ -58,6 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
       sizeNum: document.getElementById('f2_size_num'),
       sizeVal: document.getElementById('f2_size_val'),
       weightSelect: document.getElementById('f2_weight'),
+      fontSelect: document.getElementById('f2_font'),
+      fontCustomInput: document.getElementById('f2_font_custom'),
       colorInput: document.getElementById('f2_color'),
       colorText: document.getElementById('f2_color_text'),
       deleteBtn: null,
@@ -432,6 +501,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // 굵기
     f.weightSelect.addEventListener('change', () => updateAll());
 
+    // 글꼴 (폰트)
+    if (f.fontSelect) {
+      f.fontSelect.addEventListener('change', () => {
+        if (f.fontCustomInput) {
+          if (f.fontSelect.value === 'custom') {
+            f.fontCustomInput.classList.remove('hidden');
+            f.fontCustomInput.focus();
+          } else {
+            f.fontCustomInput.classList.add('hidden');
+          }
+        }
+        updateAll();
+      });
+    }
+
+    if (f.fontCustomInput) {
+      f.fontCustomInput.addEventListener('input', () => updateAll());
+      f.fontCustomInput.addEventListener('change', () => updateAll());
+    }
+
     // 색상 피커 & 텍스트 동기화
     const handleColorPick = (e) => {
       f.colorText.value = e.target.value;
@@ -504,6 +593,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let showBack = true;
     let size = 20;
     let weight = 'normal';
+    let font = 'inherit';
+    let fontCustom = '';
     let color = '#5f6368';
     let hasDictLink = false;
 
@@ -514,6 +605,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (fieldData.showBack !== undefined) showBack = Boolean(fieldData.showBack);
       if (fieldData.size !== undefined) size = fieldData.size;
       if (fieldData.weight !== undefined) weight = fieldData.weight;
+      if (fieldData.font !== undefined) font = fieldData.font;
+      if (fieldData.fontCustom !== undefined) fontCustom = fieldData.fontCustom;
       if (fieldData.color !== undefined) color = fieldData.color;
       if (fieldData.hasDictLink !== undefined) hasDictLink = Boolean(fieldData.hasDictLink);
     } else {
@@ -596,6 +689,24 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <div class="control-item">
+          <label class="sub-label">글꼴 (폰트)</label>
+          <select class="form-select small-select f-font">
+            <option value="inherit"${font === 'inherit' ? ' selected' : ''}>(기본 글꼴 따름)</option>
+            <option value="system"${font === 'system' ? ' selected' : ''}>시스템 기본 고딕</option>
+            <option value="noto-sans-kr"${font === 'noto-sans-kr' ? ' selected' : ''}>본고딕 (Noto Sans KR)</option>
+            <option value="noto-serif-kr"${font === 'noto-serif-kr' ? ' selected' : ''}>명조체 (Noto Serif KR)</option>
+            <option value="nanum-gothic"${font === 'nanum-gothic' ? ' selected' : ''}>나눔고딕</option>
+            <option value="inter"${font === 'inter' ? ' selected' : ''}>Inter (영문 고딕)</option>
+            <option value="noto-sans-jp"${font === 'noto-sans-jp' ? ' selected' : ''}>Noto Sans JP (일본어)</option>
+            <option value="noto-sans-sc"${font === 'noto-sans-sc' ? ' selected' : ''}>Noto Sans SC (중국어)</option>
+            <option value="monospace"${font === 'monospace' ? ' selected' : ''}>고정폭 (코딩체)</option>
+            <option value="cursive"${font === 'cursive' ? ' selected' : ''}>손글씨 (필기체)</option>
+            <option value="custom"${font === 'custom' ? ' selected' : ''}>직접 입력...</option>
+          </select>
+          <input type="text" class="form-input font-custom-input f-font-custom${font === 'custom' ? '' : ' hidden'}" value="${escapeHtml(fontCustom || '')}" placeholder="폰트명 입력 (예: Pretendard)">
+        </div>
+
+        <div class="control-item">
           <label class="sub-label">색상</label>
           <div class="color-picker-group">
             <input type="color" value="${color}" class="form-color f-color">
@@ -627,6 +738,8 @@ document.addEventListener('DOMContentLoaded', () => {
       sizeNum: box.querySelector('.f-size-num'),
       sizeVal: box.querySelector('.f-size-val'),
       weightSelect: box.querySelector('.f-weight'),
+      fontSelect: box.querySelector('.f-font'),
+      fontCustomInput: box.querySelector('.f-font-custom'),
       colorInput: box.querySelector('.f-color'),
       colorText: box.querySelector('.f-color-text'),
       deleteBtn: box.querySelector('.btn-delete-field'),
@@ -1109,6 +1222,45 @@ document.addEventListener('DOMContentLoaded', () => {
     centerAlign.addEventListener('change', updateAll);
     rtlForce.addEventListener('change', updateAll);
 
+    // 카드 공통 폰트 & 줄간격 이벤트
+    if (cardBaseFont) {
+      cardBaseFont.addEventListener('change', () => {
+        if (cardBaseFontCustom) {
+          if (cardBaseFont.value === 'custom') {
+            cardBaseFontCustom.classList.remove('hidden');
+            cardBaseFontCustom.focus();
+          } else {
+            cardBaseFontCustom.classList.add('hidden');
+          }
+        }
+        updateAll();
+      });
+    }
+    if (cardBaseFontCustom) {
+      cardBaseFontCustom.addEventListener('input', updateAll);
+      cardBaseFontCustom.addEventListener('change', updateAll);
+    }
+    if (cardLineHeight) {
+      cardLineHeight.addEventListener('input', (e) => {
+        if (cardLineHeightNum) cardLineHeightNum.value = e.target.value;
+        if (cardLineHeightVal) cardLineHeightVal.textContent = e.target.value;
+        updateAll();
+      });
+      cardLineHeight.addEventListener('change', updateAll);
+    }
+    if (cardLineHeightNum) {
+      cardLineHeightNum.addEventListener('input', (e) => {
+        let val = parseFloat(e.target.value);
+        if (isNaN(val)) val = 1.5;
+        if (val < 1.0) val = 1.0;
+        if (val > 3.0) val = 3.0;
+        if (cardLineHeight) cardLineHeight.value = val;
+        if (cardLineHeightVal) cardLineHeightVal.textContent = val;
+        updateAll();
+      });
+      cardLineHeightNum.addEventListener('change', updateAll);
+    }
+
     // 필드 컨트롤 동기화 (기본 필드 1, 2)
     fields.forEach(f => bindFieldEvents(f));
 
@@ -1331,6 +1483,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const weight = field.weightSelect.value;
     const color = field.colorInput.value;
     const isTargetLink = Boolean(field.hasDictLink);
+    const fieldFontCss = getFieldFontCss(field);
 
     const isDarkMode = isForPreview && Boolean(ankiCardWrapper && ankiCardWrapper.classList.contains('dark-mode'));
     const activeColor = isDarkMode ? getDarkModeColor(color) : color;
@@ -1338,6 +1491,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // style 속성 조립
     const styleParts = [];
     if (size) styleParts.push(`font-size: ${size}px;`);
+    if (fieldFontCss) styleParts.push(`font-family: ${fieldFontCss};`);
     if (weight && weight !== 'normal') styleParts.push(`font-weight: ${weight};`);
     styleParts.push(`color: ${activeColor};`);
     styleParts.push(`margin-bottom: 8px;`);
@@ -1359,7 +1513,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>`;
       } else {
         // Anki 템플릿용: {{FieldName}} 태그 사용 및 다크모드 대응 CSS 클래스 포함
-        return `<div class="field-item f-field-${fieldIndex}" style="font-size: ${size}px;${weight && weight !== 'normal' ? ` font-weight: ${weight};` : ''} color: ${color}; margin-bottom: 8px;">
+        return `<div class="field-item f-field-${fieldIndex}" style="font-size: ${size}px;${fieldFontCss ? ` font-family: ${fieldFontCss};` : ''}${weight && weight !== 'normal' ? ` font-weight: ${weight};` : ''} color: ${color}; margin-bottom: 8px;">
   <a href="${dictUrl}{{${fieldName}}}"${targetAttr} style="color: ${color}; text-decoration: ${textDeco};">
     {{${fieldName}}}
   </a>
@@ -1369,7 +1523,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isForPreview) {
         return `<div class="field-item f-field-${fieldIndex}" style="${divStyle}">${escapeHtml(sampleValue)}</div>`;
       } else {
-        return `<div class="field-item f-field-${fieldIndex}" style="font-size: ${size}px;${weight && weight !== 'normal' ? ` font-weight: ${weight};` : ''} color: ${color}; margin-bottom: 8px;">{{${fieldName}}}</div>`;
+        return `<div class="field-item f-field-${fieldIndex}" style="font-size: ${size}px;${fieldFontCss ? ` font-family: ${fieldFontCss};` : ''}${weight && weight !== 'normal' ? ` font-weight: ${weight};` : ''} color: ${color}; margin-bottom: 8px;">{{${fieldName}}}</div>`;
       }
     }
   }
@@ -1422,6 +1576,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const align = centerAlign.checked ? 'center' : 'left';
     const textDeco = linkUnderline.checked ? 'underline' : 'none';
 
+    const cardFontKey = cardBaseFont ? cardBaseFont.value : 'system';
+    const cardFontCustom = cardBaseFontCustom ? cardBaseFontCustom.value : '';
+    const cardFontCss = getFontFamilyCss(cardFontKey, cardFontCustom);
+    const cardLineHeightVal = cardLineHeight ? cardLineHeight.value : '1.5';
+
+    // 구글 폰트 웹폰트 import 필요 여부 판별
+    const webFontKeys = ['noto-sans-kr', 'noto-serif-kr', 'nanum-gothic', 'inter', 'noto-sans-jp', 'noto-sans-sc', 'cursive'];
+    const usesWebFont = webFontKeys.includes(cardFontKey) || fields.some(f => f.fontSelect && webFontKeys.includes(f.fontSelect.value));
+    const fontImportHeader = usesWebFont ? `@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;700&family=Nanum+Gothic:wght@400;700&family=Inter:wght@400;600&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Caveat:wght@600&display=swap');\n\n` : '';
+
     let fieldStyles = '';
     let nightModeStyles = '';
 
@@ -1431,10 +1595,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const weight = f.weightSelect.value;
       const color = f.colorInput.value;
       const darkColor = getDarkModeColor(color);
+      const fieldFontCss = getFieldFontCss(f);
 
       fieldStyles += `\n.f-field-${fNum} {
   font-size: ${size}px;
-  ${weight && weight !== 'normal' ? `font-weight: ${weight};\n  ` : ''}color: ${color};
+  ${fieldFontCss ? `font-family: ${fieldFontCss};\n  ` : ''}${weight && weight !== 'normal' ? `font-weight: ${weight};\n  ` : ''}color: ${color};
 }`;
 
       nightModeStyles += `\n.nightMode .f-field-${fNum},
@@ -1451,13 +1616,13 @@ document.addEventListener('DOMContentLoaded', () => {
 }`;
     });
 
-    return `.card {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+    return `${fontImportHeader}.card {
+  font-family: ${cardFontCss};
   font-size: 20px;
   text-align: ${align};
   color: #202124;
   background-color: #ffffff;
-  line-height: 1.5;
+  line-height: ${cardLineHeightVal};
 }
 
 .field-item {
@@ -1535,6 +1700,11 @@ a {
     const isRtl = rtlForce.checked;
     liveCardRender.style.direction = isRtl ? 'rtl' : 'ltr';
     liveCardRender.style.textAlign = centerAlign.checked ? 'center' : (isRtl ? 'right' : 'left');
+
+    const cardFontKey = cardBaseFont ? cardBaseFont.value : 'system';
+    const cardFontCustom = cardBaseFontCustom ? cardBaseFontCustom.value : '';
+    liveCardRender.style.fontFamily = getFontFamilyCss(cardFontKey, cardFontCustom);
+    liveCardRender.style.lineHeight = cardLineHeight ? cardLineHeight.value : '1.5';
 
     const isDark = Boolean(ankiCardWrapper && ankiCardWrapper.classList.contains('dark-mode'));
 
@@ -1637,6 +1807,9 @@ a {
         keepFrontOnBack: keepFrontOnBack.checked,
         centerAlign: centerAlign.checked,
         rtlForce: rtlForce.checked,
+        cardBaseFont: cardBaseFont ? cardBaseFont.value : 'system',
+        cardBaseFontCustom: cardBaseFontCustom ? cardBaseFontCustom.value : '',
+        cardLineHeight: cardLineHeight ? cardLineHeight.value : '1.5',
         fields: fields.map(f => ({
           name: f.nameInput.value,
           sample: f.sampleInput.value,
@@ -1644,6 +1817,8 @@ a {
           showBack: f.showBack.checked,
           size: f.sizeSlider.value,
           weight: f.weightSelect.value,
+          font: f.fontSelect ? f.fontSelect.value : 'inherit',
+          fontCustom: f.fontCustomInput ? f.fontCustomInput.value : '',
           color: f.colorInput.value,
           hasDictLink: Boolean(f.hasDictLink),
         })),
@@ -1685,6 +1860,24 @@ a {
       if (data.centerAlign !== undefined) centerAlign.checked = Boolean(data.centerAlign);
       if (data.rtlForce !== undefined) rtlForce.checked = Boolean(data.rtlForce);
 
+      // 카드 전반 폰트 및 줄간격 복원
+      if (data.cardBaseFont !== undefined && cardBaseFont) {
+        cardBaseFont.value = data.cardBaseFont;
+        if (cardBaseFontCustom) {
+          if (data.cardBaseFont === 'custom') {
+            cardBaseFontCustom.classList.remove('hidden');
+            cardBaseFontCustom.value = data.cardBaseFontCustom || '';
+          } else {
+            cardBaseFontCustom.classList.add('hidden');
+          }
+        }
+      }
+      if (data.cardLineHeight !== undefined && cardLineHeight) {
+        cardLineHeight.value = data.cardLineHeight;
+        if (cardLineHeightNum) cardLineHeightNum.value = data.cardLineHeight;
+        if (cardLineHeightVal) cardLineHeightVal.textContent = data.cardLineHeight;
+      }
+
       // 필드 설정 복원
       if (Array.isArray(data.fields) && data.fields.length >= 2) {
         const optionalContainer = document.getElementById('optionalFieldsContainer');
@@ -1707,6 +1900,17 @@ a {
               f.sizeVal.textContent = fData.size;
             }
             if (fData.weight !== undefined) f.weightSelect.value = fData.weight;
+            if (fData.font !== undefined && f.fontSelect) {
+              f.fontSelect.value = fData.font;
+              if (f.fontCustomInput) {
+                if (fData.font === 'custom') {
+                  f.fontCustomInput.classList.remove('hidden');
+                  f.fontCustomInput.value = fData.fontCustom || '';
+                } else {
+                  f.fontCustomInput.classList.add('hidden');
+                }
+              }
+            }
             if (fData.color !== undefined) {
               f.colorInput.value = fData.color;
               f.colorText.value = fData.color;
@@ -1782,12 +1986,25 @@ a {
     linkNewTab.checked = true;
     linkUnderline.checked = false;
 
-    // 공통 레이아웃
+    // 공통 레이아웃 & 폰트
     showHrAnswer.checked = true;
     keepFrontOnBack.checked = true;
     centerAlign.checked = true;
     rtlForce.checked = false;
     rtlNotice.classList.add('hidden');
+
+    if (cardBaseFont) {
+      cardBaseFont.value = 'system';
+      if (cardBaseFontCustom) {
+        cardBaseFontCustom.classList.add('hidden');
+        cardBaseFontCustom.value = '';
+      }
+    }
+    if (cardLineHeight) {
+      cardLineHeight.value = 1.5;
+      if (cardLineHeightNum) cardLineHeightNum.value = 1.5;
+      if (cardLineHeightVal) cardLineHeightVal.textContent = '1.5';
+    }
 
     // 필드 1 기본값 (Front / 한국어 뜻)
     fields[0].nameInput.value = 'Front';
@@ -1798,6 +2015,13 @@ a {
     fields[0].sizeNum.value = 24;
     fields[0].sizeVal.textContent = '24';
     fields[0].weightSelect.value = 'bold';
+    if (fields[0].fontSelect) {
+      fields[0].fontSelect.value = 'inherit';
+      if (fields[0].fontCustomInput) {
+        fields[0].fontCustomInput.classList.add('hidden');
+        fields[0].fontCustomInput.value = '';
+      }
+    }
     fields[0].colorInput.value = '#202124';
     fields[0].colorText.value = '#202124';
     fields[0].hasDictLink = false;
@@ -1811,6 +2035,13 @@ a {
     fields[1].sizeNum.value = 24;
     fields[1].sizeVal.textContent = '24';
     fields[1].weightSelect.value = 'bold';
+    if (fields[1].fontSelect) {
+      fields[1].fontSelect.value = 'inherit';
+      if (fields[1].fontCustomInput) {
+        fields[1].fontCustomInput.classList.add('hidden');
+        fields[1].fontCustomInput.value = '';
+      }
+    }
     fields[1].colorInput.value = '#1a73e8';
     fields[1].colorText.value = '#1a73e8';
     fields[1].hasDictLink = true;
