@@ -618,6 +618,16 @@ document.addEventListener('DOMContentLoaded', () => {
   function deleteField(fObj) {
     const idx = fields.indexOf(fObj);
     if (idx === -1) return;
+
+    const rawName = fObj.nameInput.value.trim();
+    const promptText = rawName
+      ? `'${rawName}' 필드를 정말 삭제하시겠습니까?`
+      : `${idx + 1}번째 필드를 정말 삭제하시겠습니까?`;
+
+    if (!confirm(promptText)) {
+      return;
+    }
+
     fObj.boxEl.remove();
     fields.splice(idx, 1);
     updateFieldBadges();
