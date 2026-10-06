@@ -25,9 +25,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const rtlForce = document.getElementById('rtlForce');
 
   // Field Elements
+  const box1 = document.getElementById('boxField1');
+  const box2 = document.getElementById('boxField2');
+
   const fields = [
     {
-      index: 1,
+      boxEl: box1,
+      badgeEl: document.getElementById('f1_badge'),
       nameInput: document.getElementById('f1_name'),
       sampleInput: document.getElementById('f1_sample'),
       showFront: document.getElementById('f1_show_front'),
@@ -38,9 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
       weightSelect: document.getElementById('f1_weight'),
       colorInput: document.getElementById('f1_color'),
       colorText: document.getElementById('f1_color_text'),
+      deleteBtn: null,
     },
     {
-      index: 2,
+      boxEl: box2,
+      badgeEl: document.getElementById('f2_badge'),
       nameInput: document.getElementById('f2_name'),
       sampleInput: document.getElementById('f2_sample'),
       showFront: document.getElementById('f2_show_front'),
@@ -51,19 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
       weightSelect: document.getElementById('f2_weight'),
       colorInput: document.getElementById('f2_color'),
       colorText: document.getElementById('f2_color_text'),
-    },
-    {
-      index: 3,
-      nameInput: document.getElementById('f3_name'),
-      sampleInput: document.getElementById('f3_sample'),
-      showFront: document.getElementById('f3_show_front'),
-      showBack: document.getElementById('f3_show_back'),
-      sizeSlider: document.getElementById('f3_size'),
-      sizeNum: document.getElementById('f3_size_num'),
-      sizeVal: document.getElementById('f3_size_val'),
-      weightSelect: document.getElementById('f3_weight'),
-      colorInput: document.getElementById('f3_color'),
-      colorText: document.getElementById('f3_color_text'),
+      deleteBtn: null,
     }
   ];
 
@@ -342,35 +336,348 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 3번째 필드명 및 배지 동적 업데이트 (중국어는 pinyin, 다른 언어는 Example)
-    const f3Badge = document.getElementById('f3_badge');
-    const f3Input = fields[2].nameInput;
-    const currentF3Val = f3Input.value.trim();
+    // 3번째 필드가 존재할 경우 언어에 맞춰 기본값/플레이스홀더 동기화
+    if (fields.length >= 3) {
+      const f3Input = fields[2].nameInput;
+      const currentF3Val = f3Input.value.trim();
 
-    if (lang.id === 'zh') {
-      if (f3Badge) f3Badge.textContent = '3번째 필드 (병음 pinyin)';
-      f3Input.placeholder = '예: pinyin, 발음';
-      // 이전 값이 Example, example, sample 이거나 비어있으면 pinyin으로 전환
-      if (!currentF3Val || currentF3Val === 'Example' || currentF3Val === 'example' || currentF3Val === 'sample') {
-        f3Input.value = 'pinyin';
-      }
-    } else {
-      if (f3Badge) f3Badge.textContent = '3번째 필드 (예문 Example)';
-      f3Input.placeholder = '예: Example, sample, 예문';
-      // 이전 값이 pinyin 이거나 비어있으면 Example로 전환
-      if (!currentF3Val || currentF3Val === 'pinyin') {
-        f3Input.value = 'Example';
+      if (lang.id === 'zh') {
+        f3Input.placeholder = '예: pinyin, 발음';
+        if (!currentF3Val || currentF3Val === 'Example' || currentF3Val === 'example' || currentF3Val === 'sample') {
+          f3Input.value = 'pinyin';
+        }
+      } else {
+        f3Input.placeholder = '예: Example, sample, 예문';
+        if (!currentF3Val || currentF3Val === 'pinyin') {
+          f3Input.value = 'Example';
+        }
       }
     }
 
     // 언어 변경 시 예시 샘플 자동 채우기 (사용자가 직접 변경한 경우)
     if (isUserManualChange && lang.sample) {
-      fields[0].sampleInput.value = lang.sample.field1;
-      fields[1].sampleInput.value = lang.sample.field2;
-      fields[2].sampleInput.value = lang.sample.field3;
+      if (fields[0]) fields[0].sampleInput.value = lang.sample.field1 || '';
+      if (fields[1]) fields[1].sampleInput.value = lang.sample.field2 || '';
+      if (fields.length >= 3 && lang.sample.field3) {
+        fields[2].sampleInput.value = lang.sample.field3;
+      }
     }
 
+    updateFieldBadges();
+    updateDictApplyTargetSelect();
     updateAll(shouldSave);
+  }
+
+  // 필드 이벤트 바인딩 헬퍼 (초기 1, 2번째 필드 및 동적 추가 필드 공통)
+  function bindFieldEvents(f) {
+    // 필드명 변경 시 사전 링크 대상 셀렉트 및 서식 즉시 갱신
+    f.nameInput.addEventListener('input', () => {
+      updateDictApplyTargetSelect();
+      updateAll();
+    });
+    f.nameInput.addEventListener('change', () => {
+      updateDictApplyTargetSelect();
+      updateAll();
+    });
+
+    f.sampleInput.addEventListener('input', () => updateAll());
+    f.sampleInput.addEventListener('change', () => updateAll());
+
+    // 노출 체크박스
+    f.showFront.addEventListener('change', () => updateAll());
+    f.showBack.addEventListener('change', () => updateAll());
+
+    // 크기 슬라이더 & 숫자 입력 동기화
+    f.sizeSlider.addEventListener('input', (e) => {
+      f.sizeNum.value = e.target.value;
+      f.sizeVal.textContent = e.target.value;
+      updateAll();
+    });
+    f.sizeSlider.addEventListener('change', () => updateAll());
+
+    f.sizeNum.addEventListener('input', (e) => {
+      let val = parseInt(e.target.value, 10);
+      if (isNaN(val)) val = 20;
+      if (val < 10) val = 10;
+      if (val > 80) val = 80;
+      f.sizeSlider.value = val;
+      f.sizeVal.textContent = val;
+      updateAll();
+    });
+    f.sizeNum.addEventListener('change', () => updateAll());
+
+    // 굵기
+    f.weightSelect.addEventListener('change', () => updateAll());
+
+    // 색상 피커 & 텍스트 동기화
+    const handleColorPick = (e) => {
+      f.colorText.value = e.target.value;
+      updateAll();
+    };
+    f.colorInput.addEventListener('input', handleColorPick);
+    f.colorInput.addEventListener('change', handleColorPick);
+
+    // 색상 텍스트 입력 처리 (# 생략 및 3자리/6자리 hex 지원)
+    f.colorText.addEventListener('input', (e) => {
+      let val = e.target.value.trim();
+      if (/^[0-9A-Fa-f]{6}$/.test(val)) {
+        val = '#' + val;
+      }
+      if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+        f.colorInput.value = val;
+        updateAll();
+      }
+    });
+
+    f.colorText.addEventListener('change', (e) => {
+      let val = e.target.value.trim();
+      if (/^[0-9A-Fa-f]{6}$/.test(val)) {
+        val = '#' + val;
+      } else if (/^#[0-9A-Fa-f]{3}$/.test(val)) {
+        val = '#' + val[1] + val[1] + val[2] + val[2] + val[3] + val[3];
+      } else if (/^[0-9A-Fa-f]{3}$/.test(val)) {
+        val = '#' + val[0] + val[0] + val[1] + val[1] + val[2] + val[2];
+      }
+
+      if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+        f.colorInput.value = val;
+        f.colorText.value = val;
+        updateAll();
+      } else {
+        f.colorText.value = f.colorInput.value;
+      }
+    });
+
+    // 해당 필드 박스 내부 색상 프리셋 버튼들
+    if (f.boxEl) {
+      f.boxEl.querySelectorAll('.preset-dot').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const color = btn.dataset.color;
+          if (color) {
+            f.colorInput.value = color;
+            f.colorText.value = color;
+            updateAll();
+          }
+        });
+      });
+    }
+
+    // 삭제 버튼이 있는 경우
+    if (f.deleteBtn) {
+      f.deleteBtn.addEventListener('click', () => {
+        deleteField(f);
+      });
+    }
+  }
+
+  // 동적 필드 추가 함수 (3번째 이상 선택 필드)
+  function addOptionalField(fieldData = null, shouldSave = true) {
+    const currentLang = getSelectedLanguage();
+    const index = fields.length + 1; // 1-based index (3, 4, 5...)
+
+    let name = '';
+    let sample = '';
+    let showFront = false;
+    let showBack = true;
+    let size = 20;
+    let weight = 'normal';
+    let color = '#5f6368';
+
+    if (fieldData) {
+      if (fieldData.name !== undefined) name = fieldData.name;
+      if (fieldData.sample !== undefined) sample = fieldData.sample;
+      if (fieldData.showFront !== undefined) showFront = Boolean(fieldData.showFront);
+      if (fieldData.showBack !== undefined) showBack = Boolean(fieldData.showBack);
+      if (fieldData.size !== undefined) size = fieldData.size;
+      if (fieldData.weight !== undefined) weight = fieldData.weight;
+      if (fieldData.color !== undefined) color = fieldData.color;
+    } else {
+      if (index === 3) {
+        if (currentLang.id === 'zh') {
+          name = 'pinyin';
+          sample = (currentLang.sample && currentLang.sample.field3) ? currentLang.sample.field3 : 'nǐ hǎo';
+        } else {
+          name = 'Example';
+          sample = (currentLang.sample && currentLang.sample.field3) ? currentLang.sample.field3 : '';
+        }
+        size = 20;
+        weight = 'normal';
+        color = '#5f6368';
+      } else {
+        name = `Field${index}`;
+        sample = '';
+        size = 18;
+        weight = 'normal';
+        color = '#64748b';
+      }
+    }
+
+    const optionalFieldsContainer = document.getElementById('optionalFieldsContainer');
+    if (!optionalFieldsContainer) return null;
+
+    const box = document.createElement('div');
+    box.className = 'field-setting-box';
+    box.innerHTML = `
+      <div class="field-setting-header">
+        <div class="field-badge field-badge-secondary"></div>
+        <div class="field-header-actions">
+          <div class="field-visibility-toggles">
+            <label class="mini-toggle" title="앞면 카드 노출 여부">
+              <input type="checkbox" class="f-show-front"${showFront ? ' checked' : ''}>
+              <span>앞면 표시</span>
+            </label>
+            <label class="mini-toggle" title="뒷면 카드 노출 여부">
+              <input type="checkbox" class="f-show-back"${showBack ? ' checked' : ''}>
+              <span>뒷면 표시</span>
+            </label>
+          </div>
+          <button type="button" class="btn-delete-field" title="이 필드 삭제">
+            🗑️ 삭제
+          </button>
+        </div>
+      </div>
+
+      <div class="grid-2-col">
+        <div class="form-group">
+          <label class="form-label">필드명 (Anki와 일치해야 함)</label>
+          <input type="text" class="form-input f-name" value="${escapeHtml(name)}" placeholder="예: Example, pinyin, 예문">
+        </div>
+        <div class="form-group">
+          <label class="form-label">미리보기 예시값</label>
+          <input type="text" class="form-input f-sample" value="${escapeHtml(sample)}" placeholder="예시 내용을 입력하세요">
+        </div>
+      </div>
+
+      <div class="style-controls-row">
+        <div class="control-item">
+          <label class="sub-label">글씨 크기: <span class="f-size-val">${size}</span>px</label>
+          <div class="slider-with-number">
+            <input type="range" min="14" max="48" value="${size}" class="form-range f-size">
+            <input type="number" min="14" max="48" value="${size}" class="num-input f-size-num">
+          </div>
+        </div>
+
+        <div class="control-item">
+          <label class="sub-label">글씨 굵기</label>
+          <select class="form-select small-select f-weight">
+            <option value="normal"${weight === 'normal' ? ' selected' : ''}>보통 (normal)</option>
+            <option value="bold"${weight === 'bold' ? ' selected' : ''}>굵게 (bold)</option>
+            <option value="600"${weight === '600' ? ' selected' : ''}>중간 굵게 (600)</option>
+          </select>
+        </div>
+
+        <div class="control-item">
+          <label class="sub-label">색상</label>
+          <div class="color-picker-group">
+            <input type="color" value="${color}" class="form-color f-color">
+            <input type="text" value="${color}" class="color-hex-input f-color-text" maxlength="7">
+          </div>
+        </div>
+      </div>
+      <div class="preset-colors">
+        <span class="preset-label">색상 프리셋:</span>
+        <button type="button" class="preset-dot" data-color="#5f6368" style="background:#5f6368;" title="뮤트 그레이"></button>
+        <button type="button" class="preset-dot" data-color="#202124" style="background:#202124;" title="다크 그레이"></button>
+        <button type="button" class="preset-dot" data-color="#1a73e8" style="background:#1a73e8;" title="구글 블루"></button>
+        <button type="button" class="preset-dot" data-color="#0d904f" style="background:#0d904f;" title="에메랄드"></button>
+        <button type="button" class="preset-dot" data-color="#e37400" style="background:#e37400;" title="오렌지"></button>
+      </div>
+    `;
+
+    optionalFieldsContainer.appendChild(box);
+
+    const fObj = {
+      boxEl: box,
+      badgeEl: box.querySelector('.field-badge'),
+      nameInput: box.querySelector('.f-name'),
+      sampleInput: box.querySelector('.f-sample'),
+      showFront: box.querySelector('.f-show-front'),
+      showBack: box.querySelector('.f-show-back'),
+      sizeSlider: box.querySelector('.f-size'),
+      sizeNum: box.querySelector('.f-size-num'),
+      sizeVal: box.querySelector('.f-size-val'),
+      weightSelect: box.querySelector('.f-weight'),
+      colorInput: box.querySelector('.f-color'),
+      colorText: box.querySelector('.f-color-text'),
+      deleteBtn: box.querySelector('.btn-delete-field'),
+    };
+
+    fields.push(fObj);
+    bindFieldEvents(fObj);
+    updateFieldBadges();
+    updateDictApplyTargetSelect();
+
+    if (shouldSave) {
+      updateAll(true);
+    }
+
+    return fObj;
+  }
+
+  // 동적 필드 삭제 함수
+  function deleteField(fObj) {
+    const idx = fields.indexOf(fObj);
+    if (idx === -1) return;
+    fObj.boxEl.remove();
+    fields.splice(idx, 1);
+    updateFieldBadges();
+    updateDictApplyTargetSelect();
+    updateAll(true);
+    showToast('선택한 필드가 삭제되었습니다.');
+  }
+
+  // 각 필드의 헤더 배지 라벨 동적 갱신
+  function updateFieldBadges() {
+    const currentLang = getSelectedLanguage();
+    fields.forEach((f, idx) => {
+      if (!f.badgeEl) return;
+      if (idx === 0) {
+        f.badgeEl.textContent = '1번째 필드 (앞면 / 한국어)';
+      } else if (idx === 1) {
+        f.badgeEl.textContent = '2번째 필드 (뒷면 / 외국어 · 사전 링크)';
+      } else if (idx === 2) {
+        if (currentLang.id === 'zh') {
+          f.badgeEl.textContent = '3번째 필드 (병음 pinyin)';
+        } else {
+          f.badgeEl.textContent = '3번째 필드 (예문 Example)';
+        }
+      } else {
+        f.badgeEl.textContent = `${idx + 1}번째 필드 (추가 선택 필드)`;
+      }
+    });
+  }
+
+  // 사전 링크 적용 위치 셀렉트 박스 동적 갱신
+  function updateDictApplyTargetSelect() {
+    const prevVal = dictApplyTarget.value;
+    dictApplyTarget.innerHTML = '';
+
+    const noneOpt = document.createElement('option');
+    noneOpt.value = 'none';
+    noneOpt.textContent = '링크 미적용 (일반 텍스트만)';
+    dictApplyTarget.appendChild(noneOpt);
+
+    let hasPrevVal = (prevVal === 'none');
+
+    fields.forEach((f, idx) => {
+      const val = `field${idx + 1}`;
+      const opt = document.createElement('option');
+      opt.value = val;
+      const fName = f.nameInput.value.trim() || `필드 ${idx + 1}`;
+      const recTag = (idx === 1) ? ' (기본 권장)' : '';
+      opt.textContent = `${idx + 1}번째 필드 (${fName})에 사전 링크 걸기${recTag}`;
+      dictApplyTarget.appendChild(opt);
+
+      if (prevVal === val) {
+        hasPrevVal = true;
+      }
+    });
+
+    if (hasPrevVal) {
+      dictApplyTarget.value = prevVal;
+    } else {
+      dictApplyTarget.value = (fields.length >= 2) ? 'field2' : (fields.length >= 1 ? 'field1' : 'none');
+    }
   }
 
   // 2. 컨트롤 이벤트 리스너 연결
@@ -394,93 +701,17 @@ document.addEventListener('DOMContentLoaded', () => {
     centerAlign.addEventListener('change', updateAll);
     rtlForce.addEventListener('change', updateAll);
 
-    // 필드 컨트롤 동기화
-    fields.forEach((f, idx) => {
-      // 필드명 & 샘플
-      f.nameInput.addEventListener('input', updateAll);
-      f.nameInput.addEventListener('change', updateAll);
-      f.sampleInput.addEventListener('input', updateAll);
-      f.sampleInput.addEventListener('change', updateAll);
+    // 필드 컨트롤 동기화 (기본 필드 1, 2)
+    fields.forEach(f => bindFieldEvents(f));
 
-      // 노출 체크박스
-      f.showFront.addEventListener('change', updateAll);
-      f.showBack.addEventListener('change', updateAll);
-
-      // 크기 슬라이더 & 숫자 입력 동기화
-      f.sizeSlider.addEventListener('input', (e) => {
-        f.sizeNum.value = e.target.value;
-        f.sizeVal.textContent = e.target.value;
-        updateAll();
+    // 필드 추가 버튼
+    const addFieldBtn = document.getElementById('addFieldBtn');
+    if (addFieldBtn) {
+      addFieldBtn.addEventListener('click', () => {
+        addOptionalField(null, true);
+        showToast(`${fields.length}번째 필드가 추가되었습니다.`);
       });
-      f.sizeSlider.addEventListener('change', updateAll);
-
-      f.sizeNum.addEventListener('input', (e) => {
-        let val = parseInt(e.target.value, 10);
-        if (isNaN(val)) val = 20;
-        if (val < 10) val = 10;
-        if (val > 80) val = 80;
-        f.sizeSlider.value = val;
-        f.sizeVal.textContent = val;
-        updateAll();
-      });
-      f.sizeNum.addEventListener('change', updateAll);
-
-      // 굵기
-      f.weightSelect.addEventListener('change', updateAll);
-
-      // 색상 피커 & 텍스트 동기화 (input 및 change 모두 감지)
-      const handleColorPick = (e) => {
-        f.colorText.value = e.target.value;
-        updateAll();
-      };
-      f.colorInput.addEventListener('input', handleColorPick);
-      f.colorInput.addEventListener('change', handleColorPick);
-
-      // 색상 텍스트 입력 처리 (# 생략 및 3자리/6자리 hex 지원)
-      f.colorText.addEventListener('input', (e) => {
-        let val = e.target.value.trim();
-        if (/^[0-9A-Fa-f]{6}$/.test(val)) {
-          val = '#' + val;
-        }
-        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-          f.colorInput.value = val;
-          updateAll();
-        }
-      });
-
-      f.colorText.addEventListener('change', (e) => {
-        let val = e.target.value.trim();
-        if (/^[0-9A-Fa-f]{6}$/.test(val)) {
-          val = '#' + val;
-        } else if (/^#[0-9A-Fa-f]{3}$/.test(val)) {
-          val = '#' + val[1] + val[1] + val[2] + val[2] + val[3] + val[3];
-        } else if (/^[0-9A-Fa-f]{3}$/.test(val)) {
-          val = '#' + val[0] + val[0] + val[1] + val[1] + val[2] + val[2];
-        }
-
-        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-          f.colorInput.value = val;
-          f.colorText.value = val;
-          updateAll();
-        } else {
-          // 잘못된 형식 입력 시 현재 색상값으로 복원
-          f.colorText.value = f.colorInput.value;
-        }
-      });
-    });
-
-    // 색상 프리셋 버튼
-    document.querySelectorAll('.preset-dot').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetIdx = parseInt(btn.dataset.target, 10) - 1;
-        const color = btn.dataset.color;
-        if (fields[targetIdx]) {
-          fields[targetIdx].colorInput.value = color;
-          fields[targetIdx].colorText.value = color;
-          updateAll();
-        }
-      });
-    });
+    }
 
     // 미리보기 탭 전환
     tabFrontPreview.addEventListener('click', () => {
@@ -597,13 +828,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 3. 필드 렌더 마크업 생성 헬퍼
-  function buildFieldBlock(field, isForPreview = false) {
-    const fieldName = field.nameInput.value.trim() || `Field${field.index}`;
+  function buildFieldBlock(field, isForPreview = false, fieldIndex = 1) {
+    const fieldName = field.nameInput.value.trim() || `Field${fieldIndex}`;
     const sampleValue = field.sampleInput.value.trim() || fieldName;
     const size = field.sizeSlider.value;
     const weight = field.weightSelect.value;
     const color = field.colorInput.value;
-    const isTargetLink = (dictApplyTarget.value === `field${field.index}`);
+    const isTargetLink = (dictApplyTarget.value === `field${fieldIndex}`);
 
     // style 속성 조립
     const styleParts = [];
@@ -645,14 +876,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 4. Anki 앞면 서식 생성
   function generateFrontTemplate() {
-    const activeFrontFields = fields.filter(f => f.showFront.checked);
+    const activeFrontFields = [];
+    fields.forEach((f, idx) => {
+      if (f.showFront.checked) {
+        activeFrontFields.push({ field: f, index: idx + 1 });
+      }
+    });
+
     if (activeFrontFields.length === 0) {
       // 아무것도 선택되지 않았을 경우 1번째 필드 기본
-      const f1Name = fields[0].nameInput.value.trim() || 'Front';
+      const f1Name = fields[0] ? (fields[0].nameInput.value.trim() || 'Front') : 'Front';
       return `{{${f1Name}}}`;
     }
 
-    return activeFrontFields.map(f => buildFieldBlock(f, false)).join('\n\n');
+    return activeFrontFields.map(item => buildFieldBlock(item.field, false, item.index)).join('\n\n');
   }
 
   // 5. Anki 뒷면 서식 생성
@@ -660,7 +897,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const parts = [];
 
     // 앞면 내용 유지 여부
-    if (keepFrontOnBack.checked) {
+    if (keepFrontOnBack.checked && fields[0]) {
       const frontName = fields[0].nameInput.value.trim() || 'Front';
       parts.push(`{{${frontName}}}`);
     }
@@ -671,9 +908,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 뒷면 노출 필드들
-    const activeBackFields = fields.filter(f => f.showBack.checked);
-    activeBackFields.forEach(f => {
-      parts.push(buildFieldBlock(f, false));
+    fields.forEach((f, idx) => {
+      if (f.showBack.checked) {
+        parts.push(buildFieldBlock(f, false, idx + 1));
+      }
     });
 
     return parts.join('\n\n');
@@ -715,17 +953,23 @@ a {
     let html = '';
 
     if (isFront) {
-      const activeFrontFields = fields.filter(f => f.showFront.checked);
+      const activeFrontFields = [];
+      fields.forEach((f, idx) => {
+        if (f.showFront.checked) {
+          activeFrontFields.push({ field: f, index: idx + 1 });
+        }
+      });
+
       if (activeFrontFields.length === 0) {
         html = '<div style="color: #94a3b8; font-style: italic;">앞면에 표시할 필드를 설정에서 선택해주세요.</div>';
       } else {
-        html = activeFrontFields.map(f => buildFieldBlock(f, true)).join('\n');
+        html = activeFrontFields.map(item => buildFieldBlock(item.field, true, item.index)).join('\n');
       }
     } else {
       const parts = [];
 
       // 앞면 유지 표시
-      if (keepFrontOnBack.checked) {
+      if (keepFrontOnBack.checked && fields[0]) {
         const f1Sample = fields[0].sampleInput.value.trim() || fields[0].nameInput.value.trim() || 'Front';
         parts.push(`<div style="color: #64748b; font-size: 18px; margin-bottom: 4px;">${escapeHtml(f1Sample)}</div>`);
       }
@@ -736,11 +980,17 @@ a {
       }
 
       // 뒷면 표시 필드
-      const activeBackFields = fields.filter(f => f.showBack.checked);
+      const activeBackFields = [];
+      fields.forEach((f, idx) => {
+        if (f.showBack.checked) {
+          activeBackFields.push({ field: f, index: idx + 1 });
+        }
+      });
+
       if (activeBackFields.length === 0 && parts.length === 0) {
         html = '<div style="color: #94a3b8; font-style: italic;">뒷면에 표시할 필드를 설정에서 선택해주세요.</div>';
       } else {
-        parts.push(...activeBackFields.map(f => buildFieldBlock(f, true)));
+        parts.push(...activeBackFields.map(item => buildFieldBlock(item.field, true, item.index)));
         html = parts.join('\n');
       }
     }
@@ -836,7 +1086,6 @@ a {
         if (dictNameTag) dictNameTag.textContent = lang.dictName;
       }
 
-      if (data.dictApplyTarget !== undefined) dictApplyTarget.value = data.dictApplyTarget;
       if (data.dictUrl !== undefined) dictUrlInput.value = data.dictUrl;
       if (data.linkNewTab !== undefined) linkNewTab.checked = Boolean(data.linkNewTab);
       if (data.linkUnderline !== undefined) linkUnderline.checked = Boolean(data.linkUnderline);
@@ -847,40 +1096,57 @@ a {
       if (data.rtlForce !== undefined) rtlForce.checked = Boolean(data.rtlForce);
 
       // 필드 설정 복원
-      if (Array.isArray(data.fields)) {
-        data.fields.forEach((fData, idx) => {
-          const f = fields[idx];
-          if (!f || !fData) return;
-          if (fData.name !== undefined) f.nameInput.value = fData.name;
-          if (fData.sample !== undefined) f.sampleInput.value = fData.sample;
-          if (fData.showFront !== undefined) f.showFront.checked = Boolean(fData.showFront);
-          if (fData.showBack !== undefined) f.showBack.checked = Boolean(fData.showBack);
+      if (Array.isArray(data.fields) && data.fields.length >= 2) {
+        const optionalContainer = document.getElementById('optionalFieldsContainer');
+        if (optionalContainer) optionalContainer.innerHTML = '';
+        fields.splice(2); // 인덱스 2 이후의 기존 optional 필드 객체 제거
 
-          if (fData.size !== undefined) {
-            f.sizeSlider.value = fData.size;
-            f.sizeNum.value = fData.size;
-            f.sizeVal.textContent = fData.size;
+        // Field 1 & 2 복원
+        for (let i = 0; i < 2; i++) {
+          const f = fields[i];
+          const fData = data.fields[i];
+          if (f && fData) {
+            if (fData.name !== undefined) f.nameInput.value = fData.name;
+            if (fData.sample !== undefined) f.sampleInput.value = fData.sample;
+            if (fData.showFront !== undefined) f.showFront.checked = Boolean(fData.showFront);
+            if (fData.showBack !== undefined) f.showBack.checked = Boolean(fData.showBack);
+
+            if (fData.size !== undefined) {
+              f.sizeSlider.value = fData.size;
+              f.sizeNum.value = fData.size;
+              f.sizeVal.textContent = fData.size;
+            }
+            if (fData.weight !== undefined) f.weightSelect.value = fData.weight;
+            if (fData.color !== undefined) {
+              f.colorInput.value = fData.color;
+              f.colorText.value = fData.color;
+            }
           }
-          if (fData.weight !== undefined) f.weightSelect.value = fData.weight;
-          if (fData.color !== undefined) {
-            f.colorInput.value = fData.color;
-            f.colorText.value = fData.color;
-          }
-        });
+        }
+
+        // Field 3 이상 복원
+        for (let i = 2; i < data.fields.length; i++) {
+          addOptionalField(data.fields[i], false);
+        }
+      } else {
+        const optionalContainer = document.getElementById('optionalFieldsContainer');
+        if (optionalContainer) optionalContainer.innerHTML = '';
+        fields.splice(2);
+        addOptionalField(null, false);
       }
 
-      // 3번째 필드 배지 복원
-      const currentLang = getSelectedLanguage();
-      const f3Badge = document.getElementById('f3_badge');
-      if (f3Badge) {
-        if (currentLang.id === 'zh') {
-          f3Badge.textContent = '3번째 필드 (병음 pinyin)';
-        } else {
-          f3Badge.textContent = '3번째 필드 (예문 Example)';
+      updateFieldBadges();
+      updateDictApplyTargetSelect();
+
+      if (data.dictApplyTarget !== undefined) {
+        const exists = Array.from(dictApplyTarget.options).some(o => o.value === data.dictApplyTarget);
+        if (exists) {
+          dictApplyTarget.value = data.dictApplyTarget;
         }
       }
 
       // RTL 알림 배지 복원
+      const currentLang = getSelectedLanguage();
       if (currentLang.isRTL || data.rtlForce) {
         rtlNotice.classList.remove('hidden');
       } else {
@@ -909,7 +1175,6 @@ a {
     if (langSearchInput) langSearchInput.value = lang.name;
     dictUrlInput.value = lang.dictUrl;
     dictNameTag.textContent = lang.dictName;
-    dictApplyTarget.value = 'field2';
     linkNewTab.checked = true;
     linkUnderline.checked = false;
 
@@ -944,24 +1209,24 @@ a {
     fields[1].colorInput.value = '#1a73e8';
     fields[1].colorText.value = '#1a73e8';
 
-    // 필드 3 기본값 (pinyin / 병음)
-    fields[2].nameInput.value = 'pinyin';
-    fields[2].sampleInput.value = 'nǐ hǎo';
-    fields[2].showFront.checked = false;
-    fields[2].showBack.checked = true;
-    fields[2].sizeSlider.value = 20;
-    fields[2].sizeNum.value = 20;
-    fields[2].sizeVal.textContent = '20';
-    fields[2].weightSelect.value = 'normal';
-    fields[2].colorInput.value = '#5f6368';
-    fields[2].colorText.value = '#5f6368';
+    // 3번째 이상 선택 필드 컨테이너 비우고 기본 3번째 필드 1개 생성
+    const optionalContainer = document.getElementById('optionalFieldsContainer');
+    if (optionalContainer) optionalContainer.innerHTML = '';
+    fields.splice(2);
 
-    const f1Badge = document.getElementById('f1_badge');
-    const f2Badge = document.getElementById('f2_badge');
-    const f3Badge = document.getElementById('f3_badge');
-    if (f1Badge) f1Badge.textContent = '1번째 필드 (앞면 / 한국어)';
-    if (f2Badge) f2Badge.textContent = '2번째 필드 (뒷면 / 외국어 · 사전 링크)';
-    if (f3Badge) f3Badge.textContent = '3번째 필드 (병음 pinyin)';
+    addOptionalField({
+      name: 'pinyin',
+      sample: 'nǐ hǎo',
+      showFront: false,
+      showBack: true,
+      size: 20,
+      weight: 'normal',
+      color: '#5f6368'
+    }, false);
+
+    updateFieldBadges();
+    updateDictApplyTargetSelect();
+    dictApplyTarget.value = 'field2';
 
     updateAll(false);
     saveSettingsToStorage();
@@ -1021,7 +1286,11 @@ a {
 
   const restored = loadSettingsFromStorage();
   if (!restored) {
-    // 저장된 설정이 없을 때만 기본 언어 세팅 수행
+    // 저장된 설정이 없을 때 기본 3번째 필드 1개 생성 및 초기 언어 반영
+    const optionalContainer = document.getElementById('optionalFieldsContainer');
+    if (optionalContainer) optionalContainer.innerHTML = '';
+    fields.splice(2);
+    addOptionalField(null, false);
     onLanguageChange(false, false);
   }
 
