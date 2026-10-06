@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sampleInput: document.getElementById('f1_sample'),
       showFront: document.getElementById('f1_show_front'),
       showBack: document.getElementById('f1_show_back'),
+      dictLinkCheck: document.getElementById('f1_dict_link'),
       sizeSlider: document.getElementById('f1_size'),
       sizeNum: document.getElementById('f1_size_num'),
       sizeVal: document.getElementById('f1_size_val'),
@@ -52,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sampleInput: document.getElementById('f2_sample'),
       showFront: document.getElementById('f2_show_front'),
       showBack: document.getElementById('f2_show_back'),
+      dictLinkCheck: document.getElementById('f2_dict_link'),
       sizeSlider: document.getElementById('f2_size'),
       sizeNum: document.getElementById('f2_size_num'),
       sizeVal: document.getElementById('f2_size_val'),
@@ -367,6 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateFieldBadges();
     updateDictFieldChecklist();
+    renderEditorQuickChips(lang.id);
     updateAll(shouldSave);
   }
 
@@ -388,6 +391,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // 노출 체크박스
     f.showFront.addEventListener('change', () => updateAll());
     f.showBack.addEventListener('change', () => updateAll());
+
+    // 사전 링크 체크박스 (헤더 미니 토글)
+    if (f.dictLinkCheck) {
+      f.dictLinkCheck.addEventListener('change', () => {
+        f.hasDictLink = f.dictLinkCheck.checked;
+        updateFieldBadges();
+        updateDictFieldChecklist();
+        updateAll();
+      });
+    }
 
     // 크기 슬라이더 & 숫자 입력 동기화
     f.sizeSlider.addEventListener('input', (e) => {
@@ -484,6 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let size = 20;
     let weight = 'normal';
     let color = '#5f6368';
+    let hasDictLink = false;
 
     if (fieldData) {
       if (fieldData.name !== undefined) name = fieldData.name;
@@ -493,6 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (fieldData.size !== undefined) size = fieldData.size;
       if (fieldData.weight !== undefined) weight = fieldData.weight;
       if (fieldData.color !== undefined) color = fieldData.color;
+      if (fieldData.hasDictLink !== undefined) hasDictLink = Boolean(fieldData.hasDictLink);
     } else {
       if (index === 3) {
         if (currentLang.id === 'zh') {
@@ -531,6 +546,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <label class="mini-toggle" title="뒷면 카드 노출 여부">
               <input type="checkbox" class="f-show-back"${showBack ? ' checked' : ''}>
               <span>뒷면 표시</span>
+            </label>
+            <label class="mini-toggle mini-toggle-link" title="네이버 사전 링크 연결">
+              <input type="checkbox" class="f-dict-link"${hasDictLink ? ' checked' : ''}>
+              <span>🔗 사전 링크</span>
             </label>
           </div>
           <button type="button" class="btn-delete-field" title="이 필드 삭제">
@@ -595,6 +614,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sampleInput: box.querySelector('.f-sample'),
       showFront: box.querySelector('.f-show-front'),
       showBack: box.querySelector('.f-show-back'),
+      dictLinkCheck: box.querySelector('.f-dict-link'),
       sizeSlider: box.querySelector('.f-size'),
       sizeNum: box.querySelector('.f-size-num'),
       sizeVal: box.querySelector('.f-size-val'),
@@ -602,7 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
       colorInput: box.querySelector('.f-color'),
       colorText: box.querySelector('.f-color-text'),
       deleteBtn: box.querySelector('.btn-delete-field'),
-      hasDictLink: initData ? Boolean(initData.hasDictLink) : false,
+      hasDictLink: hasDictLink,
     };
 
     fields.push(fObj);
@@ -639,6 +659,354 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast('선택한 필드가 삭제되었습니다.');
   }
 
+  // 언어별 추천 필드 빠른 추가 칩 데이터 생성
+  function getEditorQuickChipsForLanguage(langId) {
+    const list = window.LANGUAGES_DATA || LANGUAGES_DATA;
+    const langObj = list.find(l => l.id === langId) || {};
+    const langName = langObj.name || '해당 언어';
+
+    if (langId === 'ja') {
+      return [
+        {
+          label: '+ 후리가나/발음',
+          name: '후리가나/발음',
+          sample: 'さくら',
+          size: 18,
+          weight: 'normal',
+          color: '#70757a',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 예문(원문)',
+          name: '예문',
+          sample: (langObj.sample && langObj.sample.field3) || '公園に桜の花が綺麗に咲いています。',
+          size: 20,
+          weight: 'normal',
+          color: '#5f6368',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 예문 해석',
+          name: '예문 해석',
+          sample: '공원에 벚꽃이 아름답게 피어 있습니다.',
+          size: 16,
+          weight: 'normal',
+          color: '#70757a',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 품사',
+          name: '품사',
+          sample: '[명사]',
+          size: 15,
+          weight: '600',
+          color: '#1a73e8',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 유의어/반의어',
+          name: '유의어/반의어',
+          sample: '同: 桜花 / 反: -',
+          size: 15,
+          weight: 'normal',
+          color: '#5f6368',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 오디오',
+          name: '오디오',
+          sample: '[sound:sakura.mp3]',
+          size: 15,
+          weight: 'normal',
+          color: '#5f6368',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 학습 메모',
+          name: '메모',
+          sample: '봄철 회화 필수 표현',
+          size: 15,
+          weight: 'normal',
+          color: '#70757a',
+          showFront: false,
+          showBack: true
+        }
+      ];
+    } else if (langId === 'zh') {
+      return [
+        {
+          label: '+ 병음 (pinyin)',
+          name: '병음',
+          sample: (langObj.sample && langObj.sample.field3) || 'nǐ hǎo',
+          size: 18,
+          weight: 'normal',
+          color: '#70757a',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 예문(원문)',
+          name: '예문',
+          sample: '你好，很高兴认识你。',
+          size: 20,
+          weight: 'normal',
+          color: '#5f6368',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 예문 해석',
+          name: '예문 해석',
+          sample: '안녕하세요, 만나서 반갑습니다.',
+          size: 16,
+          weight: 'normal',
+          color: '#70757a',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 예문 병음',
+          name: '예문 병음',
+          sample: 'Nǐ hǎo, hěn gāoxìng rènshi nǐ.',
+          size: 16,
+          weight: 'normal',
+          color: '#70757a',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 품사',
+          name: '품사',
+          sample: '[인사/감탄사]',
+          size: 15,
+          weight: '600',
+          color: '#1a73e8',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 유의어/반의어',
+          name: '유의어/반의어',
+          sample: '同: 问好 / 反: 再见',
+          size: 15,
+          weight: 'normal',
+          color: '#5f6368',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 오디오',
+          name: '오디오',
+          sample: '[sound:nihao.mp3]',
+          size: 15,
+          weight: 'normal',
+          color: '#5f6368',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 학습 메모',
+          name: '메모',
+          sample: '기본 인사말',
+          size: 15,
+          weight: 'normal',
+          color: '#70757a',
+          showFront: false,
+          showBack: true
+        }
+      ];
+    } else if (langId === 'en') {
+      return [
+        {
+          label: '+ 예문(원문)',
+          name: '예문',
+          sample: (langObj.sample && langObj.sample.field3) || 'I eat an apple every morning.',
+          size: 20,
+          weight: 'normal',
+          color: '#5f6368',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 예문 해석',
+          name: '예문 해석',
+          sample: '나는 매일 아침 사과를 먹는다.',
+          size: 16,
+          weight: 'normal',
+          color: '#70757a',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 발음기호',
+          name: '발음기호',
+          sample: '[ˈæpl]',
+          size: 18,
+          weight: 'normal',
+          color: '#70757a',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 품사',
+          name: '품사',
+          sample: '[명사]',
+          size: 15,
+          weight: '600',
+          color: '#1a73e8',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 유의어/반의어',
+          name: '유의어/반의어',
+          sample: 'Syn: - / Ant: -',
+          size: 15,
+          weight: 'normal',
+          color: '#5f6368',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 오디오',
+          name: '오디오',
+          sample: '[sound:apple.mp3]',
+          size: 15,
+          weight: 'normal',
+          color: '#5f6368',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 학습 메모',
+          name: '메모',
+          sample: '자주 쓰이는 기본 어휘',
+          size: 15,
+          weight: 'normal',
+          color: '#70757a',
+          showFront: false,
+          showBack: true
+        }
+      ];
+    } else {
+      return [
+        {
+          label: '+ 예문(원문)',
+          name: '예문',
+          sample: (langObj.sample && langObj.sample.field3) || `${langName} 예문 문장입니다.`,
+          size: 20,
+          weight: 'normal',
+          color: '#5f6368',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 예문 해석',
+          name: '예문 해석',
+          sample: '예문 해석 및 번역 내용',
+          size: 16,
+          weight: 'normal',
+          color: '#70757a',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 발음/표기',
+          name: '발음/표기',
+          sample: '발음 표기',
+          size: 18,
+          weight: 'normal',
+          color: '#70757a',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 품사',
+          name: '품사',
+          sample: '[품사]',
+          size: 15,
+          weight: '600',
+          color: '#1a73e8',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 유의어/반의어',
+          name: '유의어/반의어',
+          sample: '유의어 / 반의어',
+          size: 15,
+          weight: 'normal',
+          color: '#5f6368',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 오디오',
+          name: '오디오',
+          sample: `[sound:${langId}_audio.mp3]`,
+          size: 15,
+          weight: 'normal',
+          color: '#5f6368',
+          showFront: false,
+          showBack: true
+        },
+        {
+          label: '+ 학습 메모',
+          name: '메모',
+          sample: '학습 메모 및 팁',
+          size: 15,
+          weight: 'normal',
+          color: '#70757a',
+          showFront: false,
+          showBack: true
+        }
+      ];
+    }
+  }
+
+  // 추천 필드 칩 렌더링
+  function renderEditorQuickChips(langId) {
+    const container = document.getElementById('editorQuickChipsList');
+    const badge = document.getElementById('editorQuickChipsLangBadge');
+    if (!container) return;
+
+    const langObj = getSelectedLanguage();
+    if (badge) {
+      badge.textContent = `(${langObj.name} 추천)`;
+    }
+
+    container.innerHTML = '';
+    const chips = getEditorQuickChipsForLanguage(langId);
+
+    chips.forEach(chip => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip-btn';
+      btn.textContent = chip.label;
+      btn.title = `'${chip.name}' 필드를 카드 서식에 즉시 추가합니다`;
+      btn.addEventListener('click', () => {
+        addOptionalField({
+          name: chip.name,
+          sample: chip.sample,
+          showFront: chip.showFront,
+          showBack: chip.showBack,
+          size: chip.size,
+          weight: chip.weight,
+          color: chip.color,
+          hasDictLink: false
+        }, true);
+        showToast(`'${chip.name}' 필드가 추가되었습니다.`);
+      });
+      container.appendChild(btn);
+    });
+  }
+
   // 각 필드의 헤더 배지 라벨 동적 갱신
   function updateFieldBadges() {
     const currentLang = getSelectedLanguage();
@@ -666,6 +1034,11 @@ document.addEventListener('DOMContentLoaded', () => {
         f.badgeEl.className = 'field-badge';
       }
       f.badgeEl.textContent = badgeText;
+
+      // 상단 헤더의 사전 링크 미니 토글 동기화
+      if (f.dictLinkCheck) {
+        f.dictLinkCheck.checked = Boolean(f.hasDictLink);
+      }
     });
   }
 
@@ -679,6 +1052,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const fName = f.nameInput.value.trim() || `필드 ${fNum}`;
       const isChecked = Boolean(f.hasDictLink);
 
+      // 상단 헤더 미니 토글도 동기화
+      if (f.dictLinkCheck) {
+        f.dictLinkCheck.checked = isChecked;
+      }
+
       const label = document.createElement('label');
       label.className = 'custom-checkbox dict-target-item';
 
@@ -689,6 +1067,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       checkbox.addEventListener('change', () => {
         f.hasDictLink = checkbox.checked;
+        if (f.dictLinkCheck) {
+          f.dictLinkCheck.checked = f.hasDictLink;
+        }
         updateFieldBadges();
         updateAll();
       });
@@ -1184,6 +1565,11 @@ a {
       updateFieldBadges();
       updateDictFieldChecklist();
 
+      fields.forEach(f => {
+        if (f.dictLinkCheck) f.dictLinkCheck.checked = Boolean(f.hasDictLink);
+      });
+      renderEditorQuickChips(languageSelect.value);
+
       // RTL 알림 배지 복원
       const currentLang = getSelectedLanguage();
       if (currentLang.isRTL || data.rtlForce) {
@@ -1268,6 +1654,11 @@ a {
 
     updateFieldBadges();
     updateDictFieldChecklist();
+
+    fields.forEach(f => {
+      if (f.dictLinkCheck) f.dictLinkCheck.checked = Boolean(f.hasDictLink);
+    });
+    renderEditorQuickChips('zh');
 
     updateAll(false);
     saveSettingsToStorage();

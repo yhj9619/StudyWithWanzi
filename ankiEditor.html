@@ -141,6 +141,10 @@
                   <input type="checkbox" id="f1_show_back">
                   <span>뒷면 표시</span>
                 </label>
+                <label class="mini-toggle mini-toggle-link" title="네이버 사전 링크 연결">
+                  <input type="checkbox" id="f1_dict_link">
+                  <span>🔗 사전 링크</span>
+                </label>
               </div>
             </div>
 
@@ -204,6 +208,10 @@
                   <input type="checkbox" id="f2_show_back" checked>
                   <span>뒷면 표시</span>
                 </label>
+                <label class="mini-toggle mini-toggle-link" title="네이버 사전 링크 연결">
+                  <input type="checkbox" id="f2_dict_link" checked>
+                  <span>🔗 사전 링크</span>
+                </label>
               </div>
             </div>
 
@@ -257,10 +265,21 @@
           <!-- 3번째 이상 선택 필드 컨테이너 -->
           <div id="optionalFieldsContainer"></div>
 
+          <!-- 언어별 추천 필드 빠른 추가 칩 -->
+          <div class="quick-chips-wrapper" style="margin-top: 1.25rem; margin-bottom: 0.75rem;">
+            <div class="quick-chips-title">
+              <span>⚡ 언어별 추천 필드 클릭하여 빠르게 추가:</span>
+              <span id="editorQuickChipsLangBadge" style="font-size: 0.75rem; color: var(--primary); font-weight: 700;">(중국어 추천)</span>
+            </div>
+            <div class="quick-chips-list" id="editorQuickChipsList">
+              <!-- JS에서 선택된 언어에 맞춰 동적으로 생성 -->
+            </div>
+          </div>
+
           <!-- 필드 추가 버튼 -->
           <div class="add-field-action-row">
-            <button type="button" id="addFieldBtn" class="btn-add-field" title="새로운 카드 필드를 추가합니다">
-              ➕ 필드 추가하기 (예문, 발음, 메모 등)
+            <button type="button" id="addFieldBtn" class="btn-add-field" title="새로운 카드 필드를 직접 추가합니다">
+              ➕ 필드 직접 추가하기 (빈 필드)
             </button>
           </div>
         </div>

@@ -542,9 +542,12 @@ body {
 
 /* Step 3 Dict link selection box */
 .dict-link-selection-box {
-  margin-top: 1.25rem;
-  padding-top: 1.15rem;
-  border-top: 1px dashed var(--border-color);
+  margin-top: 1.5rem;
+  padding: 1.15rem 1.25rem;
+  background-color: #f0f7ff;
+  border: 1.5px solid #bfdbfe;
+  border-radius: var(--radius-md);
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.06);
 }
 
 .dict-link-box-header {
@@ -641,6 +644,21 @@ body {
 
 .mini-toggle:hover {
   color: var(--primary);
+}
+
+.mini-toggle-link {
+  color: #1d4ed8;
+  font-weight: 600;
+  background: #eff6ff;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid #bfdbfe;
+  transition: all 0.15s ease;
+}
+
+.mini-toggle-link:hover {
+  color: #1e40af;
+  background: #dbeafe;
 }
 
 /* Dynamic Field Actions & Buttons */
