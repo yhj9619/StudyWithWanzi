@@ -42,7 +42,7 @@
 ### 방법 2: 웹 주소 (GitHub Pages) 접속
 GitHub Pages에 배포 시 다음과 같이 접속할 수 있습니다:
 * **메인 도구 허브 (Menu)**: `https://<아이디>.github.io/LanguageStudy/`
-* **Anki 에디터 직접 접속**: `https://<아이디>.github.io/LanguageStudy/ankiEditor`
+* **Anki 에디터 직접 접속**: `https://<아이디>.github.io/LanguageStudy/ankiEditor.html`
 
 ---
 
