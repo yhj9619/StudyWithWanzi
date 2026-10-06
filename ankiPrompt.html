@@ -113,16 +113,6 @@
           </div>
           <p class="section-desc">너무 쉬운 기초 단어를 걸러내거나, 특정 등급 이상의 핵심 어휘만 쏙 뽑아냅니다.</p>
 
-          <div class="form-group">
-            <label for="levelFilterModeSelect" class="form-label">필터링 조건</label>
-            <select id="levelFilterModeSelect" class="form-select">
-              <option value="below" selected>~ 이하 수준 단어는 제외하고 (너무 쉬운 기초 단어 빼기 - 기본 추천)</option>
-              <option value="above">~ 이상 수준 단어만 선별하여 (중고급 핵심 단어 위주)</option>
-              <option value="exact">~ 수준에 해당하는 단어만 선별하여 (해당 등급 집중 학습)</option>
-              <option value="none">수준 필터 없음 (모든 수준의 단어 포함)</option>
-            </select>
-          </div>
-
           <div class="grid-2-col" id="levelSelectionRow">
             <div class="form-group">
               <label for="levelPresetSelect" class="form-label">추천 기준 등급</label>
@@ -134,6 +124,16 @@
               <label for="levelCustomInput" class="form-label">기준 등급 직접 편집</label>
               <input type="text" id="levelCustomInput" class="form-input" value="HSK 3급" placeholder="예: HSK 3급, JLPT N3, 기초 수준">
             </div>
+          </div>
+
+          <div class="form-group">
+            <label for="levelFilterModeSelect" class="form-label">필터링 조건</label>
+            <select id="levelFilterModeSelect" class="form-select">
+              <option value="below" selected>선택한 등급 이하 단어는 제외하고 (너무 쉬운 기초 단어 빼기 - 기본 추천)</option>
+              <option value="above">선택한 등급 이상 단어만 선별하여 (중고급 핵심 단어 위주)</option>
+              <option value="exact">선택한 등급에 해당하는 단어만 선별하여 (해당 등급 집중 학습)</option>
+              <option value="none">수준 필터 없음 (모든 수준의 단어 포함)</option>
+            </select>
           </div>
         </div>
 
@@ -361,3 +361,4 @@
   <script src="assets/js/promptApp.js"></script>
 </body>
 </html>
+

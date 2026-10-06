@@ -534,7 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sourceTopicInput.value = '';
 
     levelFilterModeSelect.value = 'below';
-    levelSelectionRow.classList.remove('hidden');
+    syncLevelRowState();
     updateLanguagePreset(false);
     levelCustomInput.value = 'HSK 3급';
 
@@ -585,6 +585,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function syncLevelRowState() {
+    const isNone = (levelFilterModeSelect.value === 'none');
+    levelSelectionRow.style.opacity = isNone ? '0.45' : '1';
+    levelPresetSelect.disabled = isNone;
+    levelCustomInput.disabled = isNone;
+  }
+
   // 9. 컨트롤 이벤트 바인딩
   function initEventListeners() {
     promptLangSelect.addEventListener('change', () => {
@@ -599,11 +606,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sourceTopicInput.addEventListener('input', () => updatePromptAndPreview());
 
     levelFilterModeSelect.addEventListener('change', () => {
-      if (levelFilterModeSelect.value === 'none') {
-        levelSelectionRow.classList.add('hidden');
-      } else {
-        levelSelectionRow.classList.remove('hidden');
-      }
+      syncLevelRowState();
       updatePromptAndPreview();
     });
 
@@ -788,6 +791,8 @@ document.addEventListener('DOMContentLoaded', () => {
     updateLanguagePreset(false);
   }
 
+  syncLevelRowState();
   renderFields();
   updatePromptAndPreview(false);
 });
+
