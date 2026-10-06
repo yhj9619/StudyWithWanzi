@@ -52,10 +52,21 @@ document.addEventListener('DOMContentLoaded', () => {
   let saveTimer = null;
   let currentMode = 'text'; // 'text' | 'topic'
 
-  // 언어별 추천 등급 프리셋 및 기본 예시 필드
+  // 언어별 추천 등급 프리셋 및 기본 예시 필드 (관광통역안내사 공인어학성적 기준 및 국제 기준 반영)
   const LEVEL_PRESETS = {
     zh: {
-      levels: ['HSK 1급', 'HSK 2급', 'HSK 3급', 'HSK 4급', 'HSK 5급', 'HSK 6급', '신HSK 1~3급', '신HSK 4~6급', '초급', '중급', '고급'],
+      levels: [
+        'HSK 3급',
+        'HSK 4급',
+        'HSK 5급 (관광통역안내사 기준)',
+        'HSK 6급 (최고급)',
+        'HSK 1급 (기초)',
+        'HSK 2급 (초급)',
+        'BCT(B) 181점 이상 (관광통역)',
+        'TOCFL 5급(대만·관광통역)',
+        'CPT 750점 이상 (관광통역)',
+        'FLEX 776점 이상 (관광통역)'
+      ],
       defaultLevel: 'HSK 3급',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕, 안녕하세요' },
@@ -69,7 +80,15 @@ document.addEventListener('DOMContentLoaded', () => {
       ]
     },
     ja: {
-      levels: ['JLPT N5 (초급)', 'JLPT N4', 'JLPT N3 (중급)', 'JLPT N2', 'JLPT N1 (고급)', '초급', '중급', '고급'],
+      levels: [
+        'JLPT N4 (초급)',
+        'JLPT N3 (중급)',
+        'JLPT N2 (중상급)',
+        'JLPT N1 (관광통역안내사 기준)',
+        'JLPT N5 (입문)',
+        'JPT 740점 이상 (관광통역)',
+        'FLEX 776점 이상 (관광통역)'
+      ],
       defaultLevel: 'JLPT N4',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]벚꽃' },
@@ -83,7 +102,20 @@ document.addEventListener('DOMContentLoaded', () => {
       ]
     },
     en: {
-      levels: ['초등/기초', '중학 필수', '고교/수능 (CEFR B1-B2)', '토익 700점대', '토익 850점대', '토플/고급 (CEFR C1)', 'CEFR A1', 'CEFR A2', 'CEFR B1', 'CEFR B2', 'CEFR C1'],
+      levels: [
+        '중학 필수 (기초)',
+        '수능/고교 필수 (CEFR B1-B2)',
+        '토익 760점 (관광통역안내사 기준)',
+        '토익 850점 이상 (상급)',
+        '토플 iBT 81점 (관광통역안내사)',
+        'IELTS 5.0 (관광통역안내사)',
+        'TEPS 372점 (관광통역안내사)',
+        'G-TELP 레벨2 74점 (관광통역)',
+        'FLEX 776점 이상 (관광통역)',
+        'CEFR B1 (중급)',
+        'CEFR B2 (중상급)',
+        'CEFR C1 (고급/토플)'
+      ],
       defaultLevel: '중학 필수',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]사과' },
@@ -96,18 +128,206 @@ document.addEventListener('DOMContentLoaded', () => {
         ['[형용사]중요한', 'crucial', 'Water is crucial for all living things.']
       ]
     },
-    default: {
-      levels: ['CEFR A1 (입문)', 'CEFR A2 (초급)', 'CEFR B1 (중급)', 'CEFR B2 (중상급)', 'CEFR C1 (고급)', '초급', '중급', '고급'],
-      defaultLevel: 'CEFR A2',
+    fr: {
+      levels: [
+        'DELF B2 (관광통역안내사 기준)',
+        'DELF B1 (중급)',
+        'DELF A2 (초급)',
+        'DELF A1 (입문)',
+        'DALF C1 (고급)',
+        'FLEX 776점 이상 (관광통역)'
+      ],
+      defaultLevel: 'DELF A2 (초급)',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
-        { name: '원문 단어', sample: 'Bonjour' },
-        { name: '발음/예문', sample: 'Bonjour, comment allez-vous ?' }
+        { name: '프랑스어 단어', sample: 'Bonjour' },
+        { name: '예문', sample: 'Bonjour, comment allez-vous ?' }
       ],
       sampleRows: [
         ['[명사]안녕하세요', 'Bonjour', 'Bonjour, comment allez-vous ?'],
         ['[동사]감사하다', 'Merci', 'Merci beaucoup pour votre aide.'],
         ['[형용사]좋은, 멋진', 'Magnifique', 'Ce paysage est magnifique.']
+      ]
+    },
+    de: {
+      levels: [
+        'Goethe B1(ZD) (관광통역안내사 기준)',
+        'Goethe B2 (중상급)',
+        'Goethe A2 (초급)',
+        'Goethe A1 (입문)',
+        'Goethe C1 (고급)',
+        'FLEX 776점 이상 (관광통역)'
+      ],
+      defaultLevel: 'Goethe A2 (초급)',
+      defaultFields: [
+        { name: '[품사]한국어', sample: '[명사]안녕하세요' },
+        { name: '독일어 단어', sample: 'Guten Tag' },
+        { name: '예문', sample: 'Guten Tag, wie geht es Ihnen heute?' }
+      ],
+      sampleRows: [
+        ['[명사]안녕하세요', 'Guten Tag', 'Guten Tag, wie geht es Ihnen heute?'],
+        ['[동사]감사하다', 'Danken', 'Ich danke Ihnen für Ihre Hilfe.'],
+        ['[형용사]친절한', 'Freundlich', 'Er ist sehr freundlich und hilfsbereit.']
+      ]
+    },
+    es: {
+      levels: [
+        'DELE B2 (관광통역안내사 기준)',
+        'DELE B1 (중급)',
+        'DELE A2 (초급)',
+        'DELE A1 (입문)',
+        'DELE C1 (고급)',
+        'FLEX 776점 이상 (관광통역)'
+      ],
+      defaultLevel: 'DELE A2 (초급)',
+      defaultFields: [
+        { name: '[품사]한국어', sample: '[명사]감사합니다' },
+        { name: '스페인어 단어', sample: 'Gracias' },
+        { name: '예문', sample: 'Muchas gracias por tu amable ayuda.' }
+      ],
+      sampleRows: [
+        ['[명사]감사합니다', 'Gracias', 'Muchas gracias por tu amable ayuda.'],
+        ['[동사]배우다', 'Aprender', 'Quiero aprender español este año.'],
+        ['[형용사]아름다운', 'Hermoso', 'Este lugar es muy hermoso.']
+      ]
+    },
+    ru: {
+      levels: [
+        'TORFL 1단계(B1) (관광통역안내사 기준)',
+        'TORFL 2단계(B2)',
+        'TORFL 기본(A2)',
+        'TORFL 기초(A1)',
+        'TORFL 3단계(C1)',
+        'FLEX 776점 이상 (관광통역)'
+      ],
+      defaultLevel: 'TORFL 기본(A2)',
+      defaultFields: [
+        { name: '[품사]한국어', sample: '[명사]안녕하세요' },
+        { name: '러시아어 단어', sample: 'Здравствуйте' },
+        { name: '발음/예문', sample: 'Zdravstvuyte' }
+      ],
+      sampleRows: [
+        ['[명사]안녕하세요', 'Здравствуйте', 'Zdravstvuyte'],
+        ['[동사]이해하다', 'Понимать', 'Я вас понимаю.'],
+        ['[형용사]아름다운', 'Красивый', 'Это очень красивый город.']
+      ]
+    },
+    it: {
+      levels: [
+        'CILS B2 (관광통역안내사 기준)',
+        'CELI 3 (관광통역안내사 기준)',
+        'CILS B1 (중급)',
+        'CILS A2 (초급)',
+        'CILS A1 (입문)',
+        'CILS C1 (고급)'
+      ],
+      defaultLevel: 'CILS A2 (초급)',
+      defaultFields: [
+        { name: '[품사]한국어', sample: '[명사]안녕하세요' },
+        { name: '이탈리아어 단어', sample: 'Buongiorno' },
+        { name: '예문', sample: 'Buongiorno a tutti!' }
+      ],
+      sampleRows: [
+        ['[명사]안녕하세요', 'Buongiorno', 'Buongiorno a tutti!'],
+        ['[동사]사랑하다', 'Amare', 'Amo viaggiare in Italia.'],
+        ['[형용사]아름다운', 'Bello', 'La vita è bella.']
+      ]
+    },
+    vi: {
+      levels: [
+        'FLEX 600점 (관광통역안내사 기준)',
+        'VSL 1~2급 (초급/A1-A2)',
+        'VSL 3~4급 (중급/B1-B2)',
+        'VSL 5~6급 (고급/C1-C2)'
+      ],
+      defaultLevel: 'VSL 1~2급 (초급/A1-A2)',
+      defaultFields: [
+        { name: '[품사]한국어', sample: '[명사]안녕하세요' },
+        { name: '베트남어 단어', sample: 'Xin chào' },
+        { name: '예문', sample: 'Xin chào, rất vui được gặp bạn.' }
+      ],
+      sampleRows: [
+        ['[명사]안녕하세요', 'Xin chào', 'Xin chào, rất vui được gặp bạn.'],
+        ['[동사]감사하다', 'Cảm ơn', 'Cảm ơn bạn rất nhiều.'],
+        ['[형용사]맛있는', 'Ngon', 'Món ăn này rất ngon.']
+      ]
+    },
+    th: {
+      levels: [
+        'FLEX 600점 (관광통역안내사 기준)',
+        '초급 (기초 생활 회화)',
+        '중급 (일상 및 여행 어휘)',
+        '고급 (시사 및 전문 어휘)'
+      ],
+      defaultLevel: '초급 (기초 생활 회화)',
+      defaultFields: [
+        { name: '[품사]한국어', sample: '[명사]안녕하세요' },
+        { name: '태국어 단어', sample: 'สวัสดี' },
+        { name: '발음', sample: 'sà-wàt-dii' }
+      ],
+      sampleRows: [
+        ['[명사]안녕하세요', 'สวัสดี', 'sà-wàt-dii'],
+        ['[동사]감사합니다', 'ขอบคุณ', 'khɔ̀ɔp-khun'],
+        ['[형용사]맛있다', 'อร่อย', 'à-rɔ̀y']
+      ]
+    },
+    id: {
+      levels: [
+        'FLEX 600점 (관광통역안내사 기준)',
+        'UKBI 초급 (Semenjana)',
+        'UKBI 중급 (Madya)',
+        'UKBI 고급 (Unggul)'
+      ],
+      defaultLevel: 'UKBI 초급 (Semenjana)',
+      defaultFields: [
+        { name: '[품사]한국어', sample: '[명사]안녕하세요' },
+        { name: '인도네시아어 단어', sample: 'Halo' },
+        { name: '예문', sample: 'Halo, apa kabar?' }
+      ],
+      sampleRows: [
+        ['[명사]안녕하세요', 'Halo', 'Halo, apa kabar?'],
+        ['[동사]감사합니다', 'Terima kasih', 'Terima kasih banyak.'],
+        ['[형용사]좋은', 'Bagus', 'Hari ini cuaca sangat bagus.']
+      ]
+    },
+    ar: {
+      levels: [
+        'FLEX 600점 (관광통역안내사 기준)',
+        '초급 (CEFR A1-A2)',
+        '중급 (CEFR B1-B2)',
+        '고급 (CEFR C1)'
+      ],
+      defaultLevel: '초급 (CEFR A1-A2)',
+      defaultFields: [
+        { name: '[품사]한국어', sample: '[명사]안녕하세요' },
+        { name: '아랍어 단어', sample: 'مرحبا' },
+        { name: '발음', sample: 'Marhaban' }
+      ],
+      sampleRows: [
+        ['[명사]안녕하세요', 'مرحبا', 'Marhaban'],
+        ['[동사]감사합니다', 'شكرا', 'Shukran'],
+        ['[형용사]좋은', 'جميل', 'Jameel']
+      ]
+    },
+    default: {
+      levels: [
+        'CEFR A1 (입문 기초)',
+        'CEFR A2 (초급)',
+        'CEFR B1 (중급 일상 회화)',
+        'CEFR B2 (중상급)',
+        'CEFR C1 (고급 학술/시사)',
+        'FLEX 600점 (관광통역안내사 기준)'
+      ],
+      defaultLevel: 'CEFR A2 (초급)',
+      defaultFields: [
+        { name: '[품사]한국어', sample: '[명사]안녕하세요' },
+        { name: '원문 단어', sample: 'Word' },
+        { name: '발음/예문', sample: 'Sample' }
+      ],
+      sampleRows: [
+        ['[명사]안녕하세요', 'Hello', 'Hello, how are you?'],
+        ['[동사]감사합니다', 'Thank', 'Thank you so much.'],
+        ['[형용사]멋진, 좋은', 'Wonderful', 'Have a wonderful day!']
       ]
     }
   };
