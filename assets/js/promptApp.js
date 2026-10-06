@@ -520,7 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function resetAllSettings() {
-    if (!confirm('모든 프롬프트 설정을 처음 기본값으로 초기화하시겠습니까?')) {
+    if (!confirm('AI 프롬프트 생성기의 모든 설정을 처음 기본값으로 초기화하시겠습니까?\n\n(※ Anki 카드 서식 에디터 등 다른 도구의 저장 설정에는 영향을 주지 않습니다.)')) {
       return;
     }
 
@@ -564,7 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updatePromptAndPreview(false);
     saveSettingsToStorage();
     updateSaveIndicator('기본값 초기화 완료');
-    showToast('모든 설정이 기본값으로 초기화되었습니다.');
+    showToast('AI 프롬프트 생성기 설정이 기본값으로 초기화되었습니다.');
   }
 
   function setMode(mode, shouldUpdate = true) {

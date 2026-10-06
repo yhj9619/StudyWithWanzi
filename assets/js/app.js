@@ -1172,7 +1172,7 @@ a {
 
   // 10. 전체 설정 초기화 (기본값으로 복원)
   function resetAllSettings() {
-    if (!confirm('입력하신 모든 설정을 처음 기본값으로 초기화하시겠습니까?')) {
+    if (!confirm('카드 서식 에디터의 모든 설정을 처음 기본값으로 초기화하시겠습니까?\n\n(※ AI 프롬프트 생성기 등 다른 도구의 저장 설정에는 영향을 주지 않습니다.)')) {
       return;
     }
     try {
@@ -1241,7 +1241,7 @@ a {
     updateAll(false);
     saveSettingsToStorage();
     updateSaveIndicator('기본값 초기화 완료');
-    showToast('모든 설정이 기본값으로 초기화되었습니다.');
+    showToast('카드 서식 에디터 설정이 기본값으로 초기화되었습니다.');
   }
 
   // 클립보드 복사 헬퍼
