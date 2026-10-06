@@ -163,8 +163,8 @@
               <div class="control-item">
                 <label for="f1_size" class="sub-label">글씨 크기: <span id="f1_size_val">24</span>px</label>
                 <div class="slider-with-number">
-                  <input type="range" id="f1_size" min="14" max="48" value="24" class="form-range">
-                  <input type="number" id="f1_size_num" min="14" max="48" value="24" class="num-input">
+                  <input type="range" id="f1_size" min="14" max="64" value="24" class="form-range">
+                  <input type="number" id="f1_size_num" min="14" max="80" value="24" class="num-input">
                 </div>
               </div>
 
@@ -248,8 +248,8 @@
               <div class="control-item">
                 <label for="f2_size" class="sub-label">글씨 크기: <span id="f2_size_val">24</span>px</label>
                 <div class="slider-with-number">
-                  <input type="range" id="f2_size" min="14" max="48" value="24" class="form-range">
-                  <input type="number" id="f2_size_num" min="14" max="48" value="24" class="num-input">
+                  <input type="range" id="f2_size" min="14" max="64" value="24" class="form-range">
+                  <input type="number" id="f2_size_num" min="14" max="80" value="24" class="num-input">
                 </div>
               </div>
 
@@ -366,6 +366,30 @@
               <input type="checkbox" id="keepFrontOnBack" checked>
               <span>뒷면 상단에 앞면 내용(<code>{{Front}}</code>) 표시</span>
             </label>
+
+            <!-- 뒷면 상단 앞면 내용 상세 스타일 조절 -->
+            <div id="frontOnBackSettings" class="sub-setting-card" style="margin: 0.25rem 0 0.85rem 1.6rem; padding: 0.75rem 0.9rem; background: #f1f5f9; border-radius: var(--radius-sm); border: 1px solid #cbd5e1;">
+              <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                <label for="frontOnBackSize" class="sub-label" style="font-size: 0.82rem; margin: 0; color: #1e293b;">
+                  뒷면 상단 앞면 글씨 크기: <strong id="frontOnBackSizeVal" style="color: var(--primary);">24px</strong>
+                </label>
+                <label class="custom-checkbox" style="font-size: 0.78rem; margin: 0; white-space: nowrap;">
+                  <input type="checkbox" id="syncFrontSizeWithF1" checked>
+                  <span>1번 필드 크기와 자동 동기화</span>
+                </label>
+              </div>
+              <div class="slider-with-number">
+                <input type="range" id="frontOnBackSize" min="14" max="64" value="24" class="form-range">
+                <input type="number" id="frontOnBackSizeNum" min="14" max="80" value="24" class="num-input">
+              </div>
+              <div style="margin-top: 0.45rem;">
+                <label class="custom-checkbox" style="font-size: 0.78rem; margin: 0;">
+                  <input type="checkbox" id="frontOnBackKeepStyle" checked>
+                  <span>1번 필드의 글씨 색상 및 굵기 유지 (해제 시 은은한 회색 스타일)</span>
+                </label>
+              </div>
+            </div>
+
             <label class="custom-checkbox">
               <input type="checkbox" id="centerAlign" checked>
               <span>가운데 정렬 (Anki 기본 스타일: <code>text-align: center</code>)</span>

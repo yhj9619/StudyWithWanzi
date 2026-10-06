@@ -21,6 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Common Layout & Typography Options
   const showHrAnswer = document.getElementById('showHrAnswer');
   const keepFrontOnBack = document.getElementById('keepFrontOnBack');
+  const frontOnBackSettings = document.getElementById('frontOnBackSettings');
+  const frontOnBackSize = document.getElementById('frontOnBackSize');
+  const frontOnBackSizeNum = document.getElementById('frontOnBackSizeNum');
+  const frontOnBackSizeVal = document.getElementById('frontOnBackSizeVal');
+  const syncFrontSizeWithF1 = document.getElementById('syncFrontSizeWithF1');
+  const frontOnBackKeepStyle = document.getElementById('frontOnBackKeepStyle');
   const centerAlign = document.getElementById('centerAlign');
   const rtlForce = document.getElementById('rtlForce');
 
@@ -483,6 +489,11 @@ document.addEventListener('DOMContentLoaded', () => {
     f.sizeSlider.addEventListener('input', (e) => {
       f.sizeNum.value = e.target.value;
       f.sizeVal.textContent = e.target.value;
+      if (f === fields[0] && syncFrontSizeWithF1 && syncFrontSizeWithF1.checked && frontOnBackSize) {
+        frontOnBackSize.value = e.target.value;
+        if (frontOnBackSizeNum) frontOnBackSizeNum.value = e.target.value;
+        if (frontOnBackSizeVal) frontOnBackSizeVal.textContent = e.target.value + 'px';
+      }
       updateAll();
     });
     f.sizeSlider.addEventListener('change', () => updateAll());
@@ -494,6 +505,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (val > 80) val = 80;
       f.sizeSlider.value = val;
       f.sizeVal.textContent = val;
+      if (f === fields[0] && syncFrontSizeWithF1 && syncFrontSizeWithF1.checked && frontOnBackSize) {
+        frontOnBackSize.value = val;
+        if (frontOnBackSizeNum) frontOnBackSizeNum.value = val;
+        if (frontOnBackSizeVal) frontOnBackSizeVal.textContent = val + 'px';
+      }
       updateAll();
     });
     f.sizeNum.addEventListener('change', () => updateAll());
@@ -674,8 +690,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="control-item">
           <label class="sub-label">글씨 크기: <span class="f-size-val">${size}</span>px</label>
           <div class="slider-with-number">
-            <input type="range" min="14" max="48" value="${size}" class="form-range f-size">
-            <input type="number" min="14" max="48" value="${size}" class="num-input f-size-num">
+            <input type="range" min="14" max="64" value="${size}" class="form-range f-size">
+            <input type="number" min="14" max="80" value="${size}" class="num-input f-size-num">
           </div>
         </div>
 
@@ -1218,7 +1234,53 @@ document.addEventListener('DOMContentLoaded', () => {
     linkUnderline.addEventListener('change', updateAll);
 
     showHrAnswer.addEventListener('change', updateAll);
-    keepFrontOnBack.addEventListener('change', updateAll);
+    keepFrontOnBack.addEventListener('change', () => {
+      if (frontOnBackSettings) {
+        frontOnBackSettings.style.display = keepFrontOnBack.checked ? 'block' : 'none';
+      }
+      updateAll();
+    });
+
+    if (frontOnBackSize) {
+      frontOnBackSize.addEventListener('input', (e) => {
+        if (frontOnBackSizeNum) frontOnBackSizeNum.value = e.target.value;
+        if (frontOnBackSizeVal) frontOnBackSizeVal.textContent = e.target.value + 'px';
+        if (syncFrontSizeWithF1) syncFrontSizeWithF1.checked = false;
+        updateAll();
+      });
+      frontOnBackSize.addEventListener('change', updateAll);
+    }
+
+    if (frontOnBackSizeNum) {
+      frontOnBackSizeNum.addEventListener('input', (e) => {
+        let val = parseInt(e.target.value, 10);
+        if (isNaN(val)) val = 24;
+        if (val < 10) val = 10;
+        if (val > 80) val = 80;
+        if (frontOnBackSize) frontOnBackSize.value = val;
+        if (frontOnBackSizeVal) frontOnBackSizeVal.textContent = val + 'px';
+        if (syncFrontSizeWithF1) syncFrontSizeWithF1.checked = false;
+        updateAll();
+      });
+      frontOnBackSizeNum.addEventListener('change', updateAll);
+    }
+
+    if (syncFrontSizeWithF1) {
+      syncFrontSizeWithF1.addEventListener('change', () => {
+        if (syncFrontSizeWithF1.checked && fields[0]) {
+          const f1SizeVal = fields[0].sizeSlider.value;
+          if (frontOnBackSize) frontOnBackSize.value = f1SizeVal;
+          if (frontOnBackSizeNum) frontOnBackSizeNum.value = f1SizeVal;
+          if (frontOnBackSizeVal) frontOnBackSizeVal.textContent = f1SizeVal + 'px';
+        }
+        updateAll();
+      });
+    }
+
+    if (frontOnBackKeepStyle) {
+      frontOnBackKeepStyle.addEventListener('change', updateAll);
+    }
+
     centerAlign.addEventListener('change', updateAll);
     rtlForce.addEventListener('change', updateAll);
 
@@ -1553,7 +1615,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // 앞면 내용 유지 여부
     if (keepFrontOnBack.checked && fields[0]) {
       const frontName = fields[0].nameInput.value.trim() || 'Front';
-      parts.push(`<div class="front-preview-hint" style="color: #64748b; font-size: 18px; margin-bottom: 6px;">{{${frontName}}}</div>`);
+      const f1Size = frontOnBackSize ? frontOnBackSize.value : fields[0].sizeSlider.value;
+      const f1Weight = (frontOnBackKeepStyle && frontOnBackKeepStyle.checked) ? fields[0].weightSelect.value : 'normal';
+      const f1Color = (frontOnBackKeepStyle && frontOnBackKeepStyle.checked) ? fields[0].colorInput.value : '#64748b';
+      const f1FontCss = getFieldFontCss(fields[0]);
+
+      parts.push(`<div class="front-preview-hint" style="color: ${f1Color}; font-size: ${f1Size}px;${f1Weight !== 'normal' ? ` font-weight: ${f1Weight};` : ''}${f1FontCss ? ` font-family: ${f1FontCss};` : ''} margin-bottom: 8px;">{{${frontName}}}</div>`);
     }
 
     // 정답 구분선 hr 여부
@@ -1580,6 +1647,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const cardFontCustom = cardBaseFontCustom ? cardBaseFontCustom.value : '';
     const cardFontCss = getFontFamilyCss(cardFontKey, cardFontCustom);
     const cardLineHeightVal = cardLineHeight ? cardLineHeight.value : '1.5';
+
+    const f1SizeOnBack = frontOnBackSize ? frontOnBackSize.value : (fields[0] ? fields[0].sizeSlider.value : 24);
+    const f1WeightOnBack = (frontOnBackKeepStyle && frontOnBackKeepStyle.checked && fields[0]) ? fields[0].weightSelect.value : 'normal';
+    const f1ColorOnBack = (frontOnBackKeepStyle && frontOnBackKeepStyle.checked && fields[0]) ? fields[0].colorInput.value : '#64748b';
+    const darkF1ColorOnBack = getDarkModeColor(f1ColorOnBack);
+    const f1FontCssOnBack = fields[0] ? getFieldFontCss(fields[0]) : '';
 
     // 구글 폰트 웹폰트 import 필요 여부 판별
     const webFontKeys = ['noto-sans-kr', 'noto-serif-kr', 'nanum-gothic', 'inter', 'noto-sans-jp', 'noto-sans-sc', 'cursive'];
@@ -1630,9 +1703,9 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 
 .front-preview-hint {
-  color: #64748b;
-  font-size: 18px;
-  margin-bottom: 6px;
+  color: ${f1ColorOnBack};
+  font-size: ${f1SizeOnBack}px;
+  ${f1WeightOnBack !== 'normal' ? `font-weight: ${f1WeightOnBack};\n  ` : ''}${f1FontCssOnBack ? `font-family: ${f1FontCssOnBack};\n  ` : ''}margin-bottom: 8px;
 }
 
 hr#answer {
@@ -1679,12 +1752,12 @@ a {
 
 .nightMode .front-preview-hint,
 .night_mode .front-preview-hint {
-  color: #94a3b8 !important;
+  color: ${darkF1ColorOnBack} !important;
 }
 
 @media (prefers-color-scheme: dark) {
   .front-preview-hint {
-    color: #94a3b8 !important;
+    color: ${darkF1ColorOnBack} !important;
   }
 }
 
@@ -1729,8 +1802,13 @@ a {
       // 앞면 유지 표시
       if (keepFrontOnBack.checked && fields[0]) {
         const f1Sample = fields[0].sampleInput.value.trim() || fields[0].nameInput.value.trim() || 'Front';
-        const f1HintColor = isDark ? '#94a3b8' : '#64748b';
-        parts.push(`<div class="front-preview-hint" style="color: ${f1HintColor}; font-size: 18px; margin-bottom: 6px;">${escapeHtml(f1Sample)}</div>`);
+        const f1Size = frontOnBackSize ? frontOnBackSize.value : fields[0].sizeSlider.value;
+        const f1Weight = (frontOnBackKeepStyle && frontOnBackKeepStyle.checked) ? fields[0].weightSelect.value : 'normal';
+        const f1BaseColor = (frontOnBackKeepStyle && frontOnBackKeepStyle.checked) ? fields[0].colorInput.value : '#64748b';
+        const f1Color = isDark ? getDarkModeColor(f1BaseColor) : f1BaseColor;
+        const f1FontCss = getFieldFontCss(fields[0]);
+
+        parts.push(`<div class="front-preview-hint" style="color: ${f1Color}; font-size: ${f1Size}px;${f1Weight !== 'normal' ? ` font-weight: ${f1Weight};` : ''}${f1FontCss ? ` font-family: ${f1FontCss};` : ''} margin-bottom: 8px;">${escapeHtml(f1Sample)}</div>`);
       }
 
       // 구분선
@@ -1810,6 +1888,9 @@ a {
         cardBaseFont: cardBaseFont ? cardBaseFont.value : 'system',
         cardBaseFontCustom: cardBaseFontCustom ? cardBaseFontCustom.value : '',
         cardLineHeight: cardLineHeight ? cardLineHeight.value : '1.5',
+        frontOnBackSize: frontOnBackSize ? frontOnBackSize.value : 24,
+        syncFrontSizeWithF1: syncFrontSizeWithF1 ? syncFrontSizeWithF1.checked : true,
+        frontOnBackKeepStyle: frontOnBackKeepStyle ? frontOnBackKeepStyle.checked : true,
         fields: fields.map(f => ({
           name: f.nameInput.value,
           sample: f.sampleInput.value,
@@ -1876,6 +1957,22 @@ a {
         cardLineHeight.value = data.cardLineHeight;
         if (cardLineHeightNum) cardLineHeightNum.value = data.cardLineHeight;
         if (cardLineHeightVal) cardLineHeightVal.textContent = data.cardLineHeight;
+      }
+
+      // 뒷면 상단 앞면 내용 크기 & 스타일 설정 복원
+      if (data.frontOnBackSize !== undefined && frontOnBackSize) {
+        frontOnBackSize.value = data.frontOnBackSize;
+        if (frontOnBackSizeNum) frontOnBackSizeNum.value = data.frontOnBackSize;
+        if (frontOnBackSizeVal) frontOnBackSizeVal.textContent = data.frontOnBackSize + 'px';
+      }
+      if (data.syncFrontSizeWithF1 !== undefined && syncFrontSizeWithF1) {
+        syncFrontSizeWithF1.checked = Boolean(data.syncFrontSizeWithF1);
+      }
+      if (data.frontOnBackKeepStyle !== undefined && frontOnBackKeepStyle) {
+        frontOnBackKeepStyle.checked = Boolean(data.frontOnBackKeepStyle);
+      }
+      if (frontOnBackSettings && keepFrontOnBack) {
+        frontOnBackSettings.style.display = keepFrontOnBack.checked ? 'block' : 'none';
       }
 
       // 필드 설정 복원
@@ -2005,6 +2102,15 @@ a {
       if (cardLineHeightNum) cardLineHeightNum.value = 1.5;
       if (cardLineHeightVal) cardLineHeightVal.textContent = '1.5';
     }
+
+    if (frontOnBackSize) {
+      frontOnBackSize.value = 24;
+      if (frontOnBackSizeNum) frontOnBackSizeNum.value = 24;
+      if (frontOnBackSizeVal) frontOnBackSizeVal.textContent = '24px';
+    }
+    if (syncFrontSizeWithF1) syncFrontSizeWithF1.checked = true;
+    if (frontOnBackKeepStyle) frontOnBackKeepStyle.checked = true;
+    if (frontOnBackSettings) frontOnBackSettings.style.display = 'block';
 
     // 필드 1 기본값 (Front / 한국어 뜻)
     fields[0].nameInput.value = 'Front';
