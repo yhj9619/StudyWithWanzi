@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const copyCssBtn = document.getElementById('copyCssBtn');
   const toast = document.getElementById('toastNotification');
 
-  let currentPreviewSide = 'back'; // 'front' or 'back' (기존 사용자 코드가 뒷면 중심이므로 기본을 뒷면으로 보거나 토글)
+  let currentPreviewSide = 'front'; // 기본값을 탭 활성화 상태('앞면')와 일치하도록 'front'로 설정
 
   // 1. 언어 셀렉트 박스 채우기
   function initLanguageSelect() {
