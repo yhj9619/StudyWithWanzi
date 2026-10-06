@@ -128,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initComboboxEvents();
-    onLanguageChange(false);
   }
 
   function initComboboxEvents() {
@@ -325,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return list.find(lang => lang.id === selectedId) || list[0];
   }
 
-  function onLanguageChange(isUserManualChange = true) {
+  function onLanguageChange(isUserManualChange = true, shouldSave = true) {
     const lang = getSelectedLanguage();
     dictUrlInput.value = lang.dictUrl;
     dictNameTag.textContent = lang.dictName;
@@ -371,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
       fields[2].sampleInput.value = lang.sample.field3;
     }
 
-    updateAll();
+    updateAll(shouldSave);
   }
 
   // 2. 컨트롤 이벤트 리스너 연결
@@ -386,6 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     dictApplyTarget.addEventListener('change', updateAll);
     dictUrlInput.addEventListener('input', updateAll);
+    dictUrlInput.addEventListener('change', updateAll);
     linkNewTab.addEventListener('change', updateAll);
     linkUnderline.addEventListener('change', updateAll);
 
@@ -398,7 +398,9 @@ document.addEventListener('DOMContentLoaded', () => {
     fields.forEach((f, idx) => {
       // 필드명 & 샘플
       f.nameInput.addEventListener('input', updateAll);
+      f.nameInput.addEventListener('change', updateAll);
       f.sampleInput.addEventListener('input', updateAll);
+      f.sampleInput.addEventListener('change', updateAll);
 
       // 노출 체크박스
       f.showFront.addEventListener('change', updateAll);
@@ -410,6 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
         f.sizeVal.textContent = e.target.value;
         updateAll();
       });
+      f.sizeSlider.addEventListener('change', updateAll);
 
       f.sizeNum.addEventListener('input', (e) => {
         let val = parseInt(e.target.value, 10);
@@ -420,21 +423,48 @@ document.addEventListener('DOMContentLoaded', () => {
         f.sizeVal.textContent = val;
         updateAll();
       });
+      f.sizeNum.addEventListener('change', updateAll);
 
       // 굵기
       f.weightSelect.addEventListener('change', updateAll);
 
-      // 색상 피커 & 텍스트 동기화
-      f.colorInput.addEventListener('input', (e) => {
+      // 색상 피커 & 텍스트 동기화 (input 및 change 모두 감지)
+      const handleColorPick = (e) => {
         f.colorText.value = e.target.value;
         updateAll();
-      });
+      };
+      f.colorInput.addEventListener('input', handleColorPick);
+      f.colorInput.addEventListener('change', handleColorPick);
 
+      // 색상 텍스트 입력 처리 (# 생략 및 3자리/6자리 hex 지원)
       f.colorText.addEventListener('input', (e) => {
         let val = e.target.value.trim();
+        if (/^[0-9A-Fa-f]{6}$/.test(val)) {
+          val = '#' + val;
+        }
         if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
           f.colorInput.value = val;
           updateAll();
+        }
+      });
+
+      f.colorText.addEventListener('change', (e) => {
+        let val = e.target.value.trim();
+        if (/^[0-9A-Fa-f]{6}$/.test(val)) {
+          val = '#' + val;
+        } else if (/^#[0-9A-Fa-f]{3}$/.test(val)) {
+          val = '#' + val[1] + val[1] + val[2] + val[2] + val[3] + val[3];
+        } else if (/^[0-9A-Fa-f]{3}$/.test(val)) {
+          val = '#' + val[0] + val[0] + val[1] + val[1] + val[2] + val[2];
+        }
+
+        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+          f.colorInput.value = val;
+          f.colorText.value = val;
+          updateAll();
+        } else {
+          // 잘못된 형식 입력 시 현재 색상값으로 복원
+          f.colorText.value = f.colorInput.value;
         }
       });
     });
@@ -737,10 +767,28 @@ a {
 
   // 9. 로컬 스토리지 (localStorage) 자동 저장 및 복원 기능
   const STORAGE_KEY = 'anki_card_editor_settings';
+  const saveStatusIndicator = document.getElementById('saveStatusIndicator');
+  let saveTimer = null;
+
+  function updateSaveIndicator(text = '✓ 자동 저장됨') {
+    if (!saveStatusIndicator) return;
+    saveStatusIndicator.textContent = text;
+    saveStatusIndicator.classList.add('active');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      saveStatusIndicator.classList.remove('active');
+    }, 1800);
+  }
 
   function saveSettingsToStorage() {
     try {
+      const frontCode = generateFrontTemplate();
+      const backCode = generateBackTemplate();
+      const cssCode = generateCssTemplate();
+
       const data = {
+        version: 1,
+        savedAt: new Date().toISOString(),
         langId: languageSelect.value,
         dictApplyTarget: dictApplyTarget.value,
         dictUrl: dictUrlInput.value,
@@ -758,9 +806,16 @@ a {
           size: f.sizeSlider.value,
           weight: f.weightSelect.value,
           color: f.colorInput.value,
-        }))
+        })),
+        // 사용자가 직접 확인할 수 있도록 완성본 서식 전체(HTML/CSS 코드)도 통째로 함께 보관
+        templates: {
+          front: frontCode,
+          back: backCode,
+          css: cssCode
+        }
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      updateSaveIndicator('✓ 자동 저장됨');
     } catch (err) {
       console.warn('localStorage 저장 실패:', err);
     }
@@ -771,25 +826,25 @@ a {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return false;
       const data = JSON.parse(raw);
-      if (!data) return false;
+      if (!data || typeof data !== 'object') return false;
 
       // 언어 복원
       if (data.langId) {
         languageSelect.value = data.langId;
         const lang = getSelectedLanguage();
         if (langSearchInput) langSearchInput.value = lang.name;
-        dictNameTag.textContent = lang.dictName;
+        if (dictNameTag) dictNameTag.textContent = lang.dictName;
       }
 
       if (data.dictApplyTarget !== undefined) dictApplyTarget.value = data.dictApplyTarget;
       if (data.dictUrl !== undefined) dictUrlInput.value = data.dictUrl;
-      if (data.linkNewTab !== undefined) linkNewTab.checked = data.linkNewTab;
-      if (data.linkUnderline !== undefined) linkUnderline.checked = data.linkUnderline;
+      if (data.linkNewTab !== undefined) linkNewTab.checked = Boolean(data.linkNewTab);
+      if (data.linkUnderline !== undefined) linkUnderline.checked = Boolean(data.linkUnderline);
 
-      if (data.showHrAnswer !== undefined) showHrAnswer.checked = data.showHrAnswer;
-      if (data.keepFrontOnBack !== undefined) keepFrontOnBack.checked = data.keepFrontOnBack;
-      if (data.centerAlign !== undefined) centerAlign.checked = data.centerAlign;
-      if (data.rtlForce !== undefined) rtlForce.checked = data.rtlForce;
+      if (data.showHrAnswer !== undefined) showHrAnswer.checked = Boolean(data.showHrAnswer);
+      if (data.keepFrontOnBack !== undefined) keepFrontOnBack.checked = Boolean(data.keepFrontOnBack);
+      if (data.centerAlign !== undefined) centerAlign.checked = Boolean(data.centerAlign);
+      if (data.rtlForce !== undefined) rtlForce.checked = Boolean(data.rtlForce);
 
       // 필드 설정 복원
       if (Array.isArray(data.fields)) {
@@ -798,8 +853,8 @@ a {
           if (!f || !fData) return;
           if (fData.name !== undefined) f.nameInput.value = fData.name;
           if (fData.sample !== undefined) f.sampleInput.value = fData.sample;
-          if (fData.showFront !== undefined) f.showFront.checked = fData.showFront;
-          if (fData.showBack !== undefined) f.showBack.checked = fData.showBack;
+          if (fData.showFront !== undefined) f.showFront.checked = Boolean(fData.showFront);
+          if (fData.showBack !== undefined) f.showBack.checked = Boolean(fData.showBack);
 
           if (fData.size !== undefined) {
             f.sizeSlider.value = fData.size;
@@ -812,6 +867,24 @@ a {
             f.colorText.value = fData.color;
           }
         });
+      }
+
+      // 3번째 필드 배지 복원
+      const currentLang = getSelectedLanguage();
+      const f3Badge = document.getElementById('f3_badge');
+      if (f3Badge) {
+        if (currentLang.id === 'zh') {
+          f3Badge.textContent = '3번째 필드 (병음 pinyin)';
+        } else {
+          f3Badge.textContent = '3번째 필드 (예문 Example)';
+        }
+      }
+
+      // RTL 알림 배지 복원
+      if (currentLang.isRTL || data.rtlForce) {
+        rtlNotice.classList.remove('hidden');
+      } else {
+        rtlNotice.classList.add('hidden');
       }
 
       return true;
@@ -892,6 +965,7 @@ a {
 
     updateAll(false);
     saveSettingsToStorage();
+    updateSaveIndicator('기본값 초기화 완료');
     showToast('모든 설정이 기본값으로 초기화되었습니다.');
   }
 
@@ -941,15 +1015,16 @@ a {
       .replace(/'/g, '&#039;');
   }
 
-  // 초기화 실행
+  // 초기화 실행 (순서: 옵션 목록 초기화 -> 이벤트 등록 -> 로컬스토리지 복원 -> 초기 렌더링)
   initLanguageSelect();
   initEventListeners();
+
   const restored = loadSettingsFromStorage();
-  if (restored) {
-    const curLang = getSelectedLanguage();
-    if (curLang.isRTL && rtlForce.checked) {
-      rtlNotice.classList.remove('hidden');
-    }
+  if (!restored) {
+    // 저장된 설정이 없을 때만 기본 언어 세팅 수행
+    onLanguageChange(false, false);
   }
+
+  // 초기 렌더링 (저장하지 않고 렌더링만 수행하여 localStorage 원본 보존)
   updateAll(false);
 });
