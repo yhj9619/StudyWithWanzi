@@ -1,4 +1,4 @@
-# ⚡ Anki 다국어 카드 스크립트 에디터 (Anki Card Script Editor)
+# ⚡ Wanzi Study - 다국어 학습 도구 모음
 
 비개발자도 쉽고 빠르게 Anki 다국어 단어 카드 서식(앞면/뒷면/CSS)과 맞춤형 사전 검색 링크를 생성할 수 있는 웹 에디터입니다.  
 별도의 설치나 백엔드 서버 없이 브라우저에서 단독으로 바로 동작합니다.
@@ -66,10 +66,10 @@ GitHub Pages에 배포 시 다음과 같이 접속할 수 있습니다:
 ## 📁 프로젝트 구조
 
 ```
-LanguageStudy/
+Wanzi Study/
 ├── _config.yml             # GitHub Pages Jekyll 설정
-├── index.html              # 메인 메뉴 (LanguageStudy 도구 포털)
-├── ankiEditor.html         # Anki 카드 스크립트 에디터 (/ankiEditor)
+├── index.html              # 메인 메뉴 (Wanzi Study 도구 포털)
+├── ankiEditor.html         # Anki 카드 스크립트 에디터
 ├── assets/
 │   ├── css/
 │   │   └── style.css       # 반응형 스타일, 포털 및 카드 디자인
