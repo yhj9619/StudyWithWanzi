@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anki AI 프롬프트 생성기 - Wanzi Study</title>
+  <meta name="description" content="외국어 텍스트나 주제로부터 원하는 난이도(HSK, JLPT, CEFR) 단어를 Anki용 CSV로 추출하는 AI 맞춤형 프롬프트 생성기">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-group">
+        <a href="index.html" class="nav-back-link" title="Wanzi Study 메인 메뉴로 이동">
+          ◀ Wanzi Study
+        </a>
+        <span class="logo-icon">🤖</span>
+        <div>
+          <h1 class="logo-title">Anki AI 프롬프트 생성기</h1>
+          <p class="logo-subtitle">ChatGPT · Gemini · Claude용 Anki CSV 맞춤 단어장 추출 지시문 생성</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="ankiEditor.html" class="nav-link-btn" title="Anki 카드 서식 에디터로 이동">
+          ⚡ 카드 에디터 가기
+        </a>
+        <span id="saveStatusIndicator" class="save-status-badge" title="모든 설정이 브라우저 로컬 저장소에 자동 저장됩니다">✓ 자동 저장됨</span>
+        <button type="button" id="resetPromptSettingsBtn" class="btn-outline-danger" title="모든 설정을 기본값으로 되돌립니다">
+          🔄 설정 초기화
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="app-main">
+    <!-- Mobile Screen View Switcher -->
+    <nav class="mobile-view-nav" id="mobileViewNav" aria-label="모바일 화면 전환 탭">
+      <button type="button" class="mobile-nav-btn active" id="btnMobileEditTab">
+        ⚙️ 프롬프트 설정 (1~5단계)
+      </button>
+      <button type="button" class="mobile-nav-btn" id="btnMobilePreviewTab">
+        📋 생성된 프롬프트 & 복사
+      </button>
+    </nav>
+
+    <div class="main-layout">
+
+      <!-- LEFT: Prompt Settings Form -->
+      <section class="editor-panel" aria-label="프롬프트 설정 패널">
+
+        <div class="prompt-hero-box">
+          <span class="prompt-hero-icon">💡</span>
+          <div>
+            <strong>AI를 나만의 단어 추출 비서로 만드세요:</strong><br>
+            학습 중인 언어와 원하는 난이도(예: HSK 3급 이하 제외 등) 및 CSV 열 구조를 지정하면, GPT나 Gemini가 오류 없이 Anki에 즉시 들어가는 완벽한 단어장을 만들어줍니다.
+          </div>
+        </div>
+
+        <!-- 1. 학습 언어 및 추출 방식 -->
+        <div class="card-section">
+          <div class="section-title">
+            <span class="step-num">1</span>
+            <h2>학습 언어 및 추출 방식 설정</h2>
+          </div>
+          <p class="section-desc">학습할 대상 언어와 단어를 추출할 대상을 선택하세요.</p>
+
+          <div class="form-group">
+            <label for="promptLangSelect" class="form-label">학습 언어 선택</label>
+            <select id="promptLangSelect" class="form-select">
+              <!-- JS로 languages.js 연동 채움 -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">추출 대상 방식</label>
+            <div class="mode-toggle-group">
+              <button type="button" class="mode-toggle-btn active" id="btnModeText">
+                📄 본문/대본 텍스트에서 추출
+              </button>
+              <button type="button" class="mode-toggle-btn" id="btnModeTopic">
+                💡 특정 주제/상황별 어휘 생성
+              </button>
+            </div>
+          </div>
+
+          <!-- Mode A: Text Input Container -->
+          <div class="form-group" id="containerSourceText">
+            <label for="sourceTextInput" class="form-label">
+              학습할 본문 텍스트 (기사, 대본, 시험 지문 등)
+              <span class="helper-text" style="display:inline; margin-left:6px;">(비워둘 경우 프롬프트에 안내 플레이스홀더가 삽입됩니다)</span>
+            </label>
+            <textarea id="sourceTextInput" class="form-input" rows="4" placeholder="여기에 분석할 중국어/외국어 문장이나 대본, 기사 본문을 붙여넣으세요..."></textarea>
+          </div>
+
+          <!-- Mode B: Topic Input Container (Hidden by default) -->
+          <div class="form-group hidden" id="containerSourceTopic">
+            <label for="sourceTopicInput" class="form-label">어휘 주제 및 상황</label>
+            <input type="text" id="sourceTopicInput" class="form-input" placeholder="예: 공항 및 비행기 탑승 관련 필수 회화, 식당 음식 주문, 비즈니스 이메일 등">
+          </div>
+        </div>
+
+        <!-- 2. 난이도 / 수준 필터링 -->
+        <div class="card-section">
+          <div class="section-title">
+            <span class="step-num">2</span>
+            <h2>난이도 / 수준 필터링 설정</h2>
+          </div>
+          <p class="section-desc">너무 쉬운 기초 단어를 걸러내거나, 특정 등급 이상의 핵심 어휘만 쏙 뽑아냅니다.</p>
+
+          <div class="form-group">
+            <label for="levelFilterModeSelect" class="form-label">필터링 조건</label>
+            <select id="levelFilterModeSelect" class="form-select">
+              <option value="below" selected>~ 이하 수준 단어는 제외하고 (너무 쉬운 기초 단어 빼기 - 기본 추천)</option>
+              <option value="above">~ 이상 수준 단어만 선별하여 (중고급 핵심 단어 위주)</option>
+              <option value="exact">~ 수준에 해당하는 단어만 선별하여 (해당 등급 집중 학습)</option>
+              <option value="none">수준 필터 없음 (모든 수준의 단어 포함)</option>
+            </select>
+          </div>
+
+          <div class="grid-2-col" id="levelSelectionRow">
+            <div class="form-group">
+              <label for="levelPresetSelect" class="form-label">추천 기준 등급</label>
+              <select id="levelPresetSelect" class="form-select">
+                <!-- JS에서 언어별 프리셋 동적 갱신 (예: HSK 1~6급, JLPT N5~N1 등) -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="levelCustomInput" class="form-label">기준 등급 직접 편집</label>
+              <input type="text" id="levelCustomInput" class="form-input" value="HSK 3급" placeholder="예: HSK 3급, JLPT N3, 기초 수준">
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. 추출할 품사 및 단어 수 -->
+        <div class="card-section">
+          <div class="section-title">
+            <span class="step-num">3</span>
+            <h2>추출할 품사 및 단어 수 설정</h2>
+          </div>
+          <p class="section-desc">단어장에 담고 싶은 품사 종류와 추출할 최대 개수를 정합니다.</p>
+
+          <div class="form-group">
+            <label class="form-label">추출 대상 품사</label>
+            <div class="checkbox-list">
+              <label class="custom-checkbox">
+                <input type="checkbox" id="posNoun" checked>
+                <span>명사 (Noun)</span>
+              </label>
+              <label class="custom-checkbox">
+                <input type="checkbox" id="posVerb" checked>
+                <span>동사 (Verb)</span>
+              </label>
+              <label class="custom-checkbox">
+                <input type="checkbox" id="posAdj" checked>
+                <span>형용사 (Adjective)</span>
+              </label>
+              <label class="custom-checkbox">
+                <input type="checkbox" id="posAdv" checked>
+                <span>부사 (Adverb)</span>
+              </label>
+              <label class="custom-checkbox">
+                <input type="checkbox" id="posIdiom">
+                <span>숙어 / 관용구 / 성어(사자성어)</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="wordCountSelect" class="form-label">추출 단어 수</label>
+            <select id="wordCountSelect" class="form-select">
+              <option value="all" selected>제한 없음 (본문에서 조건에 맞는 모든 핵심 단어)</option>
+              <option value="10">최대 10개 내외</option>
+              <option value="20">최대 20개 내외</option>
+              <option value="30">최대 30개 내외</option>
+              <option value="50">최대 50개 내외</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 4. CSV 출력 형태 (필드 구성) 커스터마이징 -->
+        <div class="card-section">
+          <div class="section-title">
+            <span class="step-num">4</span>
+            <h2>CSV 출력 형태 (열 구성) 커스터마이징</h2>
+          </div>
+          <p class="section-desc">Anki 카드 필드 순서에 맞게 원하는 항목(한국어, 외국어, 병음, 예문 등)을 자유롭게 구성하세요.</p>
+
+          <!-- Format Formula Banner -->
+          <div class="format-banner">
+            <span class="format-banner-label">📌 현재 완성될 CSV 형태:</span>
+            <span class="format-banner-code" id="currentFormatTag">"[품사]한국어, 중국어, 병음"</span>
+          </div>
+
+          <!-- Quick Recommendation Chips -->
+          <div class="quick-chips-wrapper">
+            <div class="quick-chips-title">⚡ 클릭하여 필드 빠르게 추가:</div>
+            <div class="quick-chips-list">
+              <button type="button" class="chip-btn" data-name="[품사]한국어 뜻" data-sample="[명사]안녕, 안녕하세요">+ [품사]한국어 뜻</button>
+              <button type="button" class="chip-btn" data-name="외국어 단어" data-sample="你好">+ 외국어 단어</button>
+              <button type="button" class="chip-btn" data-name="병음/발음" data-sample="nǐ hǎo">+ 병음/발음</button>
+              <button type="button" class="chip-btn" data-name="예문(원문)" data-sample="你好！很高兴认识你。">+ 예문(원문)</button>
+              <button type="button" class="chip-btn" data-name="예문 해석" data-sample="안녕하세요! 만나서 반갑습니다.">+ 예문 해석</button>
+              <button type="button" class="chip-btn" data-name="예문 병음" data-sample="nǐ hǎo! hěn gāoxìng rènshi nǐ.">+ 예문 병음</button>
+              <button type="button" class="chip-btn" data-name="품사" data-sample="명사">+ 품사 단독</button>
+              <button type="button" class="chip-btn" data-name="유의어/반의어" data-sample="반의어: 再见">+ 유의어/반의어</button>
+            </div>
+          </div>
+
+          <!-- Dynamic Field List Container -->
+          <div class="prompt-field-list" id="promptFieldList">
+            <!-- JS로 동적 필드 렌더링 -->
+          </div>
+
+          <!-- Add Field Button -->
+          <div class="add-field-action-row">
+            <button type="button" id="btnAddPromptField" class="btn-add-field" title="새로운 CSV 열 필드를 추가합니다">
+              ➕ 필드 직접 추가하기
+            </button>
+          </div>
+
+          <!-- Delimiter Selection -->
+          <div class="form-group" style="margin-top: 1.25rem;">
+            <label for="delimiterSelect" class="form-label">열 구분자 (Delimiter)</label>
+            <select id="delimiterSelect" class="form-select">
+              <option value="comma" selected>쉼표 ( , ) - 표준 CSV 형식</option>
+              <option value="tab">탭 ( \t ) - TSV 형식 (예문에 쉼표가 많을 때 추천)</option>
+              <option value="semicolon">세미콜론 ( ; )</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 5. AI 출력 규칙 및 Anki 최적화 옵션 -->
+        <div class="card-section">
+          <div class="section-title">
+            <span class="step-num">5</span>
+            <h2>AI 출력 규칙 및 Anki 최적화 지침</h2>
+          </div>
+          <p class="section-desc">AI가 잡담 없이 깔끔한 CSV만 출력하고, Anki 임포트 오류가 나지 않도록 세부 지침을 포함합니다.</p>
+
+          <div class="checkbox-list">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="ruleCodeblock" checked>
+              <span>마크다운 코드블록(<code>```csv ... ```</code>) 안에 결과 출력 (원클릭 복사 용이)</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" id="rulePureCsv" checked>
+              <span>불필요한 인사말, 설명, 번호 매기기 생략하고 오직 CSV 데이터만 출력</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" id="ruleQuoteCommas" checked>
+              <span>내용 안에 쉼표가 들어갈 경우 큰따옴표(<code>""</code>)로 감싸기 (Anki 열 분리 오류 방지)</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" id="ruleLemma" checked>
+              <span>동사·형용사는 활용형이 아닌 기본 사전형(원형)으로 표기</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" id="ruleNoDupes" checked>
+              <span>중복된 단어는 제외하고 한 번만 추출</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" id="ruleContextMeaning" checked>
+              <span>한국어 뜻은 본문 문맥에 가장 적합한 대표 의미 위주로 명확하게 작성</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Mobile Quick Action -->
+        <div class="mobile-quick-action">
+          <button type="button" class="btn-primary-mobile" id="btnGoPreviewMobile">
+            📱 완성된 프롬프트 복사하러 가기 ➔
+          </button>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: Live Prompt Output & Action Panel -->
+      <section class="preview-panel" aria-label="생성된 프롬프트 결과 패널">
+
+        <!-- Mobile Back to Edit button -->
+        <div class="mobile-back-action">
+          <button type="button" class="btn-secondary-mobile" id="btnGoEditMobile">
+            ⚙️ ◀ 프롬프트 옵션 수정하기
+          </button>
+        </div>
+
+        <!-- Generated Prompt Card -->
+        <div class="prompt-output-card">
+          <div class="prompt-output-header">
+            <div class="prompt-output-title">
+              <span>✨ 완성된 AI 프롬프트</span>
+            </div>
+            <button type="button" id="btnCopyPrompt" class="btn-copy-prompt-large" title="클릭 시 전체 프롬프트가 클립보드에 복사됩니다">
+              📋 프롬프트 복사하기
+            </button>
+          </div>
+          <pre class="prompt-text-box" id="promptOutputText"></pre>
+        </div>
+
+        <!-- AI Expected Sample Output Preview Card -->
+        <div class="sample-csv-card">
+          <div class="sample-csv-title">
+            <span>🔍 AI 예상 출력 예시 (Sample CSV)</span>
+          </div>
+          <div class="sample-csv-desc">
+            현재 지정하신 형태대로 AI가 출력할 예상 데이터 모습입니다:
+          </div>
+          <pre class="sample-csv-pre" id="sampleCsvText"></pre>
+        </div>
+
+        <!-- One-Click AI Service Launch Buttons -->
+        <div class="ai-launch-grid">
+          <a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer" class="btn-ai-launch chatgpt" title="새 창에서 ChatGPT 열기">
+            <span>🟢 ChatGPT 열기 ↗</span>
+          </a>
+          <a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer" class="btn-ai-launch gemini" title="새 창에서 Gemini 열기">
+            <span>🔵 Google Gemini 열기 ↗</span>
+          </a>
+          <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" class="btn-ai-launch claude" title="새 창에서 Claude 열기">
+            <span>🟠 Claude 열기 ↗</span>
+          </a>
+        </div>
+
+        <!-- Anki Import 3-Step Guide -->
+        <div class="anki-guide-card">
+          <h3>📖 Anki로 단어장 가져오는 3단계 방법</h3>
+          <ol class="anki-guide-steps">
+            <li>
+              <strong>AI 결과 복사:</strong> ChatGPT나 Gemini가 출력한 코드블록 우측 상단의 <code>Copy code</code> 버튼을 누릅니다.
+            </li>
+            <li>
+              <strong>파일 저장:</strong> 메모장에 붙여넣고 파일 형식을 <code>모든 파일</code>, 인코딩을 <code>UTF-8</code>로 맞춘 뒤 <code>words.csv</code> 또는 <code>words.txt</code>로 저장합니다.
+            </li>
+            <li>
+              <strong>Anki 가져오기:</strong> Anki 상단 메뉴의 <strong>[파일] ➔ [가져오기]</strong>에서 저장한 파일을 선택하고 대상 덱과 필드를 확인한 후 가져오기를 완료합니다!
+            </li>
+          </ol>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toastNotification" class="toast" role="status" aria-live="polite">
+    프롬프트가 클립보드에 복사되었습니다!
+  </div>
+
+  <footer class="app-footer">
+    <p>Wanzi Study &copy; 2026. Made with care for language learners.</p>
+  </footer>
+
+  <script src="assets/js/languages.js"></script>
+  <script src="assets/js/promptApp.js"></script>
+</body>
+</html>
