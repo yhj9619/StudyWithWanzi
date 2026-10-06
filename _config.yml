@@ -1,5 +1,5 @@
-title: Anki 카드 스크립트 에디터
-description: 비개발자도 쉽게 만드는 다국어 Anki 카드 서식 & 사전 링크 생성기
+title: LanguageStudy - 다국어 학습 도구 모음
+description: Anki 카드 서식 제작부터 다국어 학습에 유용한 실용 웹 도구 모음
 theme: null
 markdown: kramdown
 plugins: []

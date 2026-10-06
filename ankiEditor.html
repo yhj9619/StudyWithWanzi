@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anki 카드 스크립트 에디터</title>
+  <meta name="description" content="비개발자도 쉽게 만드는 다국어 Anki 카드 서식 & 사전 링크 생성기">
+  <!-- Google Fonts for global language scripts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+Arabic:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-group">
+        <a href="index.html" class="nav-back-link" title="메인 메뉴로 돌아가기">
+          ◀ 메인 메뉴
+        </a>
+        <span class="logo-icon">⚡</span>
+        <div>
+          <h1 class="logo-title">Anki 카드 스크립트 에디터</h1>
+          <p class="logo-subtitle">비개발자를 위한 다국어 카드 서식 & 사전 링크 원클릭 생성기</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span id="saveStatusIndicator" class="save-status-badge" title="모든 변경사항이 브라우저 로컬 저장소(localStorage)에 실시간 자동 저장됩니다">✓ 자동 저장됨</span>
+        <button type="button" id="resetAllSettingsBtn" class="btn-outline-danger" title="모든 설정을 처음 기본값으로 되돌립니다">
+          🔄 설정 초기화
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <!-- Mobile Screen View Switcher (모바일 전용 화면 전환 탭) -->
+    <nav class="mobile-view-nav" id="mobileViewNav" aria-label="모바일 화면 전환 탭">
+      <button type="button" class="mobile-nav-btn active" id="btnMobileEditTab">
+        ⚙️ 서식 설정 (1~3단계)
+      </button>
+      <button type="button" class="mobile-nav-btn" id="btnMobilePreviewTab">
+        📱 미리보기 & 코드 복사
+      </button>
+    </nav>
+
+    <div class="main-layout">
+
+      <!-- LEFT: Editor Settings Form -->
+      <section class="editor-panel" aria-label="카드 서식 설정 패널">
+
+        <!-- 1. 언어 및 사전 링크 설정 -->
+        <div class="card-section">
+          <div class="section-title">
+            <span class="step-num">1</span>
+            <h2>언어 및 사전 링크 설정</h2>
+          </div>
+          <p class="section-desc">학습할 언어를 선택하면 최적의 사전 링크 URL이 자동으로 매핑됩니다.</p>
+
+          <div class="form-group">
+            <label for="langSearchInput" class="form-label">학습 언어 선택</label>
+            <div class="searchable-combobox" id="langSelectContainer">
+              <!-- 숨겨진 네이티브 셀렉트 (호환성 유지) -->
+              <select id="languageSelect" class="visually-hidden" tabindex="-1" aria-hidden="true"></select>
+              
+              <!-- 검색 및 선택 인풋창 -->
+              <div class="combobox-input-wrapper">
+                <span class="combobox-search-icon">🔍</span>
+                <input 
+                  type="text" 
+                  id="langSearchInput" 
+                  class="form-input combobox-input" 
+                  placeholder="언어 검색 (예: 프랑스어, 스페인어, ㅍㄹㅅ, es...)" 
+                  autocomplete="off"
+                  role="combobox"
+                  aria-expanded="false"
+                  aria-controls="langDropdownList"
+                  aria-autocomplete="list"
+                >
+                <button type="button" id="langClearBtn" class="combobox-clear-btn hidden" title="검색어 지우기">&times;</button>
+                <button type="button" id="langToggleBtn" class="combobox-toggle-btn" title="언어 목록 펼치기/접기">▼</button>
+              </div>
+
+              <!-- 검색 결과 드롭다운 목록 -->
+              <div id="langDropdownWrapper" class="combobox-dropdown hidden">
+                <div class="dropdown-header-info">총 <span id="filteredLangCount">46</span>개 언어</div>
+                <ul id="langDropdownList" class="dropdown-list" role="listbox"></ul>
+              </div>
+            </div>
+            <span id="rtlNotice" class="notice-badge hidden">우측에서 좌측으로 쓰는 언어(RTL)가 감지되어 서식에 적용됩니다.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="dictApplyTarget" class="form-label">사전 링크 적용 위치</label>
+            <div class="select-wrapper">
+              <select id="dictApplyTarget" class="form-select">
+                <option value="none">링크 미적용 (일반 텍스트만)</option>
+                <option value="field1">1번째 필드에 사전 링크 걸기</option>
+                <option value="field2" selected>2번째 필드에 사전 링크 걸기 (기본 권장)</option>
+                <option value="field3">3번째 필드에 사전 링크 걸기</option>
+              </select>
+            </div>
+            <span class="helper-text">선택한 필드의 단어를 클릭하면 해당 언어의 웹 사전으로 바로 연결됩니다.</span>
+          </div>
+
+          <div class="form-group">
+            <div class="label-with-action">
+              <label for="dictUrlInput" class="form-label">사전 검색 URL</label>
+              <button type="button" id="resetDictUrlBtn" class="btn-text" title="언어 기본 사전 URL로 복원">기본값 복원</button>
+            </div>
+            <input type="url" id="dictUrlInput" class="form-input" placeholder="https://zh.dict.naver.com/#/search?query=">
+            <span id="dictNameTag" class="dict-name-tag">네이버 중국어사전</span>
+          </div>
+
+          <div class="form-group inline-checkbox">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="linkNewTab" checked>
+              <span>새 창/새 탭에서 열기 (<code>target="_blank"</code>)</span>
+            </label>
+          </div>
+
+          <div class="form-group inline-checkbox">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="linkUnderline">
+              <span>사전 링크 밑줄 표시 (체크 해제 시 밑줄 없음 <code>text-decoration: none</code>)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2. 필드명 및 개별 스타일 설정 -->
+        <div class="card-section">
+          <div class="section-title">
+            <span class="step-num">2</span>
+            <h2>필드명 및 텍스트 스타일 설정</h2>
+          </div>
+          <p class="section-desc">본인이 Anki에서 사용하는 카드 필드명을 입력하고, 글씨 크기·색상·굵기를 설정하세요.</p>
+
+          <!-- Field 1 Settings -->
+          <div class="field-setting-box" id="boxField1">
+            <div class="field-setting-header">
+              <div class="field-badge" id="f1_badge">1번째 필드 (앞면 / 한국어)</div>
+              <div class="field-visibility-toggles">
+                <label class="mini-toggle" title="앞면 카드 노출 여부">
+                  <input type="checkbox" id="f1_show_front" checked>
+                  <span>앞면 표시</span>
+                </label>
+                <label class="mini-toggle" title="뒷면 카드 노출 여부">
+                  <input type="checkbox" id="f1_show_back">
+                  <span>뒷면 표시</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="grid-2-col">
+              <div class="form-group">
+                <label for="f1_name" class="form-label">필드명 (Anki와 일치해야 함)</label>
+                <input type="text" id="f1_name" class="form-input" value="Front" placeholder="예: Front, 뜻, 의미">
+              </div>
+              <div class="form-group">
+                <label for="f1_sample" class="form-label">미리보기 예시값</label>
+                <input type="text" id="f1_sample" class="form-input" value="안녕, 안녕하세요">
+              </div>
+            </div>
+
+            <div class="style-controls-row">
+              <div class="control-item">
+                <label for="f1_size" class="sub-label">글씨 크기: <span id="f1_size_val">24</span>px</label>
+                <div class="slider-with-number">
+                  <input type="range" id="f1_size" min="14" max="48" value="24" class="form-range">
+                  <input type="number" id="f1_size_num" min="14" max="48" value="24" class="num-input">
+                </div>
+              </div>
+
+              <div class="control-item">
+                <label for="f1_weight" class="sub-label">글씨 굵기</label>
+                <select id="f1_weight" class="form-select small-select">
+                  <option value="normal">보통 (normal)</option>
+                  <option value="bold" selected>굵게 (bold)</option>
+                  <option value="600">중간 굵게 (600)</option>
+                </select>
+              </div>
+
+              <div class="control-item">
+                <label for="f1_color" class="sub-label">색상</label>
+                <div class="color-picker-group">
+                  <input type="color" id="f1_color" value="#202124" class="form-color">
+                  <input type="text" id="f1_color_text" value="#202124" class="color-hex-input" maxlength="7">
+                </div>
+              </div>
+            </div>
+            <div class="preset-colors">
+              <span class="preset-label">색상 프리셋:</span>
+              <button type="button" class="preset-dot" data-target="1" data-color="#202124" style="background:#202124;" title="다크 그레이"></button>
+              <button type="button" class="preset-dot" data-target="1" data-color="#1a73e8" style="background:#1a73e8;" title="구글 블루"></button>
+              <button type="button" class="preset-dot" data-target="1" data-color="#0d904f" style="background:#0d904f;" title="에메랄드"></button>
+              <button type="button" class="preset-dot" data-target="1" data-color="#d93025" style="background:#d93025;" title="레드"></button>
+              <button type="button" class="preset-dot" data-target="1" data-color="#9334e6" style="background:#9334e6;" title="퍼플"></button>
+            </div>
+          </div>
+
+          <!-- Field 2 Settings -->
+          <div class="field-setting-box" id="boxField2">
+            <div class="field-setting-header">
+              <div class="field-badge field-badge-primary" id="f2_badge">2번째 필드 (뒷면 / 외국어 · 사전 링크)</div>
+              <div class="field-visibility-toggles">
+                <label class="mini-toggle" title="앞면 카드 노출 여부">
+                  <input type="checkbox" id="f2_show_front">
+                  <span>앞면 표시</span>
+                </label>
+                <label class="mini-toggle" title="뒷면 카드 노출 여부">
+                  <input type="checkbox" id="f2_show_back" checked>
+                  <span>뒷면 표시</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="grid-2-col">
+              <div class="form-group">
+                <label for="f2_name" class="form-label">필드명 (Anki와 일치해야 함)</label>
+                <input type="text" id="f2_name" class="form-input" value="Back" placeholder="예: Back, 단어, 표현">
+              </div>
+              <div class="form-group">
+                <label for="f2_sample" class="form-label">미리보기 예시값</label>
+                <input type="text" id="f2_sample" class="form-input" value="你好">
+              </div>
+            </div>
+
+            <div class="style-controls-row">
+              <div class="control-item">
+                <label for="f2_size" class="sub-label">글씨 크기: <span id="f2_size_val">24</span>px</label>
+                <div class="slider-with-number">
+                  <input type="range" id="f2_size" min="14" max="48" value="24" class="form-range">
+                  <input type="number" id="f2_size_num" min="14" max="48" value="24" class="num-input">
+                </div>
+              </div>
+
+              <div class="control-item">
+                <label for="f2_weight" class="sub-label">글씨 굵기</label>
+                <select id="f2_weight" class="form-select small-select">
+                  <option value="normal">보통 (normal)</option>
+                  <option value="bold" selected>굵게 (bold)</option>
+                  <option value="600">중간 굵게 (600)</option>
+                </select>
+              </div>
+
+              <div class="control-item">
+                <label for="f2_color" class="sub-label">색상</label>
+                <div class="color-picker-group">
+                  <input type="color" id="f2_color" value="#1a73e8" class="form-color">
+                  <input type="text" id="f2_color_text" value="#1a73e8" class="color-hex-input" maxlength="7">
+                </div>
+              </div>
+            </div>
+            <div class="preset-colors">
+              <span class="preset-label">색상 프리셋:</span>
+              <button type="button" class="preset-dot" data-target="2" data-color="#1a73e8" style="background:#1a73e8;" title="구글 블루"></button>
+              <button type="button" class="preset-dot" data-target="2" data-color="#202124" style="background:#202124;" title="다크 그레이"></button>
+              <button type="button" class="preset-dot" data-target="2" data-color="#0d904f" style="background:#0d904f;" title="에메랄드"></button>
+              <button type="button" data-target="2" data-color="#d93025" style="background:#d93025;" title="레드" class="preset-dot"></button>
+              <button type="button" class="preset-dot" data-target="2" data-color="#9334e6" style="background:#9334e6;" title="퍼플"></button>
+            </div>
+          </div>
+
+          <!-- Field 3 Settings -->
+          <div class="field-setting-box" id="boxField3">
+            <div class="field-setting-header">
+              <div class="field-badge field-badge-secondary" id="f3_badge">3번째 필드 (병음 pinyin)</div>
+              <div class="field-visibility-toggles">
+                <label class="mini-toggle" title="앞면 카드 노출 여부">
+                  <input type="checkbox" id="f3_show_front">
+                  <span>앞면 표시</span>
+                </label>
+                <label class="mini-toggle" title="뒷면 카드 노출 여부">
+                  <input type="checkbox" id="f3_show_back" checked>
+                  <span>뒷면 표시</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="grid-2-col">
+              <div class="form-group">
+                <label for="f3_name" class="form-label">필드명 (Anki와 일치해야 함)</label>
+                <input type="text" id="f3_name" class="form-input" value="pinyin" placeholder="예: Example, pinyin, 예문">
+              </div>
+              <div class="form-group">
+                <label for="f3_sample" class="form-label">미리보기 예시값</label>
+                <input type="text" id="f3_sample" class="form-input" value="nǐ hǎo">
+              </div>
+            </div>
+
+            <div class="style-controls-row">
+              <div class="control-item">
+                <label for="f3_size" class="sub-label">글씨 크기: <span id="f3_size_val">20</span>px</label>
+                <div class="slider-with-number">
+                  <input type="range" id="f3_size" min="14" max="48" value="20" class="form-range">
+                  <input type="number" id="f3_size_num" min="14" max="48" value="20" class="num-input">
+                </div>
+              </div>
+
+              <div class="control-item">
+                <label for="f3_weight" class="sub-label">글씨 굵기</label>
+                <select id="f3_weight" class="form-select small-select">
+                  <option value="normal" selected>보통 (normal)</option>
+                  <option value="bold">굵게 (bold)</option>
+                  <option value="600">중간 굵게 (600)</option>
+                </select>
+              </div>
+
+              <div class="control-item">
+                <label for="f3_color" class="sub-label">색상</label>
+                <div class="color-picker-group">
+                  <input type="color" id="f3_color" value="#5f6368" class="form-color">
+                  <input type="text" id="f3_color_text" value="#5f6368" class="color-hex-input" maxlength="7">
+                </div>
+              </div>
+            </div>
+            <div class="preset-colors">
+              <span class="preset-label">색상 프리셋:</span>
+              <button type="button" class="preset-dot" data-target="3" data-color="#5f6368" style="background:#5f6368;" title="뮤트 그레이"></button>
+              <button type="button" class="preset-dot" data-target="3" data-color="#202124" style="background:#202124;" title="다크 그레이"></button>
+              <button type="button" class="preset-dot" data-target="3" data-color="#1a73e8" style="background:#1a73e8;" title="구글 블루"></button>
+              <button type="button" class="preset-dot" data-target="3" data-color="#0d904f" style="background:#0d904f;" title="에메랄드"></button>
+              <button type="button" class="preset-dot" data-target="3" data-color="#e37400" style="background:#e37400;" title="오렌지"></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. 카드 공통 레이아웃 옵션 -->
+        <div class="card-section">
+          <div class="section-title">
+            <span class="step-num">3</span>
+            <h2>카드 공통 레이아웃 옵션</h2>
+          </div>
+
+          <div class="checkbox-list">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="showHrAnswer" checked>
+              <span>뒷면에 정답 구분선 (<code>&lt;hr id="answer"&gt;</code>) 표시</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" id="keepFrontOnBack" checked>
+              <span>뒷면 상단에 앞면 내용(<code>{{Front}}</code>) 표시</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" id="centerAlign" checked>
+              <span>가운데 정렬 (Anki 기본 스타일: <code>text-align: center</code>)</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" id="rtlForce">
+              <span>우측에서 좌측으로 읽기 (RTL <code>dir="rtl"</code> 강제 적용)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Mobile Bottom Quick Action -->
+        <div class="mobile-quick-action">
+          <button type="button" class="btn-primary-mobile" id="btnGoPreviewMobile">
+            📱 완성된 카드 미리보기 & 복사하러 가기 ➔
+          </button>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: Live Preview & Generated Code -->
+      <section class="preview-panel" aria-label="실시간 미리보기 및 코드 패널">
+
+        <!-- Mobile Back to Edit button -->
+        <div class="mobile-back-action">
+          <button type="button" class="btn-secondary-mobile" id="btnGoEditMobile">
+            ⚙️ ◀ 서식 다시 수정하기
+          </button>
+        </div>
+
+        <!-- Card Simulation Viewer -->
+        <div class="preview-container">
+          <div class="preview-header">
+            <div class="preview-mode-tabs">
+              <button type="button" class="mode-tab active" id="tabFrontPreview">앞면 카드 미리보기</button>
+              <button type="button" class="mode-tab" id="tabBackPreview">뒷면 카드 미리보기</button>
+            </div>
+            <div class="preview-actions">
+              <button type="button" id="flipCardBtn" class="btn-secondary btn-sm" title="카드 뒤집기">
+                <span class="flip-icon">🔄</span>
+                <span class="flip-text">뒤집기</span>
+              </button>
+              <button type="button" id="toggleDarkModeBtn" class="btn-icon" title="미리보기 다크모드 토글">
+                🌙
+              </button>
+            </div>
+          </div>
+
+          <!-- Virtual Anki Card Window -->
+          <div class="anki-card-wrapper" id="ankiCardWrapper">
+            <div class="card-status-bar">
+              <span class="card-tag">Anki Card Simulator</span>
+              <span id="currentCardSideBadge" class="side-badge">앞면 (Front)</span>
+            </div>
+            <div class="anki-card-content" id="liveCardRender">
+              <!-- Dynamically injected card markup -->
+            </div>
+          </div>
+          <p class="preview-hint">💡 미리보기 카드 속 링크를 클릭하면 실제로 해당 사전 검색 페이지로 이동을 테스트할 수 있습니다.</p>
+        </div>
+
+        <!-- Generated Template Code Box -->
+        <div class="code-container">
+          <div class="code-tabs-nav">
+            <button type="button" class="code-tab active" data-tab="front">앞면 서식 (Front)</button>
+            <button type="button" class="code-tab" data-tab="back">뒷면 서식 (Back)</button>
+            <button type="button" class="code-tab" data-tab="css">스타일 (CSS)</button>
+            <button type="button" class="code-tab" data-tab="guide">Anki 적용 가이드</button>
+          </div>
+
+          <!-- Code View Area -->
+          <div class="code-view-wrapper">
+            <!-- Front Code Tab -->
+            <div class="code-tab-panel active" id="panelFrontCode">
+              <div class="code-header">
+                <span class="code-title">Anki [앞면 서식] 입력란에 붙여넣으세요</span>
+                <button type="button" class="btn-copy" id="copyFrontBtn">
+                  📋 앞면 서식 복사
+                </button>
+              </div>
+              <pre class="code-block"><code id="codeFrontText"></code></pre>
+            </div>
+
+            <!-- Back Code Tab -->
+            <div class="code-tab-panel" id="panelBackCode">
+              <div class="code-header">
+                <span class="code-title">Anki [뒷면 서식] 입력란에 붙여넣으세요</span>
+                <button type="button" class="btn-copy" id="copyBackBtn">
+                  📋 뒷면 서식 복사
+                </button>
+              </div>
+              <pre class="code-block"><code id="codeBackText"></code></pre>
+            </div>
+
+            <!-- CSS Code Tab -->
+            <div class="code-tab-panel" id="panelCssCode">
+              <div class="code-header">
+                <span class="code-title">Anki [서식/CSS] 입력란에 붙여넣으세요 (선택 사항)</span>
+                <button type="button" class="btn-copy" id="copyCssBtn">
+                  📋 스타일 서식 복사
+                </button>
+              </div>
+              <pre class="code-block"><code id="codeCssText"></code></pre>
+            </div>
+
+            <!-- Anki Guide Tab -->
+            <div class="code-tab-panel" id="panelGuide">
+              <div class="guide-content">
+                <h3>📖 Anki에 서식 적용하는 방법 (3단계)</h3>
+                <ol class="guide-steps">
+                  <li>
+                    <strong>Anki 실행 후 카드 서식 창 열기</strong>
+                    <p>Anki에서 학습할 덱을 클릭하거나 상단 [탐색] 메뉴에서 카드를 선택한 뒤, 우측 상단의 <code>[카드...]</code> 버튼을 클릭합니다.</p>
+                  </li>
+                  <li>
+                    <strong>필드명 확인하기</strong>
+                    <p>본인 Anki 노트에 지정된 필드명이 에디터에 입력한 <code>첫번째/두번째/세번째 필드명</code>과 대소문자까지 정확히 같은지 확인합니다.</p>
+                  </li>
+                  <li>
+                    <strong>앞면 / 뒷면 서식 붙여넣기</strong>
+                    <p>위의 <code>[앞면 서식 복사]</code>와 <code>[뒷면 서식 복사]</code> 버튼을 눌러 각각 Anki의 <strong>앞면 서식</strong> 및 <strong>뒷면 서식</strong> 입력창에 기존 내용을 지우고 붙여넣습니다.</p>
+                  </li>
+                </ol>
+                <div class="guide-tip">
+                  💡 <strong>팁:</strong> 모바일(AnkiMobile, AnkiDroid)에서도 동일하게 사전 링크를 터치하면 바로 웹 브라우저 사전으로 연결되어 쾌적하게 단어를 찾아볼 수 있습니다.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toastNotification" class="toast" role="status" aria-live="polite">
+    복사되었습니다!
+  </div>
+
+  <footer class="app-footer">
+    <p>Anki Card Script Editor &copy; 2026. Made for language learners.</p>
+  </footer>
+
+  <script src="assets/js/languages.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

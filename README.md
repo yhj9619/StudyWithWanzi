@@ -34,25 +34,22 @@
 
 ### 방법 1: 가장 간단한 방법 (더블 클릭 실행)
 별도의 프로그램 설치나 터미널 실행 없이 바로 사용할 수 있습니다.
-1. 본 폴더에 있는 **`index.html`** 파일을 더블 클릭합니다.
-2. 기본 웹 브라우저(Chrome, Edge, Whale, Safari 등)에서 에디터가 즉시 실행됩니다.
+1. 본 폴더에 있는 **`index.html`**(메인 도구 메뉴) 또는 **`ankiEditor.html`**(Anki 에디터) 파일을 더블 클릭합니다.
+2. 기본 웹 브라우저(Chrome, Edge, Whale, Safari 등)에서 즉시 실행됩니다.
 
 ---
 
-### 방법 2: 로컬 개발 서버로 실행하기 (선택 사항)
-웹 서버 환경에서 실행하고 싶다면 아래 방법 중 편한 방식을 사용할 수 있습니다.
+### 방법 2: 웹 주소 (GitHub Pages) 접속
+GitHub Pages에 배포 시 다음과 같이 접속할 수 있습니다:
+* **메인 도구 허브 (Menu)**: `https://<아이디>.github.io/LanguageStudy/`
+* **Anki 에디터 직접 접속**: `https://<아이디>.github.io/LanguageStudy/ankiEditor`
 
-- **VS Code 사용 시**:
-  - `Live Server` 확장을 설치한 후 `index.html` 파일을 우클릭하여 **Open with Live Server**를 클릭합니다.
-- **Python 사용 시**:
-  ```bash
-  python -m http.server 8000
-  ```
-  실행 후 브라우저에서 `http://localhost:8000`으로 접속합니다.
-- **Node.js 사용 시**:
-  ```bash
-  npx serve
-  ```
+---
+
+### 방법 3: 로컬 개발 서버로 실행하기 (선택 사항)
+- **VS Code 사용 시**: `Live Server` 확장 설치 후 `index.html` 우클릭 → **Open with Live Server**
+- **Python 사용 시**: `python -m http.server 8000` 실행 후 브라우저에서 `http://localhost:8000` 접속
+- **Node.js 사용 시**: `npx serve` 실행 후 접속
 
 ---
 
@@ -71,12 +68,13 @@
 ```
 LanguageStudy/
 ├── _config.yml             # GitHub Pages Jekyll 설정
-├── index.html              # 에디터 메인 화면 및 카드 시뮬레이터
+├── index.html              # 메인 메뉴 (LanguageStudy 도구 포털)
+├── ankiEditor.html         # Anki 카드 스크립트 에디터 (/ankiEditor)
 ├── assets/
 │   ├── css/
-│   │   └── style.css       # 반응형 스타일 및 카드 디자인
+│   │   └── style.css       # 반응형 스타일, 포털 및 카드 디자인
 │   └── js/
 │       ├── languages.js    # 46개 언어 공식 네이버 사전 URL 데이터
-│       └── app.js          # 에디터 실시간 서식 생성 및 클립보드 로직
+│       └── app.js          # 에디터 실시간 서식 생성 및 로컬스토리지 로직
 └── README.md               # 프로젝트 안내 및 실행 가이드
 ```
