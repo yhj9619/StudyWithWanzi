@@ -129,7 +129,7 @@
           <!-- Field 1 Settings -->
           <div class="field-setting-box" id="boxField1">
             <div class="field-setting-header">
-              <div class="field-badge">1번째 필드</div>
+              <div class="field-badge" id="f1_badge">1번째 필드 (앞면 / 한국어 뜻)</div>
               <div class="field-visibility-toggles">
                 <label class="mini-toggle" title="앞면 카드 노출 여부">
                   <input type="checkbox" id="f1_show_front" checked>
@@ -145,11 +145,11 @@
             <div class="grid-2-col">
               <div class="form-group">
                 <label for="f1_name" class="form-label">필드명 (Anki와 일치해야 함)</label>
-                <input type="text" id="f1_name" class="form-input" value="Front" placeholder="예: Front, 단어">
+                <input type="text" id="f1_name" class="form-input" value="Front" placeholder="예: Front, 뜻, 의미">
               </div>
               <div class="form-group">
                 <label for="f1_sample" class="form-label">미리보기 예시값</label>
-                <input type="text" id="f1_sample" class="form-input" value="你好">
+                <input type="text" id="f1_sample" class="form-input" value="안녕, 안녕하세요">
               </div>
             </div>
 
@@ -174,15 +174,15 @@
               <div class="control-item">
                 <label for="f1_color" class="sub-label">색상</label>
                 <div class="color-picker-group">
-                  <input type="color" id="f1_color" value="#1a73e8" class="form-color">
-                  <input type="text" id="f1_color_text" value="#1a73e8" class="color-hex-input" maxlength="7">
+                  <input type="color" id="f1_color" value="#202124" class="form-color">
+                  <input type="text" id="f1_color_text" value="#202124" class="color-hex-input" maxlength="7">
                 </div>
               </div>
             </div>
             <div class="preset-colors">
               <span class="preset-label">색상 프리셋:</span>
-              <button type="button" class="preset-dot" data-target="1" data-color="#1a73e8" style="background:#1a73e8;" title="구글 블루"></button>
               <button type="button" class="preset-dot" data-target="1" data-color="#202124" style="background:#202124;" title="다크 그레이"></button>
+              <button type="button" class="preset-dot" data-target="1" data-color="#1a73e8" style="background:#1a73e8;" title="구글 블루"></button>
               <button type="button" class="preset-dot" data-target="1" data-color="#0d904f" style="background:#0d904f;" title="에메랄드"></button>
               <button type="button" class="preset-dot" data-target="1" data-color="#d93025" style="background:#d93025;" title="레드"></button>
               <button type="button" class="preset-dot" data-target="1" data-color="#9334e6" style="background:#9334e6;" title="퍼플"></button>
@@ -192,7 +192,7 @@
           <!-- Field 2 Settings -->
           <div class="field-setting-box" id="boxField2">
             <div class="field-setting-header">
-              <div class="field-badge field-badge-primary">2번째 필드 (기본 사전 링크)</div>
+              <div class="field-badge field-badge-primary" id="f2_badge">2번째 필드 (뒷면 / 외국어 학습 단어 · 사전 링크)</div>
               <div class="field-visibility-toggles">
                 <label class="mini-toggle" title="앞면 카드 노출 여부">
                   <input type="checkbox" id="f2_show_front">
@@ -208,11 +208,11 @@
             <div class="grid-2-col">
               <div class="form-group">
                 <label for="f2_name" class="form-label">필드명 (Anki와 일치해야 함)</label>
-                <input type="text" id="f2_name" class="form-input" value="Back" placeholder="예: Back, 뜻, 번역">
+                <input type="text" id="f2_name" class="form-input" value="Back" placeholder="예: Back, 단어, 표현">
               </div>
               <div class="form-group">
                 <label for="f2_sample" class="form-label">미리보기 예시값</label>
-                <input type="text" id="f2_sample" class="form-input" value="안녕, 안녕하세요">
+                <input type="text" id="f2_sample" class="form-input" value="你好">
               </div>
             </div>
 
@@ -247,7 +247,7 @@
               <button type="button" class="preset-dot" data-target="2" data-color="#1a73e8" style="background:#1a73e8;" title="구글 블루"></button>
               <button type="button" class="preset-dot" data-target="2" data-color="#202124" style="background:#202124;" title="다크 그레이"></button>
               <button type="button" class="preset-dot" data-target="2" data-color="#0d904f" style="background:#0d904f;" title="에메랄드"></button>
-              <button type="button" class="preset-dot" data-target="2" data-color="#d93025" style="background:#d93025;" title="레드"></button>
+              <button type="button" data-target="2" data-color="#d93025" style="background:#d93025;" title="레드" class="preset-dot"></button>
               <button type="button" class="preset-dot" data-target="2" data-color="#9334e6" style="background:#9334e6;" title="퍼플"></button>
             </div>
           </div>
