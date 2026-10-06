@@ -995,3 +995,262 @@ body {
   margin-top: 3rem;
   background: var(--bg-card);
 }
+
+/* ====================================================
+   Mobile Compatibility & Responsive Enhancements
+   ==================================================== */
+
+/* Desktop defaults: mobile switches hidden */
+.mobile-view-nav,
+.mobile-quick-action,
+.mobile-back-action {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Prevent iOS automatic input zoom (font-size must be >= 16px) */
+  input[type="text"],
+  input[type="url"],
+  input[type="number"],
+  select,
+  .form-input,
+  .form-select,
+  .combobox-input,
+  .color-hex-input,
+  .num-input {
+    font-size: 16px !important;
+  }
+
+  .app-header {
+    padding: 0.85rem 1rem;
+  }
+
+  .header-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  .logo-title {
+    font-size: 1.15rem;
+  }
+
+  .header-badges {
+    display: none; /* Hide header badges on small screens to save space */
+  }
+
+  .app-main {
+    margin: 0.75rem auto;
+    padding: 0 0.75rem;
+  }
+
+  /* Segmented Mobile Screen Nav Switcher */
+  .mobile-view-nav {
+    display: flex;
+    background: #e2e8f0;
+    border-radius: var(--radius-md);
+    padding: 4px;
+    margin-bottom: 1rem;
+    position: sticky;
+    top: 0.5rem;
+    z-index: 95;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .mobile-nav-btn {
+    flex: 1;
+    border: none;
+    background: none;
+    padding: 0.7rem 0.5rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #64748b;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+  }
+
+  .mobile-nav-btn.active {
+    background: #ffffff;
+    color: var(--primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Panel toggling on mobile */
+  .editor-panel.mobile-hidden,
+  .preview-panel.mobile-hidden {
+    display: none !important;
+  }
+
+  .main-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .preview-panel {
+    position: static !important; /* Unstick on mobile to avoid sticky scroll overlaps */
+  }
+
+  /* Mobile Transition Buttons */
+  .mobile-quick-action,
+  .mobile-back-action {
+    display: block;
+    margin-top: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .btn-primary-mobile {
+    width: 100%;
+    min-height: 48px;
+    padding: 0.85rem 1rem;
+    background-color: var(--primary);
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(26, 115, 232, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .btn-primary-mobile:active {
+    transform: scale(0.98);
+  }
+
+  .btn-secondary-mobile {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    background-color: #f1f5f9;
+    color: #334155;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+  }
+
+  .card-section {
+    padding: 1.15rem 1rem;
+    border-radius: var(--radius-md);
+  }
+
+  /* Touch-friendly Form Controls */
+  .field-setting-box {
+    padding: 0.85rem 0.85rem;
+  }
+
+  .style-controls-row {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .slider-with-number {
+    gap: 0.75rem;
+  }
+
+  .form-range {
+    height: 28px;
+  }
+
+  .num-input {
+    width: 60px;
+    height: 40px;
+    font-size: 16px !important;
+  }
+
+  .small-select {
+    height: 40px;
+    font-size: 16px !important;
+  }
+
+  .color-picker-group {
+    height: 40px;
+  }
+
+  .form-color {
+    width: 44px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+  }
+
+  .color-hex-input {
+    width: 90px;
+    height: 40px;
+    font-size: 16px !important;
+  }
+
+  /* Preset color buttons enlarged for fingers */
+  .preset-colors {
+    gap: 0.75rem;
+    margin-top: 0.85rem;
+  }
+
+  .preset-dot {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Dropdown size on mobile screen */
+  .combobox-dropdown {
+    max-height: 45vh;
+  }
+
+  .dropdown-list {
+    max-height: 38vh;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dropdown-item {
+    padding: 0.75rem 0.85rem;
+    font-size: 0.92rem;
+  }
+
+  .combobox-clear-btn {
+    width: 32px;
+    height: 32px;
+    right: 2.5rem;
+    font-size: 1.4rem;
+  }
+
+  .combobox-toggle-btn {
+    padding: 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  /* Simulator on Mobile */
+  .preview-container {
+    padding: 1rem 0.85rem;
+  }
+
+  .anki-card-content {
+    padding: 1.5rem 1rem;
+    min-height: 160px;
+  }
+
+  .code-tab-panel {
+    padding: 1rem 0.85rem;
+  }
+
+  .btn-copy {
+    width: 100%;
+    min-height: 46px;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Toast Notification */
+  .toast {
+    left: 1rem;
+    right: 1rem;
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    text-align: center;
+    border-radius: var(--radius-md);
+  }
+}
+

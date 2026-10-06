@@ -506,6 +506,58 @@ document.addEventListener('DOMContentLoaded', () => {
     copyFrontBtn.addEventListener('click', () => copyToClipboard(codeFrontText.textContent, '앞면 서식이'));
     copyBackBtn.addEventListener('click', () => copyToClipboard(codeBackText.textContent, '뒷면 서식이'));
     copyCssBtn.addEventListener('click', () => copyToClipboard(codeCssText.textContent, '스타일(CSS) 서식이'));
+
+    // 모바일 화면 전환 로직 (<= 768px 모바일 전용 탭 네비게이션)
+    const btnMobileEditTab = document.getElementById('btnMobileEditTab');
+    const btnMobilePreviewTab = document.getElementById('btnMobilePreviewTab');
+    const btnGoPreviewMobile = document.getElementById('btnGoPreviewMobile');
+    const btnGoEditMobile = document.getElementById('btnGoEditMobile');
+    const editorPanel = document.querySelector('.editor-panel');
+    const previewPanel = document.querySelector('.preview-panel');
+
+    function showMobileEditView() {
+      if (window.innerWidth <= 768) {
+        editorPanel.classList.remove('mobile-hidden');
+        previewPanel.classList.add('mobile-hidden');
+        if (btnMobileEditTab) btnMobileEditTab.classList.add('active');
+        if (btnMobilePreviewTab) btnMobilePreviewTab.classList.remove('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function showMobilePreviewView() {
+      if (window.innerWidth <= 768) {
+        editorPanel.classList.add('mobile-hidden');
+        previewPanel.classList.remove('mobile-hidden');
+        if (btnMobileEditTab) btnMobileEditTab.classList.remove('active');
+        if (btnMobilePreviewTab) btnMobilePreviewTab.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    if (btnMobileEditTab) btnMobileEditTab.addEventListener('click', showMobileEditView);
+    if (btnMobilePreviewTab) btnMobilePreviewTab.addEventListener('click', showMobilePreviewView);
+    if (btnGoPreviewMobile) btnGoPreviewMobile.addEventListener('click', showMobilePreviewView);
+    if (btnGoEditMobile) btnGoEditMobile.addEventListener('click', showMobileEditView);
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) {
+        editorPanel.classList.remove('mobile-hidden');
+        previewPanel.classList.remove('mobile-hidden');
+      } else {
+        if (btnMobilePreviewTab && btnMobilePreviewTab.classList.contains('active')) {
+          editorPanel.classList.add('mobile-hidden');
+          previewPanel.classList.remove('mobile-hidden');
+        } else {
+          editorPanel.classList.remove('mobile-hidden');
+          previewPanel.classList.add('mobile-hidden');
+        }
+      }
+    });
+
+    if (window.innerWidth <= 768) {
+      showMobileEditView();
+    }
   }
 
   // 3. 필드 렌더 마크업 생성 헬퍼

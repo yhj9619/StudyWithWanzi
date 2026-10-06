@@ -29,6 +29,16 @@
   </header>
 
   <main class="app-main">
+    <!-- Mobile Screen View Switcher (모바일 전용 화면 전환 탭) -->
+    <nav class="mobile-view-nav" id="mobileViewNav" aria-label="모바일 화면 전환 탭">
+      <button type="button" class="mobile-nav-btn active" id="btnMobileEditTab">
+        ⚙️ 서식 설정 (1~3단계)
+      </button>
+      <button type="button" class="mobile-nav-btn" id="btnMobilePreviewTab">
+        📱 미리보기 & 코드 복사
+      </button>
+    </nav>
+
     <div class="main-layout">
 
       <!-- LEFT: Editor Settings Form -->
@@ -337,10 +347,24 @@
           </div>
         </div>
 
+        <!-- Mobile Bottom Quick Action -->
+        <div class="mobile-quick-action">
+          <button type="button" class="btn-primary-mobile" id="btnGoPreviewMobile">
+            📱 완성된 카드 미리보기 & 복사하러 가기 ➔
+          </button>
+        </div>
+
       </section>
 
       <!-- RIGHT: Live Preview & Generated Code -->
       <section class="preview-panel" aria-label="실시간 미리보기 및 코드 패널">
+
+        <!-- Mobile Back to Edit button -->
+        <div class="mobile-back-action">
+          <button type="button" class="btn-secondary-mobile" id="btnGoEditMobile">
+            ⚙️ ◀ 서식 다시 수정하기
+          </button>
+        </div>
 
         <!-- Card Simulation Viewer -->
         <div class="preview-container">
