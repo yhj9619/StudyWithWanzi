@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const currentFormatTag = document.getElementById('currentFormatTag');
   const promptFieldList = document.getElementById('promptFieldList');
   const btnAddPromptField = document.getElementById('btnAddPromptField');
+  const btnResetFieldsToLang = document.getElementById('btnResetFieldsToLang');
   const delimiterSelect = document.getElementById('delimiterSelect');
 
   const ruleCodeblock = document.getElementById('ruleCodeblock');
@@ -56,12 +57,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 언어별 공인 시험 및 난이도 기준 프리셋
   // (실제 공인시험이 존재하는 12개 주요 언어에만 검증된 시험을 배치하고, 그 외 언어는 일반 난이도(초급/중급/고급) 및 직접 입력만 제공)
+  // (영어, 중국어, 일본어는 정확하고 풍부한 예시 필드와 샘플을 제공하며, 그 외 언어는 외국어 예시를 깔끔하게 비워둡니다)
   const EXAM_PRESETS = {
     en: {
       exams: [
         { name: '토익', label: '토익 (TOEIC)', defaultScore: '760점', scoreChips: ['600점', '700점', '760점', '800점', '850점', '900점'] },
-        { name: '토플 IBT', label: '토플 (TOEFL IBT)', defaultScore: '81점', scoreChips: ['60점', '71점', '81점', '90점', '100점'] },
-        { name: '토플 PBT', label: '토플 (TOEFL PBT)', defaultScore: '584점', scoreChips: ['500점', '550점', '584점', '600점'] },
+        { name: '토플 IBT', label: '토플 IBT (TOEFL)', defaultScore: '81점', scoreChips: ['60점', '71점', '81점', '90점', '100점'] },
+        { name: '토플 PBT', label: '토플 PBT (TOEFL)', defaultScore: '584점', scoreChips: ['500점', '550점', '584점', '600점'] },
         { name: '텝스', label: '텝스 (TEPS)', defaultScore: '372점', scoreChips: ['300점', '340점', '372점', '400점', '450점'] },
         { name: '지텔프', label: '지텔프 (G-TELP)', defaultScore: '레벨2 74점', scoreChips: ['레벨2 65점', '레벨2 74점', '레벨2 80점'] },
         { name: '아이엘츠', label: '아이엘츠 (IELTS)', defaultScore: '5.0', scoreChips: ['4.5', '5.0', '5.5', '6.0', '6.5', '7.0'] },
@@ -141,13 +143,13 @@ document.addEventListener('DOMContentLoaded', () => {
       defaultScore: 'B2',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
-        { name: '프랑스어 단어', sample: 'Bonjour' },
-        { name: '예문', sample: 'Bonjour, comment allez-vous ?' }
+        { name: '프랑스어 단어', sample: '' },
+        { name: '예문', sample: '' }
       ],
       sampleRows: [
-        ['[명사]안녕하세요', 'Bonjour', 'Bonjour, comment allez-vous ?'],
-        ['[동사]감사하다', 'Merci', 'Merci beaucoup pour votre aide.'],
-        ['[형용사]좋은, 멋진', 'Magnifique', 'Ce paysage est magnifique.']
+        ['[명사]안녕하세요', '', ''],
+        ['[동사]감사합니다', '', ''],
+        ['[형용사]좋은', '', '']
       ]
     },
     de: {
@@ -161,13 +163,13 @@ document.addEventListener('DOMContentLoaded', () => {
       defaultScore: 'B1(ZD)',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
-        { name: '독일어 단어', sample: 'Guten Tag' },
-        { name: '예문', sample: 'Guten Tag, wie geht es Ihnen heute?' }
+        { name: '독일어 단어', sample: '' },
+        { name: '예문', sample: '' }
       ],
       sampleRows: [
-        ['[명사]안녕하세요', 'Guten Tag', 'Guten Tag, wie geht es Ihnen heute?'],
-        ['[동사]감사하다', 'Danken', 'Ich danke Ihnen für Ihre Hilfe.'],
-        ['[형용사]친절한', 'Freundlich', 'Er ist sehr freundlich und hilfsbereit.']
+        ['[명사]안녕하세요', '', ''],
+        ['[동사]감사합니다', '', ''],
+        ['[형용사]좋은', '', '']
       ]
     },
     es: {
@@ -180,14 +182,14 @@ document.addEventListener('DOMContentLoaded', () => {
       defaultExam: 'DELE',
       defaultScore: 'B2',
       defaultFields: [
-        { name: '[품사]한국어', sample: '[명사]감사합니다' },
-        { name: '스페인어 단어', sample: 'Gracias' },
-        { name: '예문', sample: 'Muchas gracias por tu amable ayuda.' }
+        { name: '[품사]한국어', sample: '[명사]안녕하세요' },
+        { name: '스페인어 단어', sample: '' },
+        { name: '예문', sample: '' }
       ],
       sampleRows: [
-        ['[명사]감사합니다', 'Gracias', 'Muchas gracias por tu amable ayuda.'],
-        ['[동사]배우다', 'Aprender', 'Quiero aprender español este año.'],
-        ['[형용사]아름다운', 'Hermoso', 'Este lugar es muy hermoso.']
+        ['[명사]안녕하세요', '', ''],
+        ['[동사]감사합니다', '', ''],
+        ['[형용사]좋은', '', '']
       ]
     },
     ru: {
@@ -201,13 +203,13 @@ document.addEventListener('DOMContentLoaded', () => {
       defaultScore: '1단계',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
-        { name: '러시아어 단어', sample: 'Здравствуйте' },
-        { name: '발음/예문', sample: 'Zdravstvuyte' }
+        { name: '러시아어 단어', sample: '' },
+        { name: '예문', sample: '' }
       ],
       sampleRows: [
-        ['[명사]안녕하세요', 'Здравствуйте', 'Zdravstvuyte'],
-        ['[동사]이해하다', 'Понимать', 'Я вас понимаю.'],
-        ['[형용사]아름다운', 'Красивый', 'Это очень красивый город.']
+        ['[명사]안녕하세요', '', ''],
+        ['[동사]감사합니다', '', ''],
+        ['[형용사]좋은', '', '']
       ]
     },
     it: {
@@ -222,13 +224,13 @@ document.addEventListener('DOMContentLoaded', () => {
       defaultScore: 'B2',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
-        { name: '이탈리아어 단어', sample: 'Buongiorno' },
-        { name: '예문', sample: 'Buongiorno a tutti!' }
+        { name: '이탈리아어 단어', sample: '' },
+        { name: '예문', sample: '' }
       ],
       sampleRows: [
-        ['[명사]안녕하세요', 'Buongiorno', 'Buongiorno a tutti!'],
-        ['[동사]사랑하다', 'Amare', 'Amo viaggiare in Italia.'],
-        ['[형용사]아름다운', 'Bello', 'La vita è bella.']
+        ['[명사]안녕하세요', '', ''],
+        ['[동사]감사합니다', '', ''],
+        ['[형용사]좋은', '', '']
       ]
     },
     th: {
@@ -241,13 +243,13 @@ document.addEventListener('DOMContentLoaded', () => {
       defaultScore: '600점',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
-        { name: '태국어 단어', sample: 'สวัสดี' },
-        { name: '발음', sample: 'sà-wàt-dii' }
+        { name: '태국어 단어', sample: '' },
+        { name: '예문', sample: '' }
       ],
       sampleRows: [
-        ['[명사]안녕하세요', 'สวัสดี', 'sà-wàt-dii'],
-        ['[동사]감사합니다', 'ขอบคุณ', 'khɔ̀ɔp-khun'],
-        ['[형용사]맛있다', 'อร่อย', 'à-rɔ̀y']
+        ['[명사]안녕하세요', '', ''],
+        ['[동사]감사합니다', '', ''],
+        ['[형용사]좋은', '', '']
       ]
     },
     vi: {
@@ -260,13 +262,13 @@ document.addEventListener('DOMContentLoaded', () => {
       defaultScore: '600점',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
-        { name: '베트남어 단어', sample: 'Xin chào' },
-        { name: '예문', sample: 'Xin chào, rất vui được gặp bạn.' }
+        { name: '베트남어 단어', sample: '' },
+        { name: '예문', sample: '' }
       ],
       sampleRows: [
-        ['[명사]안녕하세요', 'Xin chào', 'Xin chào, rất vui được gặp bạn.'],
-        ['[동사]감사하다', 'Cảm ơn', 'Cảm ơn bạn rất nhiều.'],
-        ['[형용사]맛있는', 'Ngon', 'Món ăn này rất ngon.']
+        ['[명사]안녕하세요', '', ''],
+        ['[동사]감사합니다', '', ''],
+        ['[형용사]좋은', '', '']
       ]
     },
     id: {
@@ -279,13 +281,13 @@ document.addEventListener('DOMContentLoaded', () => {
       defaultScore: '600점',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
-        { name: '인도네시아어 단어', sample: 'Halo' },
-        { name: '예문', sample: 'Halo, apa kabar?' }
+        { name: '인도네시아어 단어', sample: '' },
+        { name: '예문', sample: '' }
       ],
       sampleRows: [
-        ['[명사]안녕하세요', 'Halo', 'Halo, apa kabar?'],
-        ['[동사]감사합니다', 'Terima kasih', 'Terima kasih banyak.'],
-        ['[형용사]좋은', 'Bagus', 'Hari ini cuaca sangat bagus.']
+        ['[명사]안녕하세요', '', ''],
+        ['[동사]감사합니다', '', ''],
+        ['[형용사]좋은', '', '']
       ]
     },
     ar: {
@@ -298,13 +300,13 @@ document.addEventListener('DOMContentLoaded', () => {
       defaultScore: '600점',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
-        { name: '아랍어 단어', sample: 'مرحبا' },
-        { name: '발음', sample: 'Marhaban' }
+        { name: '아랍어 단어', sample: '' },
+        { name: '예문', sample: '' }
       ],
       sampleRows: [
-        ['[명사]안녕하세요', 'مرحبا', 'Marhaban'],
-        ['[동사]감사합니다', 'شكرا', 'Shukran'],
-        ['[형용사]좋은', 'جميل', 'Jameel']
+        ['[명사]안녕하세요', '', ''],
+        ['[동사]감사합니다', '', ''],
+        ['[형용사]좋은', '', '']
       ]
     },
     default: {
@@ -316,13 +318,13 @@ document.addEventListener('DOMContentLoaded', () => {
       defaultScore: '초급',
       defaultFields: [
         { name: '[품사]한국어', sample: '[명사]안녕하세요' },
-        { name: '원문 단어', sample: 'Word' },
-        { name: '발음/예문', sample: 'Sample' }
+        { name: '외국어 단어', sample: '' },
+        { name: '예문', sample: '' }
       ],
       sampleRows: [
-        ['[명사]안녕하세요', 'Hello', 'Hello, how are you?'],
-        ['[동사]감사합니다', 'Thank', 'Thank you so much.'],
-        ['[형용사]멋진, 좋은', 'Wonderful', 'Have a wonderful day!']
+        ['[명사]안녕하세요', '', ''],
+        ['[동사]감사합니다', '', ''],
+        ['[형용사]좋은', '', '']
       ]
     }
   };
@@ -382,16 +384,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (isUserManualLangChange) {
       examScoreInput.value = matchedExamObj ? matchedExamObj.defaultScore : '';
-
-      // 기본 3개 필드 상태라면 해당 언어의 기본 필드로 자동 추천 변경
-      if (fields.length === 3 && (fields[0].name === '[품사]한국어')) {
-        fields = preset.defaultFields.map((f, i) => ({
-          id: `f_${Date.now()}_${i}`,
-          name: f.name,
-          sample: f.sample
-        }));
-        renderFields();
-      }
     }
 
     const chips = matchedExamObj ? (matchedExamObj.scoreChips || []) : [];
@@ -457,6 +449,167 @@ document.addEventListener('DOMContentLoaded', () => {
       return score;
     }
     return `${exam} ${score}`;
+  }
+
+  // 언어별 추천 필드 빠른 추가 칩 데이터 생성 (영어/중국어/일본어 호환 및 기타 언어 비움)
+  function getQuickChipsForLanguage(langId) {
+    const langObj = (window.LANGUAGES_DATA || []).find(l => l.id === langId);
+    const langName = langObj ? langObj.name : '외국어';
+
+    if (langId === 'en') {
+      return [
+        { label: '+ [품사]한국어 뜻', name: '[품사]한국어', sample: '[명사]사과' },
+        { label: '+ 영어 단어', name: '영어', sample: 'apple' },
+        { label: '+ 발음기호', name: '발음기호', sample: '[ˈæpl]' },
+        { label: '+ 예문(원문)', name: '예문', sample: 'I eat an apple every day.' },
+        { label: '+ 예문 해석', name: '예문 해석', sample: '나는 매일 사과를 하나씩 먹는다.' },
+        { label: '+ 품사', name: '품사', sample: '명사' },
+        { label: '+ 유의어/반의어', name: '유의어/반의어', sample: '유의어: fruit / 반의어: -' }
+      ];
+    } else if (langId === 'ja') {
+      return [
+        { label: '+ [품사]한국어 뜻', name: '[품사]한국어', sample: '[명사]벚꽃' },
+        { label: '+ 일본어 단어', name: '일본어', sample: '桜' },
+        { label: '+ 후리가나/발음', name: '후리가나/발음', sample: 'さくら' },
+        { label: '+ 예문(원문)', name: '예문', sample: '公園に桜の花が綺麗に咲いています。' },
+        { label: '+ 예문 해석', name: '예문 해석', sample: '공원에 벚꽃이 아름답게 피어 있습니다.' },
+        { label: '+ 품사', name: '품사', sample: '명사' },
+        { label: '+ 유의어/반의어', name: '유의어/반의어', sample: '유의어: 花 / 반의어: -' }
+      ];
+    } else if (langId === 'zh') {
+      return [
+        { label: '+ [품사]한국어 뜻', name: '[품사]한국어', sample: '[명사]안녕, 안녕하세요' },
+        { label: '+ 중국어 단어', name: '중국어', sample: '你好' },
+        { label: '+ 병음', name: '병음', sample: 'nǐ hǎo' },
+        { label: '+ 예문(원문)', name: '예문', sample: '你好！很高兴认识你。' },
+        { label: '+ 예문 해석', name: '예문 해석', sample: '안녕하세요! 만나서 반갑습니다.' },
+        { label: '+ 예문 병음', name: '예문 병음', sample: 'nǐ hǎo! hěn gāoxìng rènshi nǐ.' },
+        { label: '+ 품사', name: '품사', sample: '명사' },
+        { label: '+ 유의어/반의어', name: '유의어/반의어', sample: '유의어: 您好 / 반의어: 再见' }
+      ];
+    } else {
+      // 그 외 언어: 영/중/일 외 언어는 다른 언어의 예시값이 섞이지 않도록 외국어 샘플을 비워둠
+      return [
+        { label: '+ [품사]한국어 뜻', name: '[품사]한국어', sample: '[명사]안녕하세요' },
+        { label: `+ ${langName} 단어`, name: `${langName} 단어`, sample: '' },
+        { label: '+ 발음/표기', name: '발음/표기', sample: '' },
+        { label: '+ 예문(원문)', name: '예문', sample: '' },
+        { label: '+ 예문 해석', name: '예문 해석', sample: '' },
+        { label: '+ 품사', name: '품사', sample: '명사' },
+        { label: '+ 유의어/반의어', name: '유의어/반의어', sample: '' }
+      ];
+    }
+  }
+
+  // 추천 필드 칩 렌더링
+  function renderFieldQuickChips(langId) {
+    const container = document.getElementById('fieldQuickChipsList');
+    if (!container) return;
+    container.innerHTML = '';
+    const chips = getQuickChipsForLanguage(langId);
+
+    chips.forEach(chip => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip-btn';
+      btn.textContent = chip.label;
+      btn.addEventListener('click', () => {
+        fields.push({
+          id: `f_${Date.now()}_${fields.length}`,
+          name: chip.name,
+          sample: chip.sample
+        });
+        renderFields();
+        updatePromptAndPreview();
+        showToast(`'${chip.name}' 필드가 추가되었습니다.`);
+      });
+      container.appendChild(btn);
+    });
+  }
+
+  // 언어 변경 시 필드 목록 자동 조정 (2열 및 외국어 열을 새 언어에 맞게 자동 전환)
+  function adaptFieldsToLanguage(newLangId) {
+    const langObj = (window.LANGUAGES_DATA || []).find(l => l.id === newLangId);
+    const newLangName = langObj ? langObj.name : '외국어';
+    const preset = EXAM_PRESETS[newLangId] || EXAM_PRESETS['default'];
+
+    // 1) 기본 3개 열 상태인 경우, 해당 언어의 기본 구성으로 바로 전환
+    if (fields.length === 3) {
+      fields = preset.defaultFields.map((f, i) => ({
+        id: `f_${Date.now()}_${i}`,
+        name: f.name === '외국어 단어' ? `${newLangName} 단어` : f.name,
+        sample: f.sample
+      }));
+      renderFields();
+      return;
+    }
+
+    // 2) 필드를 이미 추가/수정한 경우라도, 2열 및 언어 종속적 필드를 지능적으로 새 언어에 맞춤
+    fields.forEach((f, idx) => {
+      // 2열 또는 외국어 단어 열
+      if (idx === 1 || f.name.includes('단어') || f.name === '중국어' || f.name === '영어' || f.name === '일본어' || f.name === '외국어') {
+        if (newLangId === 'en') {
+          f.name = '영어';
+          f.sample = 'apple';
+        } else if (newLangId === 'ja') {
+          f.name = '일본어';
+          f.sample = '桜';
+        } else if (newLangId === 'zh') {
+          f.name = '중국어';
+          f.sample = '你好';
+        } else {
+          f.name = `${newLangName} 단어`;
+          f.sample = '';
+        }
+      }
+      // 발음/병음/후리가나 열
+      else if (f.name.includes('병음') || f.name.includes('후리가나') || f.name.includes('발음')) {
+        if (newLangId === 'zh') {
+          f.name = '병음';
+          f.sample = 'nǐ hǎo';
+        } else if (newLangId === 'ja') {
+          f.name = '후리가나/발음';
+          f.sample = 'さくら';
+        } else if (newLangId === 'en') {
+          f.name = '발음기호';
+          f.sample = '[ˈæpl]';
+        } else {
+          f.name = '발음/표기';
+          f.sample = '';
+        }
+      }
+      // 예문 열
+      else if (f.name === '예문' || f.name.includes('예문(원문)')) {
+        if (newLangId === 'zh') f.sample = '你好！很高兴认识你。';
+        else if (newLangId === 'ja') f.sample = '公園に桜の花が綺麗に咲いています。';
+        else if (newLangId === 'en') f.sample = 'I eat an apple every day.';
+        else f.sample = '';
+      }
+      // 예문 해석 열
+      else if (f.name.includes('예문 해석')) {
+        if (newLangId === 'zh') f.sample = '안녕하세요! 만나서 반갑습니다.';
+        else if (newLangId === 'ja') f.sample = '공원에 벚꽃이 아름답게 피어 있습니다.';
+        else if (newLangId === 'en') f.sample = '나는 매일 사과를 하나씩 먹는다.';
+        else f.sample = '';
+      }
+      // 유의어/반의어 열
+      else if (f.name.includes('유의어') || f.name.includes('반의어')) {
+        if (newLangId === 'zh') f.sample = '유의어: 您好 / 반의어: 再见';
+        else if (newLangId === 'ja') f.sample = '유의어: 花 / 반의어: -';
+        else if (newLangId === 'en') f.sample = '유의어: fruit / 반의어: -';
+        else f.sample = '';
+      }
+    });
+
+    renderFields();
+  }
+
+  function updateResetFieldsButtonLabel() {
+    if (!btnResetFieldsToLang) return;
+    const langId = promptLangSelect.value;
+    const langObj = (window.LANGUAGES_DATA || []).find(l => l.id === langId);
+    const langName = langObj ? langObj.name : '선택 언어';
+    btnResetFieldsToLang.textContent = `🔄 '${langName}' 기본 필드로 복원`;
   }
 
   // 3. 필드 렌더링
@@ -657,9 +810,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3줄의 예시 데이터 조립
     const sampleRowsData = preset.sampleRows || [
-      ['[명사]예시1', 'Word1', 'Pronunciation1'],
-      ['[동사]예시2', 'Word2', 'Pronunciation2'],
-      ['[형용사]예시3', 'Word3', 'Pronunciation3']
+      ['[명사]예시1', '', ''],
+      ['[동사]예시2', '', ''],
+      ['[형용사]예시3', '', '']
     ];
 
     const lines = sampleRowsData.map((rowArr, rowIdx) => {
@@ -670,7 +823,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (colIdx < rowArr.length) {
           val = rowArr[colIdx];
         } else {
-          val = f.sample || `${f.name}_예시`;
+          val = f.sample || '';
         }
 
         // 쉼표 구분자이고 값에 쉼표가 들어있을 때 따옴표 래핑
@@ -774,7 +927,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (data.examScore !== undefined) {
         examScoreInput.value = data.examScore;
       } else if (data.levelCustom !== undefined) {
-        // 하위 호환
         examScoreInput.value = data.levelCustom;
       }
 
@@ -812,6 +964,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const chips = curExam ? (curExam.scoreChips || []) : [];
       renderScoreChips(chips, examScoreInput.value);
       syncLevelRowState();
+
+      renderFieldQuickChips(promptLangSelect.value);
+      updateResetFieldsButtonLabel();
 
       return true;
     } catch (e) {
@@ -868,6 +1023,8 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     renderFields();
+    renderFieldQuickChips(promptLangSelect.value);
+    updateResetFieldsButtonLabel();
     updatePromptAndPreview(false);
     saveSettingsToStorage();
     updateSaveIndicator('기본값 초기화 완료');
@@ -909,7 +1066,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // 9. 컨트롤 이벤트 바인딩
   function initEventListeners() {
     promptLangSelect.addEventListener('change', () => {
+      const newLangId = promptLangSelect.value;
       updateExamOptions(true);
+      adaptFieldsToLanguage(newLangId);
+      renderFieldQuickChips(newLangId);
+      updateResetFieldsButtonLabel();
       updatePromptAndPreview();
     });
 
@@ -964,23 +1125,6 @@ document.addEventListener('DOMContentLoaded', () => {
       chk.addEventListener('change', () => updatePromptAndPreview());
     });
 
-    // 추천 필드 빠른 추가 칩 버튼 (Step 4)
-    document.querySelectorAll('.quick-chips-wrapper button[data-name]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const name = btn.dataset.name;
-        if (!name) return;
-        const sample = btn.dataset.sample || '';
-        fields.push({
-          id: `f_${Date.now()}_${fields.length}`,
-          name: name,
-          sample: sample
-        });
-        renderFields();
-        updatePromptAndPreview();
-        showToast(`'${name}' 필드가 추가되었습니다.`);
-      });
-    });
-
     // 필드 직접 추가 버튼
     btnAddPromptField.addEventListener('click', () => {
       const newIdx = fields.length + 1;
@@ -994,7 +1138,6 @@ document.addEventListener('DOMContentLoaded', () => {
       updatePromptAndPreview();
       showToast(`${newIdx}번째 필드가 추가되었습니다.`);
 
-      // 새로 추가된 행의 인풋에 포커스
       setTimeout(() => {
         const lastRow = promptFieldList.lastElementChild;
         if (lastRow) {
@@ -1006,6 +1149,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }, 50);
     });
+
+    // 선택 언어 기본 필드로 복원 버튼
+    if (btnResetFieldsToLang) {
+      btnResetFieldsToLang.addEventListener('click', () => {
+        const langId = promptLangSelect.value;
+        const preset = EXAM_PRESETS[langId] || EXAM_PRESETS['default'];
+        const langObj = (window.LANGUAGES_DATA || []).find(l => l.id === langId);
+        const langName = langObj ? langObj.name : '선택 언어';
+
+        fields = preset.defaultFields.map((f, i) => ({
+          id: `f_${Date.now()}_${i}`,
+          name: f.name === '외국어 단어' ? `${langName} 단어` : f.name,
+          sample: f.sample
+        }));
+        renderFields();
+        updatePromptAndPreview();
+        showToast(`'${langName}' 기본 필드 구성으로 복원되었습니다.`);
+      });
+    }
 
     // 복사 버튼
     btnCopyPrompt.addEventListener('click', () => {
@@ -1116,6 +1278,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const restored = loadSettingsFromStorage();
   if (!restored) {
     updateExamOptions(false);
+    renderFieldQuickChips(promptLangSelect.value);
+    updateResetFieldsButtonLabel();
   }
 
   syncLevelRowState();

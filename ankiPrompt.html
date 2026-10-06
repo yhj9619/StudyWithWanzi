@@ -211,15 +211,8 @@
           <!-- Quick Recommendation Chips -->
           <div class="quick-chips-wrapper">
             <div class="quick-chips-title">⚡ 클릭하여 필드 빠르게 추가:</div>
-            <div class="quick-chips-list">
-              <button type="button" class="chip-btn" data-name="[품사]한국어 뜻" data-sample="[명사]안녕, 안녕하세요">+ [품사]한국어 뜻</button>
-              <button type="button" class="chip-btn" data-name="외국어 단어" data-sample="你好">+ 외국어 단어</button>
-              <button type="button" class="chip-btn" data-name="병음/발음" data-sample="nǐ hǎo">+ 병음/발음</button>
-              <button type="button" class="chip-btn" data-name="예문(원문)" data-sample="你好！很高兴认识你。">+ 예문(원문)</button>
-              <button type="button" class="chip-btn" data-name="예문 해석" data-sample="안녕하세요! 만나서 반갑습니다.">+ 예문 해석</button>
-              <button type="button" class="chip-btn" data-name="예문 병음" data-sample="nǐ hǎo! hěn gāoxìng rènshi nǐ.">+ 예문 병음</button>
-              <button type="button" class="chip-btn" data-name="품사" data-sample="명사">+ 품사 단독</button>
-              <button type="button" class="chip-btn" data-name="유의어/반의어" data-sample="반의어: 再见">+ 유의어/반의어</button>
+            <div class="quick-chips-list" id="fieldQuickChipsList">
+              <!-- JS에서 선택된 언어(영어/중국어/일본어/기타)에 맞춰 동적으로 생성 -->
             </div>
           </div>
 
@@ -228,10 +221,13 @@
             <!-- JS로 동적 필드 렌더링 -->
           </div>
 
-          <!-- Add Field Button -->
-          <div class="add-field-action-row">
-            <button type="button" id="btnAddPromptField" class="btn-add-field" title="새로운 CSV 열 필드를 추가합니다">
+          <!-- Add Field Button & Reset Fields Button -->
+          <div class="add-field-action-row" style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+            <button type="button" id="btnAddPromptField" class="btn-add-field" style="flex: 1 1 200px;" title="새로운 CSV 열 필드를 추가합니다">
               ➕ 필드 직접 추가하기
+            </button>
+            <button type="button" id="btnResetFieldsToLang" class="btn-add-field" style="flex: 1 1 200px; border-color: #cbd5e1; color: var(--text-secondary);" title="현재 선택된 언어의 기본 필드 구성으로 복원합니다">
+              🔄 기본 필드 구성으로 복원
             </button>
           </div>
 
