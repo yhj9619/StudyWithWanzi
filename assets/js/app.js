@@ -1147,7 +1147,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // 다크모드 토글
     toggleDarkModeBtn.addEventListener('click', () => {
       ankiCardWrapper.classList.toggle('dark-mode');
-      toggleDarkModeBtn.textContent = ankiCardWrapper.classList.contains('dark-mode') ? '☀️' : '🌙';
+      const isDark = ankiCardWrapper.classList.contains('dark-mode');
+      toggleDarkModeBtn.textContent = isDark ? '☀️' : '🌙';
+      toggleDarkModeBtn.title = isDark ? '라이트 모드로 전환' : '다크 모드로 전환';
+      renderPreview();
     });
 
     // 코드 탭 전환
@@ -1237,6 +1240,83 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // 다크모드 대응 색상 자동 계산 함수 (어두운 색상 -> 밝은 고대비 색상으로 지능형 반전)
+  function getDarkModeColor(hexColor) {
+    if (!hexColor || typeof hexColor !== 'string') return '#f8fafc';
+    let hex = hexColor.trim().replace('#', '');
+    if (hex.length === 3) {
+      hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    }
+    if (hex.length !== 6) return '#f8fafc';
+
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    // 상대 휘도 (Perceived Luminance)
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b);
+
+    // 채도 (Saturation)
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const saturation = max === 0 ? 0 : (max - min) / max;
+
+    // 1. 아주 어두운 검정 계열 (black, dark gray, #202124 등) -> 선명한 크림 화이트
+    if (luminance < 75) {
+      return '#f8fafc';
+    }
+
+    // 2. 무채색 회색 계열 (채도가 낮음) -> 은은한 밝은 실버 그레이
+    if (saturation < 0.2) {
+      return luminance < 140 ? '#e2e8f0' : '#f1f5f9';
+    }
+
+    // 3. 유채색 (파랑, 빨강, 초록, 보라 등) -> 다크 배경(#2f2f31)에서 눈에 잘 띄는 고대비 밝은 톤으로 보정
+    const rNorm = r / 255, gNorm = g / 255, bNorm = b / 255;
+    const cMax = Math.max(rNorm, gNorm, bNorm);
+    const cMin = Math.min(rNorm, gNorm, bNorm);
+    const delta = cMax - cMin;
+
+    let h = 0;
+    if (delta !== 0) {
+      if (cMax === rNorm) h = ((gNorm - bNorm) / delta) % 6;
+      else if (cMax === gNorm) h = (bNorm - rNorm) / delta + 2;
+      else h = (rNorm - gNorm) / delta + 4;
+      h = Math.round(h * 60);
+      if (h < 0) h += 360;
+    }
+
+    let l = (cMax + cMin) / 2;
+    let s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+
+    // 다크모드 시 가독성을 위해 명도를 최소 68% 이상으로 상향
+    const targetL = Math.max(l, 0.68);
+    const targetS = Math.min(Math.max(s, 0.65), 0.95);
+
+    return hslToHex(h, targetS, targetL);
+  }
+
+  function hslToHex(h, s, l) {
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    const m = l - c / 2;
+    let r = 0, g = 0, b = 0;
+
+    if (0 <= h && h < 60) { r = c; g = x; b = 0; }
+    else if (60 <= h && h < 120) { r = x; g = c; b = 0; }
+    else if (120 <= h && h < 180) { r = 0; g = c; b = x; }
+    else if (180 <= h && h < 240) { r = 0; g = x; b = c; }
+    else if (240 <= h && h < 300) { r = x; g = 0; b = c; }
+    else if (300 <= h && h < 360) { r = c; g = 0; b = x; }
+
+    const toHex = val => {
+      const hex = Math.round((val + m) * 255).toString(16);
+      return hex.length === 1 ? '0' + hex : hex;
+    };
+
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  }
+
   // 3. 필드 렌더 마크업 생성 헬퍼
   function buildFieldBlock(field, isForPreview = false, fieldIndex = 1) {
     const fieldName = field.nameInput.value.trim() || `Field${fieldIndex}`;
@@ -1246,11 +1326,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const color = field.colorInput.value;
     const isTargetLink = Boolean(field.hasDictLink);
 
+    const isDarkMode = isForPreview && Boolean(ankiCardWrapper && ankiCardWrapper.classList.contains('dark-mode'));
+    const activeColor = isDarkMode ? getDarkModeColor(color) : color;
+
     // style 속성 조립
     const styleParts = [];
     if (size) styleParts.push(`font-size: ${size}px;`);
     if (weight && weight !== 'normal') styleParts.push(`font-weight: ${weight};`);
-    if (color) styleParts.push(`color: ${color};`);
+    styleParts.push(`color: ${activeColor};`);
+    styleParts.push(`margin-bottom: 8px;`);
 
     const divStyle = styleParts.join(' ');
 
@@ -1260,16 +1344,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const textDeco = linkUnderline.checked ? 'underline' : 'none';
 
       if (isForPreview) {
-        // 미리보기용: 실제 클릭 가능한 검색 링크 생성
+        // 미리보기용: 실제 클릭 가능한 검색 링크 생성 (다크모드 색상 동적 반영)
         const testSearchUrl = dictUrl + encodeURIComponent(sampleValue);
-        return `<div style="${divStyle} margin-bottom: 8px;">
-  <a href="${testSearchUrl}"${targetAttr} style="color: ${color}; text-decoration: ${textDeco};">
+        return `<div class="field-item f-field-${fieldIndex}" style="${divStyle}">
+  <a href="${testSearchUrl}"${targetAttr} style="color: ${activeColor}; text-decoration: ${textDeco};">
     ${escapeHtml(sampleValue)}
   </a>
 </div>`;
       } else {
-        // Anki 템플릿용: {{FieldName}} 태그 사용
-        return `<div style="${divStyle}">
+        // Anki 템플릿용: {{FieldName}} 태그 사용 및 다크모드 대응 CSS 클래스 포함
+        return `<div class="field-item f-field-${fieldIndex}" style="font-size: ${size}px;${weight && weight !== 'normal' ? ` font-weight: ${weight};` : ''} color: ${color}; margin-bottom: 8px;">
   <a href="${dictUrl}{{${fieldName}}}"${targetAttr} style="color: ${color}; text-decoration: ${textDeco};">
     {{${fieldName}}}
   </a>
@@ -1277,9 +1361,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } else {
       if (isForPreview) {
-        return `<div style="${divStyle} margin-bottom: 8px;">${escapeHtml(sampleValue)}</div>`;
+        return `<div class="field-item f-field-${fieldIndex}" style="${divStyle}">${escapeHtml(sampleValue)}</div>`;
       } else {
-        return `<div style="${divStyle}">{{${fieldName}}}</div>`;
+        return `<div class="field-item f-field-${fieldIndex}" style="font-size: ${size}px;${weight && weight !== 'normal' ? ` font-weight: ${weight};` : ''} color: ${color}; margin-bottom: 8px;">{{${fieldName}}}</div>`;
       }
     }
   }
@@ -1309,7 +1393,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 앞면 내용 유지 여부
     if (keepFrontOnBack.checked && fields[0]) {
       const frontName = fields[0].nameInput.value.trim() || 'Front';
-      parts.push(`{{${frontName}}}`);
+      parts.push(`<div class="front-preview-hint" style="color: #64748b; font-size: 18px; margin-bottom: 6px;">{{${frontName}}}</div>`);
     }
 
     // 정답 구분선 hr 여부
@@ -1327,9 +1411,40 @@ document.addEventListener('DOMContentLoaded', () => {
     return parts.join('\n\n');
   }
 
-  // 6. Anki CSS 서식 생성
+  // 6. Anki CSS 서식 생성 (다크모드 완벽 대응)
   function generateCssTemplate() {
     const align = centerAlign.checked ? 'center' : 'left';
+    const textDeco = linkUnderline.checked ? 'underline' : 'none';
+
+    let fieldStyles = '';
+    let nightModeStyles = '';
+
+    fields.forEach((f, idx) => {
+      const fNum = idx + 1;
+      const size = f.sizeSlider.value;
+      const weight = f.weightSelect.value;
+      const color = f.colorInput.value;
+      const darkColor = getDarkModeColor(color);
+
+      fieldStyles += `\n.f-field-${fNum} {
+  font-size: ${size}px;
+  ${weight && weight !== 'normal' ? `font-weight: ${weight};\n  ` : ''}color: ${color};
+}`;
+
+      nightModeStyles += `\n.nightMode .f-field-${fNum},
+.night_mode .f-field-${fNum},
+.nightMode .f-field-${fNum} a,
+.night_mode .f-field-${fNum} a {
+  color: ${darkColor} !important;
+}
+@media (prefers-color-scheme: dark) {
+  .f-field-${fNum},
+  .f-field-${fNum} a {
+    color: ${darkColor} !important;
+  }
+}`;
+    });
+
     return `.card {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
   font-size: 20px;
@@ -1339,15 +1454,70 @@ document.addEventListener('DOMContentLoaded', () => {
   line-height: 1.5;
 }
 
-/* 모바일 및 다크모드 대응 */
-.nightMode .card {
-  color: #e2e8f0;
-  background-color: #2f2f31;
+.field-item {
+  margin-bottom: 8px;
+}
+
+.front-preview-hint {
+  color: #64748b;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+hr#answer {
+  border: none;
+  border-top: 1px solid #cbd5e1;
+  margin: 1.25rem 0;
+  width: 100%;
 }
 
 a {
+  color: inherit;
+  text-decoration: ${textDeco};
   cursor: pointer;
 }
+
+/* 필드별 기본 서식 (라이트 모드) */${fieldStyles}
+
+/* =======================================
+   🌙 Anki 다크모드 (Night Mode) 완벽 대응
+   ======================================= */
+.nightMode .card,
+.night_mode .card {
+  color: #f8fafc;
+  background-color: #2f2f31;
+}
+
+@media (prefers-color-scheme: dark) {
+  .card {
+    color: #f8fafc;
+    background-color: #2f2f31;
+  }
+}
+
+.nightMode hr#answer,
+.night_mode hr#answer {
+  border-top-color: #52525b;
+}
+
+@media (prefers-color-scheme: dark) {
+  hr#answer {
+    border-top-color: #52525b;
+  }
+}
+
+.nightMode .front-preview-hint,
+.night_mode .front-preview-hint {
+  color: #94a3b8 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .front-preview-hint {
+    color: #94a3b8 !important;
+  }
+}
+
+/* 다크모드 필드별 텍스트 색상 자동 최적화 반전 */${nightModeStyles}
 `;
   }
 
@@ -1359,6 +1529,8 @@ a {
     const isRtl = rtlForce.checked;
     liveCardRender.style.direction = isRtl ? 'rtl' : 'ltr';
     liveCardRender.style.textAlign = centerAlign.checked ? 'center' : (isRtl ? 'right' : 'left');
+
+    const isDark = Boolean(ankiCardWrapper && ankiCardWrapper.classList.contains('dark-mode'));
 
     let html = '';
 
@@ -1381,7 +1553,8 @@ a {
       // 앞면 유지 표시
       if (keepFrontOnBack.checked && fields[0]) {
         const f1Sample = fields[0].sampleInput.value.trim() || fields[0].nameInput.value.trim() || 'Front';
-        parts.push(`<div style="color: #64748b; font-size: 18px; margin-bottom: 4px;">${escapeHtml(f1Sample)}</div>`);
+        const f1HintColor = isDark ? '#94a3b8' : '#64748b';
+        parts.push(`<div class="front-preview-hint" style="color: ${f1HintColor}; font-size: 18px; margin-bottom: 6px;">${escapeHtml(f1Sample)}</div>`);
       }
 
       // 구분선
