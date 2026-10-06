@@ -976,13 +976,18 @@ document.addEventListener('DOMContentLoaded', () => {
       resetPromptSettingsBtn.addEventListener('click', resetAllSettings);
     }
 
-    // 모바일 뷰 전환
+    // 모바일 뷰 전환 (탭 네비게이션 & 좌우 전환 플로팅 버튼)
+    const btnFloatToPromptOutput = document.getElementById('btnFloatToPromptOutput');
+    const btnFloatToPromptSettings = document.getElementById('btnFloatToPromptSettings');
+
     function showMobileEditView() {
       if (window.innerWidth <= 768) {
         editorPanel.classList.remove('mobile-hidden');
         previewPanel.classList.add('mobile-hidden');
         if (btnMobileEditTab) btnMobileEditTab.classList.add('active');
         if (btnMobilePreviewTab) btnMobilePreviewTab.classList.remove('active');
+        if (btnFloatToPromptOutput) btnFloatToPromptOutput.style.display = 'inline-flex';
+        if (btnFloatToPromptSettings) btnFloatToPromptSettings.style.display = 'none';
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
@@ -993,6 +998,8 @@ document.addEventListener('DOMContentLoaded', () => {
         previewPanel.classList.remove('mobile-hidden');
         if (btnMobileEditTab) btnMobileEditTab.classList.remove('active');
         if (btnMobilePreviewTab) btnMobilePreviewTab.classList.add('active');
+        if (btnFloatToPromptOutput) btnFloatToPromptOutput.style.display = 'none';
+        if (btnFloatToPromptSettings) btnFloatToPromptSettings.style.display = 'inline-flex';
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
@@ -1001,18 +1008,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnMobilePreviewTab) btnMobilePreviewTab.addEventListener('click', showMobilePreviewView);
     if (btnGoPreviewMobile) btnGoPreviewMobile.addEventListener('click', showMobilePreviewView);
     if (btnGoEditMobile) btnGoEditMobile.addEventListener('click', showMobileEditView);
+    if (btnFloatToPromptOutput) btnFloatToPromptOutput.addEventListener('click', showMobilePreviewView);
+    if (btnFloatToPromptSettings) btnFloatToPromptSettings.addEventListener('click', showMobileEditView);
 
     window.addEventListener('resize', () => {
       if (window.innerWidth > 768) {
         editorPanel.classList.remove('mobile-hidden');
         previewPanel.classList.remove('mobile-hidden');
+        if (btnFloatToPromptOutput) btnFloatToPromptOutput.style.display = 'none';
+        if (btnFloatToPromptSettings) btnFloatToPromptSettings.style.display = 'none';
       } else {
         if (btnMobilePreviewTab && btnMobilePreviewTab.classList.contains('active')) {
-          editorPanel.classList.add('mobile-hidden');
-          previewPanel.classList.remove('mobile-hidden');
+          showMobilePreviewView();
         } else {
-          editorPanel.classList.remove('mobile-hidden');
-          previewPanel.classList.add('mobile-hidden');
+          showMobileEditView();
         }
       }
     });

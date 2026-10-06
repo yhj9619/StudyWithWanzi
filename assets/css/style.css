@@ -540,6 +540,41 @@ body {
   gap: 0.75rem;
 }
 
+/* Step 3 Dict link selection box */
+.dict-link-selection-box {
+  margin-top: 1.25rem;
+  padding-top: 1.15rem;
+  border-top: 1px dashed var(--border-color);
+}
+
+.dict-link-box-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.dict-link-box-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.dict-target-item {
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  transition: all 0.15s ease;
+}
+
+.dict-target-item:hover {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+}
+
 /* Field Setting Box */
 .field-setting-box {
   background: #f8fafc;
@@ -1181,7 +1216,8 @@ body {
 /* Desktop defaults: mobile switches hidden */
 .mobile-view-nav,
 .mobile-quick-action,
-.mobile-back-action {
+.mobile-back-action,
+.mobile-float-switch-btn {
   display: none;
 }
 
@@ -1312,6 +1348,54 @@ body {
     border: 1px solid #cbd5e1;
     border-radius: var(--radius-md);
     cursor: pointer;
+  }
+
+  /* Mobile Floating Switch Buttons (좌우 전환 플로팅 버튼) */
+  .mobile-float-switch-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    position: fixed;
+    bottom: 1.25rem;
+    z-index: 105;
+    padding: 0.75rem 1.15rem;
+    font-size: 0.92rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.22), 0 2px 6px rgba(0, 0, 0, 0.12);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-float-switch-btn.right {
+    right: 1rem;
+    background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+  }
+
+  .mobile-float-switch-btn.left {
+    left: 1rem;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: #f8fafc;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .mobile-float-switch-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.28);
+  }
+
+  .mobile-float-switch-btn:active {
+    transform: scale(0.95);
+  }
+
+  /* Ensure bottom padding on mobile so content isn't covered by floating buttons */
+  .editor-panel,
+  .preview-panel {
+    padding-bottom: 5.5rem;
   }
 
   .card-section {

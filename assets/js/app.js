@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const langDropdownList = document.getElementById('langDropdownList');
   const filteredLangCount = document.getElementById('filteredLangCount');
 
-  const dictApplyTarget = document.getElementById('dictApplyTarget');
+  const dictFieldChecklist = document.getElementById('dictFieldChecklist');
   const dictUrlInput = document.getElementById('dictUrlInput');
   const resetDictUrlBtn = document.getElementById('resetDictUrlBtn');
   const dictNameTag = document.getElementById('dictNameTag');
@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
       colorInput: document.getElementById('f1_color'),
       colorText: document.getElementById('f1_color_text'),
       deleteBtn: null,
+      hasDictLink: false,
     },
     {
       boxEl: box2,
@@ -58,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
       colorInput: document.getElementById('f2_color'),
       colorText: document.getElementById('f2_color_text'),
       deleteBtn: null,
+      hasDictLink: true,
     }
   ];
 
@@ -364,19 +366,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     updateFieldBadges();
-    updateDictApplyTargetSelect();
+    updateDictFieldChecklist();
     updateAll(shouldSave);
   }
 
   // 필드 이벤트 바인딩 헬퍼 (초기 1, 2번째 필드 및 동적 추가 필드 공통)
   function bindFieldEvents(f) {
-    // 필드명 변경 시 사전 링크 대상 셀렉트 및 서식 즉시 갱신
+    // 필드명 변경 시 3번 사전 링크 체크리스트 및 서식 즉시 갱신
     f.nameInput.addEventListener('input', () => {
-      updateDictApplyTargetSelect();
+      updateDictFieldChecklist();
       updateAll();
     });
     f.nameInput.addEventListener('change', () => {
-      updateDictApplyTargetSelect();
+      updateDictFieldChecklist();
       updateAll();
     });
 
@@ -600,12 +602,13 @@ document.addEventListener('DOMContentLoaded', () => {
       colorInput: box.querySelector('.f-color'),
       colorText: box.querySelector('.f-color-text'),
       deleteBtn: box.querySelector('.btn-delete-field'),
+      hasDictLink: initData ? Boolean(initData.hasDictLink) : false,
     };
 
     fields.push(fObj);
     bindFieldEvents(fObj);
     updateFieldBadges();
-    updateDictApplyTargetSelect();
+    updateDictFieldChecklist();
 
     if (shouldSave) {
       updateAll(true);
@@ -631,7 +634,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fObj.boxEl.remove();
     fields.splice(idx, 1);
     updateFieldBadges();
-    updateDictApplyTargetSelect();
+    updateDictFieldChecklist();
     updateAll(true);
     showToast('선택한 필드가 삭제되었습니다.');
   }
@@ -641,53 +644,63 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentLang = getSelectedLanguage();
     fields.forEach((f, idx) => {
       if (!f.badgeEl) return;
+      let badgeText = '';
       if (idx === 0) {
-        f.badgeEl.textContent = '1번째 필드 (앞면 / 한국어)';
+        badgeText = '1번째 필드 (앞면 / 한국어 뜻)';
       } else if (idx === 1) {
-        f.badgeEl.textContent = '2번째 필드 (뒷면 / 외국어 · 사전 링크)';
+        badgeText = '2번째 필드 (뒷면 / 외국어 단어)';
       } else if (idx === 2) {
         if (currentLang.id === 'zh') {
-          f.badgeEl.textContent = '3번째 필드 (병음 pinyin)';
+          badgeText = '3번째 필드 (병음 pinyin)';
         } else {
-          f.badgeEl.textContent = '3번째 필드 (예문 Example)';
+          badgeText = '3번째 필드 (예문 Example)';
         }
       } else {
-        f.badgeEl.textContent = `${idx + 1}번째 필드 (추가 선택 필드)`;
+        badgeText = `${idx + 1}번째 필드 (추가 선택 필드)`;
       }
+
+      if (f.hasDictLink) {
+        badgeText += ' · 🔗 사전 링크';
+        f.badgeEl.className = 'field-badge field-badge-primary';
+      } else {
+        f.badgeEl.className = 'field-badge';
+      }
+      f.badgeEl.textContent = badgeText;
     });
   }
 
-  // 사전 링크 적용 위치 셀렉트 박스 동적 갱신
-  function updateDictApplyTargetSelect() {
-    const prevVal = dictApplyTarget.value;
-    dictApplyTarget.innerHTML = '';
-
-    const noneOpt = document.createElement('option');
-    noneOpt.value = 'none';
-    noneOpt.textContent = '링크 미적용 (일반 텍스트만)';
-    dictApplyTarget.appendChild(noneOpt);
-
-    let hasPrevVal = (prevVal === 'none');
+  // 3번 영역의 각 필드별 사전 링크 체크박스 목록 동적 갱신 (단어·예문 다중 선택 지원)
+  function updateDictFieldChecklist() {
+    if (!dictFieldChecklist) return;
+    dictFieldChecklist.innerHTML = '';
 
     fields.forEach((f, idx) => {
-      const val = `field${idx + 1}`;
-      const opt = document.createElement('option');
-      opt.value = val;
-      const fName = f.nameInput.value.trim() || `필드 ${idx + 1}`;
-      const recTag = (idx === 1) ? ' (기본 권장)' : '';
-      opt.textContent = `${idx + 1}번째 필드 (${fName})에 사전 링크 걸기${recTag}`;
-      dictApplyTarget.appendChild(opt);
+      const fNum = idx + 1;
+      const fName = f.nameInput.value.trim() || `필드 ${fNum}`;
+      const isChecked = Boolean(f.hasDictLink);
 
-      if (prevVal === val) {
-        hasPrevVal = true;
-      }
+      const label = document.createElement('label');
+      label.className = 'custom-checkbox dict-target-item';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = isChecked;
+      checkbox.dataset.fieldIndex = idx;
+
+      checkbox.addEventListener('change', () => {
+        f.hasDictLink = checkbox.checked;
+        updateFieldBadges();
+        updateAll();
+      });
+
+      const span = document.createElement('span');
+      const recTag = (idx === 1) ? ' <span style="color: var(--primary); font-size: 0.8em; font-weight: 700;">(기본 권장)</span>' : '';
+      span.innerHTML = `<strong>${fNum}번째 필드 [${escapeHtml(fName)}]</strong>에 사전 링크 적용${recTag}`;
+
+      label.appendChild(checkbox);
+      label.appendChild(span);
+      dictFieldChecklist.appendChild(label);
     });
-
-    if (hasPrevVal) {
-      dictApplyTarget.value = prevVal;
-    } else {
-      dictApplyTarget.value = (fields.length >= 2) ? 'field2' : (fields.length >= 1 ? 'field1' : 'none');
-    }
   }
 
   // 2. 컨트롤 이벤트 리스너 연결
@@ -699,8 +712,6 @@ document.addEventListener('DOMContentLoaded', () => {
       dictUrlInput.value = lang.dictUrl;
       updateAll();
     });
-
-    dictApplyTarget.addEventListener('change', updateAll);
     dictUrlInput.addEventListener('input', updateAll);
     dictUrlInput.addEventListener('change', updateAll);
     linkNewTab.addEventListener('change', updateAll);
@@ -778,11 +789,13 @@ document.addEventListener('DOMContentLoaded', () => {
     copyBackBtn.addEventListener('click', () => copyToClipboard(codeBackText.textContent, '뒷면 서식이'));
     copyCssBtn.addEventListener('click', () => copyToClipboard(codeCssText.textContent, '스타일(CSS) 서식이'));
 
-    // 모바일 화면 전환 로직 (<= 768px 모바일 전용 탭 네비게이션)
+    // 모바일 화면 전환 로직 (<= 768px 모바일 전용 탭 네비게이션 & 좌우 전환 플로팅 버튼)
     const btnMobileEditTab = document.getElementById('btnMobileEditTab');
     const btnMobilePreviewTab = document.getElementById('btnMobilePreviewTab');
     const btnGoPreviewMobile = document.getElementById('btnGoPreviewMobile');
     const btnGoEditMobile = document.getElementById('btnGoEditMobile');
+    const btnFloatToPreview = document.getElementById('btnFloatToPreview');
+    const btnFloatToEdit = document.getElementById('btnFloatToEdit');
     const editorPanel = document.querySelector('.editor-panel');
     const previewPanel = document.querySelector('.preview-panel');
 
@@ -792,6 +805,8 @@ document.addEventListener('DOMContentLoaded', () => {
         previewPanel.classList.add('mobile-hidden');
         if (btnMobileEditTab) btnMobileEditTab.classList.add('active');
         if (btnMobilePreviewTab) btnMobilePreviewTab.classList.remove('active');
+        if (btnFloatToPreview) btnFloatToPreview.style.display = 'inline-flex';
+        if (btnFloatToEdit) btnFloatToEdit.style.display = 'none';
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
@@ -802,6 +817,8 @@ document.addEventListener('DOMContentLoaded', () => {
         previewPanel.classList.remove('mobile-hidden');
         if (btnMobileEditTab) btnMobileEditTab.classList.remove('active');
         if (btnMobilePreviewTab) btnMobilePreviewTab.classList.add('active');
+        if (btnFloatToPreview) btnFloatToPreview.style.display = 'none';
+        if (btnFloatToEdit) btnFloatToEdit.style.display = 'inline-flex';
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
@@ -810,18 +827,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnMobilePreviewTab) btnMobilePreviewTab.addEventListener('click', showMobilePreviewView);
     if (btnGoPreviewMobile) btnGoPreviewMobile.addEventListener('click', showMobilePreviewView);
     if (btnGoEditMobile) btnGoEditMobile.addEventListener('click', showMobileEditView);
+    if (btnFloatToPreview) btnFloatToPreview.addEventListener('click', showMobilePreviewView);
+    if (btnFloatToEdit) btnFloatToEdit.addEventListener('click', showMobileEditView);
 
     window.addEventListener('resize', () => {
       if (window.innerWidth > 768) {
         editorPanel.classList.remove('mobile-hidden');
         previewPanel.classList.remove('mobile-hidden');
+        if (btnFloatToPreview) btnFloatToPreview.style.display = 'none';
+        if (btnFloatToEdit) btnFloatToEdit.style.display = 'none';
       } else {
         if (btnMobilePreviewTab && btnMobilePreviewTab.classList.contains('active')) {
-          editorPanel.classList.add('mobile-hidden');
-          previewPanel.classList.remove('mobile-hidden');
+          showMobilePreviewView();
         } else {
-          editorPanel.classList.remove('mobile-hidden');
-          previewPanel.classList.add('mobile-hidden');
+          showMobileEditView();
         }
       }
     });
@@ -844,7 +863,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const size = field.sizeSlider.value;
     const weight = field.weightSelect.value;
     const color = field.colorInput.value;
-    const isTargetLink = (dictApplyTarget.value === `field${fieldIndex}`);
+    const isTargetLink = Boolean(field.hasDictLink);
 
     // style 속성 조립
     const styleParts = [];
@@ -1050,7 +1069,7 @@ a {
         version: 1,
         savedAt: new Date().toISOString(),
         langId: languageSelect.value,
-        dictApplyTarget: dictApplyTarget.value,
+        dictLinkTargets: fields.map(f => Boolean(f.hasDictLink)),
         dictUrl: dictUrlInput.value,
         linkNewTab: linkNewTab.checked,
         linkUnderline: linkUnderline.checked,
@@ -1066,6 +1085,7 @@ a {
           size: f.sizeSlider.value,
           weight: f.weightSelect.value,
           color: f.colorInput.value,
+          hasDictLink: Boolean(f.hasDictLink),
         })),
         // 사용자가 직접 확인할 수 있도록 완성본 서식 전체(HTML/CSS 코드)도 통째로 함께 보관
         templates: {
@@ -1131,6 +1151,9 @@ a {
               f.colorInput.value = fData.color;
               f.colorText.value = fData.color;
             }
+            if (fData.hasDictLink !== undefined) {
+              f.hasDictLink = Boolean(fData.hasDictLink);
+            }
           }
         }
 
@@ -1145,15 +1168,21 @@ a {
         addOptionalField(null, false);
       }
 
-      updateFieldBadges();
-      updateDictApplyTargetSelect();
-
-      if (data.dictApplyTarget !== undefined) {
-        const exists = Array.from(dictApplyTarget.options).some(o => o.value === data.dictApplyTarget);
-        if (exists) {
-          dictApplyTarget.value = data.dictApplyTarget;
-        }
+      // 사전 링크 타겟 다중 복원 (레거시 단일 문자열 호환)
+      if (Array.isArray(data.dictLinkTargets)) {
+        data.dictLinkTargets.forEach((isLinked, idx) => {
+          if (fields[idx]) {
+            fields[idx].hasDictLink = Boolean(isLinked);
+          }
+        });
+      } else if (data.dictApplyTarget !== undefined) {
+        fields.forEach((f, idx) => {
+          f.hasDictLink = (data.dictApplyTarget === `field${idx + 1}`);
+        });
       }
+
+      updateFieldBadges();
+      updateDictFieldChecklist();
 
       // RTL 알림 배지 복원
       const currentLang = getSelectedLanguage();
@@ -1206,6 +1235,7 @@ a {
     fields[0].weightSelect.value = 'bold';
     fields[0].colorInput.value = '#202124';
     fields[0].colorText.value = '#202124';
+    fields[0].hasDictLink = false;
 
     // 필드 2 기본값 (Back / 외국어 단어 · 사전 링크)
     fields[1].nameInput.value = 'Back';
@@ -1218,6 +1248,7 @@ a {
     fields[1].weightSelect.value = 'bold';
     fields[1].colorInput.value = '#1a73e8';
     fields[1].colorText.value = '#1a73e8';
+    fields[1].hasDictLink = true;
 
     // 3번째 이상 선택 필드 컨테이너 비우고 기본 3번째 필드 1개 생성
     const optionalContainer = document.getElementById('optionalFieldsContainer');
@@ -1231,12 +1262,12 @@ a {
       showBack: true,
       size: 20,
       weight: 'normal',
-      color: '#5f6368'
+      color: '#5f6368',
+      hasDictLink: false,
     }, false);
 
     updateFieldBadges();
-    updateDictApplyTargetSelect();
-    dictApplyTarget.value = 'field2';
+    updateDictFieldChecklist();
 
     updateAll(false);
     saveSettingsToStorage();
