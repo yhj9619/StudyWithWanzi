@@ -1,0 +1,5 @@
+title: Anki 카드 스크립트 에디터
+description: 비개발자도 쉽게 만드는 다국어 Anki 카드 서식 & 사전 링크 생성기
+theme: null
+markdown: kramdown
+plugins: []
