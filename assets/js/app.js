@@ -2,6 +2,14 @@
 document.addEventListener('DOMContentLoaded', () => {
   // DOM Elements
   const languageSelect = document.getElementById('languageSelect');
+  const langSelectContainer = document.getElementById('langSelectContainer');
+  const langSearchInput = document.getElementById('langSearchInput');
+  const langClearBtn = document.getElementById('langClearBtn');
+  const langToggleBtn = document.getElementById('langToggleBtn');
+  const langDropdownWrapper = document.getElementById('langDropdownWrapper');
+  const langDropdownList = document.getElementById('langDropdownList');
+  const filteredLangCount = document.getElementById('filteredLangCount');
+
   const dictApplyTarget = document.getElementById('dictApplyTarget');
   const dictUrlInput = document.getElementById('dictUrlInput');
   const resetDictUrlBtn = document.getElementById('resetDictUrlBtn');
@@ -79,7 +87,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentPreviewSide = 'front'; // 기본값을 탭 활성화 상태('앞면')와 일치하도록 'front'로 설정
 
-  // 1. 언어 셀렉트 박스 채우기
+  // 한글 초성 검색 지원 헬퍼 (예: 'ㅍㄹㅅ' -> 프랑스어, 'ㅅㅍㅇ' -> 스페인어, 'ㅈㄱ' -> 중국어)
+  const CHOSUNG_LIST = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+
+  function getChosung(text) {
+    if (!text) return '';
+    let result = '';
+    for (let i = 0; i < text.length; i++) {
+      const code = text.charCodeAt(i);
+      if (code >= 0xAC00 && code <= 0xD7A3) {
+        const chosungIndex = Math.floor((code - 0xAC00) / (21 * 28));
+        result += CHOSUNG_LIST[chosungIndex];
+      } else {
+        result += text[i];
+      }
+    }
+    return result;
+  }
+
+  let activeFocusIndex = -1;
+
+  // 1. 언어 셀렉트 박스 및 검색형 콤보박스 초기화
   function initLanguageSelect() {
     languageSelect.innerHTML = '';
     const list = window.LANGUAGES_DATA || LANGUAGES_DATA;
@@ -93,7 +121,202 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       languageSelect.appendChild(option);
     });
+
+    const initialLang = getSelectedLanguage();
+    if (langSearchInput) {
+      langSearchInput.value = initialLang.name;
+    }
+
+    initComboboxEvents();
     onLanguageChange(false);
+  }
+
+  function initComboboxEvents() {
+    if (!langSearchInput) return;
+
+    function openDropdown(filter = '') {
+      langDropdownWrapper.classList.remove('hidden');
+      langToggleBtn.classList.add('open');
+      langSearchInput.setAttribute('aria-expanded', 'true');
+      renderLangDropdown(filter);
+      updateClearBtn();
+      activeFocusIndex = -1;
+
+      // 현재 선택된 항목으로 부드럽게 스크롤 이동
+      const selectedItem = langDropdownList.querySelector('.dropdown-item.selected');
+      if (selectedItem) {
+        selectedItem.scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    function closeDropdown() {
+      langDropdownWrapper.classList.add('hidden');
+      langToggleBtn.classList.remove('open');
+      langSearchInput.setAttribute('aria-expanded', 'false');
+      const cur = getSelectedLanguage();
+      langSearchInput.value = cur.name;
+      updateClearBtn();
+      activeFocusIndex = -1;
+    }
+
+    function updateClearBtn() {
+      if (langSearchInput.value.trim().length > 0) {
+        langClearBtn.classList.remove('hidden');
+      } else {
+        langClearBtn.classList.add('hidden');
+      }
+    }
+
+    function renderLangDropdown(filterText = '') {
+      const list = window.LANGUAGES_DATA || LANGUAGES_DATA;
+      const query = filterText.trim().toLowerCase();
+      const queryChosung = getChosung(query);
+
+      let filtered = list;
+      if (query) {
+        filtered = list.filter(lang => {
+          const nameLower = lang.name.toLowerCase();
+          const idLower = lang.id.toLowerCase();
+          const langChosung = getChosung(lang.name);
+          return nameLower.includes(query) ||
+                 langChosung.includes(query) ||
+                 langChosung.includes(queryChosung) ||
+                 idLower.includes(query);
+        });
+      }
+
+      filteredLangCount.textContent = filtered.length;
+      langDropdownList.innerHTML = '';
+
+      if (filtered.length === 0) {
+        const emptyLi = document.createElement('li');
+        emptyLi.className = 'dropdown-empty';
+        emptyLi.textContent = `'${filterText}' 검색 결과가 없습니다.`;
+        langDropdownList.appendChild(emptyLi);
+        return;
+      }
+
+      const currentSelectedId = languageSelect.value;
+      filtered.forEach((lang) => {
+        const li = document.createElement('li');
+        li.className = 'dropdown-item';
+        if (lang.id === currentSelectedId) {
+          li.classList.add('selected');
+        }
+        li.setAttribute('role', 'option');
+        li.dataset.id = lang.id;
+        li.innerHTML = `
+          <span class="lang-name">
+            <span>${escapeHtml(lang.name)}</span>
+            <span class="lang-tag">${lang.id.toUpperCase()}</span>
+          </span>
+          ${lang.id === currentSelectedId ? '<span class="check-icon">✓</span>' : ''}
+        `;
+
+        li.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          selectLang(lang.id);
+        });
+
+        langDropdownList.appendChild(li);
+      });
+    }
+
+    function selectLang(id) {
+      languageSelect.value = id;
+      const lang = getSelectedLanguage();
+      langSearchInput.value = lang.name;
+      closeDropdown();
+      onLanguageChange(true);
+    }
+
+    // 클릭 시 드롭다운 열기 및 텍스트 선택
+    langSearchInput.addEventListener('click', () => {
+      openDropdown(langSearchInput.value);
+      langSearchInput.select();
+    });
+
+    langSearchInput.addEventListener('focus', () => {
+      openDropdown(langSearchInput.value);
+      langSearchInput.select();
+    });
+
+    langSearchInput.addEventListener('input', (e) => {
+      openDropdown(e.target.value);
+    });
+
+    // 키보드 네비게이션 (방향키, 엔터, ESC)
+    langSearchInput.addEventListener('keydown', (e) => {
+      const items = langDropdownList.querySelectorAll('.dropdown-item');
+      if (items.length === 0) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (langDropdownWrapper.classList.contains('hidden')) {
+          openDropdown(langSearchInput.value);
+          return;
+        }
+        activeFocusIndex = (activeFocusIndex + 1) % items.length;
+        updateFocusedItem(items);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (langDropdownWrapper.classList.contains('hidden')) {
+          openDropdown(langSearchInput.value);
+          return;
+        }
+        activeFocusIndex = (activeFocusIndex - 1 + items.length) % items.length;
+        updateFocusedItem(items);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (activeFocusIndex >= 0 && items[activeFocusIndex]) {
+          selectLang(items[activeFocusIndex].dataset.id);
+        } else if (items.length > 0) {
+          selectLang(items[0].dataset.id);
+        }
+      } else if (e.key === 'Escape') {
+        closeDropdown();
+      }
+    });
+
+    function updateFocusedItem(items) {
+      items.forEach((item, idx) => {
+        if (idx === activeFocusIndex) {
+          item.classList.add('focused');
+          item.scrollIntoView({ block: 'nearest' });
+        } else {
+          item.classList.remove('focused');
+        }
+      });
+    }
+
+    // 토글 버튼 (▼)
+    langToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (langDropdownWrapper.classList.contains('hidden')) {
+        openDropdown();
+        langSearchInput.focus();
+        langSearchInput.select();
+      } else {
+        closeDropdown();
+      }
+    });
+
+    // 클리어 버튼 (X)
+    langClearBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      langSearchInput.value = '';
+      langSearchInput.focus();
+      openDropdown('');
+    });
+
+    // 바깥 영역 클릭 시 닫기
+    document.addEventListener('click', (e) => {
+      if (!langSelectContainer.contains(e.target)) {
+        if (!langDropdownWrapper.classList.contains('hidden')) {
+          closeDropdown();
+        }
+      }
+    });
   }
 
   function getSelectedLanguage() {

@@ -43,9 +43,34 @@
           <p class="section-desc">학습할 언어를 선택하면 최적의 사전 링크 URL이 자동으로 매핑됩니다.</p>
 
           <div class="form-group">
-            <label for="languageSelect" class="form-label">학습 언어 선택 (46개 언어)</label>
-            <div class="select-wrapper">
-              <select id="languageSelect" class="form-select"></select>
+            <label for="langSearchInput" class="form-label">학습 언어 선택 (검색 가능 · 46개 언어)</label>
+            <div class="searchable-combobox" id="langSelectContainer">
+              <!-- 숨겨진 네이티브 셀렉트 (호환성 유지) -->
+              <select id="languageSelect" class="visually-hidden" tabindex="-1" aria-hidden="true"></select>
+              
+              <!-- 검색 및 선택 인풋창 -->
+              <div class="combobox-input-wrapper">
+                <span class="combobox-search-icon">🔍</span>
+                <input 
+                  type="text" 
+                  id="langSearchInput" 
+                  class="form-input combobox-input" 
+                  placeholder="언어 검색 (예: 프랑스어, 스페인어, ㅍㄹㅅ, es...)" 
+                  autocomplete="off"
+                  role="combobox"
+                  aria-expanded="false"
+                  aria-controls="langDropdownList"
+                  aria-autocomplete="list"
+                >
+                <button type="button" id="langClearBtn" class="combobox-clear-btn hidden" title="검색어 지우기">&times;</button>
+                <button type="button" id="langToggleBtn" class="combobox-toggle-btn" title="언어 목록 펼치기/접기">▼</button>
+              </div>
+
+              <!-- 검색 결과 드롭다운 목록 -->
+              <div id="langDropdownWrapper" class="combobox-dropdown hidden">
+                <div class="dropdown-header-info">총 <span id="filteredLangCount">46</span>개 언어</div>
+                <ul id="langDropdownList" class="dropdown-list" role="listbox"></ul>
+              </div>
             </div>
             <span id="rtlNotice" class="notice-badge hidden">우측에서 좌측으로 쓰는 언어(RTL)가 감지되어 서식에 적용됩니다.</span>
           </div>
