@@ -1469,9 +1469,9 @@ body {
 
 .portal-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: 1fr;
   gap: 1.5rem;
-  max-width: 1140px;
+  max-width: 680px;
   margin: 1.5rem auto 2.5rem;
   padding: 0 1rem;
 }
@@ -1619,7 +1619,7 @@ body {
 }
 
 .portal-notice-box {
-  max-width: 1140px;
+  max-width: 680px;
   margin: 0 auto 3rem;
   padding: 1.2rem 1.5rem;
   background: #eff6ff;
