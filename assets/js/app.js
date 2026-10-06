@@ -959,8 +959,8 @@ a {
     const f1Badge = document.getElementById('f1_badge');
     const f2Badge = document.getElementById('f2_badge');
     const f3Badge = document.getElementById('f3_badge');
-    if (f1Badge) f1Badge.textContent = '1번째 필드 (앞면 / 한국어 뜻)';
-    if (f2Badge) f2Badge.textContent = '2번째 필드 (뒷면 / 외국어 학습 단어 · 사전 링크)';
+    if (f1Badge) f1Badge.textContent = '1번째 필드 (앞면 / 한국어)';
+    if (f2Badge) f2Badge.textContent = '2번째 필드 (뒷면 / 외국어 · 사전 링크)';
     if (f3Badge) f3Badge.textContent = '3번째 필드 (병음 pinyin)';
 
     updateAll(false);
