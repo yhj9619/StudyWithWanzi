@@ -343,6 +343,27 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    // 3번째 필드명 및 배지 동적 업데이트 (중국어는 pinyin, 다른 언어는 Example)
+    const f3Badge = document.getElementById('f3_badge');
+    const f3Input = fields[2].nameInput;
+    const currentF3Val = f3Input.value.trim();
+
+    if (lang.id === 'zh') {
+      if (f3Badge) f3Badge.textContent = '3번째 필드 (병음 pinyin)';
+      f3Input.placeholder = '예: pinyin, 발음';
+      // 이전 값이 Example, example, sample 이거나 비어있으면 pinyin으로 전환
+      if (!currentF3Val || currentF3Val === 'Example' || currentF3Val === 'example' || currentF3Val === 'sample') {
+        f3Input.value = 'pinyin';
+      }
+    } else {
+      if (f3Badge) f3Badge.textContent = '3번째 필드 (예문 Example)';
+      f3Input.placeholder = '예: Example, sample, 예문';
+      // 이전 값이 pinyin 이거나 비어있으면 Example로 전환
+      if (!currentF3Val || currentF3Val === 'pinyin') {
+        f3Input.value = 'Example';
+      }
+    }
+
     // 언어 변경 시 예시 샘플 자동 채우기 (사용자가 직접 변경한 경우)
     if (isUserManualChange && lang.sample) {
       fields[0].sampleInput.value = lang.sample.field1;

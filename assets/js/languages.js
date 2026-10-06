@@ -1,4 +1,5 @@
 // 46개 언어 데이터 및 사용자 지정 네이버 사전 공식 하이퍼링크 매핑
+// 중국어는 3번째 필드가 병음(pinyin), 다른 언어는 유용한 예문(Example)으로 구성
 const LANGUAGES_DATA = [
   {
     id: "en",
@@ -6,7 +7,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://en.dict.naver.com/#/search?query=",
     dictName: "네이버 영어사전",
     isRTL: false,
-    sample: { field1: "Apple", field2: "사과", field3: "/ˈæp.əl/ (명사)" }
+    sample: { field1: "Apple", field2: "사과", field3: "I eat an apple every morning." }
   },
   {
     id: "ja",
@@ -14,7 +15,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://ja.dict.naver.com/#/search?query=",
     dictName: "네이버 일본어사전",
     isRTL: false,
-    sample: { field1: "桜", field2: "벚꽃", field3: "さくら [sakura]" }
+    sample: { field1: "桜", field2: "벚꽃", field3: "公園に桜の花が綺麗に咲いています。" }
   },
   {
     id: "zh",
@@ -30,7 +31,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/frkodict/#/search?query=",
     dictName: "네이버 프랑스어사전",
     isRTL: false,
-    sample: { field1: "Bonjour", field2: "안녕하세요, 좋은 아침", field3: "[bɔ̃ʒuʁ]" }
+    sample: { field1: "Bonjour", field2: "안녕하세요, 좋은 아침", field3: "Bonjour, comment allez-vous aujourd'hui ?" }
   },
   {
     id: "es",
@@ -38,7 +39,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/eskodict/#/search?query=",
     dictName: "네이버 스페인어사전",
     isRTL: false,
-    sample: { field1: "Gracias", field2: "감사합니다", field3: "[ˈɡɾasjas]" }
+    sample: { field1: "Gracias", field2: "감사합니다", field3: "Muchas gracias por tu amable ayuda." }
   },
   {
     id: "de",
@@ -46,7 +47,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/dekodict/#/search?query=",
     dictName: "네이버 독일어사전",
     isRTL: false,
-    sample: { field1: "Guten Tag", field2: "안녕하세요", field3: "[ɡuːtn̩ ˈtaːk]" }
+    sample: { field1: "Guten Tag", field2: "안녕하세요", field3: "Guten Tag, wie geht es Ihnen heute?" }
   },
   {
     id: "vi",
@@ -54,7 +55,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/vikodict/#/search?query=",
     dictName: "네이버 베트남어사전",
     isRTL: false,
-    sample: { field1: "Xin chào", field2: "안녕하세요", field3: "[sin caːw˨˩]" }
+    sample: { field1: "Xin chào", field2: "안녕하세요", field3: "Xin chào, rất vui được gặp bạn." }
   },
   {
     id: "ne",
@@ -62,7 +63,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/nekodict/#/search?query=",
     dictName: "네이버 네팔어사전",
     isRTL: false,
-    sample: { field1: "नमस्ते", field2: "안녕하세요", field3: "namaste" }
+    sample: { field1: "नमस्ते", field2: "안녕하세요", field3: "नमस्ते, तपाईंलाई कस्तो छ?" }
   },
   {
     id: "lo",
@@ -70,7 +71,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/lokodict/#/search?query=",
     dictName: "네이버 라오어사전",
     isRTL: false,
-    sample: { field1: "ສະບາຍດີ", field2: "안녕하세요", field3: "sabaidi" }
+    sample: { field1: "ສະບາຍດີ", field2: "안녕하세요", field3: "ສະບາຍດີ, ເຈົ້າສະບາຍດີບໍ?" }
   },
   {
     id: "mn",
@@ -78,7 +79,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/mnkodict/#/search?query=",
     dictName: "네이버 몽골어사전",
     isRTL: false,
-    sample: { field1: "Сайн байна уу", field2: "안녕하세요", field3: "Sain baina uu" }
+    sample: { field1: "Сайн байна уу", field2: "안녕하세요", field3: "Сайн байна уу, өдрийн мэнд хүргэе." }
   },
   {
     id: "my",
@@ -86,7 +87,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/mykodict/#/search?query=",
     dictName: "네이버 미얀마어사전",
     isRTL: false,
-    sample: { field1: "မင်္ဂလာပါ", field2: "안녕하세요", field3: "mingalaba" }
+    sample: { field1: "မင်္ဂလာပါ", field2: "안녕하세요", field3: "မင်္ဂလာပါ၊ နေကောင်းလားခင်ဗျာ။" }
   },
   {
     id: "sw",
@@ -94,7 +95,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/swkodict/#/search?query=",
     dictName: "네이버 스와힐리어사전",
     isRTL: false,
-    sample: { field1: "Habari", field2: "안녕하세요, 무슨 일인가요", field3: "[haˈɓa.ri]" }
+    sample: { field1: "Habari", field2: "안녕하세요", field3: "Habari za asubuhi, rafiki yangu." }
   },
   {
     id: "ar",
@@ -102,7 +103,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/arkodict/#/search?query=",
     dictName: "네이버 아랍어사전",
     isRTL: true,
-    sample: { field1: "مرحبا", field2: "안녕하세요", field3: "marḥaban" }
+    sample: { field1: "مرحبا", field2: "안녕하세요", field3: "مرحبا بك، أتمنى لك يوما سعيدا." }
   },
   {
     id: "ur",
@@ -110,7 +111,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/urkodict/#/search?query=",
     dictName: "네이버 우르두어사전",
     isRTL: true,
-    sample: { field1: "سلام", field2: "안녕하세요, 평화", field3: "salaam" }
+    sample: { field1: "سلام", field2: "안녕하세요", field3: "سلام، آپ سے مل کر خوشی ہوئی۔" }
   },
   {
     id: "uz",
@@ -118,7 +119,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/uzkodict/#/search?query=",
     dictName: "네이버 우즈베크어사전",
     isRTL: false,
-    sample: { field1: "Salom", field2: "안녕하세요", field3: "[sɒˈlɒm]" }
+    sample: { field1: "Salom", field2: "안녕하세요", field3: "Salom, ishlaringiz qalay?" }
   },
   {
     id: "id",
@@ -126,7 +127,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/idkodict/#/search?query=",
     dictName: "네이버 인도네시아어사전",
     isRTL: false,
-    sample: { field1: "Selamat pagi", field2: "좋은 아침입니다", field3: "[səˈla.mat ˈpa.ɡi]" }
+    sample: { field1: "Selamat pagi", field2: "좋은 아침입니다", field3: "Selamat pagi, senang bertemu dengan Anda." }
   },
   {
     id: "kk",
@@ -134,7 +135,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/kkkodict/#/search?query=",
     dictName: "네이버 카자흐어사전",
     isRTL: false,
-    sample: { field1: "Сәлеметсіз бе", field2: "안녕하세요", field3: "Sälemetsiz be" }
+    sample: { field1: "Сәлеметсіз бе", field2: "안녕하세요", field3: "Сәлеметсіз бе, қалыңыз қалай?" }
   },
   {
     id: "km",
@@ -142,7 +143,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/kmkodict/#/search?query=",
     dictName: "네이버 캄보디아어사전",
     isRTL: false,
-    sample: { field1: "សួស្តី", field2: "안녕하세요", field3: "suostei" }
+    sample: { field1: "សួស្តី", field2: "안녕하세요", field3: "សួស្តី តើអ្នកសុខសប្បាយជាទេ?" }
   },
   {
     id: "tl",
@@ -150,7 +151,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/tlkodict/#/search?query=",
     dictName: "네이버 타갈로그어사전",
     isRTL: false,
-    sample: { field1: "Kumusta", field2: "안녕하세요, 어떻게 지내세요", field3: "[kʊmʊsˈta]" }
+    sample: { field1: "Kumusta", field2: "안녕하세요", field3: "Kumusta ka sa araw na ito?" }
   },
   {
     id: "th",
@@ -158,7 +159,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/thkodict/#/search?query=",
     dictName: "네이버 태국어사전",
     isRTL: false,
-    sample: { field1: "สวัสดี", field2: "안녕하세요", field3: "sà-wàt-dii" }
+    sample: { field1: "สวัสดี", field2: "안녕하세요", field3: "สวัสดีตอนเช้าครับ ยินดีที่ได้พบคุณ" }
   },
   {
     id: "tet",
@@ -166,7 +167,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/tetkodict/#/search?query=",
     dictName: "네이버 테툼어사전",
     isRTL: false,
-    sample: { field1: "Bondia", field2: "안녕하세요, 좋은 아침", field3: "[bonˈdi.a]" }
+    sample: { field1: "Bondia", field2: "안녕하세요", field3: "Bondia, ita-boot di'ak ka lae?" }
   },
   {
     id: "fa",
@@ -174,7 +175,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/fakodict/#/search?query=",
     dictName: "네이버 페르시아어사전",
     isRTL: true,
-    sample: { field1: "سلام", field2: "안녕하세요", field3: "salām" }
+    sample: { field1: "سلام", field2: "안녕하세요", field3: "سلام، حال شما چطور است؟" }
   },
   {
     id: "ha",
@@ -182,7 +183,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/hakodict/#/search?query=",
     dictName: "네이버 하우사어사전",
     isRTL: false,
-    sample: { field1: "Sannu", field2: "안녕하세요", field3: "[sán.nùː]" }
+    sample: { field1: "Sannu", field2: "안녕하세요", field3: "Sannu da zuwa, barka da yamma." }
   },
   {
     id: "he",
@@ -190,7 +191,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/hekodict/#/search?query=",
     dictName: "네이버 히브리어사전",
     isRTL: true,
-    sample: { field1: "שלום", field2: "안녕하세요, 평화", field3: "Shalom" }
+    sample: { field1: "שלום", field2: "안녕하세요", field3: "שלום, מה שלומך הבוקר?" }
   },
   {
     id: "hbo",
@@ -198,7 +199,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/hbokodict/#/search?query=",
     dictName: "네이버 고대 히브리어사전",
     isRTL: true,
-    sample: { field1: "שָׁלוֹם", field2: "평화, 온전함 (샬롬)", field3: "šālôm" }
+    sample: { field1: "שָׁלוֹם", field2: "평화 (샬롬)", field3: "שָׁלוֹם עֲלֵיכֶם וּבְרָכָה" }
   },
   {
     id: "hi",
@@ -206,7 +207,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/hikodict/#/search?query=",
     dictName: "네이버 힌디어사전",
     isRTL: false,
-    sample: { field1: "नमस्ते", field2: "안녕하세요", field3: "namaste" }
+    sample: { field1: "नमस्ते", field2: "안녕하세요", field3: "नमस्ते, आप से मिलकर बहुत खुशी हुई।" }
   },
   {
     id: "el",
@@ -214,7 +215,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/elkodict/#/search?query=",
     dictName: "네이버 현대 그리스어사전",
     isRTL: false,
-    sample: { field1: "Γεια σας", field2: "안녕하세요", field3: "[ˈʝa sas]" }
+    sample: { field1: "Γεια σας", field2: "안녕하세요", field3: "Γεια σας, χαίρομαι πολύ που σας γνωρίζω." }
   },
   {
     id: "grc",
@@ -222,7 +223,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/elkodict/#/search?query=",
     dictName: "네이버 고대 그리스어사전",
     isRTL: false,
-    sample: { field1: "λόγος", field2: "말, 로고스, 이성", field3: "lógos" }
+    sample: { field1: "λόγος", field2: "말, 로고스", field3: "Ἐν ἀρχῇ ἦν ὁ λόγος." }
   },
   {
     id: "nl",
@@ -230,7 +231,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/nlkodict/#/search?query=",
     dictName: "네이버 네덜란드어사전",
     isRTL: false,
-    sample: { field1: "Hallo", field2: "안녕하세요", field3: "[ˈɦɑloː]" }
+    sample: { field1: "Hallo", field2: "안녕하세요", field3: "Hallo, fijn om je te ontmoeten." }
   },
   {
     id: "no",
@@ -238,7 +239,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/nokodict/#/search?query=",
     dictName: "네이버 노르웨이어사전",
     isRTL: false,
-    sample: { field1: "Hei", field2: "안녕", field3: "[hæɪ̯]" }
+    sample: { field1: "Hei", field2: "안녕", field3: "Hei, hyggelig å hilse på deg." }
   },
   {
     id: "da",
@@ -246,7 +247,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/dakodict/#/search?query=",
     dictName: "네이버 덴마크어사전",
     isRTL: false,
-    sample: { field1: "Hej", field2: "안녕", field3: "[hɑj]" }
+    sample: { field1: "Hej", field2: "안녕", field3: "Hej, det er rart at møde dig." }
   },
   {
     id: "la",
@@ -254,7 +255,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/lakodict/#/search?query=",
     dictName: "네이버 라틴어사전",
     isRTL: false,
-    sample: { field1: "Salve", field2: "안녕하세요, 평안하길", field3: "[ˈsaɫ.weː]" }
+    sample: { field1: "Salve", field2: "안녕하세요", field3: "Salve, amice mi! Quomodo te habes?" }
   },
   {
     id: "ru",
@@ -262,7 +263,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/rukodict/#/search?query=",
     dictName: "네이버 러시아어사전",
     isRTL: false,
-    sample: { field1: "Здравствуйте", field2: "안녕하세요", field3: "[ˈzdrastvʊjtʲe]" }
+    sample: { field1: "Здравствуйте", field2: "안녕하세요", field3: "Здравствуйте, рад вас видеть сегодня." }
   },
   {
     id: "ro",
@@ -270,23 +271,23 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/rokodict/#/search?query=",
     dictName: "네이버 루마니아어사전",
     isRTL: false,
-    sample: { field1: "Bună ziua", field2: "안녕하세요", field3: "[ˈbunə ˈziwa]" }
+    sample: { field1: "Bună ziua", field2: "안녕하세요", field3: "Bună ziua, mă bucur să vă cunosc." }
   },
   {
     id: "sv",
     name: "스웨덴어",
-    dictUrl: "https://dict.naver.com/svkodict/#/search?query=",
+    dictUrl: "https://svdic.naver.com/#/search?query=",
     dictName: "네이버 스웨덴어사전",
     isRTL: false,
-    sample: { field1: "Hej", field2: "안녕", field3: "[hɛj]" }
+    sample: { field1: "Hej", field2: "안녕", field3: "Hej, vad roligt att träffas." }
   },
   {
     id: "sq",
     name: "알바니아어",
-    dictUrl: "https://dict.naver.com/sqkodict/#/search?query=",
+    dictUrl: "https://sqdic.naver.com/#/search?query=",
     dictName: "네이버 알바니아어사전",
     isRTL: false,
-    sample: { field1: "Përshëndetje", field2: "안녕하세요", field3: "[pəɾʃənˈdɛt.jɛ]" }
+    sample: { field1: "Përshëndetje", field2: "안녕하세요", field3: "Përshëndetje, gëzohem që po ju takoj." }
   },
   {
     id: "uk",
@@ -294,7 +295,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/ukkodict/#/search?query=",
     dictName: "네이버 우크라이나어사전",
     isRTL: false,
-    sample: { field1: "Добрий день", field2: "안녕하세요", field3: "[ˈdɔbrɪj dɛnʲ]" }
+    sample: { field1: "Добрий день", field2: "안녕하세요", field3: "Добрий день, як ваші справи?" }
   },
   {
     id: "it",
@@ -302,7 +303,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/itkodict/#/search?query=",
     dictName: "네이버 이탈리아어사전",
     isRTL: false,
-    sample: { field1: "Ciao", field2: "안녕", field3: "[ˈtʃaːo]" }
+    sample: { field1: "Ciao", field2: "안녕", field3: "Ciao, è un piacere conoscerti." }
   },
   {
     id: "ka",
@@ -310,7 +311,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/kakodict/#/search?query=",
     dictName: "네이버 조지아어사전",
     isRTL: false,
-    sample: { field1: "გამარჯობა", field2: "안녕하세요", field3: "gamarjoba" }
+    sample: { field1: "გამარჯობა", field2: "안녕하세요", field3: "გამარჯობა, ძალიან სასიამოვნოა." }
   },
   {
     id: "cs",
@@ -318,7 +319,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/cskodict/#/search?query=",
     dictName: "네이버 체코어사전",
     isRTL: false,
-    sample: { field1: "Dobrý den", field2: "안녕하세요", field3: "[ˈdobriː dɛn]" }
+    sample: { field1: "Dobrý den", field2: "안녕하세요", field3: "Dobrý den, rád vás poznávám." }
   },
   {
     id: "hr",
@@ -326,7 +327,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/hrkodict/#/search?query=",
     dictName: "네이버 크로아티아어사전",
     isRTL: false,
-    sample: { field1: "Dobar dan", field2: "안녕하세요", field3: "[dǒbaːr dâːn]" }
+    sample: { field1: "Dobar dan", field2: "안녕하세요", field3: "Dobar dan, drago mi je što smo se upoznali." }
   },
   {
     id: "tr",
@@ -334,7 +335,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/trkodict/#/search?query=",
     dictName: "네이버 튀르키예어사전",
     isRTL: false,
-    sample: { field1: "Merhaba", field2: "안녕하세요", field3: "[meɾhaˈba]" }
+    sample: { field1: "Merhaba", field2: "안녕하세요", field3: "Merhaba, tanıştığımıza çok memnun oldum." }
   },
   {
     id: "pt",
@@ -342,7 +343,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/ptkodict/#/search?query=",
     dictName: "네이버 포르투갈어사전",
     isRTL: false,
-    sample: { field1: "Olá", field2: "안녕하세요", field3: "[ɔˈla]" }
+    sample: { field1: "Olá", field2: "안녕하세요", field3: "Olá, muito prazer em conhecê-lo." }
   },
   {
     id: "pl",
@@ -350,7 +351,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/plkodict/#/search?query=",
     dictName: "네이버 폴란드어사전",
     isRTL: false,
-    sample: { field1: "Cześć", field2: "안녕", field3: "[t͡ʂɛɕt͡ɕ]" }
+    sample: { field1: "Cześć", field2: "안녕", field3: "Cześć, bardzo miło cię poznać." }
   },
   {
     id: "fi",
@@ -358,7 +359,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/fikodict/#/search?query=",
     dictName: "네이버 핀란드어사전",
     isRTL: false,
-    sample: { field1: "Hei", field2: "안녕", field3: "[hei̯]" }
+    sample: { field1: "Hei", field2: "안녕", field3: "Hei, hauska tutustua sinuun." }
   },
   {
     id: "hu",
@@ -366,7 +367,7 @@ const LANGUAGES_DATA = [
     dictUrl: "https://dict.naver.com/hukodict/#/search?query=",
     dictName: "네이버 헝가리어사전",
     isRTL: false,
-    sample: { field1: "Szia", field2: "안녕", field3: "[ˈsijɒ]" }
+    sample: { field1: "Szia", field2: "안녕", field3: "Szia, nagyon örülök, hogy megismertelek." }
   }
 ];
 
