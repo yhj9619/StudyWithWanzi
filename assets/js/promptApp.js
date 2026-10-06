@@ -802,29 +802,116 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${mainSentence}\n${formatSentence}${rulesSection}${textSection}`;
   }
 
-  // 6. AI 예상 CSV 샘플 생성
+  // 6. AI 예상 CSV 샘플 생성 (필드 순서 및 각 필드 타입에 맞춘 3행 샘플 데이터 생성)
+  function getFieldSampleValue(field, rowIdx, langId) {
+    const rawName = (field.name || '').trim().toLowerCase();
+    const userSample = (field.sample || '').trim();
+
+    // 1행(rowIdx === 0)이고 사용자가 직접 입력한 예시값이 있으면 최우선 반영
+    if (rowIdx === 0 && userSample) {
+      return userSample;
+    }
+
+    // 언어별 3행 표준 예시 사전
+    const DICT = {
+      zh: {
+        korean: ['[명사]안녕, 안녕하세요', '[동사]감사하다, 고맙다', '[형용사]기쁘다, 즐겁다'],
+        word: ['你好', '谢谢', '高兴'],
+        pinyin: ['nǐ hǎo', 'xièxie', 'gāoxìng'],
+        example: ['你好！很高兴认识你。', '谢谢你的帮助。', '今天天气真好，我很高兴。'],
+        exampleKo: ['안녕하세요! 만나서 반갑습니다.', '도와주셔서 감사합니다.', '오늘 날씨가 정말 좋아 기쁩니다.'],
+        examplePinyin: ['nǐ hǎo! hěn gāoxìng rènshi nǐ.', 'xièxie nǐ de bāngzhù.', 'jīntiān tiānqì zhēn hǎo, wǒ hěn gāoxìng.'],
+        pos: ['명사', '동사', '형용사'],
+        antonym: ['유의어: 您好 / 반의어: 再见', '유의어: 感谢 / 반의어: -', '유의어: 快乐 / 반의어: 难过']
+      },
+      en: {
+        korean: ['[명사]사과', '[동사]성공하다', '[형용사]중요한'],
+        word: ['apple', 'succeed', 'crucial'],
+        pron: ['[ˈæpl]', '[səkˈsiːd]', '[ˈkruːʃl]'],
+        example: ['I eat an apple every day.', 'She worked hard to succeed in her career.', 'Water is crucial for all living things.'],
+        exampleKo: ['나는 매일 사과를 하나씩 먹는다.', '그녀는 성공하기 위해 열심히 일했다.', '물은 모든 생명체에 중요하다.'],
+        pos: ['명사', '동사', '형용사'],
+        antonym: ['유의어: fruit / 반의어: -', '유의어: achieve / 반의어: fail', '유의어: vital / 반의어: minor']
+      },
+      ja: {
+        korean: ['[명사]벚꽃', '[동사]먹다', '[형용사]예쁘다, 아름답다'],
+        word: ['桜', '食べる', '美しい'],
+        pron: ['さくら', 'たべる', 'うつくしい'],
+        example: ['公園に桜の花が綺麗に咲いています。', '毎朝パンを食べます。', '富士山はとても美しいです。'],
+        exampleKo: ['공원에 벚꽃이 아름답게 피어 있습니다.', '매일 아침 빵을 먹습니다.', '후지산은 매우 아름답습니다.'],
+        pos: ['명사', '동사', '형용사'],
+        antonym: ['유의어: 花 / 반의어: -', '유의어: 食す / 반의어: -', '유의어: 綺麗 / 반의어: 醜い']
+      }
+    };
+
+    const curDict = DICT[langId];
+
+    // 필드 의미에 맞게 3행 값 매핑
+    if (rawName.includes('한국어') || rawName.includes('뜻') || rawName.includes('의미')) {
+      if (curDict && curDict.korean) return curDict.korean[rowIdx] || curDict.korean[0];
+      return ['[명사]안녕하세요', '[동사]감사합니다', '[형용사]좋은'][rowIdx] || '[명사]안녕하세요';
+    }
+
+    if (rawName.includes('단어') || rawName.includes('중국어') || rawName.includes('영어') || rawName.includes('일본어') || rawName.includes('외국어') || rawName.includes('어휘') || rawName === 'word') {
+      if (curDict && curDict.word) return curDict.word[rowIdx] || curDict.word[0];
+      return userSample ? (rowIdx === 0 ? userSample : '') : '';
+    }
+
+    if (rawName.includes('병음')) {
+      if (curDict && curDict.pinyin) return curDict.pinyin[rowIdx] || curDict.pinyin[0];
+      return '';
+    }
+
+    if (rawName.includes('후리가나') || rawName.includes('발음') || rawName.includes('발음기호') || rawName.includes('표기')) {
+      if (curDict && (curDict.pron || curDict.pinyin)) {
+        const pList = curDict.pron || curDict.pinyin;
+        return pList[rowIdx] || pList[0];
+      }
+      return '';
+    }
+
+    if (rawName.includes('예문 해석') || rawName.includes('해석') || rawName.includes('번역')) {
+      if (curDict && curDict.exampleKo) return curDict.exampleKo[rowIdx] || curDict.exampleKo[0];
+      return '';
+    }
+
+    if (rawName.includes('예문 병음')) {
+      if (curDict && curDict.examplePinyin) return curDict.examplePinyin[rowIdx] || curDict.examplePinyin[0];
+      return '';
+    }
+
+    if (rawName.includes('예문') || rawName === 'sentence') {
+      if (curDict && curDict.example) return curDict.example[rowIdx] || curDict.example[0];
+      return '';
+    }
+
+    if (rawName.includes('품사') || rawName === 'pos') {
+      return ['명사', '동사', '형용사'][rowIdx] || '명사';
+    }
+
+    if (rawName.includes('유의어') || rawName.includes('반의어')) {
+      if (curDict && curDict.antonym) return curDict.antonym[rowIdx] || curDict.antonym[0];
+      return '';
+    }
+
+    // 커스텀 필드인 경우
+    if (userSample) {
+      if (rowIdx === 0) return userSample;
+      return `${userSample} (${rowIdx + 1})`;
+    }
+
+    return field.name ? `${field.name}_${rowIdx + 1}` : '';
+  }
+
   function generateSampleCsv() {
     const delim = getDelimiterInfo();
     const langId = promptLangSelect.value;
-    const preset = EXAM_PRESETS[langId] || EXAM_PRESETS['default'];
+    const rowsCount = 3;
+    const lines = [];
 
-    // 3줄의 예시 데이터 조립
-    const sampleRowsData = preset.sampleRows || [
-      ['[명사]예시1', '', ''],
-      ['[동사]예시2', '', ''],
-      ['[형용사]예시3', '', '']
-    ];
-
-    const lines = sampleRowsData.map((rowArr, rowIdx) => {
-      const rowValues = fields.map((f, colIdx) => {
-        let val = '';
-        if (colIdx === 0 && f.sample && rowIdx === 0) {
-          val = f.sample;
-        } else if (colIdx < rowArr.length) {
-          val = rowArr[colIdx];
-        } else {
-          val = f.sample || '';
-        }
+    for (let rowIdx = 0; rowIdx < rowsCount; rowIdx++) {
+      const rowValues = fields.map(f => {
+        let val = getFieldSampleValue(f, rowIdx, langId);
 
         // 쉼표 구분자이고 값에 쉼표가 들어있을 때 따옴표 래핑
         if (delim.char === ',' && val.includes(',')) {
@@ -833,8 +920,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return val;
       });
 
-      return rowValues.join(delim.display);
-    });
+      lines.push(rowValues.join(delim.display));
+    }
 
     return lines.join('\n');
   }
