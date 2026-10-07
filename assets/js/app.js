@@ -1,4 +1,4 @@
-// Anki 카드 스크립트 에디터 - 메인 애플리케이션 로직
+// Anki 카드 서식 에디터 - 메인 애플리케이션 로직
 document.addEventListener('DOMContentLoaded', () => {
   const t = (key, params) => i18n.t(key, params);
 
@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const dictUrlInput = document.getElementById('dictUrlInput');
   const resetDictUrlBtn = document.getElementById('resetDictUrlBtn');
   const dictNameTag = document.getElementById('dictNameTag');
+  const dictUrlWarn = document.getElementById('dictUrlWarn');
+  const subDictUrlWarn = document.getElementById('subDictUrlWarn');
   const rtlNotice = document.getElementById('rtlNotice');
   const linkNewTab = document.getElementById('linkNewTab');
   const linkCleanQuery = document.getElementById('linkCleanQuery');
@@ -47,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
       el.textContent = getSubDictLabel();
     });
   }
-  // 사전 / 위키 아이콘 버튼 인라인 스타일 (CSS 미적용 환경에서도 동일하게 보이도록)
+  // 미리보기 전용 사전 / 보조 사전 아이콘 버튼 인라인 스타일 (미리보기는 생성된 CSS를 불러오지 않음, Anki 서식은 CSS의 .link-btn 규칙 사용)
   const LINK_BTN_INLINE_STYLE = 'font-size: 0.6em; margin-left: 0.35em; text-decoration: none; opacity: 0.75; vertical-align: middle;';
 
   // Common Layout & Typography Options
@@ -72,46 +74,70 @@ document.addEventListener('DOMContentLoaded', () => {
   const FONT_PRESETS = {
     'system': {
       name: t('editor.font.system'),
-      css: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif'
+      css: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif"
     },
     'noto-sans-kr': {
       name: t('editor.font.notoSansKr'),
-      css: '"Noto Sans KR", -apple-system, BlinkMacSystemFont, sans-serif'
+      css: "'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     'noto-serif-kr': {
       name: t('editor.font.notoSerifKr'),
-      css: '"Noto Serif KR", "Nanum Myeongjo", "Batang", serif'
+      css: "'Noto Serif KR', 'Nanum Myeongjo', 'Batang', serif"
     },
     'nanum-gothic': {
       name: t('editor.font.nanumGothic'),
-      css: '"Nanum Gothic", "Malgun Gothic", sans-serif'
+      css: "'Nanum Gothic', 'Malgun Gothic', sans-serif"
     },
     'inter': {
       name: t('editor.font.inter'),
-      css: '"Inter", "Roboto", -apple-system, sans-serif'
+      css: "'Inter', 'Roboto', -apple-system, sans-serif"
     },
     'noto-sans-jp': {
       name: t('editor.font.notoSansJp'),
-      css: '"Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif'
+      css: "'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif"
     },
     'noto-sans-sc': {
       name: t('editor.font.notoSansSc'),
-      css: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif'
+      css: "'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif"
     },
     'monospace': {
       name: t('editor.font.monospace'),
-      css: 'Consolas, Menlo, Monaco, "Courier New", monospace'
+      css: "Consolas, Menlo, Monaco, 'Courier New', monospace"
     },
     'cursive': {
       name: t('editor.font.cursive'),
-      css: 'Caveat, "Nanum Pen Script", cursive, sans-serif'
+      css: "Caveat, 'Nanum Pen Script', cursive, sans-serif"
     }
   };
 
+  // 구글 웹폰트 import 대상 (프리셋 키 → css2 family 파라미터)
+  const WEB_FONT_FAMILIES = {
+    'noto-sans-kr': 'Noto+Sans+KR:wght@400;700',
+    'noto-serif-kr': 'Noto+Serif+KR:wght@400;700',
+    'nanum-gothic': 'Nanum+Gothic:wght@400;700',
+    'inter': 'Inter:wght@400;600',
+    'noto-sans-jp': 'Noto+Sans+JP:wght@400;700',
+    'noto-sans-sc': 'Noto+Sans+SC:wght@400;700',
+    'cursive': 'Caveat:wght@600',
+  };
+  const GENERIC_FONT_FAMILIES = ['serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui'];
+
+  // 직접 입력한 글꼴명 정리: 따옴표·<>;{}\ 제거 후 쉼표로 나눠 각 글꼴을 작은따옴표로 감쌈
+  // (style="..." 속성과 CSS 어디에 넣어도 깨지지 않도록 큰따옴표를 쓰지 않음)
+  function sanitizeCustomFontList(customVal) {
+    return String(customVal || '')
+      .replace(/["'<>;{}\\]/g, '')
+      .split(',')
+      .map(name => name.trim().replace(/\s+/g, ' '))
+      .filter(Boolean)
+      .map(name => (GENERIC_FONT_FAMILIES.includes(name.toLowerCase()) ? name.toLowerCase() : `'${name}'`))
+      .join(', ');
+  }
+
   function getFontFamilyCss(key, customVal) {
     if (key === 'custom') {
-      const trimmed = (customVal || '').trim();
-      return trimmed ? `"${trimmed}", sans-serif` : FONT_PRESETS['system'].css;
+      const list = sanitizeCustomFontList(customVal);
+      return list ? `${list}, sans-serif` : FONT_PRESETS['system'].css;
     }
     if (FONT_PRESETS[key]) {
       return FONT_PRESETS[key].css;
@@ -127,6 +153,73 @@ document.addEventListener('DOMContentLoaded', () => {
     return getFontFamilyCss(val, custom);
   }
 
+  // 필드명 비었을 때의 기본 이름 (배지·서식 코드·미리보기 공통: Front / Back / Field{n})
+  function getFieldFallbackName(idx) {
+    return idx === 0 ? 'Front' : (idx === 1 ? 'Back' : `Field${idx + 1}`);
+  }
+
+  // 화면 표시용 필드명 (입력값 그대로, 비면 기본 이름)
+  function getFieldDisplayName(field, idx) {
+    const raw = field && field.nameInput ? field.nameInput.value.trim() : '';
+    return raw || getFieldFallbackName(idx);
+  }
+
+  // Anki 필드명 규칙: : { } " 사용 불가, # ^ / 로 시작 불가
+  const FIELD_NAME_FORBIDDEN_RE = /[:{}"]/g;
+  const FIELD_NAME_LEADING_RE = /^[#^/\s]+/;
+
+  function getFieldNameIssue(rawName) {
+    const name = String(rawName || '').trim();
+    if (!name) return '';
+    if (/[:{}"]/.test(name)) return t('editor.field.nameInvalidChars');
+    if (/^[#^/]/.test(name)) return t('editor.field.nameInvalidStart');
+    return '';
+  }
+
+  // 서식 코드에 넣을 필드명 (금지 문자 제거, 입력창 값은 바꾸지 않음)
+  function getAnkiFieldName(field, idx) {
+    const raw = field && field.nameInput ? field.nameInput.value : '';
+    const cleaned = String(raw).replace(FIELD_NAME_FORBIDDEN_RE, '').trim().replace(FIELD_NAME_LEADING_RE, '').trim();
+    return cleaned || getFieldFallbackName(idx);
+  }
+
+  // 필드명 입력칸 아래 경고 표시 갱신
+  function updateFieldNameWarning(field) {
+    if (!field || !field.nameWarnEl) return;
+    const issue = getFieldNameIssue(field.nameInput.value);
+    field.nameWarnEl.textContent = issue;
+    field.nameWarnEl.classList.toggle('hidden', !issue);
+  }
+
+  // 링크로 쓸 수 있는 주소인지 (http/https만 허용, Anki 치환 기호 {{ }} 포함 불가)
+  function isHttpUrl(url) {
+    const value = String(url || '').trim();
+    return /^https?:\/\/[^\s"'<>`]+$/i.test(value) && !/\{\{|\}\}/.test(value);
+  }
+
+  // #rgb / #rrggbb 색상 검사 및 6자리로 정규화 (잘못된 값이면 null)
+  function normalizeHexColor(val) {
+    let v = String(val || '').trim();
+    if (/^[0-9A-Fa-f]{3}$/.test(v) || /^[0-9A-Fa-f]{6}$/.test(v)) v = '#' + v;
+    if (/^#[0-9A-Fa-f]{3}$/.test(v)) {
+      v = '#' + v[1] + v[1] + v[2] + v[2] + v[3] + v[3];
+    }
+    return /^#[0-9A-Fa-f]{6}$/.test(v) ? v.toLowerCase() : null;
+  }
+
+  // 숫자 범위 보정 (숫자가 아니면 기본값)
+  function clampNumber(val, min, max, fallback) {
+    const n = parseFloat(val);
+    if (!isFinite(n)) return fallback;
+    return Math.min(max, Math.max(min, n));
+  }
+
+  const SIZE_MIN = 10;
+  const SIZE_MAX = 80;
+  const LINE_HEIGHT_MIN = 1.0;
+  const LINE_HEIGHT_MAX = 3.0;
+  const WEIGHT_VALUES = ['normal', 'bold', '600'];
+
   // Field Elements
   const box1 = document.getElementById('boxField1');
   const box2 = document.getElementById('boxField2');
@@ -136,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
       boxEl: box1,
       badgeEl: document.getElementById('f1_badge'),
       nameInput: document.getElementById('f1_name'),
+      nameWarnEl: document.getElementById('f1_name_warn'),
       sampleInput: document.getElementById('f1_sample'),
       showFront: document.getElementById('f1_show_front'),
       showBack: document.getElementById('f1_show_back'),
@@ -157,6 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
       boxEl: box2,
       badgeEl: document.getElementById('f2_badge'),
       nameInput: document.getElementById('f2_name'),
+      nameWarnEl: document.getElementById('f2_name_warn'),
       sampleInput: document.getElementById('f2_sample'),
       showFront: document.getElementById('f2_show_front'),
       showBack: document.getElementById('f2_show_back'),
@@ -193,6 +288,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const copyBackBtn = document.getElementById('copyBackBtn');
   const copyCssBtn = document.getElementById('copyCssBtn');
   const toast = document.getElementById('toastNotification');
+
+  // ③ 붙여넣기 도우미: 단계별 복사 완료(✓) 표시
+  // 복사한 내용을 기억해 두고, 생성된 서식이 바뀌면 그 단계의 ✓를 자동으로 지움
+  const pasteSteps = [
+    { stepEl: document.getElementById('pasteStepFront'), codeEl: codeFrontText, copiedText: null },
+    { stepEl: document.getElementById('pasteStepBack'), codeEl: codeBackText, copiedText: null },
+    { stepEl: document.getElementById('pasteStepCss'), codeEl: codeCssText, copiedText: null },
+  ];
+  const pasteAllDone = document.getElementById('pasteAllDone');
+  const editorAdvancedSettings = document.getElementById('editorAdvancedSettings');
 
   let currentPreviewSide = 'front'; // 기본값을 탭 활성화 상태('앞면')와 일치하도록 'front'로 설정
 
@@ -246,22 +351,34 @@ document.addEventListener('DOMContentLoaded', () => {
     return list.find(lang => lang.id === selectedId) || list[0];
   }
 
-  function onLanguageChange(isUserManualChange = true, shouldSave = true) {
+  // 예시값이 사용자가 손대지 않은 기본값인지 (비었거나 어떤 언어의 해당 칸 기본 예시와 같음)
+  function isUntouchedSample(value, slot) {
+    const v = String(value || '').trim();
+    if (!v) return true;
+    const list = window.LANGUAGES_DATA || LANGUAGES_DATA;
+    if (slot === 'field3' && v === 'nǐ hǎo') return true;
+    return list.some(l => l.sample && String(l.sample[slot] || '').trim() === v);
+  }
+
+  // 3번째 필드가 아직 기본 3번째 필드(Example / pinyin)인지
+  function isDefaultThirdFieldName(name) {
+    return ['Example', 'example', 'sample', 'pinyin'].includes(String(name || '').trim());
+  }
+
+  // 언어 변경 처리
+  // isUserManualChange: 사용자가 직접 언어를 고름 → 예시값(기본값 그대로인 것만)·RTL 자동 적용
+  // opts.prevLang: 다른 도구와의 언어 연동으로 바뀐 경우 이전 언어 (RTL은 사용자가 바꾸지 않았을 때만 따라감)
+  function onLanguageChange(isUserManualChange = true, shouldSave = true, opts = {}) {
     const lang = getSelectedLanguage();
     dictUrlInput.value = lang.dictUrl;
     dictNameTag.textContent = lang.dictName;
 
     // RTL 알림 및 자동 적용
-    if (lang.isRTL) {
-      rtlNotice.classList.remove('hidden');
-      if (isUserManualChange) {
-        rtlForce.checked = true;
-      }
-    } else {
-      rtlNotice.classList.add('hidden');
-      if (isUserManualChange) {
-        rtlForce.checked = false;
-      }
+    rtlNotice.classList.toggle('hidden', !lang.isRTL);
+    if (opts.prevLang) {
+      if (rtlForce.checked === Boolean(opts.prevLang.isRTL)) rtlForce.checked = Boolean(lang.isRTL);
+    } else if (isUserManualChange) {
+      rtlForce.checked = Boolean(lang.isRTL);
     }
 
     // 3번째 필드가 존재할 경우 언어에 맞춰 기본값/플레이스홀더 동기화
@@ -282,12 +399,18 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 언어 변경 시 예시 샘플 자동 채우기 (사용자가 직접 변경한 경우)
+    // 언어 변경 시 예시 샘플 자동 채우기 (사용자가 직접 입력한 예시값은 유지, 기본값 그대로인 칸만 교체)
     if (isUserManualChange && lang.sample) {
-      if (fields[0]) fields[0].sampleInput.value = lang.sample.field1 || '';
-      if (fields[1]) fields[1].sampleInput.value = lang.sample.field2 || '';
-      if (fields.length >= 3 && lang.sample.field3) {
-        fields[2].sampleInput.value = lang.sample.field3;
+      if (fields[0] && isUntouchedSample(fields[0].sampleInput.value, 'field1')) {
+        fields[0].sampleInput.value = lang.sample.field1 || '';
+      }
+      if (fields[1] && isUntouchedSample(fields[1].sampleInput.value, 'field2')) {
+        fields[1].sampleInput.value = lang.sample.field2 || '';
+      }
+      // 3번째 칸은 기본 3번째 필드(Example / pinyin)일 때만 (추천 칩 등 다른 필드의 예시는 건드리지 않음)
+      if (fields.length >= 3 && isDefaultThirdFieldName(fields[2].nameInput.value)
+        && isUntouchedSample(fields[2].sampleInput.value, 'field3')) {
+        fields[2].sampleInput.value = getDefaultThirdField(lang).sample;
       }
     }
 
@@ -299,13 +422,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 필드 이벤트 바인딩 헬퍼 (초기 1, 2번째 필드 및 동적 추가 필드 공통)
   function bindFieldEvents(f) {
-    // 필드명 변경 시 배지 및 3번 사전 링크 체크리스트, 서식 즉시 갱신
+    // 필드명 변경 시 배지 및 고급 설정의 사전 아이콘 체크리스트, 서식 즉시 갱신
     f.nameInput.addEventListener('input', () => {
+      updateFieldNameWarning(f);
       updateFieldBadges();
       updateDictFieldChecklist();
       updateAll();
     });
     f.nameInput.addEventListener('change', () => {
+      updateFieldNameWarning(f);
       updateFieldBadges();
       updateDictFieldChecklist();
       updateAll();
@@ -350,10 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
     f.sizeSlider.addEventListener('change', () => updateAll());
 
     f.sizeNum.addEventListener('input', (e) => {
-      let val = parseInt(e.target.value, 10);
-      if (isNaN(val)) val = 20;
-      if (val < 10) val = 10;
-      if (val > 80) val = 80;
+      const val = Math.round(clampNumber(e.target.value, SIZE_MIN, SIZE_MAX, 20));
       f.sizeSlider.value = val;
       f.sizeVal.textContent = val;
       if (f === fields[0] && syncFrontSizeWithF1 && syncFrontSizeWithF1.checked && frontOnBackSize) {
@@ -363,7 +485,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       updateAll();
     });
-    f.sizeNum.addEventListener('change', () => updateAll());
+    // 입력을 마치면 범위로 보정된 실제 적용값을 숫자 칸에도 다시 표시
+    f.sizeNum.addEventListener('change', () => {
+      f.sizeNum.value = f.sizeSlider.value;
+      f.sizeVal.textContent = f.sizeSlider.value;
+      updateAll();
+    });
 
     // 굵기
     f.weightSelect.addEventListener('change', () => updateAll());
@@ -479,7 +606,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const f = fields[selectedFieldIndex];
     if (!f) return;
 
-    const fName = f.nameInput.value.trim() || `Field${selectedFieldIndex + 1}`;
+    const fName = getFieldDisplayName(f, selectedFieldIndex);
     inspectorFieldName.textContent = t('editor.field.numberedName', { num: selectedFieldIndex + 1, name: fName });
 
     const isVisible = currentPreviewSide === 'front'
@@ -507,7 +634,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'inspector-chip' + (idx === selectedFieldIndex ? ' active' : '');
-      chip.textContent = `${idx + 1}. ${field.nameInput.value.trim() || `Field${idx + 1}`}`;
+      chip.textContent = `${idx + 1}. ${getFieldDisplayName(field, idx)}`;
       chip.addEventListener('click', () => selectField(idx));
       inspectorFieldChips.appendChild(chip);
     });
@@ -539,7 +666,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     inspectorSizeNum.addEventListener('change', () => {
       const f = target();
-      if (f) inspectorSizeNum.value = f.sizeSlider.value;
+      if (!f) return;
+      // 범위로 보정된 실제 적용값을 숫자 칸에 다시 표시
+      inspectorSizeNum.value = f.sizeSlider.value;
+      inspectorSizeVal.textContent = f.sizeSlider.value;
+      f.sizeNum.value = f.sizeSlider.value;
     });
 
     inspectorWeight.addEventListener('change', () => {
@@ -637,15 +768,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let hasWikiLink = false;
 
     if (fieldData) {
-      if (fieldData.name !== undefined) name = fieldData.name;
-      if (fieldData.sample !== undefined) sample = fieldData.sample;
+      // 저장본에서 복원하는 값은 형식을 검사 (잘못된 값은 기본값 유지)
+      if (fieldData.name !== undefined) name = String(fieldData.name);
+      if (fieldData.sample !== undefined) sample = String(fieldData.sample);
       if (fieldData.showFront !== undefined) showFront = Boolean(fieldData.showFront);
       if (fieldData.showBack !== undefined) showBack = Boolean(fieldData.showBack);
-      if (fieldData.size !== undefined) size = fieldData.size;
-      if (fieldData.weight !== undefined) weight = fieldData.weight;
-      if (fieldData.font !== undefined) font = fieldData.font;
-      if (fieldData.fontCustom !== undefined) fontCustom = fieldData.fontCustom;
-      if (fieldData.color !== undefined) color = fieldData.color;
+      if (fieldData.size !== undefined) size = Math.round(clampNumber(fieldData.size, SIZE_MIN, SIZE_MAX, size));
+      if (WEIGHT_VALUES.includes(String(fieldData.weight))) weight = String(fieldData.weight);
+      if (fieldData.font !== undefined && (fieldData.font === 'inherit' || fieldData.font === 'custom' || FONT_PRESETS[fieldData.font])) font = fieldData.font;
+      if (fieldData.fontCustom !== undefined) fontCustom = String(fieldData.fontCustom);
+      if (fieldData.color !== undefined) color = normalizeHexColor(fieldData.color) || color;
       if (fieldData.hasDictLink !== undefined) hasDictLink = Boolean(fieldData.hasDictLink);
       if (fieldData.hasWikiLink !== undefined) hasWikiLink = Boolean(fieldData.hasWikiLink);
     } else {
@@ -706,6 +838,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="form-group">
           <label class="form-label">${t('editor.field.nameLabel')}</label>
           <input type="text" class="form-input f-name" value="${escapeHtml(name)}" placeholder="${t('editor.field.namePlaceholderOptional')}">
+          <span class="notice-badge field-name-warning f-name-warn hidden" role="alert"></span>
         </div>
         <div class="form-group">
           <label class="form-label">${t('editor.field.sampleLabel')}</label>
@@ -717,8 +850,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="control-item">
           <label class="sub-label">${t('editor.style.sizeLabel')} <span class="f-size-val">${size}</span>px</label>
           <div class="slider-with-number">
-            <input type="range" min="14" max="64" value="${size}" class="form-range f-size">
-            <input type="number" min="14" max="80" value="${size}" class="num-input f-size-num">
+            <input type="range" min="${SIZE_MIN}" max="${SIZE_MAX}" value="${size}" class="form-range f-size">
+            <input type="number" min="${SIZE_MIN}" max="${SIZE_MAX}" value="${size}" class="num-input f-size-num">
           </div>
         </div>
 
@@ -752,8 +885,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="control-item">
           <label class="sub-label">${t('editor.style.colorLabel')}</label>
           <div class="color-picker-group">
-            <input type="color" value="${color}" class="form-color f-color">
-            <input type="text" value="${color}" class="color-hex-input f-color-text" maxlength="7">
+            <input type="color" value="${escapeHtml(color)}" class="form-color f-color">
+            <input type="text" value="${escapeHtml(color)}" class="color-hex-input f-color-text" maxlength="7">
           </div>
         </div>
       </div>
@@ -773,6 +906,7 @@ document.addEventListener('DOMContentLoaded', () => {
       boxEl: box,
       badgeEl: box.querySelector('.field-badge'),
       nameInput: box.querySelector('.f-name'),
+      nameWarnEl: box.querySelector('.f-name-warn'),
       sampleInput: box.querySelector('.f-sample'),
       showFront: box.querySelector('.f-show-front'),
       showBack: box.querySelector('.f-show-back'),
@@ -793,6 +927,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fields.push(fObj);
     bindFieldEvents(fObj);
+    updateFieldNameWarning(fObj);
     updateFieldBadges();
     updateDictFieldChecklist();
 
@@ -819,6 +954,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fObj.boxEl.remove();
     fields.splice(idx, 1);
+    // 앞쪽 필드가 지워지면 편집 중이던 필드를 계속 가리키도록 선택 번호 보정
+    if (idx < selectedFieldIndex) selectedFieldIndex -= 1;
     updateFieldBadges();
     updateDictFieldChecklist();
     updateAll(true);
@@ -1178,7 +1315,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fields.forEach((f, idx) => {
       if (!f.badgeEl) return;
       const fNum = idx + 1;
-      const fName = f.nameInput.value.trim() || (idx === 0 ? 'Front' : (idx === 1 ? 'Back' : `Field${fNum}`));
+      const fName = getFieldDisplayName(f, idx);
 
       let sideText = t('editor.field.sideNone');
       if (f.showFront.checked && f.showBack.checked) {
@@ -1210,14 +1347,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 3번 영역의 각 필드별 외국어사전 / 보조 사전 체크박스 목록 동적 갱신 (단어·예문 다중 선택 지원)
+  // 고급 설정의 필드별 외국어사전 / 보조 사전 체크박스 목록 동적 갱신 (단어·예문 다중 선택 지원)
   function updateDictFieldChecklist() {
     if (!dictFieldChecklist) return;
     dictFieldChecklist.innerHTML = '';
 
     fields.forEach((f, idx) => {
       const fNum = idx + 1;
-      const fName = f.nameInput.value.trim() || t('editor.field.fallbackName', { num: fNum });
+      const fName = getFieldDisplayName(f, idx);
 
       // 상단 헤더 미니 토글도 동기화
       if (f.dictLinkCheck) {
@@ -1342,16 +1479,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (frontOnBackSizeNum) {
       frontOnBackSizeNum.addEventListener('input', (e) => {
-        let val = parseInt(e.target.value, 10);
-        if (isNaN(val)) val = 24;
-        if (val < 10) val = 10;
-        if (val > 80) val = 80;
+        const val = Math.round(clampNumber(e.target.value, SIZE_MIN, SIZE_MAX, 24));
         if (frontOnBackSize) frontOnBackSize.value = val;
         if (frontOnBackSizeVal) frontOnBackSizeVal.textContent = val + 'px';
         if (syncFrontSizeWithF1) syncFrontSizeWithF1.checked = false;
         updateAll();
       });
-      frontOnBackSizeNum.addEventListener('change', updateAll);
+      // 입력을 마치면 범위로 보정된 실제 적용값을 숫자 칸에도 다시 표시
+      frontOnBackSizeNum.addEventListener('change', () => {
+        if (frontOnBackSize) {
+          frontOnBackSizeNum.value = frontOnBackSize.value;
+          if (frontOnBackSizeVal) frontOnBackSizeVal.textContent = frontOnBackSize.value + 'px';
+        }
+        updateAll();
+      });
     }
 
     if (syncFrontSizeWithF1) {
@@ -1401,15 +1542,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (cardLineHeightNum) {
       cardLineHeightNum.addEventListener('input', (e) => {
-        let val = parseFloat(e.target.value);
-        if (isNaN(val)) val = 1.5;
-        if (val < 1.0) val = 1.0;
-        if (val > 3.0) val = 3.0;
+        const val = clampNumber(e.target.value, LINE_HEIGHT_MIN, LINE_HEIGHT_MAX, 1.5);
         if (cardLineHeight) cardLineHeight.value = val;
-        if (cardLineHeightVal) cardLineHeightVal.textContent = val;
+        // 슬라이더 단계(0.1)로 맞춰진 실제 적용값을 표시
+        if (cardLineHeightVal) cardLineHeightVal.textContent = cardLineHeight ? cardLineHeight.value : val;
         updateAll();
       });
-      cardLineHeightNum.addEventListener('change', updateAll);
+      // 입력을 마치면 범위로 보정된 실제 적용값을 숫자 칸에도 다시 표시
+      cardLineHeightNum.addEventListener('change', () => {
+        if (cardLineHeight) {
+          cardLineHeightNum.value = cardLineHeight.value;
+          if (cardLineHeightVal) cardLineHeightVal.textContent = cardLineHeight.value;
+        }
+        updateAll();
+      });
     }
 
     // 필드 컨트롤 동기화 (기본 필드 1, 2)
@@ -1462,25 +1608,20 @@ document.addEventListener('DOMContentLoaded', () => {
       renderPreview();
     });
 
-    // 코드 탭 전환
-    document.querySelectorAll('.code-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.code-tab-panel').forEach(p => p.classList.remove('active'));
-
-        tab.classList.add('active');
-        const tabKey = tab.dataset.tab;
-        if (tabKey === 'front') document.getElementById('panelFrontCode').classList.add('active');
-        if (tabKey === 'back') document.getElementById('panelBackCode').classList.add('active');
-        if (tabKey === 'css') document.getElementById('panelCssCode').classList.add('active');
-        if (tabKey === 'guide') document.getElementById('panelGuide').classList.add('active');
+    // 복사 버튼 (복사에 성공하면 해당 단계에 ✓ 표시)
+    const bindCopy = (btn, step, labelKey) => {
+      if (!btn) return;
+      btn.addEventListener('click', () => {
+        const text = step.codeEl.textContent;
+        copyToClipboard(text, t(labelKey), () => {
+          step.copiedText = text;
+          refreshPasteSteps();
+        });
       });
-    });
-
-    // 복사 버튼
-    copyFrontBtn.addEventListener('click', () => copyToClipboard(codeFrontText.textContent, t('editor.code.copyFrontLabel')));
-    copyBackBtn.addEventListener('click', () => copyToClipboard(codeBackText.textContent, t('editor.code.copyBackLabel')));
-    copyCssBtn.addEventListener('click', () => copyToClipboard(codeCssText.textContent, t('editor.code.copyCssLabel')));
+    };
+    bindCopy(copyFrontBtn, pasteSteps[0], 'editor.code.copyFrontLabel');
+    bindCopy(copyBackBtn, pasteSteps[1], 'editor.code.copyBackLabel');
+    bindCopy(copyCssBtn, pasteSteps[2], 'editor.code.copyCssLabel');
 
     // 모바일 화면 전환 로직 (<= 768px 모바일 전용 탭 네비게이션 & 좌우 전환 플로팅 버튼)
     const btnMobileEditTab = document.getElementById('btnMobileEditTab');
@@ -1634,32 +1775,56 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 3. 필드 렌더 마크업 생성 헬퍼
-  function buildFieldBlock(field, isForPreview = false, fieldIndex = 1) {
-    const fieldName = field.nameInput.value.trim() || `Field${fieldIndex}`;
-    const sampleValue = field.sampleInput.value.trim() || fieldName;
+  // 필드 글씨 서식 선언 목록 (미리보기 인라인 스타일과 생성 CSS의 .f-field-N 규칙이 같은 값을 쓰도록 공유)
+  function getFieldStyleDecls(field, colorOverride) {
+    const decls = [];
     const size = field.sizeSlider.value;
     const weight = field.weightSelect.value;
-    const color = field.colorInput.value;
     const fieldFontCss = getFieldFontCss(field);
+    if (size) decls.push(`font-size: ${size}px;`);
+    if (fieldFontCss) decls.push(`font-family: ${fieldFontCss};`);
+    if (weight && weight !== 'normal') decls.push(`font-weight: ${weight};`);
+    decls.push(`color: ${colorOverride || field.colorInput.value};`);
+    decls.push('margin-bottom: 8px;');
+    return decls;
+  }
 
-    const isDarkMode = isForPreview && Boolean(ankiCardWrapper && ankiCardWrapper.classList.contains('dark-mode'));
-    const activeColor = isDarkMode ? getDarkModeColor(color) : color;
+  // 뒷면 상단 앞면 내용(.front-preview-hint) 서식 값
+  function getFrontHintStyle() {
+    const f1 = fields[0];
+    const keepStyle = Boolean(frontOnBackKeepStyle && frontOnBackKeepStyle.checked);
+    return {
+      size: frontOnBackSize ? frontOnBackSize.value : f1.sizeSlider.value,
+      weight: keepStyle ? f1.weightSelect.value : 'normal',
+      color: keepStyle ? f1.colorInput.value : '#64748b',
+      fontCss: getFieldFontCss(f1),
+    };
+  }
 
-    // style 속성 조립
-    const styleParts = [];
-    if (size) styleParts.push(`font-size: ${size}px;`);
-    if (fieldFontCss) styleParts.push(`font-family: ${fieldFontCss};`);
-    if (weight && weight !== 'normal') styleParts.push(`font-weight: ${weight};`);
-    styleParts.push(`color: ${activeColor};`);
-    styleParts.push(`margin-bottom: 8px;`);
+  // 뒷면 상단 앞면 내용 서식 선언 목록 (미리보기·생성 CSS 공용)
+  function getFrontHintDecls(colorOverride) {
+    const s = getFrontHintStyle();
+    const decls = [`color: ${colorOverride || s.color};`, `font-size: ${s.size}px;`];
+    if (s.weight !== 'normal') decls.push(`font-weight: ${s.weight};`);
+    if (s.fontCss) decls.push(`font-family: ${s.fontCss};`);
+    decls.push('margin-bottom: 8px;');
+    return decls;
+  }
 
-    const divStyle = styleParts.join(' ');
-    const linkButtons = buildLinkButtons(field, isForPreview, fieldName, sampleValue);
+  function buildFieldBlock(field, isForPreview = false, fieldIndex = 1) {
+    const idx = fieldIndex - 1;
 
     if (isForPreview) {
-      return `<div class="field-item f-field-${fieldIndex}" style="${divStyle}">${escapeHtml(sampleValue)}${linkButtons}</div>`;
+      // 미리보기는 생성된 CSS를 불러오지 않으므로 같은 서식을 인라인 스타일로 적용
+      const sampleValue = field.sampleInput.value.trim() || getFieldDisplayName(field, idx);
+      const isDarkMode = Boolean(ankiCardWrapper && ankiCardWrapper.classList.contains('dark-mode'));
+      const color = isDarkMode ? getDarkModeColor(field.colorInput.value) : field.colorInput.value;
+      const divStyle = getFieldStyleDecls(field, color).join(' ');
+      return `<div class="field-item f-field-${fieldIndex}" style="${escapeHtml(divStyle)}">${escapeHtml(sampleValue)}${buildPreviewLinkButtons(field, sampleValue)}</div>`;
     }
-    return `<div class="field-item f-field-${fieldIndex}" style="font-size: ${size}px;${fieldFontCss ? ` font-family: ${fieldFontCss};` : ''}${weight && weight !== 'normal' ? ` font-weight: ${weight};` : ''} color: ${color}; margin-bottom: 8px;">{{${fieldName}}}${linkButtons}</div>`;
+
+    // Anki 서식: 스타일은 생성 CSS(.f-field-N)에만 두어 Anki [스타일] 탭에서 고칠 수 있게 함
+    return `<div class="field-item f-field-${fieldIndex}">${buildAnkiFieldContent(field, idx)}</div>`;
   }
 
   // 링크 검색어 정리: [품사]·(괄호) 내용 제거, 뜻이 여러 개면 첫 번째 뜻만 사용
@@ -1675,27 +1840,36 @@ document.addEventListener('DOMContentLoaded', () => {
     return cleaned || String(text || '').trim();
   }
 
-  // Anki 카드에서 실행되는 검색어 정리 스크립트 (각 필드의 숨은 .link-query 텍스트로 아이콘 링크 주소를 다시 만듦)
-  const LINK_QUERY_SCRIPT = `<script>
+  // Anki 카드에서 실행되는 링크 주소 생성 스크립트
+  // 같은 필드 블록의 .link-src 텍스트(재생 버튼·오디오 제외)로 검색어를 만들어 아이콘 링크 주소(data-base + 검색어)를 채움
+  function buildLinkQueryScript(shouldClean) {
+    return `<script>
 (function () {
-  document.querySelectorAll('.link-query').forEach(function (src) {
-    var raw = src.textContent;
-    var q = raw.replace(/${LINK_QUERY_STRIP_RE}/g, '').split(/${LINK_QUERY_SPLIT_RE}/)[0].trim() || raw.trim();
-    src.parentNode.querySelectorAll('.link-btn[data-base]').forEach(function (a) {
-      a.href = a.getAttribute('data-base') + encodeURIComponent(q);
+  var clean = ${shouldClean ? 'true' : 'false'};
+  var each = function (list, fn) { Array.prototype.forEach.call(list, fn); };
+  each(document.querySelectorAll('.link-src'), function (src) {
+    var copy = src.cloneNode(true);
+    each(copy.querySelectorAll('.replay-button, audio, script, style'), function (el) { el.parentNode.removeChild(el); });
+    each(copy.querySelectorAll('br, div, p, li'), function (el) { el.parentNode.insertBefore(document.createTextNode(' '), el); });
+    var raw = copy.textContent.replace(/\\s+/g, ' ').trim();
+    var q = clean ? (raw.replace(/${LINK_QUERY_STRIP_RE}/g, '').split(/${LINK_QUERY_SPLIT_RE}/)[0].trim() || raw) : raw;
+    each(src.parentNode.querySelectorAll('.link-btn[data-base]'), function (a) {
+      a.setAttribute('href', a.getAttribute('data-base') + encodeURIComponent(q));
     });
   });
 })();
 </script>`;
+  }
 
+  // 링크가 하나라도 있으면 링크 주소 생성 스크립트를 서식 끝에 붙임
   function withLinkQueryScript(template) {
-    return (linkCleanQuery && linkCleanQuery.checked && template.includes('class="link-query"'))
-      ? `${template}\n\n${LINK_QUERY_SCRIPT}`
+    return template.includes('class="link-src"')
+      ? `${template}\n\n${buildLinkQueryScript(Boolean(linkCleanQuery && linkCleanQuery.checked))}`
       : template;
   }
 
-  // 텍스트 옆 외국어사전 / 보조 사전 아이콘 버튼 (한 필드에 둘 다 적용 가능)
-  function buildLinkButtons(field, isForPreview, fieldName, sampleValue) {
+  // 필드에 붙일 외국어사전 / 보조 사전 링크 목록 (http/https 주소만, 비었거나 잘못된 주소는 제외)
+  function getLinkTargets(field) {
     const linkTargets = [];
     if (field.hasDictLink) {
       linkTargets.push({ cls: 'dict-btn', icon: '🌐', title: t('editor.link.dictTitle'), url: dictUrlInput.value.trim() });
@@ -1704,28 +1878,69 @@ document.addEventListener('DOMContentLoaded', () => {
       const sub = getSubDict();
       linkTargets.push({ cls: 'subdict-btn', icon: sub.icon, title: t('editor.link.subDictTitle', { name: sub.name }), url: wikiUrlInput ? wikiUrlInput.value.trim() : sub.url });
     }
+    return linkTargets.filter(target => isHttpUrl(target.url));
+  }
 
+  // 미리보기용 아이콘 링크: 예시값으로 실제 검색 링크 생성
+  function buildPreviewLinkButtons(field, sampleValue) {
+    const linkTargets = getLinkTargets(field);
     if (linkTargets.length === 0) return '';
 
     const targetAttr = linkNewTab.checked ? ' target="_blank"' : '';
     const shouldClean = Boolean(linkCleanQuery && linkCleanQuery.checked);
-
-    if (isForPreview) {
-      // 미리보기용: 예시값으로 실제 검색 링크 생성
-      const query = shouldClean ? cleanLinkQuery(sampleValue) : sampleValue;
-      return linkTargets.map(t =>
-        `<a class="link-btn ${t.cls}" href="${t.url + encodeURIComponent(query)}"${targetAttr} title="${t.title}" style="${LINK_BTN_INLINE_STYLE}">${t.icon}</a>`
-      ).join('');
-    }
-
-    // Anki 템플릿용: {{text:필드명}}으로 HTML 서식을 뺀 텍스트를 사용
-    // 검색어 정리를 켜면 숨은 .link-query 텍스트를 카드 스크립트가 정리해 링크 주소를 다시 만듦 (스크립트 미실행 환경에서는 원문으로 검색)
-    const buttons = linkTargets.map(t =>
-      `<a class="link-btn ${t.cls}" href="${t.url}{{text:${fieldName}}}"${shouldClean ? ` data-base="${t.url}"` : ''}${targetAttr} title="${t.title}" style="${LINK_BTN_INLINE_STYLE}">${t.icon}</a>`
+    const query = shouldClean ? cleanLinkQuery(sampleValue) : sampleValue;
+    return linkTargets.map(target =>
+      `<a class="link-btn ${target.cls}" href="${escapeHtml(target.url + encodeURIComponent(query))}"${targetAttr} title="${escapeHtml(target.title)}" style="${LINK_BTN_INLINE_STYLE}">${target.icon}</a>`
     ).join('');
-    return shouldClean
-      ? `${buttons}<span class="link-query" hidden>{{text:${fieldName}}}</span>`
-      : buttons;
+  }
+
+  // Anki 서식용 필드 내용: 링크가 있으면 필드 값을 .link-src로 감싸고, 아이콘은 필드가 비어 있지 않을 때만 표시
+  // (href에는 사전 주소만 넣고, 검색어는 카드 스크립트가 .link-src 텍스트로 채움 → & # " 등이 들어 있어도 안전)
+  function buildAnkiFieldContent(field, idx) {
+    const name = getAnkiFieldName(field, idx);
+    const linkTargets = getLinkTargets(field);
+    if (linkTargets.length === 0) return `{{${name}}}`;
+
+    const targetAttr = linkNewTab.checked ? ' target="_blank"' : '';
+    const buttons = linkTargets.map(target => {
+      const base = escapeHtml(target.url);
+      return `<a class="link-btn ${target.cls}" href="${base}" data-base="${base}"${targetAttr} title="${escapeHtml(target.title)}">${target.icon}</a>`;
+    }).join('');
+    return `<span class="link-src">{{${name}}}</span>{{#${name}}}${buttons}{{/${name}}}`;
+  }
+
+  // 사전 URL 입력칸 아래 안내 (비었거나 http/https가 아니면 링크를 만들지 않음을 알림)
+  function updateLinkUrlWarnings() {
+    const check = (warnEl, url, isUsed) => {
+      if (!warnEl) return;
+      const value = String(url || '').trim();
+      let msg = '';
+      if (isUsed && !value) msg = t('editor.step1.urlEmptyWarning');
+      else if (value && !isHttpUrl(value)) msg = t('editor.step1.urlInvalidWarning');
+      warnEl.textContent = msg;
+      warnEl.classList.toggle('hidden', !msg);
+    };
+    check(dictUrlWarn, dictUrlInput.value, fields.some(f => f.hasDictLink));
+    check(subDictUrlWarn, wikiUrlInput ? wikiUrlInput.value : '', fields.some(f => f.hasWikiLink));
+
+    // 사전 주소 칸은 고급 설정 안에 있으므로, 안내가 생기면 접힌 고급 설정을 펼쳐 보여줌
+    const hasWarning = [dictUrlWarn, subDictUrlWarn].some(el => el && !el.classList.contains('hidden'));
+    if (hasWarning && editorAdvancedSettings && !editorAdvancedSettings.open) editorAdvancedSettings.open = true;
+  }
+
+  // ③ 붙여넣기 단계 ✓ 표시 갱신: 복사한 내용이 지금 생성된 서식과 같을 때만 완료로 표시
+  function refreshPasteSteps() {
+    let doneCount = 0;
+    pasteSteps.forEach((step, idx) => {
+      if (!step.stepEl) return;
+      if (step.copiedText !== null && step.copiedText !== step.codeEl.textContent) step.copiedText = null;
+      const isDone = step.copiedText !== null;
+      if (isDone) doneCount += 1;
+      step.stepEl.classList.toggle('is-done', isDone);
+      const num = step.stepEl.querySelector('.paste-step-num');
+      if (num) num.textContent = isDone ? '✓' : String(idx + 1);
+    });
+    if (pasteAllDone) pasteAllDone.classList.toggle('hidden', doneCount < pasteSteps.length);
   }
 
   // 4. Anki 앞면 서식 생성
@@ -1739,8 +1954,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (activeFrontFields.length === 0) {
       // 아무것도 선택되지 않았을 경우 1번째 필드 기본
-      const f1Name = fields[0] ? (fields[0].nameInput.value.trim() || 'Front') : 'Front';
-      return `{{${f1Name}}}`;
+      return `{{${getAnkiFieldName(fields[0], 0)}}}`;
     }
 
     return withLinkQueryScript(activeFrontFields.map(item => buildFieldBlock(item.field, false, item.index)).join('\n\n'));
@@ -1750,15 +1964,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function generateBackTemplate() {
     const parts = [];
 
-    // 앞면 내용 유지 여부
+    // 앞면 내용 유지 여부 (서식은 생성 CSS의 .front-preview-hint 규칙)
     if (keepFrontOnBack.checked && fields[0]) {
-      const frontName = fields[0].nameInput.value.trim() || 'Front';
-      const f1Size = frontOnBackSize ? frontOnBackSize.value : fields[0].sizeSlider.value;
-      const f1Weight = (frontOnBackKeepStyle && frontOnBackKeepStyle.checked) ? fields[0].weightSelect.value : 'normal';
-      const f1Color = (frontOnBackKeepStyle && frontOnBackKeepStyle.checked) ? fields[0].colorInput.value : '#64748b';
-      const f1FontCss = getFieldFontCss(fields[0]);
-
-      parts.push(`<div class="front-preview-hint" style="color: ${f1Color}; font-size: ${f1Size}px;${f1Weight !== 'normal' ? ` font-weight: ${f1Weight};` : ''}${f1FontCss ? ` font-family: ${f1FontCss};` : ''} margin-bottom: 8px;">{{${frontName}}}${buildLinkButtons(fields[0], false, frontName)}</div>`);
+      parts.push(`<div class="front-preview-hint">${buildAnkiFieldContent(fields[0], 0)}</div>`);
     }
 
     // 정답 구분선 hr 여부
@@ -1778,51 +1986,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 6. Anki CSS 서식 생성 (다크모드 완벽 대응)
   function generateCssTemplate() {
-    const align = centerAlign.checked ? 'center' : 'left';
+    const isRtl = rtlForce.checked;
+    const align = centerAlign.checked ? 'center' : (isRtl ? 'right' : 'left');
 
     const cardFontKey = cardBaseFont ? cardBaseFont.value : 'system';
     const cardFontCustom = cardBaseFontCustom ? cardBaseFontCustom.value : '';
     const cardFontCss = getFontFamilyCss(cardFontKey, cardFontCustom);
     const cardLineHeightVal = cardLineHeight ? cardLineHeight.value : '1.5';
 
-    const f1SizeOnBack = frontOnBackSize ? frontOnBackSize.value : (fields[0] ? fields[0].sizeSlider.value : 24);
-    const f1WeightOnBack = (frontOnBackKeepStyle && frontOnBackKeepStyle.checked && fields[0]) ? fields[0].weightSelect.value : 'normal';
-    const f1ColorOnBack = (frontOnBackKeepStyle && frontOnBackKeepStyle.checked && fields[0]) ? fields[0].colorInput.value : '#64748b';
-    const darkF1ColorOnBack = getDarkModeColor(f1ColorOnBack);
-    const f1FontCssOnBack = fields[0] ? getFieldFontCss(fields[0]) : '';
+    const darkF1ColorOnBack = getDarkModeColor(getFrontHintStyle().color);
+    const frontHintDecls = getFrontHintDecls().join('\n  ');
 
-    // 구글 폰트 웹폰트 import 필요 여부 판별
-    const webFontKeys = ['noto-sans-kr', 'noto-serif-kr', 'nanum-gothic', 'inter', 'noto-sans-jp', 'noto-sans-sc', 'cursive'];
-    const usesWebFont = webFontKeys.includes(cardFontKey) || fields.some(f => f.fontSelect && webFontKeys.includes(f.fontSelect.value));
-    const fontImportHeader = usesWebFont ? `@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;700&family=Nanum+Gothic:wght@400;700&family=Inter:wght@400;600&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Caveat:wght@600&display=swap');\n\n` : '';
+    // 구글 웹폰트 import: 실제로 쓰는 글꼴(카드 기본 글꼴 + 필드별 글꼴)만 불러옴
+    const usedFontKeys = new Set([cardFontKey]);
+    fields.forEach(f => {
+      if (f.fontSelect && f.fontSelect.value !== 'inherit') usedFontKeys.add(f.fontSelect.value);
+    });
+    const webFontParams = Object.keys(WEB_FONT_FAMILIES)
+      .filter(key => usedFontKeys.has(key))
+      .map(key => `family=${WEB_FONT_FAMILIES[key]}`);
+    const fontImportHeader = webFontParams.length
+      ? `@import url('https://fonts.googleapis.com/css2?${webFontParams.join('&')}&display=swap');\n\n`
+      : '';
 
     let fieldStyles = '';
     let nightModeStyles = '';
 
     fields.forEach((f, idx) => {
       const fNum = idx + 1;
-      const size = f.sizeSlider.value;
-      const weight = f.weightSelect.value;
-      const color = f.colorInput.value;
-      const darkColor = getDarkModeColor(color);
-      const fieldFontCss = getFieldFontCss(f);
+      const darkColor = getDarkModeColor(f.colorInput.value);
 
       fieldStyles += `\n.f-field-${fNum} {
-  font-size: ${size}px;
-  ${fieldFontCss ? `font-family: ${fieldFontCss};\n  ` : ''}${weight && weight !== 'normal' ? `font-weight: ${weight};\n  ` : ''}color: ${color};
+  ${getFieldStyleDecls(f).join('\n  ')}
 }`;
 
+      // Anki는 nightMode / night_mode 클래스를 body(.card)에 붙이므로 필드는 하위 선택자로 지정
       nightModeStyles += `\n.nightMode .f-field-${fNum},
 .night_mode .f-field-${fNum},
 .nightMode .f-field-${fNum} a,
 .night_mode .f-field-${fNum} a {
   color: ${darkColor} !important;
-}
-@media (prefers-color-scheme: dark) {
-  .f-field-${fNum},
-  .f-field-${fNum} a {
-    color: ${darkColor} !important;
-  }
 }`;
     });
 
@@ -1830,7 +2033,7 @@ document.addEventListener('DOMContentLoaded', () => {
   font-family: ${cardFontCss};
   font-size: 20px;
   text-align: ${align};
-  color: #202124;
+${isRtl ? '  direction: rtl;\n' : ''}  color: #202124;
   background-color: #ffffff;
   line-height: ${cardLineHeightVal};
 }
@@ -1840,9 +2043,7 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 
 .front-preview-hint {
-  color: ${f1ColorOnBack};
-  font-size: ${f1SizeOnBack}px;
-  ${f1WeightOnBack !== 'normal' ? `font-weight: ${f1WeightOnBack};\n  ` : ''}${f1FontCssOnBack ? `font-family: ${f1FontCssOnBack};\n  ` : ''}margin-bottom: 8px;
+  ${frontHintDecls}
 }
 
 hr#answer {
@@ -1876,39 +2077,20 @@ a {
 /* =======================================
    ${t('editor.cssComment.nightMode')}
    ======================================= */
-.nightMode .card,
-.night_mode .card {
+.card.nightMode,
+.card.night_mode {
   color: #f8fafc;
   background-color: #2f2f31;
 }
 
-@media (prefers-color-scheme: dark) {
-  .card {
-    color: #f8fafc;
-    background-color: #2f2f31;
-  }
-}
-
 .nightMode hr#answer,
 .night_mode hr#answer {
-  border-top-color: #52525b;
-}
-
-@media (prefers-color-scheme: dark) {
-  hr#answer {
-    border-top-color: #52525b;
-  }
+  border-top-color: #4b5563;
 }
 
 .nightMode .front-preview-hint,
 .night_mode .front-preview-hint {
   color: ${darkF1ColorOnBack} !important;
-}
-
-@media (prefers-color-scheme: dark) {
-  .front-preview-hint {
-    color: ${darkF1ColorOnBack} !important;
-  }
 }
 
 /* ${t('editor.cssComment.nightModeFields')} */${nightModeStyles}
@@ -1951,14 +2133,12 @@ a {
 
       // 앞면 유지 표시
       if (keepFrontOnBack.checked && fields[0]) {
-        const f1Sample = fields[0].sampleInput.value.trim() || fields[0].nameInput.value.trim() || 'Front';
-        const f1Size = frontOnBackSize ? frontOnBackSize.value : fields[0].sizeSlider.value;
-        const f1Weight = (frontOnBackKeepStyle && frontOnBackKeepStyle.checked) ? fields[0].weightSelect.value : 'normal';
-        const f1BaseColor = (frontOnBackKeepStyle && frontOnBackKeepStyle.checked) ? fields[0].colorInput.value : '#64748b';
+        const f1Sample = fields[0].sampleInput.value.trim() || getFieldDisplayName(fields[0], 0);
+        const f1BaseColor = getFrontHintStyle().color;
         const f1Color = isDark ? getDarkModeColor(f1BaseColor) : f1BaseColor;
-        const f1FontCss = getFieldFontCss(fields[0]);
+        const hintStyle = getFrontHintDecls(f1Color).join(' ');
 
-        parts.push(`<div class="front-preview-hint" style="color: ${f1Color}; font-size: ${f1Size}px;${f1Weight !== 'normal' ? ` font-weight: ${f1Weight};` : ''}${f1FontCss ? ` font-family: ${f1FontCss};` : ''} margin-bottom: 8px;">${escapeHtml(f1Sample)}${buildLinkButtons(fields[0], true, '', f1Sample)}</div>`);
+        parts.push(`<div class="front-preview-hint" style="${escapeHtml(hintStyle)}">${escapeHtml(f1Sample)}${buildPreviewLinkButtons(fields[0], f1Sample)}</div>`);
       }
 
       // 구분선
@@ -2001,6 +2181,8 @@ a {
     codeBackText.textContent = backCode;
     codeCssText.textContent = cssCode;
 
+    refreshPasteSteps();
+    updateLinkUrlWarnings();
     renderPreview();
 
     if (shouldSave) {
@@ -2113,16 +2295,16 @@ a {
         }
       }
       if (data.cardLineHeight !== undefined && cardLineHeight) {
-        cardLineHeight.value = data.cardLineHeight;
-        if (cardLineHeightNum) cardLineHeightNum.value = data.cardLineHeight;
-        if (cardLineHeightVal) cardLineHeightVal.textContent = data.cardLineHeight;
+        cardLineHeight.value = clampNumber(data.cardLineHeight, LINE_HEIGHT_MIN, LINE_HEIGHT_MAX, 1.5);
+        if (cardLineHeightNum) cardLineHeightNum.value = cardLineHeight.value;
+        if (cardLineHeightVal) cardLineHeightVal.textContent = cardLineHeight.value;
       }
 
       // 뒷면 상단 앞면 내용 크기 & 스타일 설정 복원
       if (data.frontOnBackSize !== undefined && frontOnBackSize) {
-        frontOnBackSize.value = data.frontOnBackSize;
-        if (frontOnBackSizeNum) frontOnBackSizeNum.value = data.frontOnBackSize;
-        if (frontOnBackSizeVal) frontOnBackSizeVal.textContent = data.frontOnBackSize + 'px';
+        frontOnBackSize.value = Math.round(clampNumber(data.frontOnBackSize, SIZE_MIN, SIZE_MAX, 24));
+        if (frontOnBackSizeNum) frontOnBackSizeNum.value = frontOnBackSize.value;
+        if (frontOnBackSizeVal) frontOnBackSizeVal.textContent = frontOnBackSize.value + 'px';
       }
       if (data.syncFrontSizeWithF1 !== undefined && syncFrontSizeWithF1) {
         syncFrontSizeWithF1.checked = Boolean(data.syncFrontSizeWithF1);
@@ -2145,31 +2327,34 @@ a {
           const f = fields[i];
           const fData = data.fields[i];
           if (f && fData) {
-            if (fData.name !== undefined) f.nameInput.value = fData.name;
-            if (fData.sample !== undefined) f.sampleInput.value = fData.sample;
+            // 저장본 값은 형식을 검사해 복원 (잘못된 값은 현재 기본값 유지)
+            if (fData.name !== undefined) f.nameInput.value = String(fData.name);
+            if (fData.sample !== undefined) f.sampleInput.value = String(fData.sample);
             if (fData.showFront !== undefined) f.showFront.checked = Boolean(fData.showFront);
             if (fData.showBack !== undefined) f.showBack.checked = Boolean(fData.showBack);
 
             if (fData.size !== undefined) {
-              f.sizeSlider.value = fData.size;
-              f.sizeNum.value = fData.size;
-              f.sizeVal.textContent = fData.size;
+              const size = Math.round(clampNumber(fData.size, SIZE_MIN, SIZE_MAX, parseInt(f.sizeSlider.value, 10) || 24));
+              f.sizeSlider.value = size;
+              f.sizeNum.value = size;
+              f.sizeVal.textContent = size;
             }
-            if (fData.weight !== undefined) f.weightSelect.value = fData.weight;
-            if (fData.font !== undefined && f.fontSelect) {
+            if (WEIGHT_VALUES.includes(String(fData.weight))) f.weightSelect.value = String(fData.weight);
+            if (fData.font !== undefined && f.fontSelect && [...f.fontSelect.options].some(o => o.value === fData.font)) {
               f.fontSelect.value = fData.font;
               if (f.fontCustomInput) {
                 if (fData.font === 'custom') {
                   f.fontCustomInput.classList.remove('hidden');
-                  f.fontCustomInput.value = fData.fontCustom || '';
+                  f.fontCustomInput.value = String(fData.fontCustom || '');
                 } else {
                   f.fontCustomInput.classList.add('hidden');
                 }
               }
             }
-            if (fData.color !== undefined) {
-              f.colorInput.value = fData.color;
-              f.colorText.value = fData.color;
+            const color = normalizeHexColor(fData.color);
+            if (color) {
+              f.colorInput.value = color;
+              f.colorText.value = color;
             }
             if (fData.hasDictLink !== undefined) {
               f.hasDictLink = Boolean(fData.hasDictLink);
@@ -2218,6 +2403,7 @@ a {
         updateSubDictLabels();
       }
 
+      fields.forEach(f => updateFieldNameWarning(f));
       updateFieldBadges();
       updateDictFieldChecklist();
 
@@ -2350,6 +2536,7 @@ a {
       hasDictLink: false,
     }, false);
 
+    fields.forEach(f => updateFieldNameWarning(f));
     updateFieldBadges();
     updateDictFieldChecklist();
 
@@ -2366,17 +2553,19 @@ a {
   }
 
   // 클립보드 복사 헬퍼
-  function copyToClipboard(text, label) {
+  // onSuccess: 복사에 성공했을 때만 호출 (붙여넣기 단계 ✓ 표시용)
+  function copyToClipboard(text, label, onSuccess) {
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(text).then(() => {
         showToast(t('common.copied', { label }));
-      }).catch(() => fallbackCopy(text, label));
+        if (onSuccess) onSuccess();
+      }).catch(() => fallbackCopy(text, label, onSuccess));
     } else {
-      fallbackCopy(text, label);
+      fallbackCopy(text, label, onSuccess);
     }
   }
 
-  function fallbackCopy(text, label) {
+  function fallbackCopy(text, label, onSuccess) {
     const textarea = document.createElement('textarea');
     textarea.value = text;
     textarea.style.position = 'fixed';
@@ -2385,25 +2574,30 @@ a {
     textarea.focus();
     textarea.select();
     try {
-      document.execCommand('copy');
-      showToast(t('common.copied', { label }));
+      // execCommand는 실패해도 예외 없이 false를 돌려주는 경우가 있음
+      const ok = document.execCommand('copy');
+      showToast(ok ? t('common.copied', { label }) : t('common.copyFailed'));
+      if (ok && onSuccess) onSuccess();
     } catch (err) {
       showToast(t('common.copyFailed'));
     }
     document.body.removeChild(textarea);
   }
 
+  // 이전 알림의 숨김 타이머를 지워 연달아 띄운 알림이 일찍 사라지지 않게 함
+  let toastTimer = null;
   function showToast(message) {
     toast.textContent = message;
     toast.classList.add('show');
-    setTimeout(() => {
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
       toast.classList.remove('show');
     }, 2200);
   }
 
   function escapeHtml(str) {
-    if (!str) return '';
-    return str
+    if (str === null || str === undefined || str === '') return '';
+    return String(str)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
@@ -2431,8 +2625,10 @@ a {
     onLanguageChange(true, false);
   } else if (sharedLangId && sharedLangId !== languageSelect.value) {
     // 저장된 설정이 있어도 다른 도구에서 언어를 바꿨다면 그 언어로 맞춤
+    // (사전 URL·RTL 안내만 바꾸고, 사용자가 고친 예시값·RTL 설정은 유지)
+    const prevLang = getSelectedLanguage();
     langCombobox.setValue(sharedLangId);
-    onLanguageChange(true, true);
+    onLanguageChange(true, true, { prevLang });
   }
 
   // 초기 렌더링 (저장하지 않고 렌더링만 수행하여 localStorage 원본 보존)

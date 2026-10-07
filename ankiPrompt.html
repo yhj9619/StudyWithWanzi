@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/prompt.css">
 </head>
 <body>
   <!-- Header -->
@@ -22,7 +23,7 @@
         <span class="logo-icon">🤖</span>
         <div>
           <h1 class="logo-title" data-i18n="prompt.header.title">Anki AI 프롬프트 생성기</h1>
-          <p class="logo-subtitle" data-i18n="prompt.header.subtitle">ChatGPT · Gemini · Claude용 Anki CSV 맞춤 단어장 추출 지시문 생성</p>
+          <p class="logo-subtitle" data-i18n="prompt.header.subtitle">AI에게 보낼 단어장 요청문을 만들고, AI 답변을 Anki용 파일로 바꿔 줍니다</p>
         </div>
       </div>
       <div class="header-actions">
@@ -31,9 +32,9 @@
           📖 사용 가이드
         </a>
         <a href="ankiEditor.html" class="nav-link-btn" title="Anki 카드 서식 에디터로 이동" data-i18n="prompt.header.navEditor" data-i18n-attr="title:common.navEditorTitle">
-          ⚡ 카드 에디터 가기
+          ⚡ 카드 서식 에디터
         </a>
-        <span id="saveStatusIndicator" class="save-status-badge" title="모든 설정이 브라우저 로컬 저장소에 자동 저장됩니다" data-i18n="common.autoSaved" data-i18n-attr="title:prompt.header.autoSavedTitle">✓ 자동 저장됨</span>
+        <span id="saveStatusIndicator" class="save-status-badge" title="설정은 이 브라우저에 자동으로 저장돼요" data-i18n="common.autoSaved" data-i18n-attr="title:prompt.header.autoSavedTitle">✓ 자동 저장됨</span>
         <button type="button" id="resetPromptSettingsBtn" class="btn-outline-danger" title="모든 설정을 기본값으로 되돌립니다" data-i18n="common.resetAll" data-i18n-attr="title:prompt.header.resetAllTitle">
           🔄 설정 초기화
         </button>
@@ -43,13 +44,16 @@
 
   <!-- Main Content -->
   <main class="app-main">
+    <!-- 처음부터 끝까지 4단계 경로 (i18n.js가 그림 · 지금 3단계) -->
+    <nav data-journey="3"></nav>
+
     <!-- Mobile Screen View Switcher -->
     <nav class="mobile-view-nav" id="mobileViewNav" aria-label="모바일 화면 전환 탭" data-i18n-attr="aria-label:prompt.mobile.navLabel">
       <button type="button" class="mobile-nav-btn active" id="btnMobileEditTab" data-i18n="prompt.mobile.editTab">
-        ⚙️ 프롬프트 설정 (1~5단계)
+        ⚙️ 1. 설정하기
       </button>
       <button type="button" class="mobile-nav-btn" id="btnMobilePreviewTab" data-i18n="prompt.mobile.previewTab">
-        📋 생성된 프롬프트 & 복사
+        📋 2. AI에 보내고 파일 받기
       </button>
     </nav>
 
@@ -61,21 +65,23 @@
         <div class="prompt-hero-box">
           <span class="prompt-hero-icon">💡</span>
           <div data-i18n-html="prompt.hero.html">
-            <strong>AI를 나만의 단어 추출 비서로 만드세요:</strong><br>
-            학습 중인 언어와 원하는 난이도(예: HSK 3급 이하 제외 등) 및 CSV 열 구조를 지정하면, GPT나 Gemini가 오류 없이 Anki에 즉시 들어가는 완벽한 단어장을 만들어줍니다.
+            <strong>AI를 나만의 단어장 비서로 만드세요:</strong><br>
+            공부할 언어, 난이도(예: HSK 3급 이하 단어는 빼기), 단어장에 넣을 항목만 고르면 ChatGPT·Gemini·Claude에게 보낼 요청문(프롬프트)이 완성됩니다. AI 답변을 붙여넣으면 Anki로 바로 가져올 수 있는 파일로 만들어 드려요.
           </div>
         </div>
 
-        <!-- 1. 학습 언어 및 추출 방식 -->
+        <div class="pc-notice" data-i18n-html="common.pcNotice">💻 카드 서식 붙여넣기와 단어장 가져오기는 <strong>PC에서</strong> 하는 걸 추천해요. 한 번 해 두면 동기화로 폰에도 그대로 적용되고, 폰에서는 복습만 하면 됩니다.</div>
+
+        <!-- 1. 공부할 언어와 단어를 뽑을 재료 -->
         <div class="card-section">
           <div class="section-title">
             <span class="step-num">1</span>
-            <h2 data-i18n="prompt.step1.title">학습 언어 및 추출 방식 설정</h2>
+            <h2 data-i18n="prompt.step1.title">공부할 언어와 단어를 뽑을 재료</h2>
           </div>
-          <p class="section-desc" data-i18n="prompt.step1.desc">학습할 대상 언어와 단어를 추출할 대상을 선택하세요.</p>
+          <p class="section-desc" data-i18n="prompt.step1.desc">공부할 언어를 고르고, 단어를 어디서 뽑을지 정하세요.</p>
 
           <div class="form-group">
-            <label for="langSearchInput" class="form-label" data-i18n="prompt.step1.langLabel">학습 언어 선택</label>
+            <label for="langSearchInput" class="form-label" data-i18n="prompt.step1.langLabel">공부할 언어</label>
             <div class="searchable-combobox" id="langSelectContainer">
               <!-- 숨겨진 네이티브 셀렉트 (선택값 보관 · change 이벤트 연동) -->
               <select id="promptLangSelect" class="visually-hidden" tabindex="-1" aria-hidden="true"></select>
@@ -106,13 +112,13 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" data-i18n="prompt.step1.modeLabel">추출 대상 방식</label>
+            <label class="form-label" data-i18n="prompt.step1.modeLabel">단어를 어디서 뽑을까요?</label>
             <div class="mode-toggle-group">
               <button type="button" class="mode-toggle-btn active" id="btnModeText" data-i18n="prompt.step1.modeText">
-                📄 본문/대본 텍스트에서 추출
+                📄 내가 가진 글에서 뽑기
               </button>
               <button type="button" class="mode-toggle-btn" id="btnModeTopic" data-i18n="prompt.step1.modeTopic">
-                💡 특정 주제/상황별 어휘 생성
+                💡 주제만 정하고 AI가 골라 주기
               </button>
             </div>
           </div>
@@ -120,17 +126,17 @@
           <!-- Mode A: Text Input Container -->
           <div class="form-group" id="containerSourceText">
             <label for="sourceTextInput" class="form-label">
-              <span data-i18n="prompt.step1.textLabel">학습할 본문 텍스트 (기사, 대본, 시험 지문 등)</span>
-              <span class="helper-text" style="display:inline; margin-left:6px;" data-i18n="prompt.step1.textHelper">(비워둘 경우 프롬프트에 안내 플레이스홀더가 삽입됩니다)</span>
+              <span data-i18n="prompt.step1.textLabel">단어를 뽑을 글 (기사, 대본, 시험 지문 등)</span>
+              <span class="helper-text" style="display:inline; margin-left:6px;" data-i18n="prompt.step1.textHelper">(비워 두면 요청문에 '여기에 글을 붙여넣으세요' 자리만 남아요)</span>
             </label>
-            <textarea id="sourceTextInput" class="form-input" rows="4" placeholder="여기에 분석할 외국어 문장이나 대본, 기사 본문을 붙여넣으세요. 한국어 문장을 넣으면 그 내용을 외국어로 말할 때 필요한 단어를 뽑습니다." data-i18n-attr="placeholder:prompt.step1.textPlaceholder"></textarea>
+            <textarea id="sourceTextInput" class="form-input" rows="4" placeholder="여기에 외국어 문장이나 대본, 기사를 붙여넣으세요. 한국어 글을 넣으면 그 내용을 외국어로 말할 때 필요한 단어를 뽑습니다." data-i18n-attr="placeholder:prompt.step1.textPlaceholder"></textarea>
             <div class="source-lang-row">
               <span id="sourceLangNotice" class="source-lang-notice hidden"></span>
               <span class="source-lang-control">
-                <label for="sourceLangModeSelect" class="sub-label" data-i18n="prompt.step1.sourceLangLabel">본문 언어</label>
+                <label for="sourceLangModeSelect" class="sub-label" data-i18n="prompt.step1.sourceLangLabel">글의 언어</label>
                 <select id="sourceLangModeSelect" class="form-select small-select">
                   <option value="auto" selected data-i18n="prompt.step1.sourceLangAuto">자동 감지</option>
-                  <option value="foreign" data-i18n="prompt.step1.sourceLangForeign">학습 언어 (외국어)</option>
+                  <option value="foreign" data-i18n="prompt.step1.sourceLangForeign">공부하는 언어 (외국어)</option>
                   <option value="ko" data-i18n="prompt.step1.sourceLangKo">한국어</option>
                 </select>
               </span>
@@ -140,39 +146,39 @@
           <!-- Mode B: Topic Input Container (Hidden by default) -->
           <div class="form-group hidden" id="containerSourceTopic">
             <label for="sourceTopicInput" class="form-label">
-              <span data-i18n="prompt.step1.topicLabel">어휘 주제 및 상황</span>
+              <span data-i18n="prompt.step1.topicLabel">주제나 상황</span>
               <span class="helper-text" style="display:inline; margin-left:6px;" data-i18n="prompt.step1.topicHelper">(비워두면 '일상 회화 및 여행' 주제로 생성됩니다)</span>
             </label>
             <input type="text" id="sourceTopicInput" class="form-input" placeholder="예: 공항 및 비행기 탑승 관련 필수 회화, 식당 음식 주문, 비즈니스 이메일 등" data-i18n-attr="placeholder:prompt.step1.topicPlaceholder">
           </div>
         </div>
 
-        <!-- 2. 난이도 / 수준 필터링 -->
+        <!-- 2. 난이도 -->
         <div class="card-section">
           <div class="section-title">
             <span class="step-num">2</span>
-            <h2 data-i18n="prompt.step2.title">난이도 / 어학 시험 수준 설정</h2>
+            <h2 data-i18n="prompt.step2.title">난이도 (어학 시험 수준)</h2>
           </div>
-          <p class="section-desc" data-i18n="prompt.step2.desc">목표하는 어학시험이나 난이도 수준을 지정하여 기초 단어를 제외하거나 핵심 단어를 선별합니다. (선택 사항)</p>
+          <p class="section-desc" data-i18n="prompt.step2.desc">준비하는 시험과 목표 급수를 정하면 너무 쉬운 단어를 빼거나 필요한 수준의 단어만 고를 수 있어요. (안 정해도 돼요)</p>
 
           <div class="grid-2-col" id="levelSelectionRow">
             <div class="form-group">
-              <label for="examTypeSelect" class="form-label"><span data-i18n="prompt.step2.examLabel">어학시험 / 기준 종류</span> <span class="helper-text" style="display:inline; margin-left:4px;" data-i18n="prompt.common.optional">(선택)</span></label>
+              <label for="examTypeSelect" class="form-label"><span data-i18n="prompt.step2.examLabel">어학 시험</span> <span class="helper-text" style="display:inline; margin-left:4px;" data-i18n="prompt.common.optional">(선택)</span></label>
               <select id="examTypeSelect" class="form-select">
                 <!-- JS에서 언어별 시험 목록 동적 갱신 -->
               </select>
             </div>
             <div class="form-group">
-              <label for="examScoreInput" class="form-label"><span data-i18n="prompt.step2.scoreLabel">목표 급수 / 점수 입력</span> <span class="helper-text" style="display:inline; margin-left:4px;" data-i18n="prompt.common.optional">(선택)</span></label>
-              <input type="text" id="examScoreInput" class="form-input" value="" placeholder="예: 3급, 760점, B2, N3 등 직접 입력 가능" data-i18n-attr="placeholder:prompt.step2.scorePlaceholder">
+              <label for="examScoreInput" class="form-label"><span data-i18n="prompt.step2.scoreLabel">목표 급수 / 점수</span> <span class="helper-text" style="display:inline; margin-left:4px;" data-i18n="prompt.common.optional">(선택)</span></label>
+              <input type="text" id="examScoreInput" class="form-input" value="" placeholder="예: 3급, 760점, B2, N3 (직접 써도 돼요)" data-i18n-attr="placeholder:prompt.step2.scorePlaceholder">
             </div>
           </div>
 
           <!-- 점수 / 급수 빠른 선택 칩 -->
           <div class="quick-chips-wrapper" id="scoreChipsWrapper">
             <div class="quick-chips-title">
-              <span data-i18n="prompt.step2.chipsTitle">⚡ 빠른 급수/점수 선택:</span>
-              <span class="helper-text" style="font-weight: normal; margin-left: 4px;" data-i18n="prompt.step2.chipsHelper">(클릭 시 즉시 입력됩니다)</span>
+              <span data-i18n="prompt.step2.chipsTitle">⚡ 눌러서 바로 고르기:</span>
+              <span class="helper-text" style="font-weight: normal; margin-left: 4px;" data-i18n="prompt.step2.chipsHelper">(누르면 바로 입력돼요)</span>
             </div>
             <div class="quick-chips-list" id="scoreChipsList">
               <!-- JS에서 선택된 시험 종류에 맞는 급수/점수 칩 동적 생성 -->
@@ -180,26 +186,26 @@
           </div>
 
           <div class="form-group">
-            <label for="levelFilterModeSelect" class="form-label" data-i18n="prompt.step2.filterLabel">필터링 조건</label>
+            <label for="levelFilterModeSelect" class="form-label" data-i18n="prompt.step2.filterLabel">어떤 단어를 고를까요?</label>
             <select id="levelFilterModeSelect" class="form-select">
-              <option value="below" selected data-i18n="prompt.step2.filterBelow">선택한 기준과 그보다 쉬운 단어는 제외 (너무 쉬운 기초 단어 빼기 - 기본 추천)</option>
-              <option value="above" data-i18n="prompt.step2.filterAbove">선택한 기준과 그보다 어려운 단어만 선별 (중고급 핵심 단어 위주)</option>
-              <option value="exact" data-i18n="prompt.step2.filterExact">선택한 기준에 해당하는 단어만 선별하여 (해당 등급 집중 학습)</option>
-              <option value="none" data-i18n="prompt.step2.filterNone">수준 필터 적용 안 함 (모든 수준의 단어 포함)</option>
+              <option value="below" selected data-i18n="prompt.step2.filterBelow">너무 쉬운 단어는 빼기 (이 수준까지 제외 · 추천)</option>
+              <option value="above" data-i18n="prompt.step2.filterAbove">이 수준 이상 어려운 단어만</option>
+              <option value="exact" data-i18n="prompt.step2.filterExact">이 수준 단어만</option>
+              <option value="none" data-i18n="prompt.step2.filterNone">수준 상관없이 전부</option>
             </select>
           </div>
         </div>
 
-        <!-- 3. 추출할 품사 및 단어 수 -->
+        <!-- 3. 단어 종류와 개수 -->
         <div class="card-section">
           <div class="section-title">
             <span class="step-num">3</span>
-            <h2 data-i18n="prompt.step3.title">추출할 품사 및 단어 수 설정</h2>
+            <h2 data-i18n="prompt.step3.title">단어 종류와 개수</h2>
           </div>
-          <p class="section-desc" data-i18n="prompt.step3.desc">단어장에 담고 싶은 품사 종류와 추출할 최대 개수를 정합니다.</p>
+          <p class="section-desc" data-i18n="prompt.step3.desc">단어장에 담을 단어 종류(품사)와 최대 개수를 정하세요.</p>
 
           <div class="form-group">
-            <label class="form-label" data-i18n="prompt.step3.posLabel">추출 대상 품사</label>
+            <label class="form-label" data-i18n="prompt.step3.posLabel">단어 종류 (품사)</label>
             <div class="checkbox-list">
               <label class="custom-checkbox">
                 <input type="checkbox" id="posNoun" checked>
@@ -225,9 +231,9 @@
           </div>
 
           <div class="form-group">
-            <label for="wordCountSelect" class="form-label" data-i18n="prompt.step3.countLabel">추출 단어 수</label>
+            <label for="wordCountSelect" class="form-label" data-i18n="prompt.step3.countLabel">단어 개수</label>
             <select id="wordCountSelect" class="form-select">
-              <option value="all" selected data-i18n="prompt.step3.countAll">제한 없음 (본문에서 조건에 맞는 모든 핵심 단어)</option>
+              <option value="all" selected data-i18n="prompt.step3.countAll">제한 없음 (조건에 맞는 핵심 단어 전부)</option>
               <option value="10" data-i18n="prompt.step3.countMax10">최대 10개</option>
               <option value="20" data-i18n="prompt.step3.countMax20">최대 20개</option>
               <option value="30" data-i18n="prompt.step3.countMax30">최대 30개</option>
@@ -236,23 +242,23 @@
           </div>
         </div>
 
-        <!-- 4. CSV 출력 형태 (필드 구성) 커스터마이징 -->
+        <!-- 4. 단어장에 넣을 항목과 순서 (CSV 열 구성) -->
         <div class="card-section">
           <div class="section-title">
             <span class="step-num">4</span>
-            <h2 data-i18n="prompt.step4.title">CSV 출력 형태 (열 구성) 커스터마이징</h2>
+            <h2 data-i18n="prompt.step4.title">단어장에 넣을 항목과 순서</h2>
           </div>
-          <p class="section-desc" data-i18n="prompt.step4.desc">Anki 카드 필드 순서에 맞게 원하는 항목(한국어, 외국어, 병음, 예문 등)을 자유롭게 구성하세요.</p>
+          <p class="section-desc" data-i18n="prompt.step4.desc">카드에 들어갈 항목(한국어 뜻, 외국어 단어, 병음, 예문 등)을 Anki 필드(카드에 들어가는 칸) 순서대로 놓으세요. 위에서부터 한 줄의 1번 칸, 2번 칸…이 됩니다.</p>
 
           <!-- Format Formula Banner -->
           <div class="format-banner">
-            <span class="format-banner-label" data-i18n="prompt.step4.formatLabel">📌 현재 완성될 CSV 형태:</span>
+            <span class="format-banner-label" data-i18n="prompt.step4.formatLabel">📌 단어 한 줄은 이렇게 만들어져요:</span>
             <span class="format-banner-code" id="currentFormatTag">"[품사]한국어, 영어, 예문"</span>
           </div>
 
           <!-- Quick Recommendation Chips -->
           <div class="quick-chips-wrapper">
-            <div class="quick-chips-title" data-i18n="prompt.step4.quickChipsTitle">⚡ 클릭하여 필드 빠르게 추가:</div>
+            <div class="quick-chips-title" data-i18n="prompt.step4.quickChipsTitle">⚡ 눌러서 항목 추가:</div>
             <div class="quick-chips-list" id="fieldQuickChipsList">
               <!-- JS에서 선택된 언어(영어/중국어/일본어/기타)에 맞춰 동적으로 생성 -->
             </div>
@@ -263,78 +269,91 @@
             <!-- JS로 동적 필드 렌더링 -->
           </div>
 
-          <!-- Add Field Button & Reset Fields Button -->
+          <!-- Add Field Button -->
           <div class="add-field-action-row" style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
-            <button type="button" id="btnAddPromptField" class="btn-add-field" style="flex: 1 1 200px;" title="새로운 CSV 열 필드를 추가합니다" data-i18n="prompt.step4.addField" data-i18n-attr="title:prompt.step4.addFieldTitle">
-              ➕ 필드 직접 추가하기
+            <button type="button" id="btnAddPromptField" class="btn-add-field" style="flex: 1 1 200px;" title="새 항목(칸)을 하나 추가합니다" data-i18n="prompt.step4.addField" data-i18n-attr="title:prompt.step4.addFieldTitle">
+              ➕ 항목 직접 추가하기
             </button>
-            <button type="button" id="btnImportEditorFields" class="btn-add-field" style="flex: 1 1 200px;" title="카드 서식 에디터에 저장된 필드 순서를 그대로 가져옵니다" data-i18n="prompt.step4.importEditor" data-i18n-attr="title:prompt.step4.importEditorTitle">
-              ⚡ 카드 에디터 필드 불러오기
-            </button>
-            <button type="button" id="btnResetFieldsToLang" class="btn-add-field" style="flex: 1 1 200px; border-color: #cbd5e1; color: var(--text-secondary);" title="현재 선택된 언어의 기본 필드 구성으로 복원합니다" data-i18n="prompt.step4.resetFields" data-i18n-attr="title:prompt.step4.resetFieldsTitle">
-              🔄 기본 필드 구성으로 복원
-            </button>
-          </div>
-
-          <!-- Delimiter Selection -->
-          <div class="form-group" style="margin-top: 1.25rem;">
-            <label for="delimiterSelect" class="form-label" data-i18n="prompt.step4.delimiterLabel">열 구분자 (Delimiter)</label>
-            <select id="delimiterSelect" class="form-select">
-              <option value="comma" selected data-i18n="prompt.step4.delimComma">쉼표 ( , ) - 표준 CSV 형식</option>
-              <option value="tab" data-i18n="prompt.step4.delimTab">탭 ( \t ) - TSV 형식 (예문에 쉼표가 많을 때 추천)</option>
-              <option value="semicolon" data-i18n="prompt.step4.delimSemicolon">세미콜론 ( ; )</option>
-            </select>
           </div>
         </div>
 
-        <!-- 5. AI 출력 규칙 및 Anki 최적화 옵션 -->
-        <div class="card-section">
-          <div class="section-title">
-            <span class="step-num">5</span>
-            <h2 data-i18n="prompt.step5.title">AI 출력 규칙 및 Anki 최적화 지침</h2>
-          </div>
-          <p class="section-desc" data-i18n="prompt.step5.desc">AI가 잡담 없이 깔끔한 CSV만 출력하고, Anki 임포트 오류가 나지 않도록 세부 지침을 포함합니다.</p>
+        <!-- 고급 설정 (기본 접힘): 기본값 그대로 써도 되는 설정들 -->
+        <details class="advanced-settings prompt-advanced">
+          <summary><span data-i18n="common.advanced.title">⚙️ 고급 설정</span> <span class="advanced-hint" data-i18n="common.advanced.hint">기본값 그대로 써도 괜찮아요</span></summary>
+          <div class="advanced-body">
 
-          <div class="checkbox-list">
-            <label class="custom-checkbox">
-              <input type="checkbox" id="ruleCodeblock" checked>
-              <span data-i18n-html="prompt.rule.codeblock">마크다운 코드블록(<code>```csv ... ```</code>) 안에 결과 출력 (원클릭 복사 용이)</span>
-            </label>
-            <label class="custom-checkbox">
-              <input type="checkbox" id="rulePureCsv" checked>
-              <span data-i18n="prompt.rule.pureCsv">불필요한 인사말, 설명, 번호 매기기 생략하고 오직 CSV 데이터만 출력</span>
-            </label>
-            <label class="custom-checkbox">
-              <input type="checkbox" id="ruleNoHeader" checked>
-              <span data-i18n="prompt.rule.noHeader">첫 줄에 열 이름(헤더)을 넣지 않기 (헤더 줄이 카드 1장으로 들어가는 것 방지)</span>
-            </label>
-            <label class="custom-checkbox">
-              <input type="checkbox" id="ruleQuoteCommas" checked>
-              <span data-i18n-html="prompt.rule.quoteCommas">내용 안에 구분자(쉼표 등)가 들어갈 경우 큰따옴표(<code>""</code>)로 감싸기 (Anki 열 분리 오류 방지)</span>
-            </label>
-            <label class="custom-checkbox">
-              <input type="checkbox" id="ruleLemma" checked>
-              <span data-i18n="prompt.rule.lemma">동사·형용사는 활용형이 아닌 기본 사전형(원형)으로 표기</span>
-            </label>
-            <label class="custom-checkbox">
-              <input type="checkbox" id="ruleNoDupes" checked>
-              <span data-i18n="prompt.rule.noDupes">중복된 단어는 제외하고 한 번만 추출</span>
-            </label>
-            <label class="custom-checkbox">
-              <input type="checkbox" id="ruleContextMeaning" checked>
-              <span data-i18n="prompt.rule.contextMeaning">한국어 뜻은 본문 문맥에 가장 적합한 대표 의미 위주로 명확하게 작성</span>
-            </label>
-            <label class="custom-checkbox">
-              <input type="checkbox" id="ruleDistinctMeaning" checked>
-              <span data-i18n="prompt.rule.distinctMeaning">뜻이 같은 서로 다른 단어는 괄호로 뉘앙스를 덧붙여 구분 (예: 보다(눈으로) / 보다(만나다) — Anki는 1열로 중복을 판단)</span>
-            </label>
-            <label class="custom-checkbox" id="ruleExampleFromTextLabel">
-              <input type="checkbox" id="ruleExampleFromText" checked>
-              <!-- 문구는 promptApp.js가 본문 언어에 따라 설정 (prompt.rule.exampleFromText / exampleFromTextKorean) -->
-              <span id="ruleExampleFromTextText">예문은 본문에서 그 단어가 쓰인 문장을 그대로 사용 (본문이 단어·키워드 목록이면 새로 작성)</span>
-            </label>
+            <!-- 항목 불러오기 · 되돌리기 -->
+            <div class="adv-group">
+              <h3 class="adv-group-title" data-i18n="prompt.adv.fieldsTitle">항목 불러오기 · 되돌리기</h3>
+              <div class="add-field-action-row" style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                <button type="button" id="btnImportEditorFields" class="btn-add-field" style="flex: 1 1 200px;" title="카드 서식 에디터에 저장된 필드 순서를 그대로 가져옵니다" data-i18n="prompt.step4.importEditor" data-i18n-attr="title:prompt.step4.importEditorTitle">
+                  ⚡ 카드 서식 에디터의 필드 불러오기
+                </button>
+                <button type="button" id="btnResetFieldsToLang" class="btn-add-field" style="flex: 1 1 200px; border-color: #cbd5e1; color: var(--text-secondary);" title="지금 고른 언어의 기본 항목으로 되돌립니다" data-i18n="prompt.step4.resetFields" data-i18n-attr="title:prompt.step4.resetFieldsTitle">
+                  🔄 기본 항목으로 되돌리기
+                </button>
+              </div>
+            </div>
+
+            <!-- 칸 나누는 기호 (Delimiter) -->
+            <div class="adv-group">
+              <label for="delimiterSelect" class="adv-group-title" data-i18n="prompt.step4.delimiterLabel">칸 나누는 기호</label>
+              <select id="delimiterSelect" class="form-select">
+                <option value="comma" selected data-i18n="prompt.step4.delimComma">쉼표 ( , ) — 기본 (추천)</option>
+                <option value="tab" data-i18n="prompt.step4.delimTab">탭 (넓은 빈칸) — 예문에 쉼표가 많을 때</option>
+                <option value="semicolon" data-i18n="prompt.step4.delimSemicolon">세미콜론 ( ; )</option>
+              </select>
+              <p class="helper-text adv-help" data-i18n="prompt.adv.delimHelp">잘 모르겠으면 쉼표 그대로 두세요. [CSV 파일 받기]도 이 기호에 맞춰 파일을 만들어요.</p>
+            </div>
+
+            <!-- AI에게 함께 보낼 세부 부탁 (출력 규칙) -->
+            <div class="adv-group">
+              <h3 class="adv-group-title" data-i18n="prompt.step5.title">AI에게 함께 보낼 세부 부탁</h3>
+              <p class="helper-text adv-help" data-i18n="prompt.step5.desc">AI가 군더더기 없이 단어만 주고, Anki로 가져올 때 칸이 어긋나지 않게 하는 부탁들이에요. 모두 켜 두는 것을 추천해요.</p>
+
+              <div class="checkbox-list">
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="ruleCodeblock" checked>
+                  <span data-i18n="prompt.rule.codeblock">결과를 복사하기 쉬운 상자에 담아 달라고 하기 (복사 버튼이 생겨요)</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="rulePureCsv" checked>
+                  <span data-i18n="prompt.rule.pureCsv">인사말·설명·번호 없이 단어 데이터만 달라고 하기</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="ruleNoHeader" checked>
+                  <span data-i18n="prompt.rule.noHeader">첫 줄에 항목 이름(제목 줄)을 쓰지 않게 하기 (제목 줄이 카드 1장으로 들어가는 것 방지)</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="ruleQuoteCommas" checked>
+                  <span data-i18n="prompt.rule.quoteCommas">내용 안에 쉼표 같은 칸 나누는 기호가 있으면 큰따옴표(" ")로 감싸게 하기 (칸이 어긋나는 것 방지)</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="ruleLemma" checked>
+                  <span data-i18n="prompt.rule.lemma">동사·형용사는 바뀐 모양이 아닌 기본형(사전에 나오는 형태)으로 쓰게 하기</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="ruleNoDupes" checked>
+                  <span data-i18n="prompt.rule.noDupes">같은 단어는 한 번만 넣기</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="ruleContextMeaning" checked>
+                  <span data-i18n="prompt.rule.contextMeaning">한국어 뜻은 글의 흐름에 가장 맞는 대표 뜻 위주로 쓰게 하기</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="ruleDistinctMeaning" checked>
+                  <span data-i18n="prompt.rule.distinctMeaning">뜻이 같은 서로 다른 단어는 괄호로 느낌을 덧붙여 구분하기 (예: 보다(눈으로) / 보다(만나다) — Anki는 첫 번째 칸이 같으면 같은 단어로 봐요)</span>
+                </label>
+                <label class="custom-checkbox" id="ruleExampleFromTextLabel">
+                  <input type="checkbox" id="ruleExampleFromText" checked>
+                  <!-- 문구는 promptApp.js가 본문 언어에 따라 설정 (prompt.rule.exampleFromText / exampleFromTextKorean) -->
+                  <span id="ruleExampleFromTextText">예문은 글에서 그 단어가 쓰인 문장을 그대로 쓰기 (글이 단어 목록이면 새로 만들기)</span>
+                </label>
+              </div>
+            </div>
+
           </div>
-        </div>
+        </details>
 
         <!-- Mobile Quick Action -->
         <div class="mobile-quick-action">
@@ -344,7 +363,7 @@
         </div>
 
         <!-- Mobile Floating Switch to Output (입력란 우측 버튼) -->
-        <button type="button" class="mobile-float-switch-btn right" id="btnFloatToPromptOutput" title="생성된 프롬프트 결과 확인 및 복사" data-i18n="prompt.mobile.floatToOutput" data-i18n-attr="title:prompt.mobile.floatToOutputTitle">
+        <button type="button" class="mobile-float-switch-btn right" id="btnFloatToPromptOutput" title="완성된 프롬프트 보기 · 복사" data-i18n="prompt.mobile.floatToOutput" data-i18n-attr="title:prompt.mobile.floatToOutputTitle">
           📋 프롬프트 확인 ➔
         </button>
 
@@ -356,7 +375,7 @@
         <!-- Mobile Back to Edit button -->
         <div class="mobile-back-action">
           <button type="button" class="btn-secondary-mobile" id="btnGoEditMobile" data-i18n="prompt.mobile.goEdit">
-            ⚙️ ◀ 프롬프트 옵션 수정하기
+            ⚙️ ◀ 설정 바꾸러 가기
           </button>
         </div>
 
@@ -388,25 +407,42 @@
           </a>
         </div>
 
-        <!-- Anki Import 3-Step Guide -->
-        <div class="anki-guide-card">
-          <h3 data-i18n="prompt.guide.title">📖 Anki로 단어장 가져오는 3단계 방법</h3>
-          <ol class="anki-guide-steps">
-            <li data-i18n-html="prompt.guide.step1">
-              <strong>AI 결과 복사:</strong> ChatGPT나 Gemini가 출력한 코드블록 우측 상단의 <code>Copy code</code> 버튼을 누릅니다.
-            </li>
-            <li data-i18n-html="prompt.guide.step2">
-              <strong>파일 저장:</strong> 메모장에 붙여넣고 파일 형식을 <code>모든 파일</code>, 인코딩을 <code>UTF-8</code>로 맞춘 뒤 <code>words.csv</code> 또는 <code>words.txt</code>로 저장합니다.
-            </li>
-            <li data-i18n-html="prompt.guide.step3">
-              <strong>Anki 가져오기:</strong> Anki 상단 메뉴의 <strong>[파일] ➔ [가져오기]</strong>에서 저장한 파일을 선택하고 대상 덱과 필드를 확인한 후 가져오기를 완료합니다!
-            </li>
-          </ol>
+        <!-- AI 답변 붙여넣기 → CSV 파일 받기 (모두 브라우저 안에서만 처리, AI와 연결하지 않음) -->
+        <div class="paste-csv-card" id="pasteCsvCard">
+          <h3 class="paste-csv-title" data-i18n="prompt.paste.title">📥 AI 답변 붙여넣기 → CSV 파일 받기</h3>
+          <p class="paste-csv-desc" data-i18n="prompt.paste.desc">AI가 준 답변을 복사해서 아래 칸에 그대로 붙여넣으세요. 앞뒤 인사말이나 상자 표시(```)는 알아서 정리하고, Anki로 바로 가져올 수 있는 파일로 만들어 드려요. (이 브라우저 안에서만 처리돼요)</p>
+
+          <div class="paste-csv-label-row">
+            <label for="aiAnswerInput" class="form-label" data-i18n="prompt.paste.label">AI 답변</label>
+            <button type="button" id="btnClearAiAnswer" class="paste-csv-clear-btn" data-i18n="prompt.paste.clear">🧹 지우기</button>
+          </div>
+          <textarea id="aiAnswerInput" class="form-input paste-csv-input" rows="7" spellcheck="false" autocomplete="off" placeholder="AI 답변을 여기에 그대로 붙여넣으세요" data-i18n-attr="placeholder:prompt.paste.placeholder"></textarea>
+          <p class="paste-csv-expect" id="pasteExpectText"></p>
+
+          <!-- 실시간 확인 결과 (promptApp.js가 채움) -->
+          <div class="paste-csv-result" id="pasteCheckResult" aria-live="polite">
+            <p class="paste-csv-summary is-empty" id="pasteSummary" data-i18n="prompt.paste.empty">AI 답변을 붙여넣으면 여기에서 바로 확인해 드려요.</p>
+          </div>
+
+          <button type="button" id="btnDownloadCsv" class="btn-download-csv" disabled data-i18n="prompt.paste.downloadBtn">⬇️ CSV 파일 받기</button>
+
+          <!-- 다음 단계: Anki(PC)에서 가져오기 -->
+          <div class="paste-next-steps" id="pasteNextSteps">
+            <h4 class="paste-next-title" data-i18n="prompt.paste.nextTitle">📂 다음: Anki(PC)에서 가져오기</h4>
+            <p class="paste-last-file hidden" id="pasteLastFile"></p>
+            <ol class="anki-guide-steps">
+              <li data-i18n-html="prompt.paste.next1">Anki(PC) 상단 <strong>[파일] → [가져오기]</strong>를 누르세요. (단축키 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd> / Mac: <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd>)</li>
+              <li data-i18n-html="prompt.paste.next2">방금 받은 파일을 고르세요. (보통 <strong>다운로드</strong> 폴더에 있어요)</li>
+              <li data-i18n-html="prompt.paste.next3"><strong>노트 유형</strong>와 <strong>덱</strong>을 고르고, 아래 <strong>[필드 배정]</strong>에서 각 칸이 맞는 필드로 가는지 확인하세요.</li>
+              <li data-i18n-html="prompt.paste.next4"><strong>[가져오기]</strong>를 누르면 끝! 🎉</li>
+            </ol>
+            <p class="paste-pc-tip" data-i18n="prompt.paste.nextPc">💻 가져오기는 PC용 Anki에서 하는 걸 추천해요. 동기화하면 폰에서도 바로 복습할 수 있어요.</p>
+          </div>
         </div>
 
         <!-- Mobile Floating Switch to Settings (출력란 좌측 버튼) -->
-        <button type="button" class="mobile-float-switch-btn left" id="btnFloatToPromptSettings" title="프롬프트 옵션 설정으로 돌아가기" data-i18n="prompt.mobile.floatToSettings" data-i18n-attr="title:prompt.mobile.floatToSettingsTitle">
-          ◀ ⚙️ 옵션 설정
+        <button type="button" class="mobile-float-switch-btn left" id="btnFloatToPromptSettings" title="설정 화면으로 돌아가기" data-i18n="prompt.mobile.floatToSettings" data-i18n-attr="title:prompt.mobile.floatToSettingsTitle">
+          ◀ ⚙️ 설정
         </button>
 
       </section>

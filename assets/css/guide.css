@@ -1,0 +1,167 @@
+/* =======================================
+   사용 가이드(ankiGuide.html) 전용 스타일
+   (style.css 다음에 불러옴 — 스크린샷 자리 · 자주 묻는 질문 · 섹션 안 소제목)
+   ======================================= */
+
+/* 4단계 카드 아래 "자주 묻는 질문" 바로가기 */
+.guide-faq-jump {
+  margin: -0.35rem 0 1.25rem;
+  text-align: right;
+}
+
+.guide-faq-jump a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-decoration: none;
+  background: #ffffff;
+  border: 1px solid #bfdbfe;
+  border-radius: 9999px;
+  padding: 0.4rem 0.9rem;
+  transition: background-color 0.15s ease;
+}
+
+.guide-faq-jump a:hover {
+  background: var(--primary-light);
+}
+
+/* 섹션 안 앵커(#import, #review)로 이동할 때 위쪽 여백 */
+.guide-prose h4[id] {
+  scroll-margin-top: 1.5rem;
+}
+
+/* Step 4 안에서 "가져오기"와 "매일 복습하기"를 나누는 소제목 */
+.guide-prose h4.guide-subsection-title {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px dashed var(--border-color);
+  font-size: 1.1rem;
+}
+
+/* Anki 화면 스크린샷 자리 — 이미지 파일이 없으면 onerror 로 figure 전체가 숨겨짐 */
+.guide-shot {
+  margin: 1.25rem 0;
+  padding: 0;
+}
+
+.guide-shot[hidden] {
+  display: none !important;
+}
+
+.guide-shot img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  background: #f8fafc;
+}
+
+.guide-shot figcaption {
+  margin-top: 0.55rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* 스크린샷 두 장 나란히 (좁은 화면에서는 한 줄에 하나) */
+.guide-shot-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0 1rem;
+  align-items: start;
+}
+
+/* 자주 묻는 질문 */
+.guide-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.guide-faq-item {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  transition: border-color 0.15s ease;
+}
+
+.guide-faq-item[open] {
+  border-color: #93c5fd;
+  background: #fbfdff;
+}
+
+.guide-faq-item > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--text-primary);
+  user-select: none;
+  overflow-wrap: anywhere;
+}
+
+.guide-faq-item > summary::-webkit-details-marker {
+  display: none;
+}
+
+.guide-faq-item > summary::before {
+  content: 'Q';
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-top: 0.05rem;
+  border-radius: 9999px;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.guide-faq-item > summary::after {
+  content: '▾';
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--text-light);
+  transition: transform 0.15s ease;
+}
+
+.guide-faq-item[open] > summary::after {
+  transform: rotate(180deg);
+}
+
+.guide-faq-item > summary:hover {
+  color: var(--primary);
+}
+
+.guide-faq-answer {
+  padding: 0 1rem 1rem 2.85rem;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 576px) {
+  .guide-faq-item > summary {
+    font-size: 0.9rem;
+    padding: 0.8rem 0.85rem;
+  }
+  .guide-faq-answer {
+    padding: 0 0.85rem 0.9rem 0.85rem;
+  }
+}

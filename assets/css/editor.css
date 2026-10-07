@@ -1,0 +1,293 @@
+/* =======================================
+   카드 서식 에디터 전용 스타일 (style.css 다음에 불러옴)
+   - ① 학습 언어: 연결된 사전 이름
+   - 고급 설정 안의 묶음 제목
+   - ③ 카드 서식 복사해서 붙여넣기 도우미 (단계별 복사 · ✓ 표시)
+   ======================================= */
+
+/* ① 학습 언어 아래 "연결된 외국어사전" 한 줄 */
+.dict-linked-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.dict-linked-info .dict-name-tag {
+  margin-top: 0;
+}
+
+/* RTL 자동 적용 안내는 줄을 바꿔 표시 */
+#rtlNotice {
+  margin-top: 0.5rem;
+}
+
+/* 고급 설정 안의 묶음 제목 (🔗 사전 아이콘 / 🎨 카드 모양) */
+.advanced-group-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 1.1rem 0 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.advanced-body .dict-link-selection-box {
+  margin-bottom: 0.5rem;
+}
+
+/* 좁은 화면에서 긴 번역 문구가 넘치지 않도록 */
+#frontOnBackSettings .custom-checkbox {
+  white-space: normal !important;
+}
+
+/* PC 권장 안내: 문장 속 <strong>이 따로 떨어지지 않도록 일반 문단으로 표시 */
+.editor-panel > .pc-notice {
+  display: block;
+}
+
+/* =======================================
+   ③ 카드 서식 복사해서 Anki에 붙여넣기
+   ======================================= */
+.paste-helper {
+  margin-bottom: 0;
+  scroll-margin-top: 5rem; /* 모바일 상단 고정 탭에 가리지 않도록 */
+}
+
+.paste-helper .section-desc {
+  margin-bottom: 0.9rem;
+}
+
+/* [카드 서식] 창 위치 안내 */
+.paste-where {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 0.9rem;
+  margin-bottom: 1rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #334155;
+}
+
+.paste-where-title {
+  display: block;
+  font-size: 0.85rem;
+  color: #0f172a;
+  margin-bottom: 0.35rem;
+}
+
+.paste-where-list {
+  list-style: none;
+  margin: 0 0 0.45rem;
+  padding: 0;
+}
+
+.paste-where-list li {
+  padding: 0.12rem 0;
+}
+
+.paste-where-list strong {
+  color: #0f172a;
+}
+
+.paste-guide-link {
+  display: inline-block;
+  font-weight: 700;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.paste-guide-link:hover {
+  text-decoration: underline;
+}
+
+.paste-sync-tip {
+  margin-top: 0.45rem;
+  color: #1e3a8a;
+}
+
+/* 번호 붙은 3단계 */
+.paste-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.paste-step {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 0.9rem;
+  background: #ffffff;
+  min-width: 0;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.paste-step.is-done {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.paste-step-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.paste-step-num {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.paste-step.is-done .paste-step-num {
+  background: #16a34a;
+}
+
+.paste-step-text {
+  min-width: 0;
+}
+
+.paste-step-title {
+  display: block;
+  font-size: 0.98rem;
+  color: #0f172a;
+  margin-bottom: 0.15rem;
+}
+
+.paste-step-desc {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.paste-step-desc strong {
+  color: #0f172a;
+}
+
+.paste-step-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0.7rem 0 0 2.3rem;
+}
+
+/* 큰 복사 버튼 */
+.btn-copy.btn-copy-step {
+  min-height: 44px;
+  padding: 0.6rem 1.15rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  background: var(--primary);
+}
+
+.btn-copy.btn-copy-step:hover {
+  background: var(--primary-hover);
+}
+
+.paste-step.is-done .btn-copy.btn-copy-step {
+  background: #ffffff;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.paste-step-done {
+  display: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #15803d;
+}
+
+.paste-step.is-done .paste-step-done {
+  display: inline;
+}
+
+/* 붙여넣을 내용 보기 (접기) */
+.paste-code {
+  margin: 0.6rem 0 0 2.3rem;
+  min-width: 0;
+}
+
+.paste-code > summary {
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  width: fit-content;
+  user-select: none;
+}
+
+.paste-code > summary:hover {
+  color: var(--primary);
+}
+
+.paste-code .code-block {
+  margin-top: 0.45rem;
+  max-height: 240px;
+  overflow: auto;
+  font-size: 0.78rem;
+  padding: 0.75rem;
+}
+
+.paste-all-done {
+  margin-top: 0.9rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-sm);
+  background: #dcfce7;
+  color: #14532d;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.paste-field-note {
+  margin-top: 0.9rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.75rem;
+}
+
+/* 모바일: 미리보기 화면 위쪽의 "③ 카드 서식 복사로 바로 가기" */
+.mobile-jump-link {
+  display: block;
+  margin-top: 0.6rem;
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-decoration: none;
+  padding: 0.55rem 0.75rem;
+  border: 1px dashed #93c5fd;
+  border-radius: var(--radius-md);
+  background: #eff6ff;
+}
+
+@media (max-width: 576px) {
+  .paste-step-actions,
+  .paste-code {
+    margin-left: 0;
+  }
+
+  .btn-copy.btn-copy-step {
+    flex: 1 1 100%;
+  }
+}

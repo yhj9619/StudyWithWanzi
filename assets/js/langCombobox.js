@@ -147,6 +147,8 @@
   function createLangCombobox(opts) {
     const { container, select, input, clearBtn, toggleBtn, dropdown, list, countEl, languages, onSelect } = opts;
     let focusIndex = -1;
+    // 항목 id 접두어 (한 페이지에 콤보박스가 여러 개여도 겹치지 않도록 목록 id 사용)
+    const optionIdPrefix = (list.id || 'langCombobox') + '-opt';
 
     const uiLocale = window.i18n ? window.i18n.getLocale() : 'ko';
     const sortedOthers = languages
@@ -200,6 +202,8 @@
       const li = document.createElement('li');
       li.className = 'dropdown-item';
       li.setAttribute('role', 'option');
+      // 스크린리더가 강조된 항목을 읽도록 aria-activedescendant 에서 참조할 id
+      li.id = `${optionIdPrefix}-${lang.id}`;
       li.dataset.id = lang.id;
       const isSelected = lang.id === select.value;
       if (isSelected) li.classList.add('selected');
@@ -238,6 +242,7 @@
       const query = (filterText || '').trim();
       list.innerHTML = '';
       focusIndex = -1;
+      input.removeAttribute('aria-activedescendant');
 
       if (!query) {
         countEl.textContent = tr('combobox.count', { count: languages.length });
@@ -277,11 +282,18 @@
     }
 
     function updateFocus() {
+      let activeId = '';
       items().forEach((item, idx) => {
         const on = idx === focusIndex;
         item.classList.toggle('focused', on);
-        if (on) item.scrollIntoView({ block: 'nearest' });
+        if (on) {
+          activeId = item.id;
+          item.scrollIntoView({ block: 'nearest' });
+        }
       });
+      // 강조된 항목을 입력창에 연결 (없으면 속성 제거)
+      if (activeId) input.setAttribute('aria-activedescendant', activeId);
+      else input.removeAttribute('aria-activedescendant');
     }
 
     function updateClearBtn() {
@@ -311,14 +323,19 @@
       input.value = currentName();
       updateClearBtn();
       focusIndex = -1;
+      // 닫힌 상태에서 이전 목록이 남아 있지 않도록 비움 (열 때 다시 그림)
+      list.innerHTML = '';
+      input.removeAttribute('aria-activedescendant');
     }
 
     function choose(id) {
+      const changed = id !== select.value;
       select.value = id;
       saveRecent(id);
       setSharedLanguage(id);
       close();
-      if (onSelect) onSelect(id);
+      // 이미 선택된 언어를 다시 고른 경우에는 페이지 쪽 갱신(초기화 등)을 하지 않음
+      if (changed && onSelect) onSelect(id);
     }
 
     // 입력창이 현재 선택 언어 이름을 그대로 보여주는 상태라면 전체 목록을 보여줌
@@ -349,6 +366,10 @@
         open(filterFromInput());
         return;
       }
+      // 한글 등 IME 조합 중의 키 입력은 무시 (조합 확정용 Enter가 선택으로 처리되지 않도록)
+      if (e.isComposing || e.keyCode === 229) return;
+      // 목록이 닫혀 있으면 Enter 등으로 선택하지 않음
+      if (!isOpen()) return;
       const all = items();
       if (all.length === 0) return;
       if (e.key === 'ArrowDown') {
@@ -361,8 +382,10 @@
         updateFocus();
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        const target = all[focusIndex >= 0 ? focusIndex : 0];
+        // 강조된 항목이 있을 때만 선택 (검색 중에는 첫 결과가 미리 강조됨). 없으면 그냥 닫음
+        const target = focusIndex >= 0 ? all[focusIndex] : null;
         if (target) choose(target.dataset.id);
+        else close();
       }
     });
 
@@ -370,6 +393,9 @@
       e.stopPropagation();
       if (isOpen()) {
         close();
+      } else if (document.activeElement === input) {
+        // 이미 입력창에 포커스가 있으면 focus 이벤트가 다시 발생하지 않으므로 직접 열기
+        open(filterFromInput());
       } else {
         input.focus();
       }

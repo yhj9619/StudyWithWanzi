@@ -1,0 +1,309 @@
+/* =======================================
+   AI 프롬프트 생성기 전용 스타일 (style.css 다음에 로드)
+   - 고급 설정 안의 묶음 제목
+   - AI 답변 붙여넣기 → CSV 파일 받기
+   ======================================= */
+
+/* PC 권장 안내: 문구 속 <strong>이 flex 항목으로 따로 떨어져 줄이 깨지지 않게 일반 문단으로 표시 */
+.pc-notice {
+  display: block;
+}
+
+/* 고급 설정: 설정 카드들과 같은 간격 */
+.prompt-advanced {
+  margin: 0 0 1.25rem 0;
+}
+
+.adv-group {
+  padding-top: 1rem;
+}
+
+.adv-group + .adv-group {
+  margin-top: 0.5rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.adv-group-title {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.6rem 0;
+}
+
+.adv-help {
+  margin: 0.5rem 0 0.75rem 0;
+  line-height: 1.5;
+}
+
+/* 넓은 화면: 결과 패널이 화면보다 길어지면 패널 안에서 스크롤 (붙여넣기 칸까지 닿을 수 있게) */
+@media (min-width: 993px) {
+  .preview-panel {
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  /* 높이가 제한된 세로 flex 안에서 카드들이 눌려 찌그러지지 않게 */
+  .preview-panel > * {
+    flex-shrink: 0;
+  }
+
+  .preview-panel .prompt-text-box {
+    max-height: min(480px, 42vh);
+  }
+}
+
+/* ===== AI 답변 붙여넣기 → CSV 파일 받기 ===== */
+.paste-csv-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+}
+
+.paste-csv-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 0.4rem 0;
+}
+
+.paste-csv-desc {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0 0 0.85rem 0;
+  overflow-wrap: anywhere;
+}
+
+.paste-csv-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.paste-csv-label-row .form-label {
+  margin-bottom: 0;
+}
+
+.paste-csv-clear-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.paste-csv-clear-btn:hover {
+  border-color: #f87171;
+  color: #dc2626;
+}
+
+.paste-csv-input {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 140px;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.paste-csv-expect {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  margin: 0.35rem 0 0.75rem 0;
+  overflow-wrap: anywhere;
+}
+
+.paste-csv-result {
+  margin-bottom: 0.85rem;
+}
+
+.paste-csv-summary {
+  font-size: 0.92rem;
+  font-weight: 700;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-sm);
+  margin: 0 0 0.5rem 0;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: var(--text-secondary);
+}
+
+.paste-csv-summary.is-empty {
+  font-weight: 500;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+}
+
+.paste-csv-summary.is-ok {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.paste-csv-summary.is-warn {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.paste-csv-summary.is-bad {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.paste-csv-notes {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.5;
+}
+
+.paste-problem-list {
+  list-style: none;
+  margin: 0 0 0.5rem 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.paste-problem-item {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.5rem;
+  text-align: left;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.65rem;
+  font-size: 0.8rem;
+  color: #78350f;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.paste-problem-item:hover {
+  border-color: #f59e0b;
+}
+
+.paste-problem-line {
+  font-weight: 800;
+}
+
+.paste-problem-preview {
+  flex-basis: 100%;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: #57534e;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.paste-problem-more {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  padding-left: 0.25rem;
+}
+
+.paste-csv-hint,
+.paste-csv-fix-hint {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  margin: 0 0 0.4rem 0;
+  color: var(--text-secondary);
+}
+
+.paste-csv-fix-hint {
+  color: var(--text-muted);
+}
+
+.btn-download-csv {
+  width: 100%;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: #ffffff;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 800;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-download-csv:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
+}
+
+.btn-download-csv:disabled {
+  background: #cbd5e1;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* 다음 단계 안내 (파일을 받으면 강조) */
+.paste-next-steps {
+  margin-top: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.paste-next-steps.is-ready {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.paste-next-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.paste-last-file {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #166534;
+  margin: 0 0 0.5rem 0;
+  overflow-wrap: anywhere;
+}
+
+.paste-next-steps .anki-guide-steps {
+  font-size: 0.84rem;
+}
+
+.paste-next-steps kbd {
+  font-size: 0.72rem;
+}
+
+.paste-pc-tip {
+  font-size: 0.78rem;
+  color: #1e3a8a;
+  margin: 0.5rem 0 0 0;
+  line-height: 1.5;
+}

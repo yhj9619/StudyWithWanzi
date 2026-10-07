@@ -59,6 +59,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const editorPanel = document.querySelector('.editor-panel');
   const previewPanel = document.querySelector('.preview-panel');
 
+  // AI 답변 붙여넣기 → CSV 파일 받기
+  const aiAnswerInput = document.getElementById('aiAnswerInput');
+  const btnClearAiAnswer = document.getElementById('btnClearAiAnswer');
+  const pasteExpectText = document.getElementById('pasteExpectText');
+  const pasteCheckResult = document.getElementById('pasteCheckResult');
+  const btnDownloadCsv = document.getElementById('btnDownloadCsv');
+  const pasteNextSteps = document.getElementById('pasteNextSteps');
+  const pasteLastFile = document.getElementById('pasteLastFile');
+
   const STORAGE_KEY = 'anki_prompt_generator_settings';
   let saveTimer = null;
   let currentMode = 'text'; // 'text' | 'topic'
@@ -221,6 +230,60 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // 시험 이름(데이터 값) → 프롬프트에 넣을 짧은 이름 번역 키 (prompt.examShort.*)
+  // 한국어 번역값은 데이터 값과 같으므로 한국어 프롬프트는 그대로
+  const EXAM_SHORT_KEYS = {
+    '토익': 'toeic', '토플 IBT': 'toeflIbt', '토플 PBT': 'toeflPbt', '텝스': 'teps', '지텔프': 'gtelp',
+    '아이엘츠': 'ielts', 'FLEX': 'flex', 'JLPT': 'jlpt', 'JPT': 'jpt', '日檢(NIKKEN)': 'nikken',
+    'HSK': 'hsk', '신HSK': 'newHsk', 'BCT': 'bct', 'CPT': 'cpt', 'TOCFL': 'tocfl',
+    'DELF': 'delf', 'DALF': 'dalf', '괴테어학검정(Goethe)': 'goethe', 'DELE': 'dele',
+    '토르플(TORFL)': 'torfl', '칠스(CILS)': 'cils', '첼리(CELI)': 'celi'
+  };
+
+  // 급수/점수 프리셋 중 숫자 패턴이 아닌 낱말 값 → 번역 키 (prompt.score.word.*)
+  const SCORE_WORD_KEYS = {
+    '초급': 'beginner', '중급': 'intermediate', '고급': 'advanced',
+    '중학 필수': 'middleSchool', '고교 기본': 'highSchool', '수능 필수': 'suneung',
+    '기초': 'torflElementary', '기본': 'torflBasic'
+  };
+
+  const isKoreanUi = () => !i18n.getLocale || i18n.getLocale() === 'ko';
+
+  function getExamObj(examName) {
+    const preset = EXAM_PRESETS[promptLangSelect.value] || EXAM_PRESETS['default'];
+    return preset.exams.find(e => e.name === examName) || null;
+  }
+
+  // 프리셋 급수/점수 값(한국어 데이터)을 현재 UI 언어의 표시 문구로 변환 (한국어 UI는 그대로)
+  function formatPresetScore(raw) {
+    if (!raw || isKoreanUi()) return raw;
+    if (SCORE_WORD_KEYS[raw]) return i18n.t('prompt.score.word.' + SCORE_WORD_KEYS[raw]);
+    return raw
+      .replace(/레벨\s*(\d+)\s+(\d+)점/g, (m, level, n) => i18n.t('prompt.score.levelPoints', { level, n }))
+      .replace(/레벨\s*(\d+)/g, (m, n) => i18n.t('prompt.score.level', { n }))
+      .replace(/(\d+)단계/g, (m, n) => i18n.t('prompt.score.level', { n }))
+      .replace(/(\d+(?:-\d+)?)급/g, (m, n) => i18n.t('prompt.score.level', { n }))
+      .replace(/(\d+)점/g, (m, n) => i18n.t('prompt.score.points', { n }));
+  }
+
+  function getPresetScores(examObj) {
+    if (!examObj) return [];
+    return [examObj.defaultScore, ...(examObj.scoreChips || [])].filter(Boolean);
+  }
+
+  // 저장된 데이터 값 → 입력창 표시 값 (프리셋 값만 변환, 사용자가 직접 입력한 값은 그대로)
+  function scoreToDisplay(examObj, raw) {
+    const value = raw || '';
+    return getPresetScores(examObj).includes(value.trim()) ? formatPresetScore(value.trim()) : value;
+  }
+
+  // 입력창 표시 값 → 저장용 데이터 값 (번역 표시된 프리셋 값은 원래 데이터 값으로 되돌려 저장)
+  function scoreToRaw(examObj, display) {
+    const value = (display || '').trim();
+    const match = getPresetScores(examObj).find(raw => formatPresetScore(raw) === value);
+    return match !== undefined ? match : (display || '');
+  }
+
   // 현재 필드 리스트 (첫 방문 기본 언어의 기본 구성)
   let fields = createDefaultFields(DEFAULT_LANG_ID);
 
@@ -280,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (isUserManualLangChange) {
-      examScoreInput.value = matchedExamObj ? matchedExamObj.defaultScore : '';
+      examScoreInput.value = matchedExamObj ? formatPresetScore(matchedExamObj.defaultScore) : '';
     }
 
     const chips = matchedExamObj ? (matchedExamObj.scoreChips || []) : [];
@@ -298,7 +361,9 @@ document.addEventListener('DOMContentLoaded', () => {
     scoreChipsWrapper.style.display = '';
 
     const cur = (currentScore || '').trim();
-    chips.forEach(chipText => {
+    chips.forEach(rawChip => {
+      // 칩 문구는 UI 언어로 표시 (한국어 UI는 데이터 값 그대로)
+      const chipText = formatPresetScore(rawChip);
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'chip-btn' + (chipText === cur ? ' active' : '');
@@ -327,12 +392,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 목표 레벨/등급 최종 텍스트 계산
   function getTargetLevelString() {
-    const exam = examTypeSelect ? examTypeSelect.value.trim() : '';
+    const examName = examTypeSelect ? examTypeSelect.value.trim() : '';
     const score = examScoreInput ? examScoreInput.value.trim() : '';
 
-    if (exam === '직접 입력' || exam === '일반 난이도' || exam === '수능/교과') {
+    if (examName === '직접 입력' || examName === '일반 난이도' || examName === '수능/교과') {
       return score;
     }
+    // 프롬프트에는 UI 언어의 짧은 시험 이름을 사용 (한국어는 데이터 값과 동일)
+    const exam = EXAM_SHORT_KEYS[examName] ? i18n.t('prompt.examShort.' + EXAM_SHORT_KEYS[examName]) : examName;
     if (!exam && !score) {
       return '';
     }
@@ -420,7 +487,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         renderFields();
         updatePromptAndPreview();
-        showToast(i18n.t('prompt.toast.fieldAdded', { name: chip.name }));
+        // 알림에는 화면에 보이는 칩 문구를 사용 (한국어 UI는 기존처럼 열 이름, 저장되는 열 이름은 데이터 값 그대로)
+        const shownName = isKoreanUi() ? chip.name : chip.label.replace(/^\+\s*/, '');
+        showToast(i18n.t('prompt.toast.fieldAdded', { name: shownName }));
       });
       container.appendChild(btn);
     });
@@ -474,10 +543,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fields.forEach(f => {
       const name = f.name.trim();
+      let target = null;
       if (isAutoForeignWordName(name)) {
-        f.name = getForeignWordFieldName(newLangId);
+        target = getForeignWordFieldName(newLangId);
       } else if (AUTO_PRONUNCIATION_NAMES.includes(name)) {
-        f.name = getPronunciationFieldName(newLangId);
+        target = getPronunciationFieldName(newLangId);
+      }
+      // 다른 열에 이미 같은 이름이 있으면 중복 열이 생기지 않도록 이름을 바꾸지 않음
+      if (target && target !== name && !fields.some(o => o !== f && o.name.trim() === target)) {
+        f.name = target;
       }
     });
 
@@ -509,7 +583,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="prompt-field-actions">
           <button type="button" class="btn-field-icon btn-move-up" title="${escapeHtml(i18n.t('prompt.fields.moveUp'))}" ${index === 0 ? 'disabled' : ''}>▲</button>
           <button type="button" class="btn-field-icon btn-move-down" title="${escapeHtml(i18n.t('prompt.fields.moveDown'))}" ${index === fields.length - 1 ? 'disabled' : ''}>▼</button>
-          <button type="button" class="btn-field-icon btn-delete-small" title="${escapeHtml(i18n.t('prompt.fields.delete'))}">🗑️</button>
+          <button type="button" class="btn-field-icon btn-delete-small" title="${escapeHtml(i18n.t('prompt.fields.delete'))}" ${fields.length <= 1 ? 'disabled' : ''}>🗑️</button>
         </div>
       `;
 
@@ -546,6 +620,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       btnDel.addEventListener('click', () => {
+        // 마지막 남은 열은 삭제하지 않음 (0개 열 프롬프트 방지)
+        if (fields.length <= 1) return;
         const rawName = field.name.trim();
         const promptText = rawName
           ? i18n.t('prompt.confirm.deleteField', { name: rawName })
@@ -584,37 +660,76 @@ document.addEventListener('DOMContentLoaded', () => {
   // 열 이름별 작성 예시 (AI에게 열의 의미와 표기 방식을 명확히 전달)
   function getColumnHint(name) {
     // 열 이름 판별(한국어 열 이름 기준)은 데이터 모델에 속하므로 그대로 두고, 설명 문구만 번역 키로 분리
+    // 영어로 열 이름을 짓는 사용자를 위해 영어 별칭(Example, Translation, Pinyin 등)도 함께 인식
     const hint = key => i18n.t('prompt.out.hint.' + key);
+    const lower = name.toLowerCase();
     if (name.includes('[품사]')) return hint('posKorean');
-    if (name.includes('예문') && (name.includes('해석') || name.includes('번역'))) return hint('exampleTranslation');
-    if (name.includes('예문') && name.includes('병음')) return hint('examplePinyin');
-    if (name.includes('예문')) return hint('example');
-    if (name === '병음' || name.includes('병음')) return hint('pinyin');
-    if (name.includes('후리가나')) return hint('furigana');
-    if (name.includes('발음기호')) return hint('ipa');
+    if (isExampleTranslationName(name)) return hint('exampleTranslation');
+    if (isExampleWordName(name) && (name.includes('병음') || lower.includes('pinyin'))) return hint('examplePinyin');
+    if (isExampleWordName(name)) return hint('example');
+    if (name.includes('병음') || lower.includes('pinyin')) return hint('pinyin');
+    if (name.includes('후리가나') || lower.includes('furigana')) return hint('furigana');
+    if (name.includes('발음기호') || /\bipa\b/.test(lower)) return hint('ipa');
+    // '발음', '발음/표기' 등 일반 발음 열: 목표 언어에서 통용되는 로마자/발음 표기
+    if (name.includes('발음') || lower.includes('pronunciation') || lower.includes('reading')) return hint('pronunciation');
     if (name === '품사') return hint('pos');
     if (name.includes('유의어') || name.includes('반의어')) return hint('synonyms');
-    if (name.includes('한국어') || name.includes('뜻') || name.includes('의미')) return hint('korean');
+    // 'Translation' 단독 열은 예문 열이 있으면 예문 해석, 없으면 한국어 뜻으로 간주
+    if (lower.includes('translation')) return hint(hasExampleColumn() ? 'exampleTranslation' : 'korean');
+    if (name.includes('한국어') || name.includes('뜻') || name.includes('의미') || lower.includes('meaning')) return hint('korean');
     if (isAutoForeignWordName(name)) return hint('foreignWord');
     return '';
   }
 
-  function hasExampleTranslationColumn() {
-    return fields.some(f => {
-      const name = f.name.trim();
-      return name.includes('예문') && (name.includes('해석') || name.includes('번역'));
-    });
+  // 예문 계열 열 이름인지 (한국어 '예문' 또는 영어 Example / Sentence)
+  function isExampleWordName(name) {
+    const lower = name.toLowerCase();
+    return name.includes('예문') || lower.includes('example') || lower.includes('sentence');
   }
 
-  // 본문 언어 자동 감지: 글자(숫자·기호·공백 제외) 중 한글 비율이 60% 이상이면 한국어 본문
-  // (한국어 해설이 섞인 외국어 기사 등은 외국어 본문으로 유지)
-  const KOREAN_SOURCE_RATIO = 0.6;
+  // 예문 해석(번역) 열 이름인지
+  function isExampleTranslationName(name) {
+    const lower = name.toLowerCase();
+    return isExampleWordName(name)
+      && (name.includes('해석') || name.includes('번역') || lower.includes('translation') || lower.includes('meaning'));
+  }
+
+  // 첫 번째 예문 해석 열 (없으면 null)
+  function findExampleTranslationColumn() {
+    const found = fields.find(f => isExampleTranslationName(f.name.trim()));
+    if (found) return found.name.trim();
+    // 예문 열과 함께 쓰인 'Translation' 단독 열도 예문 해석으로 간주
+    if (hasExampleColumn()) {
+      const tr = fields.find(f => f.name.trim().toLowerCase().includes('translation'));
+      if (tr) return tr.name.trim();
+    }
+    return null;
+  }
+
+  // 본문 언어 자동 감지: 글자 단위가 아닌 낱말(띄어쓰기 단위) 기준으로 판단
+  // - 한글이 하나라도 들어간 낱말은 한국어 낱말 ('meeting은', 'cancel됐어' 등 외래어 섞인 한국어도 한국어)
+  // - 띄어쓰기가 없는 문자(한자·가나·태국어 등)는 2글자를 낱말 1개로 쳐서 중국어·일본어 본문이 과소평가되지 않게 함
+  // - 한국어 낱말 비율이 50% 이상이면 한국어 본문 (한국어 제목만 붙은 외국어 기사 등은 외국어 본문으로 유지)
+  const KOREAN_SOURCE_RATIO = 0.5;
+  const HANGUL_RE = /[가-힣ᄀ-ᇿ㄰-㆏]/;
+  const NO_SPACE_SCRIPT_RE = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Thai}\p{Script=Lao}\p{Script=Khmer}\p{Script=Myanmar}]/gu;
 
   function detectSourceLanguage(text) {
-    const letters = (text || '').match(/\p{L}/gu) || [];
-    if (letters.length === 0) return null;
-    const hangul = letters.filter(ch => /[가-힣ᄀ-ᇿ㄰-㆏]/.test(ch)).length;
-    return hangul / letters.length >= KOREAN_SOURCE_RATIO ? 'ko' : 'foreign';
+    let koreanWords = 0;
+    let totalWords = 0;
+    (text || '').split(/\s+/).forEach(token => {
+      const letters = (token.match(/\p{L}/gu) || []).length;
+      if (letters === 0) return; // 숫자·기호·이모지만 있는 낱말은 제외
+      if (HANGUL_RE.test(token)) {
+        koreanWords += 1;
+        totalWords += 1;
+        return;
+      }
+      const noSpaceChars = (token.match(NO_SPACE_SCRIPT_RE) || []).length;
+      totalWords += noSpaceChars > 0 ? Math.max(1, Math.ceil(noSpaceChars / 2)) + (letters > noSpaceChars ? 1 : 0) : 1;
+    });
+    if (totalWords === 0) return null;
+    return koreanWords / totalWords >= KOREAN_SOURCE_RATIO ? 'ko' : 'foreign';
   }
 
   // 실제로 적용할 본문 언어 ('ko' | 'foreign')
@@ -653,7 +768,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function hasExampleColumn() {
     return fields.some(f => {
       const name = f.name.trim();
-      return name.includes('예문') && !name.includes('해석') && !name.includes('번역') && !name.includes('병음');
+      return isExampleWordName(name) && !isExampleTranslationName(name)
+        && !name.includes('병음') && !name.toLowerCase().includes('pinyin');
     });
   }
 
@@ -768,8 +884,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (ruleExampleFromText.checked && currentMode === 'text' && hasExampleColumn()) {
       if (isKoreanSource) {
+        // 예문 해석 열의 실제 이름을 넣어 안내 ('예문 해석', '예문 번역', 'Example translation' 등)
+        const translationColumn = findExampleTranslationColumn();
         rules.push(t('prompt.out.rule.exampleKorean', { lang: langName })
-          + (hasExampleTranslationColumn() ? t('prompt.out.rule.exampleKoreanTranslation') : ''));
+          + (translationColumn ? t('prompt.out.rule.exampleKoreanTranslation', { name: translationColumn }) : ''));
       } else {
         rules.push(t('prompt.out.rule.exampleFromText'));
       }
@@ -787,10 +905,28 @@ document.addEventListener('DOMContentLoaded', () => {
       const textLabel = t(isKoreanSource ? 'prompt.out.textLabelKorean' : 'prompt.out.textLabel');
       textSection = textContent
         ? `\n\n---\n${textLabel}\n${textContent}`
-        : `\n\n---\n${textLabel}\n${t('prompt.out.textPlaceholder')}`;
+        : `\n\n---\n${textLabel}\n${t(isKoreanSource ? 'prompt.out.textPlaceholderKorean' : 'prompt.out.textPlaceholder')}`;
     }
 
     return `${mainSentence}\n${formatSentence}${rulesSection}${textSection}`;
+  }
+
+  // AI 서비스 열기 링크 (프롬프트를 입력창에 미리 채우는 서비스는 prefill 주소 사용)
+  const PREFILL_MAX_LENGTH = 6000; // URL 길이 제한을 고려한 최대 인코딩 길이
+  const AI_LAUNCH_LINKS = [
+    { id: 'btnLaunchChatGPT', base: 'https://chatgpt.com', prefill: 'https://chatgpt.com/?q=' },
+    { id: 'btnLaunchClaude', base: 'https://claude.ai', prefill: 'https://claude.ai/new?q=' },
+    { id: 'btnLaunchGemini', base: 'https://gemini.google.com', prefill: null },
+  ];
+
+  // 프롬프트가 바뀔 때마다 링크 주소도 갱신 (가운데 클릭·새 탭으로 열기에서도 최신 프롬프트 사용)
+  function updateLaunchLinks(prompt) {
+    const encoded = encodeURIComponent(prompt);
+    AI_LAUNCH_LINKS.forEach(({ id, base, prefill }) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.href = (prefill && encoded.length <= PREFILL_MAX_LENGTH) ? prefill + encoded : base;
+    });
   }
 
   // 실시간 프롬프트 갱신
@@ -800,6 +936,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const prompt = generatePrompt();
     promptOutputText.textContent = prompt;
+    updateLaunchLinks(prompt);
+    // 항목 수 · 칸 나누는 기호가 바뀌면 붙여넣은 AI 답변도 다시 확인
+    renderPasteCheck();
 
     if (shouldSave) {
       saveSettingsToStorage();
@@ -829,7 +968,8 @@ document.addEventListener('DOMContentLoaded', () => {
         sourceLangMode: sourceLangModeSelect ? sourceLangModeSelect.value : 'auto',
         levelFilterMode: levelFilterModeSelect.value,
         examType: examTypeSelect.value,
-        examScore: examScoreInput.value,
+        // 번역 표시된 프리셋 급수/점수는 원래 데이터 값(한국어)으로 저장해 UI 언어가 바뀌어도 호환
+        examScore: scoreToRaw(getExamObj(examTypeSelect.value), examScoreInput.value),
         pos: {
           noun: posNoun.checked,
           verb: posVerb.checked,
@@ -874,24 +1014,39 @@ document.addEventListener('DOMContentLoaded', () => {
         updateExamOptions(false);
       }
 
-      if (data.mode) {
-        setMode(data.mode, false);
-      }
+      // 저장값으로 select를 맞추고, 목록에 없는 값이면(빈 선택) 기본값 사용
+      const restoreSelect = (select, value, fallback) => {
+        if (!select) return;
+        if (value !== undefined && value !== null) select.value = String(value);
+        if (!select.value) select.value = fallback;
+      };
+
+      setMode(data.mode === 'topic' ? 'topic' : 'text', false);
       if (data.sourceText !== undefined) sourceTextInput.value = data.sourceText;
       if (data.sourceTopic !== undefined) sourceTopicInput.value = data.sourceTopic;
-      if (data.sourceLangMode && sourceLangModeSelect) sourceLangModeSelect.value = data.sourceLangMode;
+      restoreSelect(sourceLangModeSelect, data.sourceLangMode, 'auto');
 
-      if (data.levelFilterMode !== undefined) levelFilterModeSelect.value = data.levelFilterMode;
+      restoreSelect(levelFilterModeSelect, data.levelFilterMode, 'below');
+      let examFellBack = false;
       if (data.examType !== undefined) {
         const prevExam = examTypeSelect.value;
         examTypeSelect.value = data.examType;
-        // 저장된 시험이 현재 언어 목록에 없으면 언어 기본 시험 유지
-        if (!examTypeSelect.value) examTypeSelect.value = prevExam;
+        // 저장된 시험이 현재 언어 목록에 없으면 언어 기본 시험 유지 (점수도 그 시험의 기본값으로)
+        if (!examTypeSelect.value) {
+          examTypeSelect.value = prevExam;
+          examFellBack = true;
+        }
       }
-      if (data.examScore !== undefined) {
-        examScoreInput.value = data.examScore;
+      const restoredExam = getExamObj(examTypeSelect.value);
+      if (examFellBack) {
+        examScoreInput.value = restoredExam ? formatPresetScore(restoredExam.defaultScore) : '';
+      } else if (data.examScore !== undefined) {
+        examScoreInput.value = scoreToDisplay(restoredExam, data.examScore);
       } else if (data.levelCustom !== undefined) {
         examScoreInput.value = data.levelCustom;
+      } else if (restoredExam) {
+        // 점수가 저장되지 않은 경우 시험 이름만 남지 않도록 그 시험의 기본 급수/점수 사용
+        examScoreInput.value = formatPresetScore(restoredExam.defaultScore);
       }
 
       if (data.pos) {
@@ -902,8 +1057,8 @@ document.addEventListener('DOMContentLoaded', () => {
         posIdiom.checked = Boolean(data.pos.idiom);
       }
 
-      if (data.wordCount !== undefined) wordCountSelect.value = data.wordCount;
-      if (data.delimiter !== undefined) delimiterSelect.value = data.delimiter;
+      restoreSelect(wordCountSelect, data.wordCount, 'all');
+      restoreSelect(delimiterSelect, data.delimiter, 'comma');
 
       if (data.rules) {
         ruleCodeblock.checked = Boolean(data.rules.codeblock);
@@ -921,8 +1076,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (Array.isArray(data.fields) && data.fields.length > 0) {
         fields = data.fields.map((f, i) => ({
           id: `f_${Date.now()}_${i}`,
-          name: f.name || i18n.t('prompt.fields.defaultName', { n: i + 1 })
+          name: (f && f.name) || i18n.t('prompt.fields.defaultName', { n: i + 1 })
         }));
+      } else {
+        // 저장된 열 목록이 없거나 비어 있으면 복원된 언어의 기본 열 구성 사용
+        fields = createDefaultFields(promptLangSelect.value);
       }
 
       const langId = promptLangSelect.value;
@@ -1071,6 +1229,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function initEventListeners() {
     promptLangSelect.addEventListener('change', () => {
       const newLangId = promptLangSelect.value;
+      // 이미 선택된 언어를 다시 고른 경우: 시험·점수·필드를 초기화하지 않음
+      if (newLangId === activeLangId) return;
       updateExamOptions(true);
       adaptFieldsToLanguage(activeLangId || newLangId, newLangId);
       activeLangId = newLangId;
@@ -1100,12 +1260,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const examObj = preset.exams.find(e => e.name === curExamName);
 
       if (curExamName === '직접 입력') {
+        // 이전 시험의 점수가 시험 이름 없이 남지 않도록 비움
+        examScoreInput.value = '';
         renderScoreChips([], '');
         examScoreInput.focus();
         examScoreInput.select();
       } else if (examObj) {
-        examScoreInput.value = examObj.defaultScore;
-        renderScoreChips(examObj.scoreChips, examObj.defaultScore);
+        examScoreInput.value = formatPresetScore(examObj.defaultScore);
+        renderScoreChips(examObj.scoreChips, examScoreInput.value);
       } else {
         renderScoreChips([], examScoreInput.value);
       }
@@ -1186,19 +1348,15 @@ document.addEventListener('DOMContentLoaded', () => {
       copyToClipboard(promptOutputText.textContent, i18n.t('prompt.copyLabel'));
     });
 
-    // AI 서비스 열기 버튼: 프롬프트를 자동 복사하고, 지원하는 서비스는 입력창에 미리 채워서 열기
-    const PREFILL_MAX_LENGTH = 6000; // URL 길이 제한을 고려한 최대 인코딩 길이
-    [
-      { el: document.getElementById('btnLaunchChatGPT'), base: 'https://chatgpt.com', prefill: 'https://chatgpt.com/?q=' },
-      { el: document.getElementById('btnLaunchClaude'), base: 'https://claude.ai', prefill: 'https://claude.ai/new?q=' },
-      { el: document.getElementById('btnLaunchGemini'), base: 'https://gemini.google.com', prefill: null },
-    ].forEach(({ el, base, prefill }) => {
+    // AI 서비스 열기 버튼: 링크 이동(기본 동작)보다 먼저 프롬프트를 자동 복사
+    // (링크 주소는 updatePromptAndPreview에서 항상 최신 프롬프트로 갱신됨)
+    AI_LAUNCH_LINKS.forEach(({ id }) => {
+      const el = document.getElementById(id);
       if (!el) return;
       el.addEventListener('click', () => {
         const prompt = promptOutputText.textContent;
-        const encoded = encodeURIComponent(prompt);
-        el.href = (prefill && encoded.length <= PREFILL_MAX_LENGTH) ? prefill + encoded : base;
         copyToClipboard(prompt, i18n.t('prompt.copyLabel'));
+        updateLaunchLinks(prompt);
       });
     });
 
@@ -1269,6 +1427,401 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // ===== 10. AI 답변 붙여넣기 → CSV 파일 받기 =====
+  // AI와 연결하지 않고, 사용자가 붙여넣은 답변을 이 브라우저 안에서만 정리 · 확인 · 파일로 만든다
+  const PASTE_DELIMS = { comma: ',', tab: '\t', semicolon: ';' };
+  // Anki 2.1.55 이상은 파일 첫머리의 '#separator:' · '#html:' 줄을 읽고, 이전 버전은 '#'으로 시작하는 줄을 주석으로 건너뜀
+  const ANKI_SEPARATOR_NAMES = { comma: 'Comma', tab: 'Tab', semicolon: 'Semicolon' };
+  const MAX_PROBLEMS_SHOWN = 20;
+  // AI가 제목 줄에 자주 쓰는 일반적인 항목 이름 (설정한 항목 이름과 함께 제목 줄 판단에 사용)
+  const GENERIC_HEADER_WORDS = [
+    'front', 'back', 'word', 'words', 'meaning', 'korean', 'koreanmeaning', 'english', 'chinese', 'japanese',
+    'example', 'examplesentence', 'sentence', 'translation', 'exampletranslation', 'pinyin', 'reading',
+    'furigana', 'pronunciation', 'ipa', 'pos', 'partofspeech', 'synonyms', 'antonyms',
+    '단어', '뜻', '의미', '한국어', '한국어뜻', '품사', '예문', '예문해석', '병음', '발음', '발음기호', '후리가나'
+  ];
+
+  let lastPasteResult = null;
+
+  // 한 줄을 CSV 규칙으로 나누기 (큰따옴표로 감싼 칸, 겹쳐 쓴 큰따옴표 "", 큰따옴표 안의 구분 기호)
+  // 여러 줄에 걸친 칸은 지원하지 않음 (AI에게 한 줄에 한 단어로 요청하므로, 닫히지 않은 따옴표는 문제 줄로 알림)
+  function splitDelimitedLine(line, delim) {
+    const cells = [];
+    const n = line.length;
+    let i = 0;
+    for (;;) {
+      let j = i;
+      while (j < n && line[j] === ' ') j++; // 칸 앞 공백은 건너뜀 (탭 구분일 때도 탭은 구분 기호로 남김)
+      if (j < n && line[j] === '"') {
+        let k = j + 1;
+        let value = '';
+        let closed = false;
+        while (k < n) {
+          if (line[k] === '"') {
+            if (line[k + 1] === '"') {
+              value += '"';
+              k += 2;
+              continue;
+            }
+            closed = true;
+            k += 1;
+            break;
+          }
+          value += line[k];
+          k += 1;
+        }
+        if (!closed) return { cells: null, unclosed: true };
+        // 닫는 따옴표 뒤 ~ 다음 구분 기호 사이의 글자는 그대로 이어 붙임
+        let rest = '';
+        while (k < n && line[k] !== delim) {
+          rest += line[k];
+          k += 1;
+        }
+        cells.push(value + rest.trim());
+        if (k >= n) break;
+        i = k + 1;
+      } else {
+        let k = i;
+        while (k < n && line[k] !== delim) k += 1;
+        cells.push(line.slice(i, k).trim());
+        if (k >= n) break;
+        i = k + 1;
+      }
+    }
+    return { cells, unclosed: false };
+  }
+
+  // 마크다운 표의 한 줄(| a | b |)을 칸으로 나누기 (\| 는 글자 | 로)
+  function splitTableRow(line) {
+    let s = line.trim().replace(/\\\|/g, '\u0000');
+    if (s.startsWith('|')) s = s.slice(1);
+    if (s.endsWith('|')) s = s.slice(0, -1);
+    return s.split('|').map(c => c.replace(/\u0000/g, '|').trim());
+  }
+
+  function normalizeHeaderCell(s) {
+    return (s || '').toLowerCase().replace(/[\s"'`*_]/g, '');
+  }
+
+  // 첫 줄이 항목 이름(제목 줄)처럼 보이는지: 설정한 항목 이름과 같거나 비슷한 칸이 절반 이상
+  function looksLikeHeaderRow(cells, fieldNames) {
+    if (!cells || cells.length === 0) return false;
+    const names = fieldNames.map(normalizeHeaderCell);
+    let hits = 0;
+    cells.forEach((cell, idx) => {
+      const v = normalizeHeaderCell(cell);
+      if (!v) return;
+      const own = names[idx] || '';
+      const similar = own && Math.min(own.length, v.length) >= 2 && (v.includes(own) || own.includes(v));
+      if (names.includes(v) || similar || GENERIC_HEADER_WORDS.includes(v.replace(/[[\]()]/g, ''))) hits += 1;
+    });
+    const need = cells.length >= 2 ? Math.max(2, Math.ceil(cells.length / 2)) : 1;
+    return hits >= need;
+  }
+
+  // 붙여넣은 AI 답변 정리 · 확인
+  // 결과: { rows: 올바른 줄의 칸 배열들, problems, notes(자동 정리 내용), delimKey(실제로 읽은 기호), noTabs }
+  function analyzeAiAnswer(text, delimKey, fieldNames) {
+    const expected = fieldNames.length;
+    const notes = [];
+    let chatterCount = 0;
+    let fenced = false;
+    let items = text.replace(/^﻿/, '').split(/\r\n|\r|\n/).map((t, i) => ({ text: t, line: i + 1 }));
+
+    // 1) 복사용 상자(```csv … ```)가 있으면 상자 안쪽만 사용, 바깥 줄은 AI의 설명으로 보고 지움
+    const isFence = t => /^\s*(```|~~~)/.test(t);
+    if (items.some(it => isFence(it.text))) {
+      fenced = true;
+      const inside = [];
+      let open = false;
+      let outside = 0;
+      items.forEach(it => {
+        if (isFence(it.text)) {
+          open = !open;
+          return;
+        }
+        if (open) inside.push(it);
+        else if (it.text.trim()) outside += 1;
+      });
+      if (inside.some(it => it.text.trim())) {
+        items = inside;
+        chatterCount += outside;
+      } else {
+        items = items.filter(it => !isFence(it.text));
+      }
+      notes.push(i18n.t('prompt.paste.cleanedFence'));
+    }
+
+    // 2) 빈 줄 지우기
+    items = items.filter(it => it.text.trim() !== '');
+
+    let rows = []; // { line, raw, cells, unclosed }
+    let delimUsed = delimKey;
+    let headerRemoved = false;
+
+    // 3) 마크다운 표(| a | b |)로 답한 경우: 표 줄만 칸으로 나누고, |---| 줄과 그 바로 위 제목 줄은 지움
+    const isTableLine = t => /^\s*\|.*\|\s*$/.test(t);
+    const tableItems = items.filter(it => isTableLine(it.text));
+    if (tableItems.length >= 2 && tableItems.length * 2 >= items.length) {
+      const sepRe = /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/;
+      chatterCount += items.length - tableItems.length;
+      tableItems.forEach((it, idx) => {
+        if (sepRe.test(it.text)) {
+          const prev = tableItems[idx - 1];
+          if (!headerRemoved && prev && rows.length && rows[rows.length - 1].line === prev.line) {
+            rows.pop();
+            headerRemoved = true;
+          }
+          return;
+        }
+        rows.push({ line: it.line, raw: it.text, cells: splitTableRow(it.text), unclosed: false });
+      });
+      notes.push(i18n.t('prompt.paste.cleanedTable'));
+    } else {
+      // 4) 구분 기호로 나누기. 설정한 기호로 읽어서 맞는 줄이 절반도 안 되면 다른 기호도 시도
+      const parseWith = key => items.map(it => {
+        const r = splitDelimitedLine(it.text, PASTE_DELIMS[key]);
+        return { line: it.line, raw: it.text, cells: r.cells, unclosed: r.unclosed };
+      });
+      const goodCount = list => list.filter(r => r.cells && r.cells.length === expected).length;
+      rows = parseWith(delimKey);
+      if (expected >= 2 && goodCount(rows) * 2 < rows.length) {
+        let best = { key: delimKey, list: rows, good: goodCount(rows) };
+        Object.keys(PASTE_DELIMS).filter(k => k !== delimKey).forEach(k => {
+          const list = parseWith(k);
+          const good = goodCount(list);
+          if (good > best.good && good * 2 >= list.length) best = { key: k, list, good };
+        });
+        if (best.key !== delimKey) {
+          rows = best.list;
+          delimUsed = best.key;
+          notes.push(i18n.t('prompt.paste.cleanedDelim', { name: i18n.t('prompt.paste.delimName.' + best.key) }));
+        }
+      }
+
+      // 5) 상자 없이 답한 경우, 앞뒤의 AI 설명 줄 지우기: 구분 기호가 없는 줄이나 콜론(:)으로 끝나는 줄 (데이터 줄 앞 · 뒤에서만)
+      //    (구분 기호가 든 줄이 하나도 없으면 설명이 아니라 형식 문제이므로 지우지 않고 문제 줄로 알림)
+      const d = PASTE_DELIMS[delimUsed];
+      if (!fenced && expected >= 2 && rows.some(r => r.raw.includes(d))) {
+        const isChatter = r => !r.raw.includes(d) || /[:：]\s*$/.test(r.raw);
+        while (rows.length && isChatter(rows[0])) {
+          rows.shift();
+          chatterCount += 1;
+        }
+        while (rows.length && isChatter(rows[rows.length - 1])) {
+          rows.pop();
+          chatterCount += 1;
+        }
+      }
+    }
+
+    // 6) 첫 줄이 항목 이름(제목 줄)이면 지움 (그대로 두면 카드 1장으로 들어감)
+    if (!headerRemoved && rows.length && rows[0].cells && looksLikeHeaderRow(rows[0].cells, fieldNames)) {
+      rows.shift();
+      headerRemoved = true;
+    }
+    if (chatterCount > 0) notes.push(i18n.t('prompt.paste.cleanedChatter', { n: chatterCount }));
+    if (headerRemoved) notes.push(i18n.t('prompt.paste.cleanedHeader'));
+
+    // 7) 칸 수 확인
+    const valid = [];
+    const problems = [];
+    rows.forEach(r => {
+      if (r.unclosed) {
+        problems.push({ line: r.line, raw: r.raw, kind: 'quote' });
+        return;
+      }
+      const cells = r.cells.slice();
+      // 줄 끝에 구분 기호가 하나 더 붙은 경우(a,b,c,)는 빈 칸 하나를 무시
+      if (cells.length === expected + 1 && cells[cells.length - 1] === '') cells.pop();
+      if (cells.length !== expected) {
+        problems.push({ line: r.line, raw: r.raw, kind: 'count', actual: cells.length });
+        return;
+      }
+      valid.push(cells);
+    });
+
+    const noTabs = delimUsed === 'tab' && !text.includes('\t');
+    return { rows: valid, problems, notes, delimKey: delimUsed, noTabs };
+  }
+
+  // Anki로 가져올 파일 내용 만들기 (설정한 칸 나누는 기호로 다시 쓰고, 필요한 칸은 큰따옴표로 감쌈)
+  function buildAnkiImportText(rows, delimKey) {
+    const d = PASTE_DELIMS[delimKey] || ',';
+    const quote = (value, idx) => {
+      // 첫 칸이 #으로 시작하면 Anki가 주석 줄로 보므로 큰따옴표로 감쌈
+      const needs = value.includes(d) || value.includes('"') || /[\r\n]/.test(value) || (idx === 0 && value.startsWith('#'));
+      return needs ? '"' + value.replace(/"/g, '""') + '"' : value;
+    };
+    const header = [`#separator:${ANKI_SEPARATOR_NAMES[delimKey] || 'Comma'}`, '#html:true'];
+    const body = rows.map(cells => cells.map(quote).join(d));
+    return header.concat(body).join('\n') + '\n';
+  }
+
+  function makeDownloadFileName(delimKey) {
+    const now = new Date();
+    const p = n => String(n).padStart(2, '0');
+    const stamp = `${now.getFullYear()}${p(now.getMonth() + 1)}${p(now.getDate())}-${p(now.getHours())}${p(now.getMinutes())}`;
+    return `anki-words-${stamp}.${delimKey === 'tab' ? 'txt' : 'csv'}`;
+  }
+
+  // 임시 링크(<a download>)로 파일 저장 (iOS Safari는 '파일' 앱으로 저장됨)
+  function downloadTextFile(content, fileName, mimeType) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+      a.remove();
+    }, 1000);
+  }
+
+  function makeEl(tag, className, text) {
+    const el = document.createElement(tag);
+    if (className) el.className = className;
+    if (text !== undefined) el.textContent = text;
+    return el;
+  }
+
+  // 붙여넣은 답변을 확인하고 결과(요약 · 정리 내용 · 문제 줄 · 받기 버튼)를 그림
+  function renderPasteCheck() {
+    if (!aiAnswerInput || !pasteCheckResult || !btnDownloadCsv) return;
+    const fieldNames = fields.map(f => f.name.trim() || i18n.t('prompt.fields.unnamed'));
+    if (pasteExpectText) {
+      pasteExpectText.textContent = i18n.t('prompt.paste.expect', { count: fieldNames.length, formula: fieldNames.join(' · ') });
+    }
+
+    pasteCheckResult.innerHTML = '';
+    const text = aiAnswerInput.value;
+    if (!text.trim()) {
+      lastPasteResult = null;
+      pasteCheckResult.appendChild(makeEl('p', 'paste-csv-summary is-empty', i18n.t('prompt.paste.empty')));
+      btnDownloadCsv.disabled = true;
+      btnDownloadCsv.textContent = i18n.t('prompt.paste.downloadBtn');
+      return;
+    }
+
+    const result = analyzeAiAnswer(text, delimiterSelect.value, fieldNames);
+    lastPasteResult = result;
+    const count = result.rows.length;
+    const bad = result.problems.length;
+
+    let summary;
+    if (count === 0) {
+      // 올바른 줄이 하나도 없음 (문제 줄이 있으면 아래 목록으로 함께 보여 줌)
+      summary = makeEl('p', 'paste-csv-summary is-bad', i18n.t('prompt.paste.noRows'));
+    } else if (bad === 0) {
+      summary = makeEl('p', 'paste-csv-summary is-ok', i18n.t('prompt.paste.summaryOk', { count }));
+    } else {
+      summary = makeEl('p', 'paste-csv-summary is-warn', i18n.t('prompt.paste.summaryBad', { count, bad }));
+    }
+    pasteCheckResult.appendChild(summary);
+
+    if (result.notes.length) {
+      const notes = makeEl('p', 'paste-csv-notes');
+      notes.appendChild(makeEl('strong', '', i18n.t('prompt.paste.cleanedTitle')));
+      notes.appendChild(document.createTextNode(' ' + result.notes.join(' · ')));
+      pasteCheckResult.appendChild(notes);
+    }
+
+    if (bad > 0) {
+      const list = makeEl('ul', 'paste-problem-list');
+      result.problems.slice(0, MAX_PROBLEMS_SHOWN).forEach(pr => {
+        const li = document.createElement('li');
+        const btn = makeEl('button', 'paste-problem-item');
+        btn.type = 'button';
+        btn.title = i18n.t('prompt.paste.problemGoTitle');
+        btn.appendChild(makeEl('span', 'paste-problem-line', i18n.t('prompt.paste.lineLabel', { n: pr.line })));
+        const reason = pr.kind === 'quote'
+          ? i18n.t('prompt.paste.problemQuote')
+          : i18n.t('prompt.paste.problemCount', { expected: fieldNames.length, actual: pr.actual });
+        btn.appendChild(makeEl('span', 'paste-problem-reason', reason));
+        const raw = pr.raw.trim();
+        btn.appendChild(makeEl('code', 'paste-problem-preview', raw.length > 48 ? raw.slice(0, 48) + '…' : raw));
+        btn.addEventListener('click', () => selectAnswerLine(pr.line));
+        li.appendChild(btn);
+        list.appendChild(li);
+      });
+      if (bad > MAX_PROBLEMS_SHOWN) {
+        list.appendChild(makeEl('li', 'paste-problem-more', i18n.t('prompt.paste.problemMore', { n: bad - MAX_PROBLEMS_SHOWN })));
+      }
+      pasteCheckResult.appendChild(list);
+
+      if (result.delimKey === 'comma' && result.problems.some(pr => pr.kind === 'count' && pr.actual > fieldNames.length)) {
+        pasteCheckResult.appendChild(makeEl('p', 'paste-csv-hint', i18n.t('prompt.paste.commaHint')));
+      }
+    }
+    if (result.noTabs && (bad > 0 || count === 0)) {
+      pasteCheckResult.appendChild(makeEl('p', 'paste-csv-hint', i18n.t('prompt.paste.tabHint')));
+    }
+    if (bad > 0) {
+      pasteCheckResult.appendChild(makeEl('p', 'paste-csv-fix-hint', i18n.t('prompt.paste.fixHint')));
+    }
+
+    // 문제 있는 줄이 있어도 올바른 줄만으로 받을 수 있게 함 (빠진 줄은 위에 목록으로 보여 줌)
+    btnDownloadCsv.disabled = count === 0;
+    btnDownloadCsv.textContent = count > 0
+      ? i18n.t('prompt.paste.downloadBtnCount', { count })
+      : i18n.t('prompt.paste.downloadBtn');
+  }
+
+  // 문제 줄을 누르면 붙여넣기 칸에서 그 줄을 선택해 바로 고칠 수 있게 함
+  function selectAnswerLine(lineNo) {
+    const lines = aiAnswerInput.value.split('\n');
+    let start = 0;
+    for (let i = 0; i < lineNo - 1 && i < lines.length; i++) start += lines[i].length + 1;
+    const end = start + (lines[lineNo - 1] || '').replace(/\r$/, '').length;
+    aiAnswerInput.focus();
+    try {
+      aiAnswerInput.setSelectionRange(start, end);
+    } catch (e) {}
+    const lineHeight = parseFloat(window.getComputedStyle(aiAnswerInput).lineHeight) || 20;
+    aiAnswerInput.scrollTop = Math.max(0, (lineNo - 2) * lineHeight);
+  }
+
+  function downloadPastedCsv() {
+    if (!lastPasteResult || lastPasteResult.rows.length === 0) return;
+    const delimKey = delimiterSelect.value;
+    const fileName = makeDownloadFileName(delimKey);
+    const content = buildAnkiImportText(lastPasteResult.rows, delimKey);
+    // UTF-8 (BOM 없음): Anki는 UTF-8로 읽으며, BOM이 있으면 첫 줄 '#separator:'를 알아보지 못할 수 있음
+    const mimeType = delimKey === 'tab' ? 'text/plain;charset=utf-8' : 'text/csv;charset=utf-8';
+    downloadTextFile(content, fileName, mimeType);
+
+    const bad = lastPasteResult.problems.length;
+    showToast(bad > 0
+      ? i18n.t('prompt.paste.downloadedSkipped', { name: fileName, bad })
+      : i18n.t('prompt.paste.downloaded', { name: fileName }));
+    if (pasteLastFile) {
+      pasteLastFile.textContent = i18n.t('prompt.paste.lastFile', { name: fileName });
+      pasteLastFile.classList.remove('hidden');
+    }
+    if (pasteNextSteps) {
+      pasteNextSteps.classList.add('is-ready');
+      if (typeof pasteNextSteps.scrollIntoView === 'function') {
+        pasteNextSteps.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }
+
+  function initPasteCsv() {
+    if (!aiAnswerInput) return;
+    aiAnswerInput.addEventListener('input', renderPasteCheck);
+    if (btnClearAiAnswer) {
+      btnClearAiAnswer.addEventListener('click', () => {
+        aiAnswerInput.value = '';
+        renderPasteCheck();
+        aiAnswerInput.focus();
+      });
+    }
+    if (btnDownloadCsv) btnDownloadCsv.addEventListener('click', downloadPastedCsv);
+  }
+
   // 클립보드 복사 헬퍼
   function copyToClipboard(text, label) {
     if (navigator.clipboard && window.isSecureContext) {
@@ -1289,8 +1842,12 @@ document.addEventListener('DOMContentLoaded', () => {
     textarea.focus();
     textarea.select();
     try {
-      document.execCommand('copy');
-      showToast(i18n.t('common.copied', { label }));
+      // execCommand가 false를 돌려주면 실제로 복사되지 않은 것이므로 실패 안내
+      if (document.execCommand('copy')) {
+        showToast(i18n.t('common.copied', { label }));
+      } else {
+        showToast(i18n.t('common.copyFailed'));
+      }
     } catch (err) {
       showToast(i18n.t('common.copyFailed'));
     }
@@ -1318,6 +1875,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 초기화 실행
   initLanguageSelect();
   initEventListeners();
+  initPasteCsv();
 
   const restored = loadSettingsFromStorage();
   if (!restored) {

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($s='C:\\\\Users\\\\fitec\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--myProject-studyWithWanzi\\\\2e323407-2c16-471a-946a-7700ef2bf4b0\\\\scratchpad'; ls \"$s\\\\jsdomtest\" | select Name,Length; ls \"$s\\\\screens\" | select -First 50 Name; ls D:\\\\myProject\\\\studyWithWanzi -Recurse -File | ? { $_.FullName -notmatch 'node_modules|\\\\.git' } | select FullName,Length)"
+    ]
+  }
+}
