@@ -1788,8 +1788,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!lastPasteResult || lastPasteResult.rows.length === 0) return;
     const delimKey = delimiterSelect.value;
     const fileName = makeDownloadFileName(delimKey);
-    const content = buildAnkiImportText(lastPasteResult.rows, delimKey);
-    // UTF-8 (BOM 없음): Anki는 UTF-8로 읽으며, BOM이 있으면 첫 줄 '#separator:'를 알아보지 못할 수 있음
+    // UTF-8 + BOM: 파일을 더블클릭해 엑셀로 열어도 한글이 깨지지 않게 함 (BOM이 없으면 엑셀이 한국어 윈도우 인코딩으로 읽음)
+    // Anki는 첫 줄의 BOM을 제거한 뒤 '#separator:' 머리말을 읽으므로 가져오기에는 영향 없음 (rslib csv metadata strip_utf8_bom)
+    const content = '﻿' + buildAnkiImportText(lastPasteResult.rows, delimKey);
     const mimeType = delimKey === 'tab' ? 'text/plain;charset=utf-8' : 'text/csv;charset=utf-8';
     downloadTextFile(content, fileName, mimeType);
 
