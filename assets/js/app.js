@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const dictNameTag = document.getElementById('dictNameTag');
   const rtlNotice = document.getElementById('rtlNotice');
   const linkNewTab = document.getElementById('linkNewTab');
+  const linkCleanQuery = document.getElementById('linkCleanQuery');
   const wikiUrlInput = document.getElementById('wikiUrlInput');
   const resetWikiUrlBtn = document.getElementById('resetWikiUrlBtn');
   const DEFAULT_WIKI_URL = 'https://ko.wikipedia.org/wiki/';
@@ -184,235 +185,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let selectedFieldIndex = 0;
 
-  // 한글 초성 검색 지원 헬퍼 (예: 'ㅍㄹㅅ' -> 프랑스어, 'ㅅㅍㅇ' -> 스페인어, 'ㅈㄱ' -> 중국어)
-  const CHOSUNG_LIST = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+  let langCombobox = null;
 
-  function getChosung(text) {
-    if (!text) return '';
-    let result = '';
-    for (let i = 0; i < text.length; i++) {
-      const code = text.charCodeAt(i);
-      if (code >= 0xAC00 && code <= 0xD7A3) {
-        const chosungIndex = Math.floor((code - 0xAC00) / (21 * 28));
-        result += CHOSUNG_LIST[chosungIndex];
-      } else {
-        result += text[i];
-      }
-    }
-    return result;
-  }
-
-  let activeFocusIndex = -1;
-
-  // 1. 언어 셀렉트 박스 및 검색형 콤보박스 초기화
+  // 1. 언어 검색형 콤보박스 초기화 (공용 컴포넌트: assets/js/langCombobox.js)
   function initLanguageSelect() {
-    languageSelect.innerHTML = '';
-    const list = window.LANGUAGES_DATA || LANGUAGES_DATA;
-    list.forEach(lang => {
-      const option = document.createElement('option');
-      option.value = lang.id;
-      option.textContent = lang.name;
-      // 중국어를 기본 선택 (사용자 기존 예시가 zh.dict.naver.com 및 pinyin이었음)
-      if (lang.id === 'zh') {
-        option.selected = true;
-      }
-      languageSelect.appendChild(option);
+    langCombobox = window.createLangCombobox({
+      container: langSelectContainer,
+      select: languageSelect,
+      input: langSearchInput,
+      clearBtn: langClearBtn,
+      toggleBtn: langToggleBtn,
+      dropdown: langDropdownWrapper,
+      list: langDropdownList,
+      countEl: filteredLangCount,
+      languages: window.LANGUAGES_DATA || LANGUAGES_DATA,
+      onSelect: () => onLanguageChange(true),
     });
-
-    const initialLang = getSelectedLanguage();
-    if (langSearchInput) {
-      langSearchInput.value = initialLang.name;
-    }
-
-    initComboboxEvents();
-  }
-
-  function initComboboxEvents() {
-    if (!langSearchInput) return;
-
-    function openDropdown(filter = '') {
-      langDropdownWrapper.classList.remove('hidden');
-      langToggleBtn.classList.add('open');
-      langSearchInput.setAttribute('aria-expanded', 'true');
-      renderLangDropdown(filter);
-      updateClearBtn();
-      activeFocusIndex = -1;
-
-      // 현재 선택된 항목으로 부드럽게 스크롤 이동
-      const selectedItem = langDropdownList.querySelector('.dropdown-item.selected');
-      if (selectedItem) {
-        selectedItem.scrollIntoView({ block: 'nearest' });
-      }
-    }
-
-    function closeDropdown() {
-      langDropdownWrapper.classList.add('hidden');
-      langToggleBtn.classList.remove('open');
-      langSearchInput.setAttribute('aria-expanded', 'false');
-      const cur = getSelectedLanguage();
-      langSearchInput.value = cur.name;
-      updateClearBtn();
-      activeFocusIndex = -1;
-    }
-
-    function updateClearBtn() {
-      if (langSearchInput.value.trim().length > 0) {
-        langClearBtn.classList.remove('hidden');
-      } else {
-        langClearBtn.classList.add('hidden');
-      }
-    }
-
-    function renderLangDropdown(filterText = '') {
-      const list = window.LANGUAGES_DATA || LANGUAGES_DATA;
-      const query = filterText.trim().toLowerCase();
-      const queryChosung = getChosung(query);
-
-      let filtered = list;
-      if (query) {
-        filtered = list.filter(lang => {
-          const nameLower = lang.name.toLowerCase();
-          const idLower = lang.id.toLowerCase();
-          const langChosung = getChosung(lang.name);
-          return nameLower.includes(query) ||
-                 langChosung.includes(query) ||
-                 langChosung.includes(queryChosung) ||
-                 idLower.includes(query);
-        });
-      }
-
-      filteredLangCount.textContent = filtered.length;
-      langDropdownList.innerHTML = '';
-
-      if (filtered.length === 0) {
-        const emptyLi = document.createElement('li');
-        emptyLi.className = 'dropdown-empty';
-        emptyLi.textContent = `'${filterText}' 검색 결과가 없습니다.`;
-        langDropdownList.appendChild(emptyLi);
-        return;
-      }
-
-      const currentSelectedId = languageSelect.value;
-      filtered.forEach((lang) => {
-        const li = document.createElement('li');
-        li.className = 'dropdown-item';
-        if (lang.id === currentSelectedId) {
-          li.classList.add('selected');
-        }
-        li.setAttribute('role', 'option');
-        li.dataset.id = lang.id;
-        li.innerHTML = `
-          <span class="lang-name">
-            <span>${escapeHtml(lang.name)}</span>
-            <span class="lang-tag">${lang.id.toUpperCase()}</span>
-          </span>
-          ${lang.id === currentSelectedId ? '<span class="check-icon">✓</span>' : ''}
-        `;
-
-        li.addEventListener('mousedown', (e) => {
-          e.preventDefault();
-          selectLang(lang.id);
-        });
-
-        langDropdownList.appendChild(li);
-      });
-    }
-
-    function selectLang(id) {
-      languageSelect.value = id;
-      const lang = getSelectedLanguage();
-      langSearchInput.value = lang.name;
-      closeDropdown();
-      onLanguageChange(true);
-    }
-
-    // 클릭 시 드롭다운 열기 및 텍스트 선택
-    langSearchInput.addEventListener('click', () => {
-      openDropdown(langSearchInput.value);
-      langSearchInput.select();
-    });
-
-    langSearchInput.addEventListener('focus', () => {
-      openDropdown(langSearchInput.value);
-      langSearchInput.select();
-    });
-
-    langSearchInput.addEventListener('input', (e) => {
-      openDropdown(e.target.value);
-    });
-
-    // 키보드 네비게이션 (방향키, 엔터, ESC)
-    langSearchInput.addEventListener('keydown', (e) => {
-      const items = langDropdownList.querySelectorAll('.dropdown-item');
-      if (items.length === 0) return;
-
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        if (langDropdownWrapper.classList.contains('hidden')) {
-          openDropdown(langSearchInput.value);
-          return;
-        }
-        activeFocusIndex = (activeFocusIndex + 1) % items.length;
-        updateFocusedItem(items);
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        if (langDropdownWrapper.classList.contains('hidden')) {
-          openDropdown(langSearchInput.value);
-          return;
-        }
-        activeFocusIndex = (activeFocusIndex - 1 + items.length) % items.length;
-        updateFocusedItem(items);
-      } else if (e.key === 'Enter') {
-        e.preventDefault();
-        if (activeFocusIndex >= 0 && items[activeFocusIndex]) {
-          selectLang(items[activeFocusIndex].dataset.id);
-        } else if (items.length > 0) {
-          selectLang(items[0].dataset.id);
-        }
-      } else if (e.key === 'Escape') {
-        closeDropdown();
-      }
-    });
-
-    function updateFocusedItem(items) {
-      items.forEach((item, idx) => {
-        if (idx === activeFocusIndex) {
-          item.classList.add('focused');
-          item.scrollIntoView({ block: 'nearest' });
-        } else {
-          item.classList.remove('focused');
-        }
-      });
-    }
-
-    // 토글 버튼 (▼)
-    langToggleBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (langDropdownWrapper.classList.contains('hidden')) {
-        openDropdown();
-        langSearchInput.focus();
-        langSearchInput.select();
-      } else {
-        closeDropdown();
-      }
-    });
-
-    // 클리어 버튼 (X)
-    langClearBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      langSearchInput.value = '';
-      langSearchInput.focus();
-      openDropdown('');
-    });
-
-    // 바깥 영역 클릭 시 닫기
-    document.addEventListener('click', (e) => {
-      if (!langSelectContainer.contains(e.target)) {
-        if (!langDropdownWrapper.classList.contains('hidden')) {
-          closeDropdown();
-        }
-      }
-    });
+    // 중국어를 기본 선택 (사용자 기존 예시가 zh.dict.naver.com 및 pinyin이었음)
+    langCombobox.setValue('zh');
   }
 
   function getSelectedLanguage() {
@@ -1465,6 +1255,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
     linkNewTab.addEventListener('change', updateAll);
+    if (linkCleanQuery) linkCleanQuery.addEventListener('change', updateAll);
 
     showHrAnswer.addEventListener('change', updateAll);
     keepFrontOnBack.addEventListener('change', () => {
@@ -1636,7 +1427,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const editorPanel = document.querySelector('.editor-panel');
     const previewPanel = document.querySelector('.preview-panel');
 
-    function showMobileEditView() {
+    // keepScroll === true 이면 스크롤 위치 유지 (resize 등 사용자 전환이 아닌 경우)
+    function showMobileEditView(keepScroll) {
       if (window.innerWidth <= 768) {
         editorPanel.classList.remove('mobile-hidden');
         previewPanel.classList.add('mobile-hidden');
@@ -1644,11 +1436,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnMobilePreviewTab) btnMobilePreviewTab.classList.remove('active');
         if (btnFloatToPreview) btnFloatToPreview.style.display = 'inline-flex';
         if (btnFloatToEdit) btnFloatToEdit.style.display = 'none';
-        window.scrollTo(0, 0);
+        if (keepScroll !== true) window.scrollTo(0, 0);
       }
     }
 
-    function showMobilePreviewView() {
+    function showMobilePreviewView(keepScroll) {
       if (window.innerWidth <= 768) {
         editorPanel.classList.add('mobile-hidden');
         previewPanel.classList.remove('mobile-hidden');
@@ -1656,7 +1448,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnMobilePreviewTab) btnMobilePreviewTab.classList.add('active');
         if (btnFloatToPreview) btnFloatToPreview.style.display = 'none';
         if (btnFloatToEdit) btnFloatToEdit.style.display = 'inline-flex';
-        window.scrollTo(0, 0);
+        if (keepScroll !== true) window.scrollTo(0, 0);
       }
     }
 
@@ -1667,7 +1459,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnFloatToPreview) btnFloatToPreview.addEventListener('click', showMobilePreviewView);
     if (btnFloatToEdit) btnFloatToEdit.addEventListener('click', showMobileEditView);
 
+    // 모바일에서 위로 스크롤하면 주소창이 다시 나타나며 높이만 바뀌는 resize가 발생하므로
+    // 너비가 바뀐 경우에만 처리하고, 이때도 스크롤 위치는 유지한다
+    let lastViewportWidth = window.innerWidth;
     window.addEventListener('resize', () => {
+      if (window.innerWidth === lastViewportWidth) return;
+      lastViewportWidth = window.innerWidth;
+
       if (window.innerWidth > 768) {
         editorPanel.classList.remove('mobile-hidden');
         previewPanel.classList.remove('mobile-hidden');
@@ -1675,9 +1473,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnFloatToEdit) btnFloatToEdit.style.display = 'none';
       } else {
         if (btnMobilePreviewTab && btnMobilePreviewTab.classList.contains('active')) {
-          showMobilePreviewView();
+          showMobilePreviewView(true);
         } else {
-          showMobileEditView();
+          showMobileEditView(true);
         }
       }
     });
@@ -1799,6 +1597,38 @@ document.addEventListener('DOMContentLoaded', () => {
     return `<div class="field-item f-field-${fieldIndex}" style="font-size: ${size}px;${fieldFontCss ? ` font-family: ${fieldFontCss};` : ''}${weight && weight !== 'normal' ? ` font-weight: ${weight};` : ''} color: ${color}; margin-bottom: 8px;">{{${fieldName}}}${linkButtons}</div>`;
   }
 
+  // 링크 검색어 정리: [품사]·(괄호) 내용 제거, 뜻이 여러 개면 첫 번째 뜻만 사용
+  // (미리보기와 Anki 카드 스크립트가 같은 규칙을 쓰도록 정규식을 공유)
+  const LINK_QUERY_STRIP_RE = String.raw`\[[^\]]*\]|\([^)]*\)|（[^）]*）`;
+  const LINK_QUERY_SPLIT_RE = String.raw`[,;，、；]`;
+
+  function cleanLinkQuery(text) {
+    const cleaned = String(text || '')
+      .replace(new RegExp(LINK_QUERY_STRIP_RE, 'g'), '')
+      .split(new RegExp(LINK_QUERY_SPLIT_RE))[0]
+      .trim();
+    return cleaned || String(text || '').trim();
+  }
+
+  // Anki 카드에서 실행되는 검색어 정리 스크립트 (각 필드의 숨은 .link-query 텍스트로 아이콘 링크 주소를 다시 만듦)
+  const LINK_QUERY_SCRIPT = `<script>
+(function () {
+  document.querySelectorAll('.link-query').forEach(function (src) {
+    var raw = src.textContent;
+    var q = raw.replace(/${LINK_QUERY_STRIP_RE}/g, '').split(/${LINK_QUERY_SPLIT_RE}/)[0].trim() || raw.trim();
+    src.parentNode.querySelectorAll('.link-btn[data-base]').forEach(function (a) {
+      a.href = a.getAttribute('data-base') + encodeURIComponent(q);
+    });
+  });
+})();
+</script>`;
+
+  function withLinkQueryScript(template) {
+    return (linkCleanQuery && linkCleanQuery.checked && template.includes('class="link-query"'))
+      ? `${template}\n\n${LINK_QUERY_SCRIPT}`
+      : template;
+  }
+
   // 텍스트 옆 사전 / 위키 아이콘 버튼 (한 필드에 둘 다 적용 가능)
   function buildLinkButtons(field, isForPreview, fieldName, sampleValue) {
     const linkTargets = [];
@@ -1812,11 +1642,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (linkTargets.length === 0) return '';
 
     const targetAttr = linkNewTab.checked ? ' target="_blank"' : '';
-    return linkTargets.map(t => {
-      // 미리보기용: 예시값으로 실제 검색 링크 생성 / Anki 템플릿용: {{FieldName}} 태그 사용
-      const href = isForPreview ? t.url + encodeURIComponent(sampleValue) : `${t.url}{{${fieldName}}}`;
-      return `<a class="link-btn ${t.cls}" href="${href}"${targetAttr} title="${t.title}" style="${LINK_BTN_INLINE_STYLE}">${t.icon}</a>`;
-    }).join('');
+    const shouldClean = Boolean(linkCleanQuery && linkCleanQuery.checked);
+
+    if (isForPreview) {
+      // 미리보기용: 예시값으로 실제 검색 링크 생성
+      const query = shouldClean ? cleanLinkQuery(sampleValue) : sampleValue;
+      return linkTargets.map(t =>
+        `<a class="link-btn ${t.cls}" href="${t.url + encodeURIComponent(query)}"${targetAttr} title="${t.title}" style="${LINK_BTN_INLINE_STYLE}">${t.icon}</a>`
+      ).join('');
+    }
+
+    // Anki 템플릿용: {{text:필드명}}으로 HTML 서식을 뺀 텍스트를 사용
+    // 검색어 정리를 켜면 숨은 .link-query 텍스트를 카드 스크립트가 정리해 링크 주소를 다시 만듦 (스크립트 미실행 환경에서는 원문으로 검색)
+    const buttons = linkTargets.map(t =>
+      `<a class="link-btn ${t.cls}" href="${t.url}{{text:${fieldName}}}"${shouldClean ? ` data-base="${t.url}"` : ''}${targetAttr} title="${t.title}" style="${LINK_BTN_INLINE_STYLE}">${t.icon}</a>`
+    ).join('');
+    return shouldClean
+      ? `${buttons}<span class="link-query" hidden>{{text:${fieldName}}}</span>`
+      : buttons;
   }
 
   // 4. Anki 앞면 서식 생성
@@ -1834,7 +1677,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return `{{${f1Name}}}`;
     }
 
-    return activeFrontFields.map(item => buildFieldBlock(item.field, false, item.index)).join('\n\n');
+    return withLinkQueryScript(activeFrontFields.map(item => buildFieldBlock(item.field, false, item.index)).join('\n\n'));
   }
 
   // 5. Anki 뒷면 서식 생성
@@ -1864,7 +1707,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    return parts.join('\n\n');
+    return withLinkQueryScript(parts.join('\n\n'));
   }
 
   // 6. Anki CSS 서식 생성 (다크모드 완벽 대응)
@@ -2128,6 +1971,7 @@ a {
         dictUrl: dictUrlInput.value,
         wikiUrl: wikiUrlInput ? wikiUrlInput.value : DEFAULT_WIKI_URL,
         linkNewTab: linkNewTab.checked,
+        linkCleanQuery: linkCleanQuery ? linkCleanQuery.checked : true,
         showHrAnswer: showHrAnswer.checked,
         keepFrontOnBack: keepFrontOnBack.checked,
         centerAlign: centerAlign.checked,
@@ -2183,6 +2027,7 @@ a {
       if (data.dictUrl !== undefined) dictUrlInput.value = data.dictUrl;
       if (data.wikiUrl !== undefined && wikiUrlInput) wikiUrlInput.value = data.wikiUrl;
       if (data.linkNewTab !== undefined) linkNewTab.checked = Boolean(data.linkNewTab);
+      if (data.linkCleanQuery !== undefined && linkCleanQuery) linkCleanQuery.checked = Boolean(data.linkCleanQuery);
 
       if (data.showHrAnswer !== undefined) showHrAnswer.checked = Boolean(data.showHrAnswer);
       if (data.keepFrontOnBack !== undefined) keepFrontOnBack.checked = Boolean(data.keepFrontOnBack);
@@ -2332,6 +2177,7 @@ a {
     dictNameTag.textContent = lang.dictName;
     if (wikiUrlInput) wikiUrlInput.value = DEFAULT_WIKI_URL;
     linkNewTab.checked = true;
+    if (linkCleanQuery) linkCleanQuery.checked = true;
 
     // 공통 레이아웃 & 폰트
     showHrAnswer.checked = true;

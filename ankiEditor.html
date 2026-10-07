@@ -55,6 +55,14 @@
       <!-- LEFT: Editor Settings Form -->
       <section class="editor-panel" aria-label="카드 서식 설정 패널">
 
+        <div class="prompt-hero-box">
+          <span class="prompt-hero-icon">🎨</span>
+          <div>
+            <strong>내 Anki 카드를 보기 좋게, 찾아보기 쉽게 만드세요:</strong><br>
+            글씨 크기·색상·폰트는 물론, 단어 옆에 <strong>🔗 어학사전 · 📖 위키</strong> 아이콘을 달아 복습하다 궁금한 단어를 바로 찾아볼 수 있습니다. 필드명만 맞추면 Anki에 붙여넣을 서식 코드가 바로 완성됩니다.
+          </div>
+        </div>
+
         <!-- 1. 언어 및 사전 링크 설정 -->
         <div class="card-section">
           <div class="section-title">
@@ -76,7 +84,7 @@
                   type="text" 
                   id="langSearchInput" 
                   class="form-input combobox-input" 
-                  placeholder="언어 검색 (예: 프랑스어, 스페인어, ㅍㄹㅅ, es...)" 
+                  placeholder="언어 검색 (예: 스페인어, ㅅㅍㅇ, spanish, es...)"
                   autocomplete="off"
                   role="combobox"
                   aria-expanded="false"
@@ -117,6 +125,13 @@
             <label class="custom-checkbox">
               <input type="checkbox" id="linkNewTab" checked>
               <span>새 창/새 탭에서 열기 (<code>target="_blank"</code>)</span>
+            </label>
+          </div>
+
+          <div class="form-group inline-checkbox">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="linkCleanQuery" checked>
+              <span>검색어 정리: <code>[품사]</code>·<code>(괄호)</code> 내용은 빼고, 뜻이 여러 개면 첫 번째 뜻만 검색 (예: <code>[명사] 사과, 사과나무</code> ➔ <code>사과</code>)</span>
             </label>
           </div>
         </div>
@@ -634,6 +649,7 @@
   </footer>
 
   <script src="assets/js/languages.js"></script>
+  <script src="assets/js/langCombobox.js"></script>
   <script src="assets/js/app.js"></script>
 </body>
 </html>

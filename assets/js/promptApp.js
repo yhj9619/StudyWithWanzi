@@ -35,6 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const ruleLemma = document.getElementById('ruleLemma');
   const ruleNoDupes = document.getElementById('ruleNoDupes');
   const ruleContextMeaning = document.getElementById('ruleContextMeaning');
+  const ruleNoHeader = document.getElementById('ruleNoHeader');
+  const ruleDistinctMeaning = document.getElementById('ruleDistinctMeaning');
+  const ruleExampleFromText = document.getElementById('ruleExampleFromText');
+  const ruleExampleFromTextLabel = document.getElementById('ruleExampleFromTextLabel');
+  const btnImportEditorFields = document.getElementById('btnImportEditorFields');
+  const EDITOR_STORAGE_KEY = 'anki_card_editor_settings';
 
   const promptOutputText = document.getElementById('promptOutputText');
   const btnCopyPrompt = document.getElementById('btnCopyPrompt');
@@ -53,6 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY = 'anki_prompt_generator_settings';
   let saveTimer = null;
   let currentMode = 'text'; // 'text' | 'topic'
+  let activeLangId = null; // 언어 변경 직전의 언어 (필드 자동 조정 판단용)
+  let langCombobox = null;
+  const DEFAULT_LANG_ID = 'en'; // 첫 방문 기본 언어 (사용자가 가장 많은 영어)
 
   // 언어별 공인 시험 및 기본 열 구성 프리셋
   const EXAM_PRESETS = {
@@ -75,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     ja: {
       exams: [
-        { name: 'JLPT', label: '일본어능력시험 (JLPT)', defaultScore: 'N1', scoreChips: ['N5', 'N4', 'N3', 'N2', 'N1'] },
+        { name: 'JLPT', label: '일본어능력시험 (JLPT)', defaultScore: 'N3', scoreChips: ['N5', 'N4', 'N3', 'N2', 'N1'] },
         { name: 'JPT', label: 'JPT', defaultScore: '740점', scoreChips: ['550점', '650점', '740점', '800점', '900점'] },
         { name: '日檢(NIKKEN)', label: '일본어검정시험 (日檢 NIKKEN)', defaultScore: '750점', scoreChips: ['600점', '700점', '750점', '800점'] },
         { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
@@ -83,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
       ],
       defaultExam: 'JLPT',
-      defaultScore: 'N1',
+      defaultScore: 'N3',
       defaultFields: ['[품사]한국어', '일본어', '후리가나/발음']
     },
     zh: {
@@ -209,28 +218,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // 현재 필드 리스트
-  let fields = [
-    { id: 'f_1', name: '[품사]한국어' },
-    { id: 'f_2', name: '중국어' },
-    { id: 'f_3', name: '병음' }
-  ];
+  // 현재 필드 리스트 (첫 방문 기본 언어의 기본 구성)
+  let fields = createDefaultFields(DEFAULT_LANG_ID);
 
-  // 1. 언어 셀렉트 박스 초기화
+  function createDefaultFields(langId) {
+    return getDefaultFieldNames(langId).map((name, i) => ({
+      id: `f_${Date.now()}_${i}`,
+      name
+    }));
+  }
+
+  // 1. 언어 검색형 콤보박스 초기화 (공용 컴포넌트: assets/js/langCombobox.js)
+  // 선택 시 숨겨진 select의 change 이벤트를 발생시켜 기존 언어 변경 로직을 그대로 사용
   function initLanguageSelect() {
-    promptLangSelect.innerHTML = '';
-    const list = window.LANGUAGES_DATA || [];
-    list.forEach(lang => {
-      const option = document.createElement('option');
-      option.value = lang.id;
-      option.textContent = lang.name;
-      promptLangSelect.appendChild(option);
+    langCombobox = window.createLangCombobox({
+      container: document.getElementById('langSelectContainer'),
+      select: promptLangSelect,
+      input: document.getElementById('langSearchInput'),
+      clearBtn: document.getElementById('langClearBtn'),
+      toggleBtn: document.getElementById('langToggleBtn'),
+      dropdown: document.getElementById('langDropdownWrapper'),
+      list: document.getElementById('langDropdownList'),
+      countEl: document.getElementById('filteredLangCount'),
+      languages: window.LANGUAGES_DATA || [],
+      onSelect: () => promptLangSelect.dispatchEvent(new Event('change')),
     });
 
-    if (!promptLangSelect.value) {
-      promptLangSelect.value = 'zh'; // 기본값: 중국어
-    }
-
+    langCombobox.setValue(DEFAULT_LANG_ID);
     updateExamOptions(false);
   }
 
@@ -405,47 +419,58 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 언어 변경 시 필드 목록 자동 조정 (2열 및 외국어 열을 새 언어에 맞게 자동 전환)
-  function adaptFieldsToLanguage(newLangId) {
-    const langObj = (window.LANGUAGES_DATA || []).find(l => l.id === newLangId);
-    const newLangName = langObj ? langObj.name : '외국어';
-    const preset = EXAM_PRESETS[newLangId] || EXAM_PRESETS['default'];
+  // 언어별 기본 필드명 계산 ('외국어 단어'는 '<언어명> 단어'로 치환)
+  function getDefaultFieldNames(langId) {
+    const langObj = (window.LANGUAGES_DATA || []).find(l => l.id === langId);
+    const langName = langObj ? langObj.name : '외국어';
+    const preset = EXAM_PRESETS[langId] || EXAM_PRESETS['default'];
+    return preset.defaultFields.map(name => (name === '외국어 단어' ? `${langName} 단어` : name));
+  }
 
-    // 1) 기본 3개 열 상태인 경우, 해당 언어의 기본 구성으로 바로 전환
-    if (fields.length === 3) {
-      fields = preset.defaultFields.map((name, i) => ({
+  function getForeignWordFieldName(langId) {
+    return getDefaultFieldNames(langId)[1];
+  }
+
+  function getPronunciationFieldName(langId) {
+    if (langId === 'zh') return '병음';
+    if (langId === 'ja') return '후리가나/발음';
+    if (langId === 'en') return '발음기호';
+    return '발음/표기';
+  }
+
+  // 자동 생성된 외국어 단어 열 이름인지 (사용자가 직접 지은 이름은 건드리지 않음)
+  function isAutoForeignWordName(name) {
+    const langs = window.LANGUAGES_DATA || [];
+    if (name === '외국어' || name === '외국어 단어') return true;
+    if (Object.keys(EXAM_PRESETS).some(id => (EXAM_PRESETS[id].defaultFields || [])[1] === name)) return true;
+    return langs.some(l => name === l.name || name === `${l.name} 단어`);
+  }
+
+  const AUTO_PRONUNCIATION_NAMES = ['병음', '후리가나/발음', '발음기호', '발음/표기', '발음'];
+
+  // 언어 변경 시 필드 목록 자동 조정
+  // - 이전 언어의 기본 구성 그대로라면 새 언어의 기본 구성으로 교체
+  // - 직접 수정한 구성이라면, 자동 생성된 외국어/발음 열 이름만 새 언어에 맞게 변경
+  function adaptFieldsToLanguage(prevLangId, newLangId) {
+    const prevDefaults = getDefaultFieldNames(prevLangId);
+    const isUntouchedDefault = fields.length === prevDefaults.length
+      && fields.every((f, i) => f.name.trim() === prevDefaults[i]);
+
+    if (isUntouchedDefault) {
+      fields = getDefaultFieldNames(newLangId).map((name, i) => ({
         id: `f_${Date.now()}_${i}`,
-        name: name === '외국어 단어' ? `${newLangName} 단어` : name
+        name
       }));
       renderFields();
       return;
     }
 
-    // 2) 필드를 이미 추가/수정한 경우라도, 2열 및 언어 종속적 필드를 지능적으로 새 언어에 맞춤
-    fields.forEach((f, idx) => {
-      // 2열 또는 외국어 단어 열
-      if (idx === 1 || f.name.includes('단어') || f.name === '중국어' || f.name === '영어' || f.name === '일본어' || f.name === '외국어') {
-        if (newLangId === 'en') {
-          f.name = '영어';
-        } else if (newLangId === 'ja') {
-          f.name = '일본어';
-        } else if (newLangId === 'zh') {
-          f.name = '중국어';
-        } else {
-          f.name = `${newLangName} 단어`;
-        }
-      }
-      // 발음/병음/후리가나 열
-      else if (f.name.includes('병음') || f.name.includes('후리가나') || f.name.includes('발음')) {
-        if (newLangId === 'zh') {
-          f.name = '병음';
-        } else if (newLangId === 'ja') {
-          f.name = '후리가나/발음';
-        } else if (newLangId === 'en') {
-          f.name = '발음기호';
-        } else {
-          f.name = '발음/표기';
-        }
+    fields.forEach(f => {
+      const name = f.name.trim();
+      if (isAutoForeignWordName(name)) {
+        f.name = getForeignWordFieldName(newLangId);
+      } else if (AUTO_PRONUNCIATION_NAMES.includes(name)) {
+        f.name = getPronunciationFieldName(newLangId);
       }
     });
 
@@ -549,6 +574,29 @@ document.addEventListener('DOMContentLoaded', () => {
     currentFormatTag.textContent = `"${formula}"`;
   }
 
+  // 열 이름별 작성 예시 (AI에게 열의 의미와 표기 방식을 명확히 전달)
+  function getColumnHint(name) {
+    if (name.includes('[품사]')) return '대괄호 안에 품사를 쓰고 한국어 뜻을 이어서 작성. 예: [명사] 사과, [동사] 먹다';
+    if (name.includes('예문') && (name.includes('해석') || name.includes('번역'))) return '예문의 자연스러운 한국어 번역';
+    if (name.includes('예문') && name.includes('병음')) return '예문 전체의 병음, 성조 부호 포함';
+    if (name.includes('예문')) return '해당 단어가 들어간 목표 언어 문장';
+    if (name === '병음' || name.includes('병음')) return '성조 부호 포함. 예: píngguǒ';
+    if (name.includes('후리가나')) return '히라가나 읽기. 예: りんご';
+    if (name.includes('발음기호')) return 'IPA 발음기호. 예: /ˈæp.əl/';
+    if (name === '품사') return '명사, 동사, 형용사 등';
+    if (name.includes('유의어') || name.includes('반의어')) return '없으면 빈칸';
+    if (name.includes('한국어') || name.includes('뜻') || name.includes('의미')) return '한국어 뜻';
+    if (isAutoForeignWordName(name)) return '목표 언어 단어, 기본형으로';
+    return '';
+  }
+
+  function hasExampleColumn() {
+    return fields.some(f => {
+      const name = f.name.trim();
+      return name.includes('예문') && !name.includes('해석') && !name.includes('번역') && !name.includes('병음');
+    });
+  }
+
   // 5. 프롬프트 문자열 생성
   function generatePrompt() {
     const langObj = (window.LANGUAGES_DATA || []).find(l => l.id === promptLangSelect.value);
@@ -561,12 +609,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterMode = levelFilterModeSelect.value;
     const targetLevel = getTargetLevelString();
 
+    // JLPT(N5→N1)처럼 숫자가 작을수록 어려운 시험도 있으므로 '이하/이상' 대신 쉬움/어려움으로 방향을 명시
     let conditionClause = '';
     if (filterMode !== 'none' && targetLevel) {
       if (filterMode === 'below') {
-        conditionClause = `${targetLevel} 이하 수준의 단어는 제외하고, `;
+        conditionClause = `${targetLevel} 수준 및 그보다 쉬운 단어는 제외하고, `;
       } else if (filterMode === 'above') {
-        conditionClause = `${targetLevel} 이상 수준의 단어만 선별하여, `;
+        conditionClause = `${targetLevel} 수준 및 그보다 어려운 단어만 선별하여, `;
       } else if (filterMode === 'exact') {
         conditionClause = `${targetLevel} 수준에 해당하는 단어만 선별하여, `;
       }
@@ -589,7 +638,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const countVal = wordCountSelect.value;
     let countClause = '';
     if (countVal !== 'all') {
-      countClause = `최대 ${countVal}개 내외로 `;
+      countClause = `최대 ${countVal}개까지 `;
     }
 
     // 1번 문장
@@ -601,19 +650,32 @@ document.addEventListener('DOMContentLoaded', () => {
       mainSentence = `1. 아래 [${langName}] 중에서 ${conditionClause}${countClause}${posClause}을 ANKI에서 사용할 수 있는 CSV 형태로 뽑아줘.`;
     }
 
-    // 2번 문장 (형태)
-    const formatSentence = `2. 형태는 "${formatFormula}" 이 형태로 뽑아줘.`;
+    // 2번 문장 (형태) + 열별 설명 (AI가 열 의미를 오해하지 않도록 열 개수와 각 열의 예시를 명시)
+    const columnGuide = fields.map((f, i) => {
+      const name = f.name.trim() || '항목';
+      const hint = getColumnHint(name);
+      return `   - ${i + 1}열: ${name}${hint ? ` (${hint})` : ''}`;
+    }).join('\n');
+    const formatSentence = `2. 형태는 "${formatFormula}" 이 형태로 뽑아줘. 열 구분자는 ${delim.name}이고, 모든 줄은 정확히 ${fields.length}개 열이어야 해.\n${columnGuide}`;
 
     // 작성 규칙 (Anki 최적화)
     const rules = [];
     if (ruleCodeblock.checked) {
-      rules.push('불필요한 인사말이나 서론/결론 없이 오직 마크다운 코드블록(```csv ... ```) 안에 CSV 내용만 출력해줘.');
+      const codeLang = delim.char === '\t' ? 'tsv' : 'csv';
+      rules.push(`결과는 마크다운 코드블록(\`\`\`${codeLang} ... \`\`\`) 안에 출력해줘.`);
     }
-    if (rulePureCsv.checked && !ruleCodeblock.checked) {
-      rules.push('불필요한 설명 없이 순수 CSV 텍스트 데이터만 출력해줘.');
+    if (rulePureCsv.checked) {
+      rules.push('인사말, 설명, 번호 매기기 없이 단어 데이터만 출력해줘.');
     }
-    if (ruleQuoteCommas.checked && delim.char === ',') {
-      rules.push('예문이나 해석 등 내용 안에 쉼표(,)가 포함된 열은 반드시 큰따옴표("")로 감싸서 CSV 열이 어긋나지 않게 해줘.');
+    if (ruleNoHeader.checked) {
+      rules.push('첫 줄에 열 이름(헤더)을 넣지 말고 첫 줄부터 바로 단어 데이터로 시작해줘.');
+    }
+    if (ruleQuoteCommas.checked) {
+      if (delim.char === '\t') {
+        rules.push('내용 안에는 탭 문자를 쓰지 말아줘.');
+      } else {
+        rules.push(`예문이나 해석 등 내용 안에 구분 기호(${delim.char})가 포함된 열은 반드시 큰따옴표("")로 감싸서 열이 어긋나지 않게 해줘.`);
+      }
     }
     if (ruleLemma.checked) {
       rules.push('동사나 형용사는 문맥 활용형이 아닌 기본 사전형(원형)으로 변환하여 표기해줘.');
@@ -623,6 +685,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (ruleContextMeaning.checked) {
       rules.push('한국어 뜻은 본문 문맥에 가장 적합한 대표 의미 위주로 간결하게 정리해줘.');
+    }
+    if (ruleDistinctMeaning.checked) {
+      rules.push('한국어 뜻이 같은 서로 다른 단어가 있으면 괄호 안에 뉘앙스나 쓰임을 덧붙여 한국어 뜻이 서로 겹치지 않게 구분해줘. (예: 보다(눈으로), 보다(만나다))');
+    }
+    if (ruleExampleFromText.checked && currentMode === 'text' && hasExampleColumn()) {
+      rules.push('예문은 대상 텍스트에서 그 단어가 실제로 쓰인 문장을 그대로 사용해줘. 대상 텍스트가 단어·키워드 목록이라 문장이 없으면 그 단어로 자연스러운 예문을 새로 만들어줘.');
     }
 
     let rulesSection = '';
@@ -692,7 +760,10 @@ document.addEventListener('DOMContentLoaded', () => {
           quoteCommas: ruleQuoteCommas.checked,
           lemma: ruleLemma.checked,
           noDupes: ruleNoDupes.checked,
-          contextMeaning: ruleContextMeaning.checked
+          contextMeaning: ruleContextMeaning.checked,
+          noHeader: ruleNoHeader.checked,
+          distinctMeaning: ruleDistinctMeaning.checked,
+          exampleFromText: ruleExampleFromText.checked
         },
         fields: fields.map(f => ({ name: f.name }))
       };
@@ -713,6 +784,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (data.langId) {
         promptLangSelect.value = data.langId;
+        if (!promptLangSelect.value) promptLangSelect.value = DEFAULT_LANG_ID;
+        if (langCombobox) langCombobox.sync();
         updateExamOptions(false);
       }
 
@@ -723,7 +796,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (data.sourceTopic !== undefined) sourceTopicInput.value = data.sourceTopic;
 
       if (data.levelFilterMode !== undefined) levelFilterModeSelect.value = data.levelFilterMode;
-      if (data.examType !== undefined) examTypeSelect.value = data.examType;
+      if (data.examType !== undefined) {
+        const prevExam = examTypeSelect.value;
+        examTypeSelect.value = data.examType;
+        // 저장된 시험이 현재 언어 목록에 없으면 언어 기본 시험 유지
+        if (!examTypeSelect.value) examTypeSelect.value = prevExam;
+      }
       if (data.examScore !== undefined) {
         examScoreInput.value = data.examScore;
       } else if (data.levelCustom !== undefined) {
@@ -748,6 +826,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ruleLemma.checked = Boolean(data.rules.lemma);
         ruleNoDupes.checked = Boolean(data.rules.noDupes);
         ruleContextMeaning.checked = Boolean(data.rules.contextMeaning);
+        // 새로 추가된 규칙은 이전 저장본에 없으면 기본값(켜짐) 유지
+        if (data.rules.noHeader !== undefined) ruleNoHeader.checked = Boolean(data.rules.noHeader);
+        if (data.rules.distinctMeaning !== undefined) ruleDistinctMeaning.checked = Boolean(data.rules.distinctMeaning);
+        if (data.rules.exampleFromText !== undefined) ruleExampleFromText.checked = Boolean(data.rules.exampleFromText);
       }
 
       if (Array.isArray(data.fields) && data.fields.length > 0) {
@@ -783,21 +865,16 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.removeItem(STORAGE_KEY);
     } catch (e) {}
 
-    promptLangSelect.value = 'zh';
+    if (langCombobox) langCombobox.setValue(DEFAULT_LANG_ID);
+    activeLangId = DEFAULT_LANG_ID;
     setMode('text', false);
     sourceTextInput.value = '';
     sourceTopicInput.value = '';
 
     levelFilterModeSelect.value = 'below';
     syncLevelRowState();
-    updateExamOptions(false);
-    examTypeSelect.value = 'HSK';
-    examScoreInput.value = '3급';
-
-    const langId = promptLangSelect.value;
-    const preset = EXAM_PRESETS[langId] || EXAM_PRESETS['default'];
-    const curExam = preset.exams.find(e => e.name === 'HSK');
-    renderScoreChips(curExam ? curExam.scoreChips : [], '3급');
+    examTypeSelect.value = '';
+    updateExamOptions(true); // 기본 언어의 기본 시험 · 기본 급수로 설정
 
     posNoun.checked = true;
     posVerb.checked = true;
@@ -814,12 +891,11 @@ document.addEventListener('DOMContentLoaded', () => {
     ruleLemma.checked = true;
     ruleNoDupes.checked = true;
     ruleContextMeaning.checked = true;
+    ruleNoHeader.checked = true;
+    ruleDistinctMeaning.checked = true;
+    ruleExampleFromText.checked = true;
 
-    fields = [
-      { id: 'f_1', name: '[품사]한국어' },
-      { id: 'f_2', name: '중국어' },
-      { id: 'f_3', name: '병음' }
-    ];
+    fields = createDefaultFields(DEFAULT_LANG_ID);
 
     renderFields();
     renderFieldQuickChips(promptLangSelect.value);
@@ -843,6 +919,10 @@ document.addEventListener('DOMContentLoaded', () => {
       containerSourceText.classList.remove('hidden');
       containerSourceTopic.classList.add('hidden');
     }
+    // '본문에서 예문 가져오기'는 텍스트 추출 모드에서만 의미가 있음
+    if (ruleExampleFromTextLabel) {
+      ruleExampleFromTextLabel.classList.toggle('hidden', mode === 'topic');
+    }
     if (shouldUpdate) {
       updatePromptAndPreview();
     }
@@ -862,12 +942,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // 카드 서식 에디터의 Anki 필드명(Front, Back, pinyin 등)은 AI가 내용을 알 수 없으므로 내용 설명형 이름으로 변환
+  function toPromptColumnName(editorFieldName, langId) {
+    const name = (editorFieldName || '').trim();
+    const lower = name.toLowerCase();
+    if (lower === 'front') return '[품사]한국어';
+    if (lower === 'back') return getForeignWordFieldName(langId);
+    if (lower === 'pinyin') return '병음';
+    if (lower === 'example' || lower === 'sentence') return '예문';
+    return name;
+  }
+
+  function importFieldsFromEditor() {
+    let editorData = null;
+    try {
+      editorData = JSON.parse(localStorage.getItem(EDITOR_STORAGE_KEY) || 'null');
+    } catch (e) {
+      editorData = null;
+    }
+
+    const editorFields = editorData && Array.isArray(editorData.fields) ? editorData.fields : [];
+    if (editorFields.length === 0) {
+      showToast('카드 서식 에디터에 저장된 필드가 없습니다. 에디터에서 먼저 필드를 설정해주세요.');
+      return;
+    }
+
+    const langId = promptLangSelect.value;
+    fields = editorFields.map((f, i) => ({
+      id: `f_${Date.now()}_${i}`,
+      name: toPromptColumnName(f.name, langId) || `필드 ${i + 1}`
+    }));
+    renderFields();
+    updatePromptAndPreview();
+    showToast(`카드 에디터의 필드 ${fields.length}개를 같은 순서로 불러왔습니다. 열 이름이 내용을 잘 설명하는지 확인하세요.`);
+  }
+
   // 9. 컨트롤 이벤트 바인딩
   function initEventListeners() {
     promptLangSelect.addEventListener('change', () => {
       const newLangId = promptLangSelect.value;
       updateExamOptions(true);
-      adaptFieldsToLanguage(newLangId);
+      adaptFieldsToLanguage(activeLangId || newLangId, newLangId);
+      activeLangId = newLangId;
       renderFieldQuickChips(newLangId);
       updateResetFieldsButtonLabel();
       updatePromptAndPreview();
@@ -920,7 +1036,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 규칙 체크박스
-    [ruleCodeblock, rulePureCsv, ruleQuoteCommas, ruleLemma, ruleNoDupes, ruleContextMeaning].forEach(chk => {
+    [ruleCodeblock, rulePureCsv, ruleQuoteCommas, ruleLemma, ruleNoDupes, ruleContextMeaning,
+      ruleNoHeader, ruleDistinctMeaning, ruleExampleFromText].forEach(chk => {
       chk.addEventListener('change', () => updatePromptAndPreview());
     });
 
@@ -956,9 +1073,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const langObj = (window.LANGUAGES_DATA || []).find(l => l.id === langId);
         const langName = langObj ? langObj.name : '선택 언어';
 
-        fields = preset.defaultFields.map((name, i) => ({
+        fields = getDefaultFieldNames(langId).map((name, i) => ({
           id: `f_${Date.now()}_${i}`,
-          name: name === '외국어 단어' ? `${langName} 단어` : name
+          name
         }));
         renderFields();
         updatePromptAndPreview();
@@ -966,9 +1083,30 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    // 카드 서식 에디터에 저장된 필드 순서 그대로 불러오기
+    if (btnImportEditorFields) {
+      btnImportEditorFields.addEventListener('click', importFieldsFromEditor);
+    }
+
     // 복사 버튼
     btnCopyPrompt.addEventListener('click', () => {
       copyToClipboard(promptOutputText.textContent, '프롬프트가');
+    });
+
+    // AI 서비스 열기 버튼: 프롬프트를 자동 복사하고, 지원하는 서비스는 입력창에 미리 채워서 열기
+    const PREFILL_MAX_LENGTH = 6000; // URL 길이 제한을 고려한 최대 인코딩 길이
+    [
+      { el: document.getElementById('btnLaunchChatGPT'), base: 'https://chatgpt.com', prefill: 'https://chatgpt.com/?q=' },
+      { el: document.getElementById('btnLaunchClaude'), base: 'https://claude.ai', prefill: 'https://claude.ai/new?q=' },
+      { el: document.getElementById('btnLaunchGemini'), base: 'https://gemini.google.com', prefill: null },
+    ].forEach(({ el, base, prefill }) => {
+      if (!el) return;
+      el.addEventListener('click', () => {
+        const prompt = promptOutputText.textContent;
+        const encoded = encodeURIComponent(prompt);
+        el.href = (prefill && encoded.length <= PREFILL_MAX_LENGTH) ? prefill + encoded : base;
+        copyToClipboard(prompt, '프롬프트가');
+      });
     });
 
     // 초기화 버튼
@@ -980,7 +1118,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnFloatToPromptOutput = document.getElementById('btnFloatToPromptOutput');
     const btnFloatToPromptSettings = document.getElementById('btnFloatToPromptSettings');
 
-    function showMobileEditView() {
+    // keepScroll === true 이면 스크롤 위치 유지 (resize 등 사용자 전환이 아닌 경우)
+    function showMobileEditView(keepScroll) {
       if (window.innerWidth <= 768) {
         editorPanel.classList.remove('mobile-hidden');
         previewPanel.classList.add('mobile-hidden');
@@ -988,11 +1127,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnMobilePreviewTab) btnMobilePreviewTab.classList.remove('active');
         if (btnFloatToPromptOutput) btnFloatToPromptOutput.style.display = 'inline-flex';
         if (btnFloatToPromptSettings) btnFloatToPromptSettings.style.display = 'none';
-        window.scrollTo(0, 0);
+        if (keepScroll !== true) window.scrollTo(0, 0);
       }
     }
 
-    function showMobilePreviewView() {
+    function showMobilePreviewView(keepScroll) {
       if (window.innerWidth <= 768) {
         editorPanel.classList.add('mobile-hidden');
         previewPanel.classList.remove('mobile-hidden');
@@ -1000,7 +1139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnMobilePreviewTab) btnMobilePreviewTab.classList.add('active');
         if (btnFloatToPromptOutput) btnFloatToPromptOutput.style.display = 'none';
         if (btnFloatToPromptSettings) btnFloatToPromptSettings.style.display = 'inline-flex';
-        window.scrollTo(0, 0);
+        if (keepScroll !== true) window.scrollTo(0, 0);
       }
     }
 
@@ -1011,7 +1150,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnFloatToPromptOutput) btnFloatToPromptOutput.addEventListener('click', showMobilePreviewView);
     if (btnFloatToPromptSettings) btnFloatToPromptSettings.addEventListener('click', showMobileEditView);
 
+    // 모바일에서 위로 스크롤하면 주소창이 다시 나타나며 높이만 바뀌는 resize가 발생하므로
+    // 너비가 바뀐 경우에만 처리하고, 이때도 스크롤 위치는 유지한다
+    let lastViewportWidth = window.innerWidth;
     window.addEventListener('resize', () => {
+      if (window.innerWidth === lastViewportWidth) return;
+      lastViewportWidth = window.innerWidth;
+
       if (window.innerWidth > 768) {
         editorPanel.classList.remove('mobile-hidden');
         previewPanel.classList.remove('mobile-hidden');
@@ -1019,9 +1164,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnFloatToPromptSettings) btnFloatToPromptSettings.style.display = 'none';
       } else {
         if (btnMobilePreviewTab && btnMobilePreviewTab.classList.contains('active')) {
-          showMobilePreviewView();
+          showMobilePreviewView(true);
         } else {
-          showMobileEditView();
+          showMobileEditView(true);
         }
       }
     });
@@ -1083,11 +1228,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const restored = loadSettingsFromStorage();
   if (!restored) {
-    updateExamOptions(false);
+    updateExamOptions(true); // 첫 방문: 기본 언어의 기본 시험 · 기본 급수로 설정
     renderFieldQuickChips(promptLangSelect.value);
     updateResetFieldsButtonLabel();
   }
 
+  activeLangId = promptLangSelect.value;
   syncLevelRowState();
   renderFields();
   updatePromptAndPreview(false);

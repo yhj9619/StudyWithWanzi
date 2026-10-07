@@ -100,12 +100,13 @@
         <div class="guide-prose">
           <p class="guide-field-chips">
             추천 필드:
-            <span class="guide-code-badge">단어</span>
             <span class="guide-code-badge">의미</span>
+            <span class="guide-code-badge">단어</span>
             <span class="guide-code-badge">발음</span>
             <span class="guide-code-badge">예문</span>
             <span class="guide-code-badge">예문해석</span>
           </p>
+          <p>한국어 뜻을 보고 외국어를 떠올리는 연습을 위해 <strong>1번째 필드는 한국어 뜻</strong>으로 둡니다. 1번째 필드가 카드 앞면(문제)이 됩니다.</p>
 
           <ul class="step-flow-list">
             <li class="step-flow-item">
@@ -152,15 +153,15 @@
                   <tbody>
                     <tr>
                       <td><strong>1열</strong></td>
-                      <td><span class="guide-code-badge">단어</span> (Word)</td>
-                      <td>외울 목표 언어 단어 (예: <i>apple</i>, <i>リンゴ</i>, <i>苹果</i>)</td>
-                      <td>카드 앞면 & 뒷면</td>
+                      <td><span class="guide-code-badge">의미</span> (Meaning)</td>
+                      <td>한국어 뜻 (예: <i>[명사] 사과</i>)</td>
+                      <td>카드 앞면 (문제)</td>
                     </tr>
                     <tr>
                       <td><strong>2열</strong></td>
-                      <td><span class="guide-code-badge">의미</span> (Meaning)</td>
-                      <td>한국어 뜻 (예: <i>사과</i>)</td>
-                      <td>카드 뒷면</td>
+                      <td><span class="guide-code-badge">단어</span> (Word)</td>
+                      <td>외울 목표 언어 단어 (예: <i>apple</i>, <i>リンゴ</i>, <i>苹果</i>)</td>
+                      <td>카드 뒷면 (정답)</td>
                     </tr>
                     <tr>
                       <td><strong>3열</strong></td>
@@ -210,7 +211,7 @@
                   <span class="step-flow-num">3</span>
                   <div class="step-flow-content">
                     <strong>필드 목록 편집</strong>
-                    <p>생성한 노트 타입을 선택하고 우측 <b>[필드...(Fields...)]</b> 버튼을 클릭합니다. 여기서 <b>[추가]</b>를 눌러 위의 추천 필드명(단어, 의미, 발음, 예문, 예문해석)을 입력하고 <b>[위로 이동] / [아래로 이동]</b>으로 순서를 정렬합니다.</p>
+                    <p>생성한 노트 타입을 선택하고 우측 <b>[필드...(Fields...)]</b> 버튼을 클릭합니다. 여기서 <b>[추가]</b>를 눌러 위의 추천 필드명(의미, 단어, 발음, 예문, 예문해석)을 입력하고 <b>[위로 이동] / [아래로 이동]</b>으로 순서를 정렬합니다.</p>
                   </div>
                 </li>
               </ul>
@@ -283,7 +284,7 @@
                   <span class="step-flow-num">A</span>
                   <div class="step-flow-content">
                     <strong>앞면 서식 (Front Template)</strong>
-                    <p>문제를 보여주는 화면입니다. 보통 외워야 할 <code>{{단어}}</code>를 큰 글씨로 배치합니다.</p>
+                    <p>문제를 보여주는 화면입니다. 한국어 뜻 <code>{{의미}}</code>를 큰 글씨로 보여주고, 외국어 단어를 떠올려 봅니다.</p>
                   </div>
                 </li>
                 <li class="step-flow-item">
@@ -297,7 +298,7 @@
                   <span class="step-flow-num">C</span>
                   <div class="step-flow-content">
                     <strong>뒷면 서식 (Back Template)</strong>
-                    <p>정답 확인 화면입니다. 앞면의 단어와 함께 <code>{{의미}}</code>, <code>{{발음}}</code>, <code>{{예문}}</code>, 그리고 <b>사전 · 위키 바로가기 버튼</b>이 노출됩니다.</p>
+                    <p>정답 확인 화면입니다. 앞면의 뜻과 함께 정답 <code>{{단어}}</code>, <code>{{발음}}</code>, <code>{{예문}}</code>, 그리고 <b>사전 · 위키 바로가기 버튼</b>이 노출됩니다.</p>
                   </div>
                 </li>
               </ul>
@@ -373,7 +374,7 @@
               <span class="step-flow-num">3</span>
               <div class="step-flow-content">
                 <strong>Anki [파일] ➔ [가져오기]에서 파일 선택</strong>
-                <p>1열 ➔ 단어, 2열 ➔ 의미처럼 열과 필드가 맞는지만 확인하고 가져옵니다.</p>
+                <p>1열 ➔ 의미, 2열 ➔ 단어처럼 열과 필드가 맞는지만 확인하고 가져옵니다.</p>
               </div>
             </li>
           </ul>
@@ -404,7 +405,7 @@
               <h4>✨ AI 프롬프트 생성기로 해결하기</h4>
               <ul class="guide-feature-list">
                 <li><strong>검증된 공인 어학시험 기준</strong>: 일본어 JLPT(N1~N5), 중국어 HSK(1~6급), 유럽언어 CEFR(A1~C2), 프랑스 DELF, 독일 괴테 등 해당 언어에 실제로 존재하는 시험 등급을 선택할 수 있습니다.</li>
-                <li><strong>내 Anki 필드 맞춤 열 순서</strong>: 1열부터 원하는 항목(단어, 한국어 뜻, 발음/성조, 예문 등)의 순서를 드래그/버튼으로 내 맘대로 지정할 수 있습니다.</li>
+                <li><strong>내 Anki 필드 맞춤 열 순서</strong>: 1열부터 원하는 항목(한국어 뜻, 단어, 발음/성조, 예문 등)의 순서를 드래그/버튼으로 내 맘대로 지정할 수 있습니다.</li>
                 <li><strong>원클릭 프롬프트 복사</strong>: ChatGPT, Gemini, Claude 어디든 복사해서 붙여넣기만 하면 완벽한 CSV 텍스트가 출력됩니다.</li>
               </ul>
 
@@ -414,7 +415,7 @@
                   <span class="step-flow-num">1</span>
                   <div class="step-flow-content">
                     <strong>AI 출력 결과 복사하여 메모장에 붙여넣기</strong>
-                    <p>ChatGPT나 Gemini가 출력해 준 표 또는 코드블록 안의 CSV 텍스트(예: <code>사과,apple,píngguǒ...</code>)를 전체 복사하여 윈도우 <b>메모장(Notepad)</b>에 붙여넣습니다.</p>
+                    <p>ChatGPT나 Gemini가 출력해 준 표 또는 코드블록 안의 CSV 텍스트(예: <code>[명사] 사과,苹果,píngguǒ...</code>)를 전체 복사하여 윈도우 <b>메모장(Notepad)</b>에 붙여넣습니다.</p>
                   </div>
                 </li>
                 <li class="step-flow-item">
@@ -433,7 +434,7 @@
                     <strong>Anki에서 [가져오기] 실행</strong>
                     <p>
                       Anki 상단 메뉴 <b>[파일(File)] ➔ [가져오기(Import)]</b> (단축키: <kbd>Ctrl</kbd> + <kbd>I</kbd>)를 누르고 방금 저장한 파일을 선택합니다.<br>
-                      가져오기 창에서 <b>노트 타입</b>과 <b>필드 매핑(1열 ➔ 단어, 2열 ➔ 의미...)</b>이 올바른지 확인한 후 우측 상단 <b>[가져오기]</b> 버튼을 누르면 순식간에 수십~수백 장의 카드가 등록됩니다!
+                      가져오기 창에서 <b>노트 타입</b>과 <b>필드 매핑(1열 ➔ 의미, 2열 ➔ 단어...)</b>이 올바른지 확인한 후 우측 상단 <b>[가져오기]</b> 버튼을 누르면 순식간에 수십~수백 장의 카드가 등록됩니다!
                     </p>
                   </div>
                 </li>
@@ -442,8 +443,9 @@
               <div class="guide-callout tip">
                 <span class="guide-callout-icon">💡</span>
                 <div>
-                  <strong>꿀팁: 중복 단어 자동 건너뛰기 기능</strong><br>
-                  Anki는 첫 번째 필드(1열)의 값이 기존 덱에 이미 존재하는 경우 자동으로 중복 카드를 건너뛰거나 업데이트해 줍니다. 따라서 여러 텍스트에서 단어를 모을 때도 중복 걱정 없이 안심하고 가져올 수 있습니다.
+                  <strong>꿀팁: 중복은 첫 번째 필드(한국어 뜻)로 판단됩니다</strong><br>
+                  Anki는 첫 번째 필드(1열)의 값이 이미 있는 노트를 중복으로 보고 건너뛰거나 업데이트합니다. 그래서 여러 글에서 단어를 모아도 같은 단어가 두 번 들어가지 않습니다.<br>
+                  단, <b>뜻이 같은 다른 단어</b>(예: 看·见 → 둘 다 "보다")도 중복으로 걸릴 수 있습니다. <code>[동사] 보다 (눈으로 보다)</code>처럼 품사나 뉘앙스를 붙여 뜻을 구분해 두면 안전합니다. 프롬프트 생성기의 <b>"[품사]한국어"</b> 형식과 <b>"뜻이 같은 단어 구분"</b> 규칙이 이걸 도와줍니다.
                 </div>
               </div>
             </div>

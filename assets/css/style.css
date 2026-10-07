@@ -484,6 +484,33 @@ body {
   font-weight: bold;
 }
 
+.dropdown-item mark {
+  background: #fef08a;
+  color: inherit;
+  border-radius: 2px;
+  padding: 0;
+}
+
+.dropdown-item .lang-alias {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.dropdown-group-label {
+  padding: 0.5rem 0.85rem 0.25rem 0.85rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-light);
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+.dropdown-group-label:not(:first-child) {
+  border-top: 1px solid #f1f5f9;
+  margin-top: 0.25rem;
+}
+
 .dropdown-empty {
   padding: 1.5rem 1rem;
   text-align: center;
