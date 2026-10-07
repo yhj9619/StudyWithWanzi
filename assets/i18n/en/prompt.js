@@ -16,7 +16,7 @@ i18nRegister('en', {
   // 모바일 화면 전환
   'prompt.mobile.navLabel': 'Mobile view tabs',
   'prompt.mobile.editTab': '⚙️ 1. Settings',
-  'prompt.mobile.previewTab': '📋 2. Send to AI & get file',
+  'prompt.mobile.previewTab': '📋 2. AI & file',
   'prompt.mobile.goPreview': '📱 Go copy the finished prompt ➔',
   'prompt.mobile.floatToOutput': '📋 View prompt ➔',
   'prompt.mobile.floatToOutputTitle': 'See and copy the finished prompt',

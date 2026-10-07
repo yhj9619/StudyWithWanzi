@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // AI 답변 붙여넣기 → CSV 파일 받기
   const aiAnswerInput = document.getElementById('aiAnswerInput');
   const btnClearAiAnswer = document.getElementById('btnClearAiAnswer');
+  const btnClearSourceText = document.getElementById('btnClearSourceText');
   const pasteExpectText = document.getElementById('pasteExpectText');
   const pasteCheckResult = document.getElementById('pasteCheckResult');
   const btnDownloadCsv = document.getElementById('btnDownloadCsv');
@@ -1244,6 +1245,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sourceTextInput.addEventListener('input', () => updatePromptAndPreview());
     sourceTopicInput.addEventListener('input', () => updatePromptAndPreview());
+
+    // '단어를 뽑을 글' 지우기 → 새 글로 다른 단어장을 바로 만들 수 있게 (프롬프트 · 언어 감지 · 저장도 함께 갱신)
+    if (btnClearSourceText) {
+      btnClearSourceText.addEventListener('click', () => {
+        sourceTextInput.value = '';
+        updatePromptAndPreview();
+        sourceTextInput.focus();
+      });
+    }
     if (sourceLangModeSelect) {
       sourceLangModeSelect.addEventListener('change', () => updatePromptAndPreview());
     }

@@ -7,8 +7,8 @@ i18nRegister('en', {
 
   // Mobile view switch
   'editor.mobile.navAriaLabel': 'Mobile view tabs',
-  'editor.mobile.editTab': '⚙️ ①② Language & fields',
-  'editor.mobile.previewTab': '📱 Preview & copy card template',
+  'editor.mobile.editTab': '⚙️ 1. Settings',
+  'editor.mobile.previewTab': '📱 2. Preview & copy',
   'editor.mobile.goPreview': '📱 See the preview & copy your card template ➔',
   'editor.mobile.floatToPreview': '📱 Preview ➔',
   'editor.mobile.floatToPreviewTitle': 'Go to the preview & card template copy screen',

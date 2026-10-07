@@ -3674,3 +3674,44 @@ body {
   padding: 0.55rem 0.75rem;
   margin-bottom: 1rem;
 }
+
+/* =======================================
+   작은 버튼 줄바꿈 방지 ("🧹 지우\n기"처럼 버튼 글자가 쪼개지지 않게)
+   - 버튼 글자는 한 줄로 유지하고, 공간이 부족하면 옆의 제목 글자가 줄바꿈됨
+   - 한국어는 낱말 중간에서 끊기지 않게 (keep-all)
+   ======================================= */
+button {
+  word-break: keep-all;
+}
+
+.label-with-action,
+.paste-csv-label-row {
+  gap: 0.5rem;
+}
+
+.label-with-action > :not(button),
+.paste-csv-label-row > .form-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.label-with-action > button,
+.paste-csv-label-row > button,
+.btn-text,
+.paste-csv-clear-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* 한국어 화면: 낱말 중간에서 줄이 끊기지 않게 ("붙/여넣으세요" 방지), 긴 주소·영어는 넘치면 끊김 */
+html:lang(ko) body {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* 두 줄이 되는 버튼은 두 줄 길이를 고르게 (지원하지 않는 브라우저는 기존처럼 표시) */
+button,
+.mobile-nav-btn,
+.mode-toggle-btn {
+  text-wrap: balance;
+}

@@ -15,7 +15,7 @@ i18nRegister('ko', {
   // 모바일 화면 전환
   'prompt.mobile.navLabel': '모바일 화면 전환 탭',
   'prompt.mobile.editTab': '⚙️ 1. 설정하기',
-  'prompt.mobile.previewTab': '📋 2. AI에 보내고 파일 받기',
+  'prompt.mobile.previewTab': '📋 2. AI·파일 받기',
   'prompt.mobile.goPreview': '📱 완성된 프롬프트 복사하러 가기 ➔',
   'prompt.mobile.floatToOutput': '📋 프롬프트 확인 ➔',
   'prompt.mobile.floatToOutputTitle': '완성된 프롬프트 보기 · 복사',

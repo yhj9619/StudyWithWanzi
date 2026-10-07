@@ -16,7 +16,7 @@ i18nRegister('zh', {
   // 모바일 화면 전환
   'prompt.mobile.navLabel': '移动端视图切换标签',
   'prompt.mobile.editTab': '⚙️ 1. 设置',
-  'prompt.mobile.previewTab': '📋 2. 发给 AI · 获取文件',
+  'prompt.mobile.previewTab': '📋 2. AI·获取文件',
   'prompt.mobile.goPreview': '📱 去复制完成的提示词 ➔',
   'prompt.mobile.floatToOutput': '📋 查看提示词 ➔',
   'prompt.mobile.floatToOutputTitle': '查看并复制完成的提示词',

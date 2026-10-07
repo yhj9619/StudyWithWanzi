@@ -7,8 +7,8 @@ i18nRegister('ko', {
 
   // 모바일 화면 전환
   'editor.mobile.navAriaLabel': '모바일 화면 전환 탭',
-  'editor.mobile.editTab': '⚙️ ①② 언어·필드 설정',
-  'editor.mobile.previewTab': '📱 미리보기 & 카드 서식 복사',
+  'editor.mobile.editTab': '⚙️ 1. 설정하기',
+  'editor.mobile.previewTab': '📱 2. 미리보기·복사',
   'editor.mobile.goPreview': '📱 미리보기 보고 카드 서식 복사하러 가기 ➔',
   'editor.mobile.floatToPreview': '📱 미리보기 ➔',
   'editor.mobile.floatToPreviewTitle': '미리보기 & 카드 서식 복사 화면으로 이동',

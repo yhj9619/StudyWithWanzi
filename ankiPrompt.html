@@ -52,9 +52,7 @@
       <button type="button" class="mobile-nav-btn active" id="btnMobileEditTab" data-i18n="prompt.mobile.editTab">
         ⚙️ 1. 설정하기
       </button>
-      <button type="button" class="mobile-nav-btn" id="btnMobilePreviewTab" data-i18n="prompt.mobile.previewTab">
-        📋 2. AI에 보내고 파일 받기
-      </button>
+      <button type="button" class="mobile-nav-btn" id="btnMobilePreviewTab" data-i18n="prompt.mobile.previewTab">📋 2. AI·파일 받기</button>
     </nav>
 
     <div class="main-layout">
@@ -125,10 +123,13 @@
 
           <!-- Mode A: Text Input Container -->
           <div class="form-group" id="containerSourceText">
-            <label for="sourceTextInput" class="form-label">
-              <span data-i18n="prompt.step1.textLabel">단어를 뽑을 글 (기사, 대본, 시험 지문 등)</span>
-              <span class="helper-text" style="display:inline; margin-left:6px;" data-i18n="prompt.step1.textHelper">(비워 두면 요청문에 '여기에 글을 붙여넣으세요' 자리만 남아요)</span>
-            </label>
+            <div class="paste-csv-label-row">
+              <label for="sourceTextInput" class="form-label">
+                <span data-i18n="prompt.step1.textLabel">단어를 뽑을 글 (기사, 대본, 시험 지문 등)</span>
+                <span class="helper-text" style="display:inline; margin-left:6px;" data-i18n="prompt.step1.textHelper">(비워 두면 요청문에 '여기에 글을 붙여넣으세요' 자리만 남아요)</span>
+              </label>
+              <button type="button" id="btnClearSourceText" class="paste-csv-clear-btn" data-i18n="prompt.paste.clear">🧹 지우기</button>
+            </div>
             <textarea id="sourceTextInput" class="form-input" rows="4" placeholder="여기에 외국어 문장이나 대본, 기사를 붙여넣으세요. 한국어 글을 넣으면 그 내용을 외국어로 말할 때 필요한 단어를 뽑습니다." data-i18n-attr="placeholder:prompt.step1.textPlaceholder"></textarea>
             <div class="source-lang-row">
               <span id="sourceLangNotice" class="source-lang-notice hidden"></span>

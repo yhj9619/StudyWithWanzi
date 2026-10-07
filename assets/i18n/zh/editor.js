@@ -7,8 +7,8 @@ i18nRegister('zh', {
 
   // 移动端视图切换
   'editor.mobile.navAriaLabel': '移动端视图切换标签',
-  'editor.mobile.editTab': '⚙️ ①② 语言·字段设置',
-  'editor.mobile.previewTab': '📱 预览和复制卡片模板',
+  'editor.mobile.editTab': '⚙️ 1. 设置',
+  'editor.mobile.previewTab': '📱 2. 预览·复制',
   'editor.mobile.goPreview': '📱 去看预览并复制卡片模板 ➔',
   'editor.mobile.floatToPreview': '📱 预览 ➔',
   'editor.mobile.floatToPreviewTitle': '前往预览和复制卡片模板页面',
