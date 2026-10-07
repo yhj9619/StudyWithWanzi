@@ -573,6 +573,22 @@ body {
   transition: all 0.15s ease;
 }
 
+.dict-target-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  font-size: 0.85rem;
+  color: #334155;
+}
+
+.dict-target-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+
 .dict-target-item:hover {
   background-color: #eff6ff;
   border-color: #bfdbfe;
@@ -1063,6 +1079,107 @@ body {
   color: var(--text-muted);
   margin-top: 0.75rem;
   text-align: center;
+}
+
+/* 미리보기 필드 클릭 선택 */
+.anki-card-content .field-item,
+.anki-card-content .front-preview-hint {
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  outline: 2px dashed transparent;
+  outline-offset: 4px;
+  transition: outline-color 0.15s ease;
+}
+
+.anki-card-content .field-item:hover,
+.anki-card-content .front-preview-hint:hover {
+  outline-color: #cbd5e1;
+}
+
+.anki-card-content .field-item.is-selected {
+  outline: 2px solid var(--primary);
+}
+
+/* 필드별 스타일 컨트롤은 공용 편집 패널로 이동 (값 보관용으로 DOM에는 유지) */
+.field-setting-box .style-controls-row,
+.field-setting-box .preset-colors {
+  display: none;
+}
+
+.field-setting-box {
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field-setting-box.is-selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.15);
+}
+
+/* 선택한 필드 스타일 편집 패널 */
+.field-style-inspector {
+  margin-top: 1rem;
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.15rem;
+}
+
+.inspector-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.inspector-title {
+  font-size: 0.85rem;
+  color: #334155;
+}
+
+.inspector-title strong {
+  color: var(--primary);
+}
+
+.inspector-notice {
+  font-size: 0.72rem;
+  color: #92400e;
+  background: #fef3c7;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+}
+
+.inspector-field-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px dashed #cbd5e1;
+}
+
+.inspector-chip {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.inspector-chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.inspector-chip.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
 }
 
 /* Code Container */

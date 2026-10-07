@@ -105,17 +105,18 @@
             <span id="dictNameTag" class="dict-name-tag">네이버 중국어사전</span>
           </div>
 
-          <div class="form-group inline-checkbox">
-            <label class="custom-checkbox">
-              <input type="checkbox" id="linkNewTab" checked>
-              <span>새 창/새 탭에서 열기 (<code>target="_blank"</code>)</span>
-            </label>
+          <div class="form-group">
+            <div class="label-with-action">
+              <label for="wikiUrlInput" class="form-label">위키 검색 URL</label>
+              <button type="button" id="resetWikiUrlBtn" class="btn-text" title="한국어 위키백과 URL로 복원">기본값 복원</button>
+            </div>
+            <input type="url" id="wikiUrlInput" class="form-input" placeholder="https://ko.wikipedia.org/wiki/" value="https://ko.wikipedia.org/wiki/">
           </div>
 
           <div class="form-group inline-checkbox">
             <label class="custom-checkbox">
-              <input type="checkbox" id="linkUnderline">
-              <span>사전 링크 밑줄 표시 (체크 해제 시 밑줄 없음 <code>text-decoration: none</code>)</span>
+              <input type="checkbox" id="linkNewTab" checked>
+              <span>새 창/새 탭에서 열기 (<code>target="_blank"</code>)</span>
             </label>
           </div>
         </div>
@@ -124,9 +125,9 @@
         <div class="card-section">
           <div class="section-title">
             <span class="step-num">2</span>
-            <h2>필드명 및 텍스트 스타일 설정</h2>
+            <h2>필드 설정</h2>
           </div>
-          <p class="section-desc">본인이 Anki에서 사용하는 카드 필드명을 입력하고, 글씨 크기·색상·굵기를 설정하세요.</p>
+          <p class="section-desc">본인이 Anki에서 사용하는 카드 필드명을 입력하세요. 글씨 크기·색상·굵기·글꼴은 오른쪽 미리보기에서 필드를 클릭해 편집합니다.</p>
 
           <!-- Field 1 Settings -->
           <div class="field-setting-box" id="boxField1">
@@ -144,6 +145,10 @@
                 <label class="mini-toggle mini-toggle-link" title="네이버 사전 링크 연결">
                   <input type="checkbox" id="f1_dict_link">
                   <span>🔗 사전 링크</span>
+                </label>
+                <label class="mini-toggle mini-toggle-link" title="위키 링크 연결">
+                  <input type="checkbox" id="f1_wiki_link">
+                  <span>📖 위키 링크</span>
                 </label>
               </div>
             </div>
@@ -229,6 +234,10 @@
                 <label class="mini-toggle mini-toggle-link" title="네이버 사전 링크 연결">
                   <input type="checkbox" id="f2_dict_link" checked>
                   <span>🔗 사전 링크</span>
+                </label>
+                <label class="mini-toggle mini-toggle-link" title="위키 링크 연결">
+                  <input type="checkbox" id="f2_wiki_link">
+                  <span>📖 위키 링크</span>
                 </label>
               </div>
             </div>
@@ -403,11 +412,11 @@
           <!-- 3번에서 각 필드별 네이버 사전 링크 여부 선택 (단어·예문 다중 선택 가능) -->
           <div class="dict-link-selection-box">
             <div class="dict-link-box-header">
-              <span class="dict-link-box-title">🔗 네이버 사전 링크 적용 필드 (다중 선택 가능)</span>
-              <span class="helper-badge">단어 · 예문 동시 적용 가능</span>
+              <span class="dict-link-box-title">🔗 사전 / 📖 위키 링크 적용 필드 (다중 선택 가능)</span>
+              <span class="helper-badge">사전 · 위키 동시 적용 가능</span>
             </div>
             <p class="helper-text">
-              체크된 필드의 텍스트를 클릭하면 네이버 사전 검색 결과로 바로 연결됩니다. 단어와 예문 모두에 걸어둘 수도 있습니다.
+              체크된 필드의 텍스트 옆에 🔗(사전) · 📖(위키) 아이콘 버튼이 생기고, 누르면 검색 결과로 바로 연결됩니다.
             </p>
             <div id="dictFieldChecklist" class="checkbox-list">
               <!-- JS에서 각 필드별 체크박스가 동적으로 렌더링됨 -->
@@ -467,7 +476,73 @@
               <!-- Dynamically injected card markup -->
             </div>
           </div>
-          <p class="preview-hint">💡 미리보기 카드 속 링크를 클릭하면 실제로 해당 사전 검색 페이지로 이동을 테스트할 수 있습니다.</p>
+          <p class="preview-hint">💡 미리보기 카드 속 필드를 클릭하면 아래에서 바로 서식을 편집할 수 있습니다. 텍스트 옆 🔗(사전) · 📖(위키) 아이콘을 누르면 실제 검색 페이지로 이동합니다.</p>
+
+          <!-- 선택한 필드 스타일 편집 패널 (모든 필드 공용) -->
+          <div class="field-style-inspector" id="fieldStyleInspector">
+            <div class="inspector-header">
+              <span class="inspector-title">🎨 선택한 필드 서식: <strong id="inspectorFieldName">Front</strong></span>
+              <span id="inspectorHiddenNotice" class="inspector-notice hidden">현재 면에는 표시되지 않는 필드입니다</span>
+            </div>
+            <div class="inspector-field-chips" id="inspectorFieldChips" role="tablist" aria-label="편집할 필드 선택">
+              <!-- JS에서 필드 목록에 맞춰 동적으로 생성 -->
+            </div>
+
+            <div class="style-controls-row">
+              <div class="control-item">
+                <label for="inspectorSize" class="sub-label">글씨 크기: <span id="inspectorSizeVal">24</span>px</label>
+                <div class="slider-with-number">
+                  <input type="range" id="inspectorSize" min="14" max="64" value="24" class="form-range">
+                  <input type="number" id="inspectorSizeNum" min="14" max="80" value="24" class="num-input">
+                </div>
+              </div>
+
+              <div class="control-item">
+                <label for="inspectorWeight" class="sub-label">글씨 굵기</label>
+                <select id="inspectorWeight" class="form-select small-select">
+                  <option value="normal">보통 (normal)</option>
+                  <option value="bold">굵게 (bold)</option>
+                  <option value="600">중간 굵게 (600)</option>
+                </select>
+              </div>
+
+              <div class="control-item">
+                <label for="inspectorFont" class="sub-label">글꼴 (폰트)</label>
+                <select id="inspectorFont" class="form-select small-select">
+                  <option value="inherit">(기본 글꼴 따름)</option>
+                  <option value="system">시스템 기본 고딕</option>
+                  <option value="noto-sans-kr">본고딕 (Noto Sans KR)</option>
+                  <option value="noto-serif-kr">명조체 (Noto Serif KR)</option>
+                  <option value="nanum-gothic">나눔고딕</option>
+                  <option value="inter">Inter (영문 고딕)</option>
+                  <option value="noto-sans-jp">Noto Sans JP (일본어)</option>
+                  <option value="noto-sans-sc">Noto Sans SC (중국어)</option>
+                  <option value="monospace">고정폭 (코딩체)</option>
+                  <option value="cursive">손글씨 (필기체)</option>
+                  <option value="custom">직접 입력...</option>
+                </select>
+                <input type="text" id="inspectorFontCustom" class="form-input font-custom-input hidden" placeholder="폰트명 입력 (예: Pretendard)">
+              </div>
+
+              <div class="control-item">
+                <label for="inspectorColor" class="sub-label">색상</label>
+                <div class="color-picker-group">
+                  <input type="color" id="inspectorColor" value="#202124" class="form-color">
+                  <input type="text" id="inspectorColorText" value="#202124" class="color-hex-input" maxlength="7">
+                </div>
+              </div>
+            </div>
+            <div class="preset-colors" id="inspectorPresets">
+              <span class="preset-label">색상 프리셋:</span>
+              <button type="button" class="preset-dot" data-color="#202124" style="background:#202124;" title="다크 그레이"></button>
+              <button type="button" class="preset-dot" data-color="#5f6368" style="background:#5f6368;" title="뮤트 그레이"></button>
+              <button type="button" class="preset-dot" data-color="#1a73e8" style="background:#1a73e8;" title="구글 블루"></button>
+              <button type="button" class="preset-dot" data-color="#0d904f" style="background:#0d904f;" title="에메랄드"></button>
+              <button type="button" class="preset-dot" data-color="#d93025" style="background:#d93025;" title="레드"></button>
+              <button type="button" class="preset-dot" data-color="#e37400" style="background:#e37400;" title="오렌지"></button>
+              <button type="button" class="preset-dot" data-color="#9334e6" style="background:#9334e6;" title="퍼플"></button>
+            </div>
+          </div>
         </div>
 
         <!-- Generated Template Code Box -->

@@ -16,7 +16,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const dictNameTag = document.getElementById('dictNameTag');
   const rtlNotice = document.getElementById('rtlNotice');
   const linkNewTab = document.getElementById('linkNewTab');
-  const linkUnderline = document.getElementById('linkUnderline');
+  const wikiUrlInput = document.getElementById('wikiUrlInput');
+  const resetWikiUrlBtn = document.getElementById('resetWikiUrlBtn');
+  const DEFAULT_WIKI_URL = 'https://ko.wikipedia.org/wiki/';
+  // 사전 / 위키 아이콘 버튼 인라인 스타일 (CSS 미적용 환경에서도 동일하게 보이도록)
+  const LINK_BTN_INLINE_STYLE = 'font-size: 0.6em; margin-left: 0.35em; text-decoration: none; opacity: 0.75; vertical-align: middle;';
 
   // Common Layout & Typography Options
   const showHrAnswer = document.getElementById('showHrAnswer');
@@ -108,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showFront: document.getElementById('f1_show_front'),
       showBack: document.getElementById('f1_show_back'),
       dictLinkCheck: document.getElementById('f1_dict_link'),
+      wikiLinkCheck: document.getElementById('f1_wiki_link'),
       sizeSlider: document.getElementById('f1_size'),
       sizeNum: document.getElementById('f1_size_num'),
       sizeVal: document.getElementById('f1_size_val'),
@@ -118,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
       colorText: document.getElementById('f1_color_text'),
       deleteBtn: null,
       hasDictLink: false,
+      hasWikiLink: false,
     },
     {
       boxEl: box2,
@@ -127,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showFront: document.getElementById('f2_show_front'),
       showBack: document.getElementById('f2_show_back'),
       dictLinkCheck: document.getElementById('f2_dict_link'),
+      wikiLinkCheck: document.getElementById('f2_wiki_link'),
       sizeSlider: document.getElementById('f2_size'),
       sizeNum: document.getElementById('f2_size_num'),
       sizeVal: document.getElementById('f2_size_val'),
@@ -137,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
       colorText: document.getElementById('f2_color_text'),
       deleteBtn: null,
       hasDictLink: true,
+      hasWikiLink: false,
     }
   ];
 
@@ -159,6 +167,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const toast = document.getElementById('toastNotification');
 
   let currentPreviewSide = 'front'; // 기본값을 탭 활성화 상태('앞면')와 일치하도록 'front'로 설정
+
+  // 선택한 필드 스타일 편집 패널 (모든 필드 공용)
+  const inspectorFieldName = document.getElementById('inspectorFieldName');
+  const inspectorHiddenNotice = document.getElementById('inspectorHiddenNotice');
+  const inspectorFieldChips = document.getElementById('inspectorFieldChips');
+  const inspectorSize = document.getElementById('inspectorSize');
+  const inspectorSizeNum = document.getElementById('inspectorSizeNum');
+  const inspectorSizeVal = document.getElementById('inspectorSizeVal');
+  const inspectorWeight = document.getElementById('inspectorWeight');
+  const inspectorFont = document.getElementById('inspectorFont');
+  const inspectorFontCustom = document.getElementById('inspectorFontCustom');
+  const inspectorColor = document.getElementById('inspectorColor');
+  const inspectorColorText = document.getElementById('inspectorColorText');
+  const inspectorPresets = document.getElementById('inspectorPresets');
+
+  let selectedFieldIndex = 0;
 
   // 한글 초성 검색 지원 헬퍼 (예: 'ㅍㄹㅅ' -> 프랑스어, 'ㅅㅍㅇ' -> 스페인어, 'ㅈㄱ' -> 중국어)
   const CHOSUNG_LIST = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
@@ -475,13 +499,15 @@ document.addEventListener('DOMContentLoaded', () => {
       updateAll();
     });
 
-    // 사전 링크 체크박스 (헤더 미니 토글)
+    // 사전 / 위키 링크 체크박스 (헤더 미니 토글, 둘 중 하나만 선택)
     if (f.dictLinkCheck) {
       f.dictLinkCheck.addEventListener('change', () => {
-        f.hasDictLink = f.dictLinkCheck.checked;
-        updateFieldBadges();
-        updateDictFieldChecklist();
-        updateAll();
+        setFieldLink(f, 'dict', f.dictLinkCheck.checked);
+      });
+    }
+    if (f.wikiLinkCheck) {
+      f.wikiLinkCheck.addEventListener('change', () => {
+        setFieldLink(f, 'wiki', f.wikiLinkCheck.checked);
       });
     }
 
@@ -596,6 +622,176 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteField(f);
       });
     }
+
+    // 필드 박스 클릭 시 공용 스타일 편집 패널의 편집 대상으로 선택
+    if (f.boxEl) {
+      f.boxEl.addEventListener('click', (e) => {
+        if (f.deleteBtn && f.deleteBtn.contains(e.target)) return;
+        const idx = fields.indexOf(f);
+        if (idx !== -1 && idx !== selectedFieldIndex) selectField(idx);
+      });
+    }
+  }
+
+  // 필드 링크 적용 여부 설정 (type: 'dict' | 'wiki') - 사전 / 위키 동시 적용 가능
+  function setFieldLink(f, type, enabled) {
+    if (type === 'dict') f.hasDictLink = enabled;
+    if (type === 'wiki') f.hasWikiLink = enabled;
+    updateFieldBadges();
+    updateDictFieldChecklist();
+    updateAll();
+  }
+
+  // 공용 스타일 편집 패널: 편집 대상 필드 선택
+  function selectField(idx) {
+    selectedFieldIndex = idx;
+    renderPreview();
+  }
+
+  // 공용 스타일 편집 패널: 선택된 필드의 현재 값으로 패널 갱신
+  function syncInspector() {
+    if (!inspectorSize) return;
+    const f = fields[selectedFieldIndex];
+    if (!f) return;
+
+    const fName = f.nameInput.value.trim() || `Field${selectedFieldIndex + 1}`;
+    inspectorFieldName.textContent = `${selectedFieldIndex + 1}번째 필드 [${fName}]`;
+
+    const isVisible = currentPreviewSide === 'front'
+      ? f.showFront.checked
+      : (f.showBack.checked || (selectedFieldIndex === 0 && keepFrontOnBack.checked));
+    inspectorHiddenNotice.classList.toggle('hidden', isVisible);
+
+    // 사용자가 입력 중인 컨트롤은 덮어쓰지 않음
+    const setIfIdle = (el, val) => {
+      if (el && document.activeElement !== el) el.value = val;
+    };
+    setIfIdle(inspectorSize, f.sizeSlider.value);
+    setIfIdle(inspectorSizeNum, f.sizeSlider.value);
+    inspectorSizeVal.textContent = f.sizeSlider.value;
+    setIfIdle(inspectorWeight, f.weightSelect.value);
+    setIfIdle(inspectorFont, f.fontSelect ? f.fontSelect.value : 'inherit');
+    setIfIdle(inspectorFontCustom, f.fontCustomInput ? f.fontCustomInput.value : '');
+    inspectorFontCustom.classList.toggle('hidden', inspectorFont.value !== 'custom');
+    setIfIdle(inspectorColor, f.colorInput.value);
+    setIfIdle(inspectorColorText, f.colorInput.value);
+
+    // 필드 선택 칩 (현재 면에 표시되지 않는 필드도 선택 가능)
+    inspectorFieldChips.innerHTML = '';
+    fields.forEach((field, idx) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'inspector-chip' + (idx === selectedFieldIndex ? ' active' : '');
+      chip.textContent = `${idx + 1}. ${field.nameInput.value.trim() || `Field${idx + 1}`}`;
+      chip.addEventListener('click', () => selectField(idx));
+      inspectorFieldChips.appendChild(chip);
+    });
+
+    fields.forEach((field, idx) => {
+      if (field.boxEl) field.boxEl.classList.toggle('is-selected', idx === selectedFieldIndex);
+    });
+  }
+
+  // 공용 스타일 편집 패널 이벤트: 선택된 필드의 (숨겨진) 개별 컨트롤에 값을 반영하고
+  // 기존 필드 이벤트를 그대로 발생시켜 동기화·저장 로직을 재사용
+  function initInspectorEvents() {
+    if (!inspectorSize) return;
+    const target = () => fields[selectedFieldIndex];
+
+    inspectorSize.addEventListener('input', (e) => {
+      const f = target();
+      if (!f) return;
+      inspectorSizeNum.value = e.target.value;
+      f.sizeSlider.value = e.target.value;
+      f.sizeSlider.dispatchEvent(new Event('input'));
+    });
+
+    inspectorSizeNum.addEventListener('input', (e) => {
+      const f = target();
+      if (!f) return;
+      f.sizeNum.value = e.target.value;
+      f.sizeNum.dispatchEvent(new Event('input'));
+    });
+    inspectorSizeNum.addEventListener('change', () => {
+      const f = target();
+      if (f) inspectorSizeNum.value = f.sizeSlider.value;
+    });
+
+    inspectorWeight.addEventListener('change', () => {
+      const f = target();
+      if (!f) return;
+      f.weightSelect.value = inspectorWeight.value;
+      f.weightSelect.dispatchEvent(new Event('change'));
+    });
+
+    inspectorFont.addEventListener('change', () => {
+      const f = target();
+      if (!f || !f.fontSelect) return;
+      f.fontSelect.value = inspectorFont.value;
+      f.fontSelect.dispatchEvent(new Event('change'));
+      if (inspectorFont.value === 'custom') inspectorFontCustom.focus();
+    });
+
+    inspectorFontCustom.addEventListener('input', () => {
+      const f = target();
+      if (!f || !f.fontCustomInput) return;
+      f.fontCustomInput.value = inspectorFontCustom.value;
+      f.fontCustomInput.dispatchEvent(new Event('input'));
+    });
+
+    const applyColor = (color) => {
+      const f = target();
+      if (!f) return;
+      f.colorInput.value = color;
+      f.colorInput.dispatchEvent(new Event('input'));
+    };
+
+    inspectorColor.addEventListener('input', () => {
+      inspectorColorText.value = inspectorColor.value;
+      applyColor(inspectorColor.value);
+    });
+
+    // 색상 텍스트 입력 처리 (# 생략 및 3자리/6자리 hex 지원)
+    inspectorColorText.addEventListener('input', (e) => {
+      let val = e.target.value.trim();
+      if (/^[0-9A-Fa-f]{6}$/.test(val)) val = '#' + val;
+      if (/^#[0-9A-Fa-f]{6}$/.test(val)) applyColor(val);
+    });
+
+    inspectorColorText.addEventListener('change', (e) => {
+      let val = e.target.value.trim();
+      if (/^[0-9A-Fa-f]{6}$/.test(val)) {
+        val = '#' + val;
+      } else if (/^#[0-9A-Fa-f]{3}$/.test(val)) {
+        val = '#' + val[1] + val[1] + val[2] + val[2] + val[3] + val[3];
+      } else if (/^[0-9A-Fa-f]{3}$/.test(val)) {
+        val = '#' + val[0] + val[0] + val[1] + val[1] + val[2] + val[2];
+      }
+
+      if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+        applyColor(val);
+      }
+      const f = target();
+      if (f) inspectorColorText.value = f.colorInput.value;
+    });
+
+    inspectorPresets.querySelectorAll('.preset-dot').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.dataset.color) applyColor(btn.dataset.color);
+      });
+    });
+
+    // 미리보기 카드 속 필드 텍스트 클릭 → 편집 대상 선택 (사전 / 위키 아이콘은 그대로 링크 이동)
+    liveCardRender.addEventListener('click', (e) => {
+      if (e.target.closest('a')) return;
+      const item = e.target.closest('.field-item, .front-preview-hint');
+      if (!item) return;
+
+      let idx = 0;
+      const match = item.className.match(/f-field-(\d+)/);
+      if (match) idx = parseInt(match[1], 10) - 1;
+      if (fields[idx] && idx !== selectedFieldIndex) selectField(idx);
+    });
   }
 
   // 동적 필드 추가 함수 (3번째 이상 선택 필드)
@@ -613,6 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let fontCustom = '';
     let color = '#5f6368';
     let hasDictLink = false;
+    let hasWikiLink = false;
 
     if (fieldData) {
       if (fieldData.name !== undefined) name = fieldData.name;
@@ -625,6 +822,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (fieldData.fontCustom !== undefined) fontCustom = fieldData.fontCustom;
       if (fieldData.color !== undefined) color = fieldData.color;
       if (fieldData.hasDictLink !== undefined) hasDictLink = Boolean(fieldData.hasDictLink);
+      if (fieldData.hasWikiLink !== undefined) hasWikiLink = Boolean(fieldData.hasWikiLink);
     } else {
       if (index === 3) {
         if (currentLang.id === 'zh') {
@@ -667,6 +865,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <label class="mini-toggle mini-toggle-link" title="네이버 사전 링크 연결">
               <input type="checkbox" class="f-dict-link"${hasDictLink ? ' checked' : ''}>
               <span>🔗 사전 링크</span>
+            </label>
+            <label class="mini-toggle mini-toggle-link" title="위키 링크 연결">
+              <input type="checkbox" class="f-wiki-link"${hasWikiLink ? ' checked' : ''}>
+              <span>📖 위키 링크</span>
             </label>
           </div>
           <button type="button" class="btn-delete-field" title="이 필드 삭제">
@@ -750,6 +952,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showFront: box.querySelector('.f-show-front'),
       showBack: box.querySelector('.f-show-back'),
       dictLinkCheck: box.querySelector('.f-dict-link'),
+      wikiLinkCheck: box.querySelector('.f-wiki-link'),
       sizeSlider: box.querySelector('.f-size'),
       sizeNum: box.querySelector('.f-size-num'),
       sizeVal: box.querySelector('.f-size-val'),
@@ -760,6 +963,7 @@ document.addEventListener('DOMContentLoaded', () => {
       colorText: box.querySelector('.f-color-text'),
       deleteBtn: box.querySelector('.btn-delete-field'),
       hasDictLink: hasDictLink,
+      hasWikiLink: hasWikiLink,
     };
 
     fields.push(fObj);
@@ -1162,22 +1366,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
       let badgeText = `${fNum}번째 필드 (${sideText} / ${fName})`;
 
-      if (f.hasDictLink) {
-        badgeText += ' · 🔗 사전 링크';
+      if (f.hasDictLink) badgeText += ' · 🔗 사전';
+      if (f.hasWikiLink) badgeText += ' · 📖 위키';
+      if (f.hasDictLink || f.hasWikiLink) {
         f.badgeEl.className = 'field-badge field-badge-primary';
       } else {
         f.badgeEl.className = 'field-badge';
       }
       f.badgeEl.textContent = badgeText;
 
-      // 상단 헤더의 사전 링크 미니 토글 동기화
+      // 상단 헤더의 사전 / 위키 링크 미니 토글 동기화
       if (f.dictLinkCheck) {
         f.dictLinkCheck.checked = Boolean(f.hasDictLink);
+      }
+      if (f.wikiLinkCheck) {
+        f.wikiLinkCheck.checked = Boolean(f.hasWikiLink);
       }
     });
   }
 
-  // 3번 영역의 각 필드별 사전 링크 체크박스 목록 동적 갱신 (단어·예문 다중 선택 지원)
+  // 3번 영역의 각 필드별 사전 / 위키 링크 체크박스 목록 동적 갱신 (단어·예문 다중 선택 지원)
   function updateDictFieldChecklist() {
     if (!dictFieldChecklist) return;
     dictFieldChecklist.innerHTML = '';
@@ -1185,37 +1393,52 @@ document.addEventListener('DOMContentLoaded', () => {
     fields.forEach((f, idx) => {
       const fNum = idx + 1;
       const fName = f.nameInput.value.trim() || `필드 ${fNum}`;
-      const isChecked = Boolean(f.hasDictLink);
 
       // 상단 헤더 미니 토글도 동기화
       if (f.dictLinkCheck) {
-        f.dictLinkCheck.checked = isChecked;
+        f.dictLinkCheck.checked = Boolean(f.hasDictLink);
+      }
+      if (f.wikiLinkCheck) {
+        f.wikiLinkCheck.checked = Boolean(f.hasWikiLink);
       }
 
-      const label = document.createElement('label');
-      label.className = 'custom-checkbox dict-target-item';
-
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.checked = isChecked;
-      checkbox.dataset.fieldIndex = idx;
-
-      checkbox.addEventListener('change', () => {
-        f.hasDictLink = checkbox.checked;
-        if (f.dictLinkCheck) {
-          f.dictLinkCheck.checked = f.hasDictLink;
-        }
-        updateFieldBadges();
-        updateAll();
-      });
+      const row = document.createElement('div');
+      row.className = 'dict-target-item dict-target-row';
 
       const span = document.createElement('span');
       const recTag = (idx === 1) ? ' <span style="color: var(--primary); font-size: 0.8em; font-weight: 700;">(기본 권장)</span>' : '';
-      span.innerHTML = `<strong>${fNum}번째 필드 [${escapeHtml(fName)}]</strong>에 사전 링크 적용${recTag}`;
+      span.className = 'dict-target-name';
+      span.innerHTML = `<strong>${fNum}번째 필드 [${escapeHtml(fName)}]</strong>${recTag}`;
+      row.appendChild(span);
 
-      label.appendChild(checkbox);
-      label.appendChild(span);
-      dictFieldChecklist.appendChild(label);
+      const options = document.createElement('div');
+      options.className = 'dict-target-options';
+
+      [
+        { type: 'dict', text: '🔗 사전 링크', checked: Boolean(f.hasDictLink) },
+        { type: 'wiki', text: '📖 위키 링크', checked: Boolean(f.hasWikiLink) },
+      ].forEach(opt => {
+        const label = document.createElement('label');
+        label.className = 'custom-checkbox';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = opt.checked;
+        checkbox.dataset.fieldIndex = idx;
+        checkbox.addEventListener('change', () => {
+          setFieldLink(f, opt.type, checkbox.checked);
+        });
+
+        const text = document.createElement('span');
+        text.textContent = opt.text;
+
+        label.appendChild(checkbox);
+        label.appendChild(text);
+        options.appendChild(label);
+      });
+
+      row.appendChild(options);
+      dictFieldChecklist.appendChild(row);
     });
   }
 
@@ -1230,8 +1453,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     dictUrlInput.addEventListener('input', updateAll);
     dictUrlInput.addEventListener('change', updateAll);
+
+    if (wikiUrlInput) {
+      wikiUrlInput.addEventListener('input', updateAll);
+      wikiUrlInput.addEventListener('change', updateAll);
+    }
+    if (resetWikiUrlBtn) {
+      resetWikiUrlBtn.addEventListener('click', () => {
+        wikiUrlInput.value = DEFAULT_WIKI_URL;
+        updateAll();
+      });
+    }
     linkNewTab.addEventListener('change', updateAll);
-    linkUnderline.addEventListener('change', updateAll);
 
     showHrAnswer.addEventListener('change', updateAll);
     keepFrontOnBack.addEventListener('change', () => {
@@ -1544,7 +1777,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const size = field.sizeSlider.value;
     const weight = field.weightSelect.value;
     const color = field.colorInput.value;
-    const isTargetLink = Boolean(field.hasDictLink);
     const fieldFontCss = getFieldFontCss(field);
 
     const isDarkMode = isForPreview && Boolean(ankiCardWrapper && ankiCardWrapper.classList.contains('dark-mode'));
@@ -1560,34 +1792,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const divStyle = styleParts.join(' ');
 
-    if (isTargetLink) {
-      const dictUrl = dictUrlInput.value.trim();
-      const targetAttr = linkNewTab.checked ? ' target="_blank"' : '';
-      const textDeco = linkUnderline.checked ? 'underline' : 'none';
-
-      if (isForPreview) {
-        // 미리보기용: 실제 클릭 가능한 검색 링크 생성 (다크모드 색상 동적 반영)
-        const testSearchUrl = dictUrl + encodeURIComponent(sampleValue);
-        return `<div class="field-item f-field-${fieldIndex}" style="${divStyle}">
-  <a href="${testSearchUrl}"${targetAttr} style="color: ${activeColor}; text-decoration: ${textDeco};">
-    ${escapeHtml(sampleValue)}
-  </a>
-</div>`;
-      } else {
-        // Anki 템플릿용: {{FieldName}} 태그 사용 및 다크모드 대응 CSS 클래스 포함
-        return `<div class="field-item f-field-${fieldIndex}" style="font-size: ${size}px;${fieldFontCss ? ` font-family: ${fieldFontCss};` : ''}${weight && weight !== 'normal' ? ` font-weight: ${weight};` : ''} color: ${color}; margin-bottom: 8px;">
-  <a href="${dictUrl}{{${fieldName}}}"${targetAttr} style="color: ${color}; text-decoration: ${textDeco};">
-    {{${fieldName}}}
-  </a>
-</div>`;
-      }
-    } else {
-      if (isForPreview) {
-        return `<div class="field-item f-field-${fieldIndex}" style="${divStyle}">${escapeHtml(sampleValue)}</div>`;
-      } else {
-        return `<div class="field-item f-field-${fieldIndex}" style="font-size: ${size}px;${fieldFontCss ? ` font-family: ${fieldFontCss};` : ''}${weight && weight !== 'normal' ? ` font-weight: ${weight};` : ''} color: ${color}; margin-bottom: 8px;">{{${fieldName}}}</div>`;
-      }
+    // 텍스트 옆 사전 / 위키 아이콘 버튼 (한 필드에 둘 다 적용 가능)
+    const linkTargets = [];
+    if (field.hasDictLink) {
+      linkTargets.push({ cls: 'dict-btn', icon: '🔗', title: '사전 검색', url: dictUrlInput.value.trim() });
     }
+    if (field.hasWikiLink) {
+      linkTargets.push({ cls: 'wiki-btn', icon: '📖', title: '위키 검색', url: wikiUrlInput ? wikiUrlInput.value.trim() : DEFAULT_WIKI_URL });
+    }
+
+    let linkButtons = '';
+    if (linkTargets.length > 0) {
+      const targetAttr = linkNewTab.checked ? ' target="_blank"' : '';
+      linkButtons = linkTargets.map(t => {
+        // 미리보기용: 예시값으로 실제 검색 링크 생성 / Anki 템플릿용: {{FieldName}} 태그 사용
+        const href = isForPreview ? t.url + encodeURIComponent(sampleValue) : `${t.url}{{${fieldName}}}`;
+        return `<a class="link-btn ${t.cls}" href="${href}"${targetAttr} title="${t.title}" style="${LINK_BTN_INLINE_STYLE}">${t.icon}</a>`;
+      }).join('');
+    }
+
+    if (isForPreview) {
+      return `<div class="field-item f-field-${fieldIndex}" style="${divStyle}">${escapeHtml(sampleValue)}${linkButtons}</div>`;
+    }
+    return `<div class="field-item f-field-${fieldIndex}" style="font-size: ${size}px;${fieldFontCss ? ` font-family: ${fieldFontCss};` : ''}${weight && weight !== 'normal' ? ` font-weight: ${weight};` : ''} color: ${color}; margin-bottom: 8px;">{{${fieldName}}}${linkButtons}</div>`;
   }
 
   // 4. Anki 앞면 서식 생성
@@ -1641,7 +1868,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // 6. Anki CSS 서식 생성 (다크모드 완벽 대응)
   function generateCssTemplate() {
     const align = centerAlign.checked ? 'center' : 'left';
-    const textDeco = linkUnderline.checked ? 'underline' : 'none';
 
     const cardFontKey = cardBaseFont ? cardBaseFont.value : 'system';
     const cardFontCustom = cardBaseFontCustom ? cardBaseFontCustom.value : '';
@@ -1717,8 +1943,21 @@ hr#answer {
 
 a {
   color: inherit;
-  text-decoration: ${textDeco};
+  text-decoration: none;
   cursor: pointer;
+}
+
+/* 텍스트 옆 사전 / 위키 아이콘 버튼 */
+.link-btn {
+  font-size: 0.6em;
+  margin-left: 0.35em;
+  text-decoration: none;
+  opacity: 0.75;
+  vertical-align: middle;
+}
+
+.link-btn:hover {
+  opacity: 1;
 }
 
 /* 필드별 기본 서식 (라이트 모드) */${fieldStyles}
@@ -1833,6 +2072,12 @@ a {
     }
 
     liveCardRender.innerHTML = html;
+
+    // 공용 스타일 편집 패널의 선택 필드 강조 및 패널 값 갱신 (필드 삭제 시 범위 보정)
+    selectedFieldIndex = Math.max(0, Math.min(selectedFieldIndex, fields.length - 1));
+    const selectedEl = liveCardRender.querySelector(`.f-field-${selectedFieldIndex + 1}`);
+    if (selectedEl) selectedEl.classList.add('is-selected');
+    syncInspector();
   }
 
   // 8. 전체 동기화 및 코드 갱신
@@ -1879,8 +2124,8 @@ a {
         langId: languageSelect.value,
         dictLinkTargets: fields.map(f => Boolean(f.hasDictLink)),
         dictUrl: dictUrlInput.value,
+        wikiUrl: wikiUrlInput ? wikiUrlInput.value : DEFAULT_WIKI_URL,
         linkNewTab: linkNewTab.checked,
-        linkUnderline: linkUnderline.checked,
         showHrAnswer: showHrAnswer.checked,
         keepFrontOnBack: keepFrontOnBack.checked,
         centerAlign: centerAlign.checked,
@@ -1902,6 +2147,7 @@ a {
           fontCustom: f.fontCustomInput ? f.fontCustomInput.value : '',
           color: f.colorInput.value,
           hasDictLink: Boolean(f.hasDictLink),
+          hasWikiLink: Boolean(f.hasWikiLink),
         })),
         // 사용자가 직접 확인할 수 있도록 완성본 서식 전체(HTML/CSS 코드)도 통째로 함께 보관
         templates: {
@@ -1933,8 +2179,8 @@ a {
       }
 
       if (data.dictUrl !== undefined) dictUrlInput.value = data.dictUrl;
+      if (data.wikiUrl !== undefined && wikiUrlInput) wikiUrlInput.value = data.wikiUrl;
       if (data.linkNewTab !== undefined) linkNewTab.checked = Boolean(data.linkNewTab);
-      if (data.linkUnderline !== undefined) linkUnderline.checked = Boolean(data.linkUnderline);
 
       if (data.showHrAnswer !== undefined) showHrAnswer.checked = Boolean(data.showHrAnswer);
       if (data.keepFrontOnBack !== undefined) keepFrontOnBack.checked = Boolean(data.keepFrontOnBack);
@@ -2015,6 +2261,7 @@ a {
             if (fData.hasDictLink !== undefined) {
               f.hasDictLink = Boolean(fData.hasDictLink);
             }
+            f.hasWikiLink = Boolean(fData.hasWikiLink);
           }
         }
 
@@ -2047,6 +2294,7 @@ a {
 
       fields.forEach(f => {
         if (f.dictLinkCheck) f.dictLinkCheck.checked = Boolean(f.hasDictLink);
+        if (f.wikiLinkCheck) f.wikiLinkCheck.checked = Boolean(f.hasWikiLink);
       });
       renderEditorQuickChips(languageSelect.value);
 
@@ -2080,8 +2328,8 @@ a {
     if (langSearchInput) langSearchInput.value = lang.name;
     dictUrlInput.value = lang.dictUrl;
     dictNameTag.textContent = lang.dictName;
+    if (wikiUrlInput) wikiUrlInput.value = DEFAULT_WIKI_URL;
     linkNewTab.checked = true;
-    linkUnderline.checked = false;
 
     // 공통 레이아웃 & 폰트
     showHrAnswer.checked = true;
@@ -2131,6 +2379,7 @@ a {
     fields[0].colorInput.value = '#202124';
     fields[0].colorText.value = '#202124';
     fields[0].hasDictLink = false;
+    fields[0].hasWikiLink = false;
 
     // 필드 2 기본값 (Back / 외국어 단어 · 사전 링크)
     fields[1].nameInput.value = 'Back';
@@ -2151,6 +2400,7 @@ a {
     fields[1].colorInput.value = '#1a73e8';
     fields[1].colorText.value = '#1a73e8';
     fields[1].hasDictLink = true;
+    fields[1].hasWikiLink = false;
 
     // 3번째 이상 선택 필드 컨테이너 비우고 기본 3번째 필드 1개 생성
     const optionalContainer = document.getElementById('optionalFieldsContainer');
@@ -2173,6 +2423,7 @@ a {
 
     fields.forEach(f => {
       if (f.dictLinkCheck) f.dictLinkCheck.checked = Boolean(f.hasDictLink);
+      if (f.wikiLinkCheck) f.wikiLinkCheck.checked = Boolean(f.hasWikiLink);
     });
     renderEditorQuickChips('zh');
 
@@ -2231,6 +2482,7 @@ a {
   // 초기화 실행 (순서: 옵션 목록 초기화 -> 이벤트 등록 -> 로컬스토리지 복원 -> 초기 렌더링)
   initLanguageSelect();
   initEventListeners();
+  initInspectorEvents();
 
   const restored = loadSettingsFromStorage();
   if (!restored) {
