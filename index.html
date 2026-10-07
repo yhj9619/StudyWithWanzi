@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Study with Wanzi - 언어 학습 도구 모음</title>
-  <meta name="description" content="Anki 카드 서식 제작부터 다국어 학습에 유용한 실용 웹 도구 모음">
+  <title data-i18n="index.meta.title">Study with Wanzi - 언어 학습 도구 모음</title>
+  <meta name="description" content="Anki 카드 서식 제작부터 다국어 학습에 유용한 실용 웹 도구 모음" data-i18n-attr="content:index.meta.description">
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,104 +18,98 @@
         <span class="logo-icon">⚡</span>
         <div>
           <h1 class="logo-title">Study with Wanzi</h1>
-          <p class="logo-subtitle">효과적인 다국어 학습을 위한 실용 웹 도구 모음</p>
+          <p class="logo-subtitle" data-i18n="index.header.subtitle">효과적인 다국어 학습을 위한 실용 웹 도구 모음</p>
         </div>
+      </div>
+      <div class="header-actions">
+        <div data-i18n-switcher></div>
       </div>
     </div>
   </header>
 
   <main class="app-main">
     <section class="portal-hero">
-      <div class="portal-tag">✨ Study with Wanzi Hub</div>
-      <h2 class="portal-title">원하는 학습 도구를 선택하세요</h2>
-      <p class="portal-subtitle">
-        복잡한 설치나 번거로운 설정 없이, 웹 브라우저에서 바로 사용할 수 있는 편리한 다국어 학습 도구들을 제공합니다.
-      </p>
+      <div class="portal-tag" data-i18n="index.hero.tag">✨ Study with Wanzi Hub</div>
+      <h2 class="portal-title" data-i18n="index.hero.title">원하는 학습 도구를 선택하세요</h2>
+      <p class="portal-subtitle" data-i18n="index.hero.subtitle">복잡한 설치나 번거로운 설정 없이, 웹 브라우저에서 바로 사용할 수 있는 편리한 다국어 학습 도구들을 제공합니다.</p>
     </section>
 
-    <section class="portal-grid" aria-label="언어 학습 도구 목록">
-      
+    <section class="portal-grid" aria-label="언어 학습 도구 목록" data-i18n-attr="aria-label:index.grid.ariaLabel">
+
       <!-- Tool Card 1: Anki Guide -->
       <article class="tool-card">
         <div class="tool-card-header">
           <span class="tool-card-icon">📖</span>
-          <span class="tool-status-badge active">● 바로 사용 가능</span>
+          <span class="tool-status-badge active" data-i18n="index.card.statusAvailable">● 바로 사용 가능</span>
         </div>
-        <h3 class="tool-card-title">Anki 사용 가이드</h3>
+        <h3 class="tool-card-title" data-i18n="index.card.guide.title">Anki 사용 가이드</h3>
         <span class="tool-card-route">ankiGuide.html</span>
-        <p class="tool-card-desc">
-          필드 설정부터 카드 서식(에디터 연동), AI 단어 추출(프롬프트 연동), 과학적 SRS 복습법(망각곡선, 4개 버튼 기준, 덱 옵션)까지 Anki의 모든 것을 담은 실전 가이드입니다.
-        </p>
+        <p class="tool-card-desc" data-i18n="index.card.guide.desc">필드 설정부터 카드 서식(에디터 연동), AI 단어 추출(프롬프트 연동), 과학적 SRS 복습법(망각곡선, 4개 버튼 기준, 덱 옵션)까지 Anki의 모든 것을 담은 실전 가이드입니다.</p>
         <div class="tool-card-tags">
-          <span class="tool-tag-pill">완벽 가이드</span>
-          <span class="tool-tag-pill">필드 설정</span>
-          <span class="tool-tag-pill">서식 연동</span>
-          <span class="tool-tag-pill">AI 단어 추출</span>
-          <span class="tool-tag-pill">SRS 복습 노하우</span>
+          <span class="tool-tag-pill" data-i18n="index.card.guide.tag1">완벽 가이드</span>
+          <span class="tool-tag-pill" data-i18n="index.card.guide.tag2">필드 설정</span>
+          <span class="tool-tag-pill" data-i18n="index.card.guide.tag3">서식 연동</span>
+          <span class="tool-tag-pill" data-i18n="index.card.guide.tag4">AI 단어 추출</span>
+          <span class="tool-tag-pill" data-i18n="index.card.guide.tag5">SRS 복습 노하우</span>
         </div>
-        <a href="ankiGuide.html" class="btn-tool-launch" id="btnLaunchGuide">
-          가이드 읽어보기 ➔
-        </a>
+        <a href="ankiGuide.html" class="btn-tool-launch" id="btnLaunchGuide" data-i18n="index.card.guide.launch">가이드 읽어보기 ➔</a>
       </article>
 
       <!-- Tool Card 2: Anki Card Script Editor -->
       <article class="tool-card">
         <div class="tool-card-header">
           <span class="tool-card-icon">⚡</span>
-          <span class="tool-status-badge active">● 바로 사용 가능</span>
+          <span class="tool-status-badge active" data-i18n="index.card.statusAvailable">● 바로 사용 가능</span>
         </div>
-        <h3 class="tool-card-title">Anki 카드 서식 에디터</h3>
+        <h3 class="tool-card-title" data-i18n="index.card.editor.title">Anki 카드 서식 에디터</h3>
         <span class="tool-card-route">ankiEditor.html</span>
-        <p class="tool-card-desc">
-          46개 언어 공식 네이버 사전 링크가 자동 삽입되는 Anki 앞면·뒷면 서식 생성기입니다. 실시간 카드 시뮬레이터와 서식 커스터마이징, 로컬 자동 저장을 지원합니다.
-        </p>
+        <p class="tool-card-desc" data-i18n="index.card.editor.desc">46개 언어 공식 네이버 사전 링크가 자동 삽입되는 Anki 앞면·뒷면 서식 생성기입니다. 실시간 카드 시뮬레이터와 서식 커스터마이징, 로컬 자동 저장을 지원합니다.</p>
         <div class="tool-card-tags">
-          <span class="tool-tag-pill">Anki 서식</span>
-          <span class="tool-tag-pill">46개 언어 지원</span>
-          <span class="tool-tag-pill">네이버 사전 링크</span>
-          <span class="tool-tag-pill">실시간 미리보기</span>
-          <span class="tool-tag-pill">자동 저장</span>
+          <span class="tool-tag-pill" data-i18n="index.card.editor.tag1">Anki 서식</span>
+          <span class="tool-tag-pill" data-i18n="index.card.editor.tag2">46개 언어 지원</span>
+          <span class="tool-tag-pill" data-i18n="index.card.editor.tag3">네이버 사전 링크</span>
+          <span class="tool-tag-pill" data-i18n="index.card.editor.tag4">실시간 미리보기</span>
+          <span class="tool-tag-pill" data-i18n="index.card.editor.tag5">자동 저장</span>
         </div>
-        <a href="ankiEditor.html" class="btn-tool-launch" id="btnLaunchAnki">
-          에디터 실행하기 ➔
-        </a>
+        <a href="ankiEditor.html" class="btn-tool-launch" id="btnLaunchAnki" data-i18n="index.card.editor.launch">에디터 실행하기 ➔</a>
       </article>
 
       <!-- Tool Card 3: Anki AI Prompt Generator -->
       <article class="tool-card">
         <div class="tool-card-header">
           <span class="tool-card-icon">🤖</span>
-          <span class="tool-status-badge active">● 바로 사용 가능</span>
+          <span class="tool-status-badge active" data-i18n="index.card.statusAvailable">● 바로 사용 가능</span>
         </div>
-        <h3 class="tool-card-title">Anki AI 프롬프트 생성기</h3>
+        <h3 class="tool-card-title" data-i18n="index.card.prompt.title">Anki AI 프롬프트 생성기</h3>
         <span class="tool-card-route">ankiPrompt.html</span>
-        <p class="tool-card-desc">
-          외국어 텍스트나 주제로부터 원하는 난이도(HSK, JLPT, CEFR 등)의 단어를 Anki용 CSV 서식으로 바로 추출하도록 AI(ChatGPT, Gemini)에게 지시하는 맞춤 프롬프트 생성기입니다.
-        </p>
+        <p class="tool-card-desc" data-i18n="index.card.prompt.desc">외국어 텍스트나 주제로부터 원하는 난이도(HSK, JLPT, CEFR 등)의 단어를 Anki용 CSV 서식으로 바로 추출하도록 AI(ChatGPT, Gemini)에게 지시하는 맞춤 프롬프트 생성기입니다.</p>
         <div class="tool-card-tags">
-          <span class="tool-tag-pill">AI 프롬프트</span>
-          <span class="tool-tag-pill">Anki CSV 추출</span>
-          <span class="tool-tag-pill">난이도/급수 필터</span>
-          <span class="tool-tag-pill">커스텀 열 구성</span>
-          <span class="tool-tag-pill">원클릭 복사</span>
+          <span class="tool-tag-pill" data-i18n="index.card.prompt.tag1">AI 프롬프트</span>
+          <span class="tool-tag-pill" data-i18n="index.card.prompt.tag2">Anki CSV 추출</span>
+          <span class="tool-tag-pill" data-i18n="index.card.prompt.tag3">난이도/급수 필터</span>
+          <span class="tool-tag-pill" data-i18n="index.card.prompt.tag4">커스텀 열 구성</span>
+          <span class="tool-tag-pill" data-i18n="index.card.prompt.tag5">원클릭 복사</span>
         </div>
-        <a href="ankiPrompt.html" class="btn-tool-launch" id="btnLaunchPrompt">
-          프롬프트 생성기 실행하기 ➔
-        </a>
+        <a href="ankiPrompt.html" class="btn-tool-launch" id="btnLaunchPrompt" data-i18n="index.card.prompt.launch">프롬프트 생성기 실행하기 ➔</a>
       </article>
     </section>
 
     <!-- Notice Box -->
     <div class="portal-notice-box">
       <span class="notice-icon">💡</span>
-      <div>
-        <strong>100% 무료 & 개인정보 보호:</strong> Study with Wanzi의 모든 도구는 별도의 회원가입이나 백엔드 서버 통신 없이 사용자 브라우저 로컬에서 안전하게 실행됩니다.
-      </div>
+      <div data-i18n-html="index.notice.body"><strong>100% 무료 &amp; 개인정보 보호:</strong> Study with Wanzi의 모든 도구는 별도의 회원가입이나 백엔드 서버 통신 없이 사용자 브라우저 로컬에서 안전하게 실행됩니다.</div>
     </div>
   </main>
 
   <footer class="app-footer">
-    <p>Study with Wanzi &copy; 2026. Made with care for language learners.</p>
+    <p data-i18n="common.footer">Study with Wanzi &copy; 2026. Made with care for language learners.</p>
   </footer>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/i18n/ko/common.js"></script>
+  <script src="assets/i18n/ko/index.js"></script>
+  <script src="assets/i18n/en/common.js"></script>
+  <script src="assets/i18n/en/index.js"></script>
+  <script src="assets/i18n/zh/common.js"></script>
+  <script src="assets/i18n/zh/index.js"></script>
 </body>
 </html>

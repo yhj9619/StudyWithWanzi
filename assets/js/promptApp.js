@@ -40,6 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const ruleExampleFromText = document.getElementById('ruleExampleFromText');
   const ruleExampleFromTextLabel = document.getElementById('ruleExampleFromTextLabel');
   const btnImportEditorFields = document.getElementById('btnImportEditorFields');
+  const sourceLangModeSelect = document.getElementById('sourceLangModeSelect');
+  const sourceLangNotice = document.getElementById('sourceLangNotice');
+  const ruleExampleFromTextText = document.getElementById('ruleExampleFromTextText');
   const EDITOR_STORAGE_KEY = 'anki_card_editor_settings';
 
   const promptOutputText = document.getElementById('promptOutputText');
@@ -67,16 +70,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const EXAM_PRESETS = {
     en: {
       exams: [
-        { name: '토익', label: '토익 (TOEIC)', defaultScore: '760점', scoreChips: ['600점', '700점', '760점', '800점', '850점', '900점'] },
-        { name: '토플 IBT', label: '토플 IBT (TOEFL)', defaultScore: '81점', scoreChips: ['60점', '71점', '81점', '90점', '100점'] },
-        { name: '토플 PBT', label: '토플 PBT (TOEFL)', defaultScore: '584점', scoreChips: ['500점', '550점', '584점', '600점'] },
-        { name: '텝스', label: '텝스 (TEPS)', defaultScore: '372점', scoreChips: ['300점', '340점', '372점', '400점', '450점'] },
-        { name: '지텔프', label: '지텔프 (G-TELP)', defaultScore: '레벨2 74점', scoreChips: ['레벨2 65점', '레벨2 74점', '레벨2 80점'] },
-        { name: '아이엘츠', label: '아이엘츠 (IELTS)', defaultScore: '5.0', scoreChips: ['4.5', '5.0', '5.5', '6.0', '6.5', '7.0'] },
-        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
-        { name: '수능/교과', label: '수능/교과 어휘', defaultScore: '수능 필수', scoreChips: ['중학 필수', '고교 기본', '수능 필수'] },
-        { name: '일반 난이도', label: '일반 난이도', defaultScore: '중급', scoreChips: ['초급', '중급', '고급'] },
-        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
+        { name: '토익', label: i18n.t('prompt.exam.toeic'), defaultScore: '760점', scoreChips: ['600점', '700점', '760점', '800점', '850점', '900점'] },
+        { name: '토플 IBT', label: i18n.t('prompt.exam.toeflIbt'), defaultScore: '81점', scoreChips: ['60점', '71점', '81점', '90점', '100점'] },
+        { name: '토플 PBT', label: i18n.t('prompt.exam.toeflPbt'), defaultScore: '584점', scoreChips: ['500점', '550점', '584점', '600점'] },
+        { name: '텝스', label: i18n.t('prompt.exam.teps'), defaultScore: '372점', scoreChips: ['300점', '340점', '372점', '400점', '450점'] },
+        { name: '지텔프', label: i18n.t('prompt.exam.gtelp'), defaultScore: '레벨2 74점', scoreChips: ['레벨2 65점', '레벨2 74점', '레벨2 80점'] },
+        { name: '아이엘츠', label: i18n.t('prompt.exam.ielts'), defaultScore: '5.0', scoreChips: ['4.5', '5.0', '5.5', '6.0', '6.5', '7.0'] },
+        { name: 'FLEX', label: i18n.t('prompt.exam.flex'), defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
+        { name: '수능/교과', label: i18n.t('prompt.exam.suneung'), defaultScore: '수능 필수', scoreChips: ['중학 필수', '고교 기본', '수능 필수'] },
+        { name: '일반 난이도', label: i18n.t('prompt.exam.general'), defaultScore: '중급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: i18n.t('prompt.exam.custom'), defaultScore: '', scoreChips: [] }
       ],
       defaultExam: '토익',
       defaultScore: '760점',
@@ -84,12 +87,12 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     ja: {
       exams: [
-        { name: 'JLPT', label: '일본어능력시험 (JLPT)', defaultScore: 'N3', scoreChips: ['N5', 'N4', 'N3', 'N2', 'N1'] },
+        { name: 'JLPT', label: i18n.t('prompt.exam.jlpt'), defaultScore: 'N3', scoreChips: ['N5', 'N4', 'N3', 'N2', 'N1'] },
         { name: 'JPT', label: 'JPT', defaultScore: '740점', scoreChips: ['550점', '650점', '740점', '800점', '900점'] },
-        { name: '日檢(NIKKEN)', label: '일본어검정시험 (日檢 NIKKEN)', defaultScore: '750점', scoreChips: ['600점', '700점', '750점', '800점'] },
-        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
-        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
-        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
+        { name: '日檢(NIKKEN)', label: i18n.t('prompt.exam.nikken'), defaultScore: '750점', scoreChips: ['600점', '700점', '750점', '800점'] },
+        { name: 'FLEX', label: i18n.t('prompt.exam.flex'), defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
+        { name: '일반 난이도', label: i18n.t('prompt.exam.general'), defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: i18n.t('prompt.exam.custom'), defaultScore: '', scoreChips: [] }
       ],
       defaultExam: 'JLPT',
       defaultScore: 'N3',
@@ -97,14 +100,14 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     zh: {
       exams: [
-        { name: 'HSK', label: '한어수평고시 (HSK)', defaultScore: '3급', scoreChips: ['1급', '2급', '3급', '4급', '5급', '6급'] },
-        { name: '신HSK', label: '신HSK (3.0)', defaultScore: '3급', scoreChips: ['1급', '2급', '3급', '4급', '5급', '6급', '7-9급'] },
-        { name: 'BCT', label: '실용중국어시험 (BCT)', defaultScore: '(B) 181점', scoreChips: ['(A)', '(B) 181점', '(B) L&R 601점'] },
-        { name: 'CPT', label: '중국어실용능력시험 (CPT)', defaultScore: '750점', scoreChips: ['600점', '700점', '750점', '800점'] },
-        { name: 'TOCFL', label: '대만중국어능력시험 (TOCFL)', defaultScore: '5급', scoreChips: ['1급', '2급', '3급', '4급', '5급', '6급'] },
-        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
-        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
-        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
+        { name: 'HSK', label: i18n.t('prompt.exam.hsk'), defaultScore: '3급', scoreChips: ['1급', '2급', '3급', '4급', '5급', '6급'] },
+        { name: '신HSK', label: i18n.t('prompt.exam.newHsk'), defaultScore: '3급', scoreChips: ['1급', '2급', '3급', '4급', '5급', '6급', '7-9급'] },
+        { name: 'BCT', label: i18n.t('prompt.exam.bct'), defaultScore: '(B) 181점', scoreChips: ['(A)', '(B) 181점', '(B) L&R 601점'] },
+        { name: 'CPT', label: i18n.t('prompt.exam.cpt'), defaultScore: '750점', scoreChips: ['600점', '700점', '750점', '800점'] },
+        { name: 'TOCFL', label: i18n.t('prompt.exam.tocfl'), defaultScore: '5급', scoreChips: ['1급', '2급', '3급', '4급', '5급', '6급'] },
+        { name: 'FLEX', label: i18n.t('prompt.exam.flex'), defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
+        { name: '일반 난이도', label: i18n.t('prompt.exam.general'), defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: i18n.t('prompt.exam.custom'), defaultScore: '', scoreChips: [] }
       ],
       defaultExam: 'HSK',
       defaultScore: '3급',
@@ -112,11 +115,11 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     fr: {
       exams: [
-        { name: 'DELF', label: '델프 (DELF)', defaultScore: 'B2', scoreChips: ['A1', 'A2', 'B1', 'B2'] },
-        { name: 'DALF', label: '달프 (DALF)', defaultScore: 'C1', scoreChips: ['C1', 'C2'] },
-        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
-        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
-        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
+        { name: 'DELF', label: i18n.t('prompt.exam.delf'), defaultScore: 'B2', scoreChips: ['A1', 'A2', 'B1', 'B2'] },
+        { name: 'DALF', label: i18n.t('prompt.exam.dalf'), defaultScore: 'C1', scoreChips: ['C1', 'C2'] },
+        { name: 'FLEX', label: i18n.t('prompt.exam.flex'), defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
+        { name: '일반 난이도', label: i18n.t('prompt.exam.general'), defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: i18n.t('prompt.exam.custom'), defaultScore: '', scoreChips: [] }
       ],
       defaultExam: 'DELF',
       defaultScore: 'B2',
@@ -124,10 +127,10 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     de: {
       exams: [
-        { name: '괴테어학검정(Goethe)', label: '괴테어학검정시험 (Goethe)', defaultScore: 'B1(ZD)', scoreChips: ['A1', 'A2', 'B1(ZD)', 'B2', 'C1'] },
-        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
-        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
-        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
+        { name: '괴테어학검정(Goethe)', label: i18n.t('prompt.exam.goethe'), defaultScore: 'B1(ZD)', scoreChips: ['A1', 'A2', 'B1(ZD)', 'B2', 'C1'] },
+        { name: 'FLEX', label: i18n.t('prompt.exam.flex'), defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
+        { name: '일반 난이도', label: i18n.t('prompt.exam.general'), defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: i18n.t('prompt.exam.custom'), defaultScore: '', scoreChips: [] }
       ],
       defaultExam: '괴테어학검정(Goethe)',
       defaultScore: 'B1(ZD)',
@@ -135,10 +138,10 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     es: {
       exams: [
-        { name: 'DELE', label: '델레 (DELE)', defaultScore: 'B2', scoreChips: ['A1', 'A2', 'B1', 'B2', 'C1'] },
-        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
-        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
-        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
+        { name: 'DELE', label: i18n.t('prompt.exam.dele'), defaultScore: 'B2', scoreChips: ['A1', 'A2', 'B1', 'B2', 'C1'] },
+        { name: 'FLEX', label: i18n.t('prompt.exam.flex'), defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
+        { name: '일반 난이도', label: i18n.t('prompt.exam.general'), defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: i18n.t('prompt.exam.custom'), defaultScore: '', scoreChips: [] }
       ],
       defaultExam: 'DELE',
       defaultScore: 'B2',
@@ -146,10 +149,10 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     ru: {
       exams: [
-        { name: '토르플(TORFL)', label: '토르플 (TORFL)', defaultScore: '1단계', scoreChips: ['기초', '기본', '1단계', '2단계', '3단계'] },
-        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
-        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
-        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
+        { name: '토르플(TORFL)', label: i18n.t('prompt.exam.torfl'), defaultScore: '1단계', scoreChips: ['기초', '기본', '1단계', '2단계', '3단계'] },
+        { name: 'FLEX', label: i18n.t('prompt.exam.flex'), defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
+        { name: '일반 난이도', label: i18n.t('prompt.exam.general'), defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: i18n.t('prompt.exam.custom'), defaultScore: '', scoreChips: [] }
       ],
       defaultExam: '토르플(TORFL)',
       defaultScore: '1단계',
@@ -157,11 +160,11 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     it: {
       exams: [
-        { name: '칠스(CILS)', label: '칠스 (CILS)', defaultScore: 'B2', scoreChips: ['A1', 'A2', 'B1', 'B2', 'C1'] },
-        { name: '첼리(CELI)', label: '첼리 (CELI)', defaultScore: '3', scoreChips: ['1', '2', '3', '4'] },
-        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
-        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
-        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
+        { name: '칠스(CILS)', label: i18n.t('prompt.exam.cils'), defaultScore: 'B2', scoreChips: ['A1', 'A2', 'B1', 'B2', 'C1'] },
+        { name: '첼리(CELI)', label: i18n.t('prompt.exam.celi'), defaultScore: '3', scoreChips: ['1', '2', '3', '4'] },
+        { name: 'FLEX', label: i18n.t('prompt.exam.flex'), defaultScore: '776점', scoreChips: ['600점', '700점', '776점', '850점'] },
+        { name: '일반 난이도', label: i18n.t('prompt.exam.general'), defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: i18n.t('prompt.exam.custom'), defaultScore: '', scoreChips: [] }
       ],
       defaultExam: '칠스(CILS)',
       defaultScore: 'B2',
@@ -169,9 +172,9 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     th: {
       exams: [
-        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '600점', scoreChips: ['500점', '600점', '700점', '776점'] },
-        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
-        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
+        { name: 'FLEX', label: i18n.t('prompt.exam.flex'), defaultScore: '600점', scoreChips: ['500점', '600점', '700점', '776점'] },
+        { name: '일반 난이도', label: i18n.t('prompt.exam.general'), defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: i18n.t('prompt.exam.custom'), defaultScore: '', scoreChips: [] }
       ],
       defaultExam: 'FLEX',
       defaultScore: '600점',
@@ -179,9 +182,9 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     vi: {
       exams: [
-        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '600점', scoreChips: ['500점', '600점', '700점', '776점'] },
-        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
-        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
+        { name: 'FLEX', label: i18n.t('prompt.exam.flex'), defaultScore: '600점', scoreChips: ['500점', '600점', '700점', '776점'] },
+        { name: '일반 난이도', label: i18n.t('prompt.exam.general'), defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: i18n.t('prompt.exam.custom'), defaultScore: '', scoreChips: [] }
       ],
       defaultExam: 'FLEX',
       defaultScore: '600점',
@@ -189,9 +192,9 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     id: {
       exams: [
-        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '600점', scoreChips: ['500점', '600점', '700점', '776점'] },
-        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
-        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
+        { name: 'FLEX', label: i18n.t('prompt.exam.flex'), defaultScore: '600점', scoreChips: ['500점', '600점', '700점', '776점'] },
+        { name: '일반 난이도', label: i18n.t('prompt.exam.general'), defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: i18n.t('prompt.exam.custom'), defaultScore: '', scoreChips: [] }
       ],
       defaultExam: 'FLEX',
       defaultScore: '600점',
@@ -199,9 +202,9 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     ar: {
       exams: [
-        { name: 'FLEX', label: '플렉스 (FLEX)', defaultScore: '600점', scoreChips: ['500점', '600점', '700점', '776점'] },
-        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
-        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
+        { name: 'FLEX', label: i18n.t('prompt.exam.flex'), defaultScore: '600점', scoreChips: ['500점', '600점', '700점', '776점'] },
+        { name: '일반 난이도', label: i18n.t('prompt.exam.general'), defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: i18n.t('prompt.exam.custom'), defaultScore: '', scoreChips: [] }
       ],
       defaultExam: 'FLEX',
       defaultScore: '600점',
@@ -209,8 +212,8 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     default: {
       exams: [
-        { name: '일반 난이도', label: '일반 난이도', defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
-        { name: '직접 입력', label: '✏️ 직접 입력', defaultScore: '', scoreChips: [] }
+        { name: '일반 난이도', label: i18n.t('prompt.exam.general'), defaultScore: '초급', scoreChips: ['초급', '중급', '고급'] },
+        { name: '직접 입력', label: i18n.t('prompt.exam.custom'), defaultScore: '', scoreChips: [] }
       ],
       defaultExam: '일반 난이도',
       defaultScore: '초급',
@@ -346,50 +349,54 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 언어별 추천 필드 빠른 추가 칩 데이터 생성
+  // (label은 화면 표시 문구, name은 추가되는 열 이름 — 열 이름은 데이터라 한국어 그대로 유지)
   function getQuickChipsForLanguage(langId) {
     const langObj = (window.LANGUAGES_DATA || []).find(l => l.id === langId);
     const langName = langObj ? langObj.name : '외국어';
+    const displayLangName = langObj ? i18n.langName(langObj) : i18n.t('prompt.foreignLangFallback');
+    const chip = (key, name) => ({ label: i18n.t('prompt.chip.' + key), name });
+    const wordChip = name => ({ label: i18n.t('prompt.chip.langWord', { lang: displayLangName }), name });
 
     if (langId === 'en') {
       return [
-        { label: '+ [품사]한국어 뜻', name: '[품사]한국어' },
-        { label: '+ 영어 단어', name: '영어' },
-        { label: '+ 발음기호', name: '발음기호' },
-        { label: '+ 예문(원문)', name: '예문' },
-        { label: '+ 예문 해석', name: '예문 해석' },
-        { label: '+ 품사', name: '품사' },
-        { label: '+ 유의어/반의어', name: '유의어/반의어' }
+        chip('koreanMeaning', '[품사]한국어'),
+        wordChip('영어'),
+        chip('ipa', '발음기호'),
+        chip('example', '예문'),
+        chip('exampleTranslation', '예문 해석'),
+        chip('pos', '품사'),
+        chip('synonyms', '유의어/반의어')
       ];
     } else if (langId === 'ja') {
       return [
-        { label: '+ [품사]한국어 뜻', name: '[품사]한국어' },
-        { label: '+ 일본어 단어', name: '일본어' },
-        { label: '+ 후리가나/발음', name: '후리가나/발음' },
-        { label: '+ 예문(원문)', name: '예문' },
-        { label: '+ 예문 해석', name: '예문 해석' },
-        { label: '+ 품사', name: '품사' },
-        { label: '+ 유의어/반의어', name: '유의어/반의어' }
+        chip('koreanMeaning', '[품사]한국어'),
+        wordChip('일본어'),
+        chip('furigana', '후리가나/발음'),
+        chip('example', '예문'),
+        chip('exampleTranslation', '예문 해석'),
+        chip('pos', '품사'),
+        chip('synonyms', '유의어/반의어')
       ];
     } else if (langId === 'zh') {
       return [
-        { label: '+ [품사]한국어 뜻', name: '[품사]한국어' },
-        { label: '+ 중국어 단어', name: '중국어' },
-        { label: '+ 병음', name: '병음' },
-        { label: '+ 예문(원문)', name: '예문' },
-        { label: '+ 예문 해석', name: '예문 해석' },
-        { label: '+ 예문 병음', name: '예문 병음' },
-        { label: '+ 품사', name: '품사' },
-        { label: '+ 유의어/반의어', name: '유의어/반의어' }
+        chip('koreanMeaning', '[품사]한국어'),
+        wordChip('중국어'),
+        chip('pinyin', '병음'),
+        chip('example', '예문'),
+        chip('exampleTranslation', '예문 해석'),
+        chip('examplePinyin', '예문 병음'),
+        chip('pos', '품사'),
+        chip('synonyms', '유의어/반의어')
       ];
     } else {
       return [
-        { label: '+ [품사]한국어 뜻', name: '[품사]한국어' },
-        { label: `+ ${langName} 단어`, name: `${langName} 단어` },
-        { label: '+ 발음/표기', name: '발음/표기' },
-        { label: '+ 예문(원문)', name: '예문' },
-        { label: '+ 예문 해석', name: '예문 해석' },
-        { label: '+ 품사', name: '품사' },
-        { label: '+ 유의어/반의어', name: '유의어/반의어' }
+        chip('koreanMeaning', '[품사]한국어'),
+        wordChip(`${langName} 단어`),
+        chip('pronunciation', '발음/표기'),
+        chip('example', '예문'),
+        chip('exampleTranslation', '예문 해석'),
+        chip('pos', '품사'),
+        chip('synonyms', '유의어/반의어')
       ];
     }
   }
@@ -413,7 +420,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         renderFields();
         updatePromptAndPreview();
-        showToast(`'${chip.name}' 필드가 추가되었습니다.`);
+        showToast(i18n.t('prompt.toast.fieldAdded', { name: chip.name }));
       });
       container.appendChild(btn);
     });
@@ -481,8 +488,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!btnResetFieldsToLang) return;
     const langId = promptLangSelect.value;
     const langObj = (window.LANGUAGES_DATA || []).find(l => l.id === langId);
-    const langName = langObj ? langObj.name : '선택 언어';
-    btnResetFieldsToLang.textContent = `🔄 '${langName}' 기본 필드로 복원`;
+    const langName = langObj ? i18n.langName(langObj) : i18n.t('prompt.fields.selectedLangFallback');
+    btnResetFieldsToLang.textContent = i18n.t('prompt.fields.resetToLang', { lang: langName });
   }
 
   // 3. 필드 렌더링
@@ -495,14 +502,14 @@ document.addEventListener('DOMContentLoaded', () => {
       row.dataset.id = field.id;
 
       row.innerHTML = `
-        <div class="field-order-badge">${index + 1}열</div>
+        <div class="field-order-badge">${escapeHtml(i18n.t('prompt.fields.colBadge', { n: index + 1 }))}</div>
         <div class="prompt-field-inputs">
-          <input type="text" class="form-input field-input-name" value="${escapeHtml(field.name)}" placeholder="열 항목명 (예: [품사]한국어, 중국어, 병음, 예문)">
+          <input type="text" class="form-input field-input-name" value="${escapeHtml(field.name)}" placeholder="${escapeHtml(i18n.t('prompt.fields.namePlaceholder'))}">
         </div>
         <div class="prompt-field-actions">
-          <button type="button" class="btn-field-icon btn-move-up" title="위로 이동" ${index === 0 ? 'disabled' : ''}>▲</button>
-          <button type="button" class="btn-field-icon btn-move-down" title="아래로 이동" ${index === fields.length - 1 ? 'disabled' : ''}>▼</button>
-          <button type="button" class="btn-field-icon btn-delete-small" title="필드 삭제">🗑️</button>
+          <button type="button" class="btn-field-icon btn-move-up" title="${escapeHtml(i18n.t('prompt.fields.moveUp'))}" ${index === 0 ? 'disabled' : ''}>▲</button>
+          <button type="button" class="btn-field-icon btn-move-down" title="${escapeHtml(i18n.t('prompt.fields.moveDown'))}" ${index === fields.length - 1 ? 'disabled' : ''}>▼</button>
+          <button type="button" class="btn-field-icon btn-delete-small" title="${escapeHtml(i18n.t('prompt.fields.delete'))}">🗑️</button>
         </div>
       `;
 
@@ -541,8 +548,8 @@ document.addEventListener('DOMContentLoaded', () => {
       btnDel.addEventListener('click', () => {
         const rawName = field.name.trim();
         const promptText = rawName
-          ? `'${rawName}' 필드를 정말 삭제하시겠습니까?`
-          : `${index + 1}번째 열 필드를 정말 삭제하시겠습니까?`;
+          ? i18n.t('prompt.confirm.deleteField', { name: rawName })
+          : i18n.t('prompt.confirm.deleteFieldIndex', { n: index + 1 });
 
         if (!confirm(promptText)) {
           return;
@@ -551,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fields.splice(index, 1);
         renderFields();
         updatePromptAndPreview();
-        showToast('필드가 삭제되었습니다.');
+        showToast(i18n.t('prompt.toast.fieldDeleted'));
       });
 
       promptFieldList.appendChild(row);
@@ -563,31 +570,84 @@ document.addEventListener('DOMContentLoaded', () => {
   // 4. 구분자 및 형태 배너 문자열 생성
   function getDelimiterInfo() {
     const val = delimiterSelect.value;
-    if (val === 'tab') return { char: '\t', display: '\\t', name: '탭(\\t)' };
-    if (val === 'semicolon') return { char: ';', display: '; ', name: '세미콜론(;)' };
-    return { char: ',', display: ', ', name: '쉼표(,)' };
+    if (val === 'tab') return { char: '\t', display: '\\t', name: i18n.t('prompt.out.delimTab') };
+    if (val === 'semicolon') return { char: ';', display: '; ', name: i18n.t('prompt.out.delimSemicolon') };
+    return { char: ',', display: ', ', name: i18n.t('prompt.out.delimComma') };
   }
 
   function updateFormatBanner() {
     const delim = getDelimiterInfo();
-    const formula = fields.map(f => f.name.trim() || '미지정').join(delim.display);
+    const formula = fields.map(f => f.name.trim() || i18n.t('prompt.fields.unnamed')).join(delim.display);
     currentFormatTag.textContent = `"${formula}"`;
   }
 
   // 열 이름별 작성 예시 (AI에게 열의 의미와 표기 방식을 명확히 전달)
   function getColumnHint(name) {
-    if (name.includes('[품사]')) return '대괄호 안에 품사를 쓰고 한국어 뜻을 이어서 작성. 예: [명사] 사과, [동사] 먹다';
-    if (name.includes('예문') && (name.includes('해석') || name.includes('번역'))) return '예문의 자연스러운 한국어 번역';
-    if (name.includes('예문') && name.includes('병음')) return '예문 전체의 병음, 성조 부호 포함';
-    if (name.includes('예문')) return '해당 단어가 들어간 목표 언어 문장';
-    if (name === '병음' || name.includes('병음')) return '성조 부호 포함. 예: píngguǒ';
-    if (name.includes('후리가나')) return '히라가나 읽기. 예: りんご';
-    if (name.includes('발음기호')) return 'IPA 발음기호. 예: /ˈæp.əl/';
-    if (name === '품사') return '명사, 동사, 형용사 등';
-    if (name.includes('유의어') || name.includes('반의어')) return '없으면 빈칸';
-    if (name.includes('한국어') || name.includes('뜻') || name.includes('의미')) return '한국어 뜻';
-    if (isAutoForeignWordName(name)) return '목표 언어 단어, 기본형으로';
+    // 열 이름 판별(한국어 열 이름 기준)은 데이터 모델에 속하므로 그대로 두고, 설명 문구만 번역 키로 분리
+    const hint = key => i18n.t('prompt.out.hint.' + key);
+    if (name.includes('[품사]')) return hint('posKorean');
+    if (name.includes('예문') && (name.includes('해석') || name.includes('번역'))) return hint('exampleTranslation');
+    if (name.includes('예문') && name.includes('병음')) return hint('examplePinyin');
+    if (name.includes('예문')) return hint('example');
+    if (name === '병음' || name.includes('병음')) return hint('pinyin');
+    if (name.includes('후리가나')) return hint('furigana');
+    if (name.includes('발음기호')) return hint('ipa');
+    if (name === '품사') return hint('pos');
+    if (name.includes('유의어') || name.includes('반의어')) return hint('synonyms');
+    if (name.includes('한국어') || name.includes('뜻') || name.includes('의미')) return hint('korean');
+    if (isAutoForeignWordName(name)) return hint('foreignWord');
     return '';
+  }
+
+  function hasExampleTranslationColumn() {
+    return fields.some(f => {
+      const name = f.name.trim();
+      return name.includes('예문') && (name.includes('해석') || name.includes('번역'));
+    });
+  }
+
+  // 본문 언어 자동 감지: 글자(숫자·기호·공백 제외) 중 한글 비율이 60% 이상이면 한국어 본문
+  // (한국어 해설이 섞인 외국어 기사 등은 외국어 본문으로 유지)
+  const KOREAN_SOURCE_RATIO = 0.6;
+
+  function detectSourceLanguage(text) {
+    const letters = (text || '').match(/\p{L}/gu) || [];
+    if (letters.length === 0) return null;
+    const hangul = letters.filter(ch => /[가-힣ᄀ-ᇿ㄰-㆏]/.test(ch)).length;
+    return hangul / letters.length >= KOREAN_SOURCE_RATIO ? 'ko' : 'foreign';
+  }
+
+  // 실제로 적용할 본문 언어 ('ko' | 'foreign')
+  function getSourceLanguage() {
+    const mode = sourceLangModeSelect ? sourceLangModeSelect.value : 'auto';
+    if (mode === 'ko' || mode === 'foreign') return mode;
+    return detectSourceLanguage(sourceTextInput.value) || 'foreign';
+  }
+
+  // 본문 언어 안내 문구 및 예문 옵션 문구 갱신
+  function updateSourceLangNotice() {
+    if (!sourceLangNotice) return;
+    const langObj = (window.LANGUAGES_DATA || []).find(l => l.id === promptLangSelect.value);
+    const langName = langObj ? i18n.langName(langObj) : i18n.t('prompt.foreignLangFallback');
+    const mode = sourceLangModeSelect ? sourceLangModeSelect.value : 'auto';
+    const detected = detectSourceLanguage(sourceTextInput.value);
+    const effective = getSourceLanguage();
+    const isKorean = effective === 'ko';
+
+    if (mode === 'auto' && !detected) {
+      sourceLangNotice.classList.add('hidden');
+    } else {
+      const prefix = i18n.t(mode === 'auto' ? 'prompt.notice.auto' : 'prompt.notice.manual');
+      sourceLangNotice.textContent = i18n.t(isKorean ? 'prompt.notice.korean' : 'prompt.notice.foreign', { prefix, lang: langName });
+      sourceLangNotice.classList.toggle('is-korean', isKorean);
+      sourceLangNotice.classList.remove('hidden');
+    }
+
+    if (ruleExampleFromTextText) {
+      ruleExampleFromTextText.textContent = isKorean
+        ? i18n.t('prompt.rule.exampleFromTextKorean', { lang: langName })
+        : i18n.t('prompt.rule.exampleFromText');
+    }
   }
 
   function hasExampleColumn() {
@@ -598,12 +658,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 5. 프롬프트 문자열 생성
+  // 생성 문구는 prompt.out.* 키 사용. 언어 이름은 아직 데이터 모델(한국어 lang.name) 기준으로 삽입
   function generatePrompt() {
+    const t = i18n.t;
     const langObj = (window.LANGUAGES_DATA || []).find(l => l.id === promptLangSelect.value);
-    const langName = langObj ? langObj.name : '외국어';
+    // 프롬프트 문장 속 언어 이름은 UI 언어로 (한국어 UI는 기존과 동일). 기본 열 이름은 아직 한국어 데이터
+    const langName = langObj ? i18n.langName(langObj) : t('prompt.out.foreignLang');
 
     const delim = getDelimiterInfo();
-    const formatFormula = fields.map(f => f.name.trim() || '항목').join(delim.display);
+    const formatFormula = fields.map(f => f.name.trim() || t('prompt.out.unnamedColumn')).join(delim.display);
 
     // 난이도 / 시험 조건절
     const filterMode = levelFilterModeSelect.value;
@@ -613,98 +676,118 @@ document.addEventListener('DOMContentLoaded', () => {
     let conditionClause = '';
     if (filterMode !== 'none' && targetLevel) {
       if (filterMode === 'below') {
-        conditionClause = `${targetLevel} 수준 및 그보다 쉬운 단어는 제외하고, `;
+        conditionClause = t('prompt.out.condBelow', { level: targetLevel });
       } else if (filterMode === 'above') {
-        conditionClause = `${targetLevel} 수준 및 그보다 어려운 단어만 선별하여, `;
+        conditionClause = t('prompt.out.condAbove', { level: targetLevel });
       } else if (filterMode === 'exact') {
-        conditionClause = `${targetLevel} 수준에 해당하는 단어만 선별하여, `;
+        conditionClause = t('prompt.out.condExact', { level: targetLevel });
       }
     }
 
     // 품사 텍스트
     const selectedPos = [];
-    if (posNoun.checked) selectedPos.push('명사');
-    if (posVerb.checked) selectedPos.push('동사');
-    if (posAdj.checked) selectedPos.push('형용사');
-    if (posAdv.checked) selectedPos.push('부사');
-    if (posIdiom.checked) selectedPos.push('숙어/관용구/성어');
+    if (posNoun.checked) selectedPos.push(t('prompt.out.posNoun'));
+    if (posVerb.checked) selectedPos.push(t('prompt.out.posVerb'));
+    if (posAdj.checked) selectedPos.push(t('prompt.out.posAdj'));
+    if (posAdv.checked) selectedPos.push(t('prompt.out.posAdv'));
+    if (posIdiom.checked) selectedPos.push(t('prompt.out.posIdiom'));
 
-    let posClause = '단어(명사, 형용사, 부사, 동사 등)';
+    let posClause = t('prompt.out.posDefault');
     if (selectedPos.length > 0) {
-      posClause = `단어(${selectedPos.join(', ')} 등)`;
+      posClause = t('prompt.out.posList', { list: selectedPos.join(t('prompt.out.listSeparator')) });
     }
 
     // 단어 수
     const countVal = wordCountSelect.value;
     let countClause = '';
     if (countVal !== 'all') {
-      countClause = `최대 ${countVal}개까지 `;
+      countClause = t('prompt.out.count', { count: countVal });
     }
 
+    // 한국어 본문: "이 한국어 내용을 외국어로 말할 때 필요한 단어"를 뽑도록 프롬프트 전환
+    const isKoreanSource = currentMode === 'text' && getSourceLanguage() === 'ko';
+
     // 1번 문장
+    const mainParams = { lang: langName, condition: conditionClause, count: countClause, pos: posClause };
     let mainSentence = '';
     if (currentMode === 'topic') {
-      const topicText = sourceTopicInput.value.trim() || '일상 회화 및 여행';
-      mainSentence = `1. [${langName}]에서 '${topicText}' 주제와 관련된 ${conditionClause}${countClause}${posClause}을 ANKI에서 사용할 수 있는 CSV 형태로 뽑아줘.`;
+      const topicText = sourceTopicInput.value.trim() || t('prompt.out.defaultTopic');
+      mainSentence = t('prompt.out.mainTopic', Object.assign({ topic: topicText }, mainParams));
+    } else if (isKoreanSource) {
+      mainSentence = t('prompt.out.mainKorean', mainParams);
     } else {
-      mainSentence = `1. 아래 [${langName}] 중에서 ${conditionClause}${countClause}${posClause}을 ANKI에서 사용할 수 있는 CSV 형태로 뽑아줘.`;
+      mainSentence = t('prompt.out.mainText', mainParams);
     }
 
     // 2번 문장 (형태) + 열별 설명 (AI가 열 의미를 오해하지 않도록 열 개수와 각 열의 예시를 명시)
     const columnGuide = fields.map((f, i) => {
-      const name = f.name.trim() || '항목';
+      const name = f.name.trim() || t('prompt.out.unnamedColumn');
       const hint = getColumnHint(name);
-      return `   - ${i + 1}열: ${name}${hint ? ` (${hint})` : ''}`;
+      return t('prompt.out.columnLine', {
+        n: i + 1,
+        name,
+        hint: hint ? t('prompt.out.columnHintWrap', { hint }) : '',
+      });
     }).join('\n');
-    const formatSentence = `2. 형태는 "${formatFormula}" 이 형태로 뽑아줘. 열 구분자는 ${delim.name}이고, 모든 줄은 정확히 ${fields.length}개 열이어야 해.\n${columnGuide}`;
+    const formatSentence = t('prompt.out.format', { formula: formatFormula, delim: delim.name, count: fields.length })
+      + `\n${columnGuide}`;
 
     // 작성 규칙 (Anki 최적화)
     const rules = [];
     if (ruleCodeblock.checked) {
       const codeLang = delim.char === '\t' ? 'tsv' : 'csv';
-      rules.push(`결과는 마크다운 코드블록(\`\`\`${codeLang} ... \`\`\`) 안에 출력해줘.`);
+      rules.push(t('prompt.out.rule.codeblock', { codeLang }));
     }
     if (rulePureCsv.checked) {
-      rules.push('인사말, 설명, 번호 매기기 없이 단어 데이터만 출력해줘.');
+      rules.push(t('prompt.out.rule.pureCsv'));
     }
     if (ruleNoHeader.checked) {
-      rules.push('첫 줄에 열 이름(헤더)을 넣지 말고 첫 줄부터 바로 단어 데이터로 시작해줘.');
+      rules.push(t('prompt.out.rule.noHeader'));
     }
     if (ruleQuoteCommas.checked) {
       if (delim.char === '\t') {
-        rules.push('내용 안에는 탭 문자를 쓰지 말아줘.');
+        rules.push(t('prompt.out.rule.noTabs'));
       } else {
-        rules.push(`예문이나 해석 등 내용 안에 구분 기호(${delim.char})가 포함된 열은 반드시 큰따옴표("")로 감싸서 열이 어긋나지 않게 해줘.`);
+        rules.push(t('prompt.out.rule.quote', { delim: delim.char }));
       }
     }
     if (ruleLemma.checked) {
-      rules.push('동사나 형용사는 문맥 활용형이 아닌 기본 사전형(원형)으로 변환하여 표기해줘.');
+      rules.push(t('prompt.out.rule.lemma'));
     }
     if (ruleNoDupes.checked) {
-      rules.push('중복된 단어는 한 번만 추출해줘.');
+      rules.push(t('prompt.out.rule.noDupes'));
+    }
+    if (isKoreanSource) {
+      rules.push(t('prompt.out.rule.targetLangWord', { lang: langName }));
     }
     if (ruleContextMeaning.checked) {
-      rules.push('한국어 뜻은 본문 문맥에 가장 적합한 대표 의미 위주로 간결하게 정리해줘.');
+      rules.push(t(isKoreanSource ? 'prompt.out.rule.contextMeaningKorean' : 'prompt.out.rule.contextMeaning'));
     }
     if (ruleDistinctMeaning.checked) {
-      rules.push('한국어 뜻이 같은 서로 다른 단어가 있으면 괄호 안에 뉘앙스나 쓰임을 덧붙여 한국어 뜻이 서로 겹치지 않게 구분해줘. (예: 보다(눈으로), 보다(만나다))');
+      rules.push(t('prompt.out.rule.distinctMeaning'));
     }
     if (ruleExampleFromText.checked && currentMode === 'text' && hasExampleColumn()) {
-      rules.push('예문은 대상 텍스트에서 그 단어가 실제로 쓰인 문장을 그대로 사용해줘. 대상 텍스트가 단어·키워드 목록이라 문장이 없으면 그 단어로 자연스러운 예문을 새로 만들어줘.');
+      if (isKoreanSource) {
+        rules.push(t('prompt.out.rule.exampleKorean', { lang: langName })
+          + (hasExampleTranslationColumn() ? t('prompt.out.rule.exampleKoreanTranslation') : ''));
+      } else {
+        rules.push(t('prompt.out.rule.exampleFromText'));
+      }
     }
 
     let rulesSection = '';
     if (rules.length > 0) {
-      rulesSection = `\n\n[작성 규칙]\n` + rules.map(r => `- ${r}`).join('\n');
+      rulesSection = `\n\n${t('prompt.out.rulesHeader')}\n` + rules.map(r => `- ${r}`).join('\n');
     }
 
     // 대상 텍스트 영역
     let textSection = '';
     if (currentMode === 'text') {
       const textContent = sourceTextInput.value.trim();
+      const textLabel = t(isKoreanSource ? 'prompt.out.textLabelKorean' : 'prompt.out.textLabel');
       textSection = textContent
-        ? `\n\n---\n[대상 텍스트]\n${textContent}`
-        : `\n\n---\n[대상 텍스트]\n(여기에 분석할 외국어 텍스트나 대본을 붙여넣으세요)`;
+        ? `\n\n---\n${textLabel}\n${textContent}`
+        : `\n\n---\n${textLabel}\n${t('prompt.out.textPlaceholder')}`;
     }
 
     return `${mainSentence}\n${formatSentence}${rulesSection}${textSection}`;
@@ -713,6 +796,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 실시간 프롬프트 갱신
   function updatePromptAndPreview(shouldSave = true) {
     updateFormatBanner();
+    updateSourceLangNotice();
 
     const prompt = generatePrompt();
     promptOutputText.textContent = prompt;
@@ -723,7 +807,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 8. 로컬스토리지 저장 & 복원
-  function updateSaveIndicator(text = '✓ 자동 저장됨') {
+  function updateSaveIndicator(text = i18n.t('common.autoSaved')) {
     if (!saveStatusIndicator) return;
     saveStatusIndicator.textContent = text;
     saveStatusIndicator.classList.add('active');
@@ -742,6 +826,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mode: currentMode,
         sourceText: sourceTextInput.value,
         sourceTopic: sourceTopicInput.value,
+        sourceLangMode: sourceLangModeSelect ? sourceLangModeSelect.value : 'auto',
         levelFilterMode: levelFilterModeSelect.value,
         examType: examTypeSelect.value,
         examScore: examScoreInput.value,
@@ -769,7 +854,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      updateSaveIndicator('✓ 자동 저장됨');
+      updateSaveIndicator(i18n.t('common.autoSaved'));
     } catch (e) {
       console.warn('localStorage 저장 실패:', e);
     }
@@ -794,6 +879,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (data.sourceText !== undefined) sourceTextInput.value = data.sourceText;
       if (data.sourceTopic !== undefined) sourceTopicInput.value = data.sourceTopic;
+      if (data.sourceLangMode && sourceLangModeSelect) sourceLangModeSelect.value = data.sourceLangMode;
 
       if (data.levelFilterMode !== undefined) levelFilterModeSelect.value = data.levelFilterMode;
       if (data.examType !== undefined) {
@@ -835,7 +921,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (Array.isArray(data.fields) && data.fields.length > 0) {
         fields = data.fields.map((f, i) => ({
           id: `f_${Date.now()}_${i}`,
-          name: f.name || `필드 ${i + 1}`
+          name: f.name || i18n.t('prompt.fields.defaultName', { n: i + 1 })
         }));
       }
 
@@ -857,7 +943,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function resetAllSettings() {
-    if (!confirm('AI 프롬프트 생성기의 모든 설정을 처음 기본값으로 초기화하시겠습니까?\n\n(※ Anki 카드 서식 에디터 등 다른 도구의 저장 설정에는 영향을 주지 않습니다.)')) {
+    if (!confirm(i18n.t('prompt.confirm.resetAll'))) {
       return;
     }
 
@@ -873,6 +959,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setMode('text', false);
     sourceTextInput.value = '';
     sourceTopicInput.value = '';
+    if (sourceLangModeSelect) sourceLangModeSelect.value = 'auto';
 
     levelFilterModeSelect.value = 'below';
     syncLevelRowState();
@@ -905,8 +992,8 @@ document.addEventListener('DOMContentLoaded', () => {
     updateResetFieldsButtonLabel();
     updatePromptAndPreview(false);
     saveSettingsToStorage();
-    updateSaveIndicator('기본값 초기화 완료');
-    showToast('AI 프롬프트 생성기 설정이 기본값으로 초기화되었습니다.');
+    updateSaveIndicator(i18n.t('common.resetDone'));
+    showToast(i18n.t('prompt.toast.resetAll'));
   }
 
   function setMode(mode, shouldUpdate = true) {
@@ -966,18 +1053,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const editorFields = editorData && Array.isArray(editorData.fields) ? editorData.fields : [];
     if (editorFields.length === 0) {
-      showToast('카드 서식 에디터에 저장된 필드가 없습니다. 에디터에서 먼저 필드를 설정해주세요.');
+      showToast(i18n.t('prompt.toast.editorFieldsEmpty'));
       return;
     }
 
     const langId = promptLangSelect.value;
     fields = editorFields.map((f, i) => ({
       id: `f_${Date.now()}_${i}`,
-      name: toPromptColumnName(f.name, langId) || `필드 ${i + 1}`
+      name: toPromptColumnName(f.name, langId) || i18n.t('prompt.fields.defaultName', { n: i + 1 })
     }));
     renderFields();
     updatePromptAndPreview();
-    showToast(`카드 에디터의 필드 ${fields.length}개를 같은 순서로 불러왔습니다. 열 이름이 내용을 잘 설명하는지 확인하세요.`);
+    showToast(i18n.t('prompt.toast.editorFieldsImported', { count: fields.length }));
   }
 
   // 9. 컨트롤 이벤트 바인딩
@@ -997,6 +1084,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sourceTextInput.addEventListener('input', () => updatePromptAndPreview());
     sourceTopicInput.addEventListener('input', () => updatePromptAndPreview());
+    if (sourceLangModeSelect) {
+      sourceLangModeSelect.addEventListener('change', () => updatePromptAndPreview());
+    }
 
     levelFilterModeSelect.addEventListener('change', () => {
       syncLevelRowState();
@@ -1049,12 +1139,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const newIdx = fields.length + 1;
       const newField = {
         id: `f_${Date.now()}_${newIdx}`,
-        name: `필드 ${newIdx}`
+        name: i18n.t('prompt.fields.defaultName', { n: newIdx })
       };
       fields.push(newField);
       renderFields();
       updatePromptAndPreview();
-      showToast(`${newIdx}번째 필드가 추가되었습니다.`);
+      showToast(i18n.t('prompt.toast.fieldAddedIndex', { n: newIdx }));
 
       setTimeout(() => {
         const lastRow = promptFieldList.lastElementChild;
@@ -1074,7 +1164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const langId = promptLangSelect.value;
         const preset = EXAM_PRESETS[langId] || EXAM_PRESETS['default'];
         const langObj = (window.LANGUAGES_DATA || []).find(l => l.id === langId);
-        const langName = langObj ? langObj.name : '선택 언어';
+        const langName = langObj ? i18n.langName(langObj) : i18n.t('prompt.fields.selectedLangFallback');
 
         fields = getDefaultFieldNames(langId).map((name, i) => ({
           id: `f_${Date.now()}_${i}`,
@@ -1082,7 +1172,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
         renderFields();
         updatePromptAndPreview();
-        showToast(`'${langName}' 기본 필드 구성으로 복원되었습니다.`);
+        showToast(i18n.t('prompt.toast.fieldsReset', { lang: langName }));
       });
     }
 
@@ -1093,7 +1183,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 복사 버튼
     btnCopyPrompt.addEventListener('click', () => {
-      copyToClipboard(promptOutputText.textContent, '프롬프트가');
+      copyToClipboard(promptOutputText.textContent, i18n.t('prompt.copyLabel'));
     });
 
     // AI 서비스 열기 버튼: 프롬프트를 자동 복사하고, 지원하는 서비스는 입력창에 미리 채워서 열기
@@ -1108,7 +1198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const prompt = promptOutputText.textContent;
         const encoded = encodeURIComponent(prompt);
         el.href = (prefill && encoded.length <= PREFILL_MAX_LENGTH) ? prefill + encoded : base;
-        copyToClipboard(prompt, '프롬프트가');
+        copyToClipboard(prompt, i18n.t('prompt.copyLabel'));
       });
     });
 
@@ -1183,7 +1273,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function copyToClipboard(text, label) {
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(text).then(() => {
-        showToast(`${label} 클립보드에 복사되었습니다!`);
+        showToast(i18n.t('common.copied', { label }));
       }).catch(() => fallbackCopy(text, label));
     } else {
       fallbackCopy(text, label);
@@ -1200,9 +1290,9 @@ document.addEventListener('DOMContentLoaded', () => {
     textarea.select();
     try {
       document.execCommand('copy');
-      showToast(`${label} 클립보드에 복사되었습니다!`);
+      showToast(i18n.t('common.copied', { label }));
     } catch (err) {
-      showToast('복사에 실패했습니다. 수동으로 드래그하여 복사해주세요.');
+      showToast(i18n.t('common.copyFailed'));
     }
     document.body.removeChild(textarea);
   }

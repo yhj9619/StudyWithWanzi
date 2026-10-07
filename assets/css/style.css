@@ -107,6 +107,37 @@ body {
   flex-wrap: wrap;
 }
 
+/* 화면 언어 전환 버튼 (한국어 / 中文) */
+.ui-lang-switcher {
+  display: inline-flex;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  padding: 2px;
+}
+
+.ui-lang-btn {
+  background: none;
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ui-lang-btn:hover {
+  color: var(--primary);
+}
+
+.ui-lang-btn.active {
+  background: #ffffff;
+  color: var(--primary);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
 .save-status-badge {
   font-size: 0.75rem;
   font-weight: 500;
@@ -2083,6 +2114,47 @@ body {
   font-size: 0.88rem;
   color: #1e3a8a;
   line-height: 1.5;
+}
+
+/* 프롬프트 생성기: 본문 언어 감지 안내 */
+.source-lang-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-top: 0.5rem;
+}
+
+.source-lang-notice {
+  font-size: 0.78rem;
+  color: #1e40af;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.6rem;
+}
+
+.source-lang-notice.is-korean {
+  color: #92400e;
+  background: #fffbeb;
+  border-color: #fcd34d;
+}
+
+.source-lang-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: auto;
+}
+
+.source-lang-control .sub-label {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.source-lang-control .small-select {
+  width: auto;
 }
 
 .prompt-hero-icon {

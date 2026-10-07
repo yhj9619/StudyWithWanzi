@@ -1,0 +1,30 @@
+// 공용 문구 (한국어 · 기본 언어)
+i18nRegister('ko', {
+  'common.uiLanguage': '화면 언어',
+  'common.backToHub': '◀ Study with Wanzi',
+  'common.backToHubTitle': 'Study with Wanzi 메인 메뉴로 돌아가기',
+  'common.navGuide': '📖 사용 가이드',
+  'common.navGuideTitle': 'Anki 완벽 사용 가이드로 이동',
+  'common.navEditor': '⚡ 카드 서식 에디터',
+  'common.navEditorTitle': 'Anki 카드 서식 에디터로 이동',
+  'common.navPrompt': '🤖 AI 프롬프트 생성기',
+  'common.navPromptTitle': 'Anki AI 프롬프트 생성기로 이동',
+  'common.autoSaved': '✓ 자동 저장됨',
+  'common.autoSavedTitle': '모든 변경사항이 브라우저 로컬 저장소(localStorage)에 실시간 자동 저장됩니다',
+  'common.resetAll': '🔄 설정 초기화',
+  'common.resetAllTitle': '모든 설정을 처음 기본값으로 되돌립니다',
+  'common.resetDone': '기본값 초기화 완료',
+  'common.copied': '{label} 클립보드에 복사되었습니다!',
+  'common.copyFailed': '복사에 실패했습니다. 수동으로 드래그하여 복사해주세요.',
+  'common.footer': 'Study with Wanzi © 2026. Made with care for language learners.',
+
+  // 언어 검색 콤보박스
+  'combobox.placeholder': '언어 검색 (예: 스페인어, ㅅㅍㅇ, spanish, es...)',
+  'combobox.clearTitle': '검색어 지우기',
+  'combobox.toggleTitle': '언어 목록 펼치기/접기',
+  'combobox.count': '총 {count}개 언어',
+  'combobox.groupRecent': '최근 선택',
+  'combobox.groupMajor': '주요 언어',
+  'combobox.groupOthers': '그 외 언어 (가나다순)',
+  'combobox.empty': "'{query}' 검색 결과가 없습니다.",
+});

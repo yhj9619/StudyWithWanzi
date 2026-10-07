@@ -1,5 +1,7 @@
 // Anki 카드 스크립트 에디터 - 메인 애플리케이션 로직
 document.addEventListener('DOMContentLoaded', () => {
+  const t = (key, params) => i18n.t(key, params);
+
   // DOM Elements
   const languageSelect = document.getElementById('languageSelect');
   const langSelectContainer = document.getElementById('langSelectContainer');
@@ -24,9 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 보조 사전 (한국어 뜻 찾아보기용) 프리셋 - 링크 URL은 wikiUrlInput에 보관 (기존 저장값 호환)
   const SUB_DICT_PRESETS = {
-    ko: { name: '국어사전', icon: '📘', url: 'https://ko.dict.naver.com/#/search?query=' },
-    wiki: { name: '위키', icon: '📖', url: DEFAULT_WIKI_URL },
-    custom: { name: '보조 사전', icon: '🔎', url: '' },
+    ko: { name: t('editor.subDict.ko'), icon: '📘', url: 'https://ko.dict.naver.com/#/search?query=' },
+    wiki: { name: t('editor.subDict.wiki'), icon: '📖', url: DEFAULT_WIKI_URL },
+    custom: { name: t('editor.subDict.custom'), icon: '🔎', url: '' },
   };
   const DEFAULT_SUB_DICT = 'ko';
 
@@ -69,39 +71,39 @@ document.addEventListener('DOMContentLoaded', () => {
   // Font Presets Definition
   const FONT_PRESETS = {
     'system': {
-      name: '시스템 기본 고딕',
+      name: t('editor.font.system'),
       css: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif'
     },
     'noto-sans-kr': {
-      name: '본고딕 (Noto Sans KR)',
+      name: t('editor.font.notoSansKr'),
       css: '"Noto Sans KR", -apple-system, BlinkMacSystemFont, sans-serif'
     },
     'noto-serif-kr': {
-      name: '명조체 (Noto Serif KR)',
+      name: t('editor.font.notoSerifKr'),
       css: '"Noto Serif KR", "Nanum Myeongjo", "Batang", serif'
     },
     'nanum-gothic': {
-      name: '나눔고딕',
+      name: t('editor.font.nanumGothic'),
       css: '"Nanum Gothic", "Malgun Gothic", sans-serif'
     },
     'inter': {
-      name: 'Inter (영문 고딕)',
+      name: t('editor.font.inter'),
       css: '"Inter", "Roboto", -apple-system, sans-serif'
     },
     'noto-sans-jp': {
-      name: 'Noto Sans JP (일본어)',
+      name: t('editor.font.notoSansJp'),
       css: '"Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif'
     },
     'noto-sans-sc': {
-      name: 'Noto Sans SC (중국어 간체)',
+      name: t('editor.font.notoSansSc'),
       css: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif'
     },
     'monospace': {
-      name: '고정폭 (코딩체)',
+      name: t('editor.font.monospace'),
       css: 'Consolas, Menlo, Monaco, "Courier New", monospace'
     },
     'cursive': {
-      name: '손글씨 (필기체)',
+      name: t('editor.font.cursive'),
       css: 'Caveat, "Nanum Pen Script", cursive, sans-serif'
     }
   };
@@ -268,12 +270,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const currentF3Val = f3Input.value.trim();
 
       if (lang.id === 'zh') {
-        f3Input.placeholder = '예: pinyin, 발음';
+        f3Input.placeholder = t('editor.field.namePlaceholderPinyin');
         if (!currentF3Val || currentF3Val === 'Example' || currentF3Val === 'example' || currentF3Val === 'sample') {
           f3Input.value = 'pinyin';
         }
       } else {
-        f3Input.placeholder = '예: Example, sample, 예문';
+        f3Input.placeholder = t('editor.field.namePlaceholderExample');
         if (!currentF3Val || currentF3Val === 'pinyin') {
           f3Input.value = 'Example';
         }
@@ -478,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!f) return;
 
     const fName = f.nameInput.value.trim() || `Field${selectedFieldIndex + 1}`;
-    inspectorFieldName.textContent = `${selectedFieldIndex + 1}번째 필드 [${fName}]`;
+    inspectorFieldName.textContent = t('editor.field.numberedName', { num: selectedFieldIndex + 1, name: fName });
 
     const isVisible = currentPreviewSide === 'front'
       ? f.showFront.checked
@@ -677,43 +679,43 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="field-badge field-badge-secondary"></div>
         <div class="field-header-actions">
           <div class="field-visibility-toggles">
-            <label class="mini-toggle" title="앞면 카드 노출 여부">
+            <label class="mini-toggle" title="${t('editor.field.showFrontTitle')}">
               <input type="checkbox" class="f-show-front"${showFront ? ' checked' : ''}>
-              <span>앞면 표시</span>
+              <span>${t('editor.field.showFront')}</span>
             </label>
-            <label class="mini-toggle" title="뒷면 카드 노출 여부">
+            <label class="mini-toggle" title="${t('editor.field.showBackTitle')}">
               <input type="checkbox" class="f-show-back"${showBack ? ' checked' : ''}>
-              <span>뒷면 표시</span>
+              <span>${t('editor.field.showBack')}</span>
             </label>
-            <label class="mini-toggle mini-toggle-link" title="외국어사전 링크 연결">
+            <label class="mini-toggle mini-toggle-link" title="${t('editor.field.dictLinkTitle')}">
               <input type="checkbox" class="f-dict-link"${hasDictLink ? ' checked' : ''}>
-              <span>🌐 외국어사전</span>
+              <span>${t('editor.field.dictLink')}</span>
             </label>
-            <label class="mini-toggle mini-toggle-link" title="보조 사전 링크 연결">
+            <label class="mini-toggle mini-toggle-link" title="${t('editor.field.subDictLinkTitle')}">
               <input type="checkbox" class="f-wiki-link"${hasWikiLink ? ' checked' : ''}>
               <span class="sub-dict-label">${getSubDictLabel()}</span>
             </label>
           </div>
-          <button type="button" class="btn-delete-field" title="이 필드 삭제">
-            🗑️ 삭제
+          <button type="button" class="btn-delete-field" title="${t('editor.field.deleteTitle')}">
+            ${t('editor.field.delete')}
           </button>
         </div>
       </div>
 
       <div class="grid-2-col">
         <div class="form-group">
-          <label class="form-label">필드명 (Anki와 일치해야 함)</label>
-          <input type="text" class="form-input f-name" value="${escapeHtml(name)}" placeholder="예: Example, pinyin, 예문">
+          <label class="form-label">${t('editor.field.nameLabel')}</label>
+          <input type="text" class="form-input f-name" value="${escapeHtml(name)}" placeholder="${t('editor.field.namePlaceholderOptional')}">
         </div>
         <div class="form-group">
-          <label class="form-label">미리보기 예시값</label>
-          <input type="text" class="form-input f-sample" value="${escapeHtml(sample)}" placeholder="예시 내용을 입력하세요">
+          <label class="form-label">${t('editor.field.sampleLabel')}</label>
+          <input type="text" class="form-input f-sample" value="${escapeHtml(sample)}" placeholder="${t('editor.field.samplePlaceholder')}">
         </div>
       </div>
 
       <div class="style-controls-row">
         <div class="control-item">
-          <label class="sub-label">글씨 크기: <span class="f-size-val">${size}</span>px</label>
+          <label class="sub-label">${t('editor.style.sizeLabel')} <span class="f-size-val">${size}</span>px</label>
           <div class="slider-with-number">
             <input type="range" min="14" max="64" value="${size}" class="form-range f-size">
             <input type="number" min="14" max="80" value="${size}" class="num-input f-size-num">
@@ -721,34 +723,34 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <div class="control-item">
-          <label class="sub-label">글씨 굵기</label>
+          <label class="sub-label">${t('editor.style.weightLabel')}</label>
           <select class="form-select small-select f-weight">
-            <option value="normal"${weight === 'normal' ? ' selected' : ''}>보통 (normal)</option>
-            <option value="bold"${weight === 'bold' ? ' selected' : ''}>굵게 (bold)</option>
-            <option value="600"${weight === '600' ? ' selected' : ''}>중간 굵게 (600)</option>
+            <option value="normal"${weight === 'normal' ? ' selected' : ''}>${t('editor.style.weightNormal')}</option>
+            <option value="bold"${weight === 'bold' ? ' selected' : ''}>${t('editor.style.weightBold')}</option>
+            <option value="600"${weight === '600' ? ' selected' : ''}>${t('editor.style.weight600')}</option>
           </select>
         </div>
 
         <div class="control-item">
-          <label class="sub-label">글꼴 (폰트)</label>
+          <label class="sub-label">${t('editor.style.fontLabel')}</label>
           <select class="form-select small-select f-font">
-            <option value="inherit"${font === 'inherit' ? ' selected' : ''}>(기본 글꼴 따름)</option>
-            <option value="system"${font === 'system' ? ' selected' : ''}>시스템 기본 고딕</option>
-            <option value="noto-sans-kr"${font === 'noto-sans-kr' ? ' selected' : ''}>본고딕 (Noto Sans KR)</option>
-            <option value="noto-serif-kr"${font === 'noto-serif-kr' ? ' selected' : ''}>명조체 (Noto Serif KR)</option>
-            <option value="nanum-gothic"${font === 'nanum-gothic' ? ' selected' : ''}>나눔고딕</option>
-            <option value="inter"${font === 'inter' ? ' selected' : ''}>Inter (영문 고딕)</option>
-            <option value="noto-sans-jp"${font === 'noto-sans-jp' ? ' selected' : ''}>Noto Sans JP (일본어)</option>
-            <option value="noto-sans-sc"${font === 'noto-sans-sc' ? ' selected' : ''}>Noto Sans SC (중국어)</option>
-            <option value="monospace"${font === 'monospace' ? ' selected' : ''}>고정폭 (코딩체)</option>
-            <option value="cursive"${font === 'cursive' ? ' selected' : ''}>손글씨 (필기체)</option>
-            <option value="custom"${font === 'custom' ? ' selected' : ''}>직접 입력...</option>
+            <option value="inherit"${font === 'inherit' ? ' selected' : ''}>${t('editor.font.inherit')}</option>
+            <option value="system"${font === 'system' ? ' selected' : ''}>${t('editor.font.system')}</option>
+            <option value="noto-sans-kr"${font === 'noto-sans-kr' ? ' selected' : ''}>${t('editor.font.notoSansKr')}</option>
+            <option value="noto-serif-kr"${font === 'noto-serif-kr' ? ' selected' : ''}>${t('editor.font.notoSerifKr')}</option>
+            <option value="nanum-gothic"${font === 'nanum-gothic' ? ' selected' : ''}>${t('editor.font.nanumGothic')}</option>
+            <option value="inter"${font === 'inter' ? ' selected' : ''}>${t('editor.font.inter')}</option>
+            <option value="noto-sans-jp"${font === 'noto-sans-jp' ? ' selected' : ''}>${t('editor.font.notoSansJp')}</option>
+            <option value="noto-sans-sc"${font === 'noto-sans-sc' ? ' selected' : ''}>${t('editor.font.notoSansSc')}</option>
+            <option value="monospace"${font === 'monospace' ? ' selected' : ''}>${t('editor.font.monospace')}</option>
+            <option value="cursive"${font === 'cursive' ? ' selected' : ''}>${t('editor.font.cursive')}</option>
+            <option value="custom"${font === 'custom' ? ' selected' : ''}>${t('editor.font.custom')}</option>
           </select>
-          <input type="text" class="form-input font-custom-input f-font-custom${font === 'custom' ? '' : ' hidden'}" value="${escapeHtml(fontCustom || '')}" placeholder="폰트명 입력 (예: Pretendard)">
+          <input type="text" class="form-input font-custom-input f-font-custom${font === 'custom' ? '' : ' hidden'}" value="${escapeHtml(fontCustom || '')}" placeholder="${t('editor.style.fontCustomPlaceholder')}">
         </div>
 
         <div class="control-item">
-          <label class="sub-label">색상</label>
+          <label class="sub-label">${t('editor.style.colorLabel')}</label>
           <div class="color-picker-group">
             <input type="color" value="${color}" class="form-color f-color">
             <input type="text" value="${color}" class="color-hex-input f-color-text" maxlength="7">
@@ -756,12 +758,12 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
       <div class="preset-colors">
-        <span class="preset-label">색상 프리셋:</span>
-        <button type="button" class="preset-dot" data-color="#5f6368" style="background:#5f6368;" title="뮤트 그레이"></button>
-        <button type="button" class="preset-dot" data-color="#202124" style="background:#202124;" title="다크 그레이"></button>
-        <button type="button" class="preset-dot" data-color="#1a73e8" style="background:#1a73e8;" title="구글 블루"></button>
-        <button type="button" class="preset-dot" data-color="#0d904f" style="background:#0d904f;" title="에메랄드"></button>
-        <button type="button" class="preset-dot" data-color="#e37400" style="background:#e37400;" title="오렌지"></button>
+        <span class="preset-label">${t('editor.style.presetLabel')}</span>
+        <button type="button" class="preset-dot" data-color="#5f6368" style="background:#5f6368;" title="${t('editor.color.muteGray')}"></button>
+        <button type="button" class="preset-dot" data-color="#202124" style="background:#202124;" title="${t('editor.color.darkGray')}"></button>
+        <button type="button" class="preset-dot" data-color="#1a73e8" style="background:#1a73e8;" title="${t('editor.color.googleBlue')}"></button>
+        <button type="button" class="preset-dot" data-color="#0d904f" style="background:#0d904f;" title="${t('editor.color.emerald')}"></button>
+        <button type="button" class="preset-dot" data-color="#e37400" style="background:#e37400;" title="${t('editor.color.orange')}"></button>
       </div>
     `;
 
@@ -808,8 +810,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const rawName = fObj.nameInput.value.trim();
     const promptText = rawName
-      ? `'${rawName}' 필드를 정말 삭제하시겠습니까?`
-      : `${idx + 1}번째 필드를 정말 삭제하시겠습니까?`;
+      ? t('editor.confirm.deleteNamed', { name: rawName })
+      : t('editor.confirm.deleteNumbered', { num: idx + 1 });
 
     if (!confirm(promptText)) {
       return;
@@ -820,20 +822,20 @@ document.addEventListener('DOMContentLoaded', () => {
     updateFieldBadges();
     updateDictFieldChecklist();
     updateAll(true);
-    showToast('선택한 필드가 삭제되었습니다.');
+    showToast(t('editor.toast.fieldDeleted'));
   }
 
   // 언어별 추천 필드 빠른 추가 칩 데이터 생성
   function getEditorQuickChipsForLanguage(langId) {
     const list = window.LANGUAGES_DATA || LANGUAGES_DATA;
     const langObj = list.find(l => l.id === langId) || {};
-    const langName = langObj.name || '해당 언어';
+    const langName = i18n.langName(langObj) || t('editor.chips.langFallback');
 
     if (langId === 'ja') {
       return [
         {
-          label: '+ 후리가나/발음',
-          name: '후리가나/발음',
+          label: t('editor.chips.furiganaLabel'),
+          name: t('editor.chips.furiganaName'),
           sample: 'さくら',
           size: 18,
           weight: 'normal',
@@ -842,8 +844,8 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 예문(원문)',
-          name: '예문',
+          label: t('editor.chips.exampleLabel'),
+          name: t('editor.chips.exampleName'),
           sample: (langObj.sample && langObj.sample.field3) || '公園に桜の花が綺麗に咲いています。',
           size: 20,
           weight: 'normal',
@@ -852,9 +854,9 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 예문 해석',
-          name: '예문 해석',
-          sample: '공원에 벚꽃이 아름답게 피어 있습니다.',
+          label: t('editor.chips.exampleTranslationLabel'),
+          name: t('editor.chips.exampleTranslationName'),
+          sample: t('editor.chips.sampleJaExampleTranslation'),
           size: 16,
           weight: 'normal',
           color: '#70757a',
@@ -862,9 +864,9 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 품사',
-          name: '품사',
-          sample: '[명사]',
+          label: t('editor.chips.partOfSpeechLabel'),
+          name: t('editor.chips.partOfSpeechName'),
+          sample: t('editor.chips.sampleNoun'),
           size: 15,
           weight: '600',
           color: '#1a73e8',
@@ -872,8 +874,8 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 유의어/반의어',
-          name: '유의어/반의어',
+          label: t('editor.chips.synonymsLabel'),
+          name: t('editor.chips.synonymsName'),
           sample: '同: 桜花 / 反: -',
           size: 15,
           weight: 'normal',
@@ -882,8 +884,8 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 오디오',
-          name: '오디오',
+          label: t('editor.chips.audioLabel'),
+          name: t('editor.chips.audioName'),
           sample: '[sound:sakura.mp3]',
           size: 15,
           weight: 'normal',
@@ -892,9 +894,9 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 학습 메모',
-          name: '메모',
-          sample: '봄철 회화 필수 표현',
+          label: t('editor.chips.memoLabel'),
+          name: t('editor.chips.memoName'),
+          sample: t('editor.chips.sampleJaMemo'),
           size: 15,
           weight: 'normal',
           color: '#70757a',
@@ -905,8 +907,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (langId === 'zh') {
       return [
         {
-          label: '+ 병음 (pinyin)',
-          name: '병음',
+          label: t('editor.chips.pinyinLabel'),
+          name: t('editor.chips.pinyinName'),
           sample: (langObj.sample && langObj.sample.field3) || 'nǐ hǎo',
           size: 18,
           weight: 'normal',
@@ -915,8 +917,8 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 예문(원문)',
-          name: '예문',
+          label: t('editor.chips.exampleLabel'),
+          name: t('editor.chips.exampleName'),
           sample: '你好，很高兴认识你。',
           size: 20,
           weight: 'normal',
@@ -925,9 +927,9 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 예문 해석',
-          name: '예문 해석',
-          sample: '안녕하세요, 만나서 반갑습니다.',
+          label: t('editor.chips.exampleTranslationLabel'),
+          name: t('editor.chips.exampleTranslationName'),
+          sample: t('editor.chips.sampleZhExampleTranslation'),
           size: 16,
           weight: 'normal',
           color: '#70757a',
@@ -935,8 +937,8 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 예문 병음',
-          name: '예문 병음',
+          label: t('editor.chips.examplePinyinLabel'),
+          name: t('editor.chips.examplePinyinName'),
           sample: 'Nǐ hǎo, hěn gāoxìng rènshi nǐ.',
           size: 16,
           weight: 'normal',
@@ -945,9 +947,9 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 품사',
-          name: '품사',
-          sample: '[인사/감탄사]',
+          label: t('editor.chips.partOfSpeechLabel'),
+          name: t('editor.chips.partOfSpeechName'),
+          sample: t('editor.chips.sampleZhPartOfSpeech'),
           size: 15,
           weight: '600',
           color: '#1a73e8',
@@ -955,8 +957,8 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 유의어/반의어',
-          name: '유의어/반의어',
+          label: t('editor.chips.synonymsLabel'),
+          name: t('editor.chips.synonymsName'),
           sample: '同: 问好 / 反: 再见',
           size: 15,
           weight: 'normal',
@@ -965,8 +967,8 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 오디오',
-          name: '오디오',
+          label: t('editor.chips.audioLabel'),
+          name: t('editor.chips.audioName'),
           sample: '[sound:nihao.mp3]',
           size: 15,
           weight: 'normal',
@@ -975,9 +977,9 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 학습 메모',
-          name: '메모',
-          sample: '기본 인사말',
+          label: t('editor.chips.memoLabel'),
+          name: t('editor.chips.memoName'),
+          sample: t('editor.chips.sampleZhMemo'),
           size: 15,
           weight: 'normal',
           color: '#70757a',
@@ -988,8 +990,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (langId === 'en') {
       return [
         {
-          label: '+ 예문(원문)',
-          name: '예문',
+          label: t('editor.chips.exampleLabel'),
+          name: t('editor.chips.exampleName'),
           sample: (langObj.sample && langObj.sample.field3) || 'I eat an apple every morning.',
           size: 20,
           weight: 'normal',
@@ -998,9 +1000,9 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 예문 해석',
-          name: '예문 해석',
-          sample: '나는 매일 아침 사과를 먹는다.',
+          label: t('editor.chips.exampleTranslationLabel'),
+          name: t('editor.chips.exampleTranslationName'),
+          sample: t('editor.chips.sampleEnExampleTranslation'),
           size: 16,
           weight: 'normal',
           color: '#70757a',
@@ -1008,8 +1010,8 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 발음기호',
-          name: '발음기호',
+          label: t('editor.chips.phoneticLabel'),
+          name: t('editor.chips.phoneticName'),
           sample: '[ˈæpl]',
           size: 18,
           weight: 'normal',
@@ -1018,9 +1020,9 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 품사',
-          name: '품사',
-          sample: '[명사]',
+          label: t('editor.chips.partOfSpeechLabel'),
+          name: t('editor.chips.partOfSpeechName'),
+          sample: t('editor.chips.sampleNoun'),
           size: 15,
           weight: '600',
           color: '#1a73e8',
@@ -1028,8 +1030,8 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 유의어/반의어',
-          name: '유의어/반의어',
+          label: t('editor.chips.synonymsLabel'),
+          name: t('editor.chips.synonymsName'),
           sample: 'Syn: - / Ant: -',
           size: 15,
           weight: 'normal',
@@ -1038,8 +1040,8 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 오디오',
-          name: '오디오',
+          label: t('editor.chips.audioLabel'),
+          name: t('editor.chips.audioName'),
           sample: '[sound:apple.mp3]',
           size: 15,
           weight: 'normal',
@@ -1048,9 +1050,9 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 학습 메모',
-          name: '메모',
-          sample: '자주 쓰이는 기본 어휘',
+          label: t('editor.chips.memoLabel'),
+          name: t('editor.chips.memoName'),
+          sample: t('editor.chips.sampleEnMemo'),
           size: 15,
           weight: 'normal',
           color: '#70757a',
@@ -1061,9 +1063,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       return [
         {
-          label: '+ 예문(원문)',
-          name: '예문',
-          sample: (langObj.sample && langObj.sample.field3) || `${langName} 예문 문장입니다.`,
+          label: t('editor.chips.exampleLabel'),
+          name: t('editor.chips.exampleName'),
+          sample: (langObj.sample && langObj.sample.field3) || t('editor.chips.sampleExample', { lang: langName }),
           size: 20,
           weight: 'normal',
           color: '#5f6368',
@@ -1071,9 +1073,9 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 예문 해석',
-          name: '예문 해석',
-          sample: '예문 해석 및 번역 내용',
+          label: t('editor.chips.exampleTranslationLabel'),
+          name: t('editor.chips.exampleTranslationName'),
+          sample: t('editor.chips.sampleExampleTranslation'),
           size: 16,
           weight: 'normal',
           color: '#70757a',
@@ -1081,9 +1083,9 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 발음/표기',
-          name: '발음/표기',
-          sample: '발음 표기',
+          label: t('editor.chips.pronunciationLabel'),
+          name: t('editor.chips.pronunciationName'),
+          sample: t('editor.chips.samplePronunciation'),
           size: 18,
           weight: 'normal',
           color: '#70757a',
@@ -1091,9 +1093,9 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 품사',
-          name: '품사',
-          sample: '[품사]',
+          label: t('editor.chips.partOfSpeechLabel'),
+          name: t('editor.chips.partOfSpeechName'),
+          sample: t('editor.chips.samplePartOfSpeech'),
           size: 15,
           weight: '600',
           color: '#1a73e8',
@@ -1101,9 +1103,9 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 유의어/반의어',
-          name: '유의어/반의어',
-          sample: '유의어 / 반의어',
+          label: t('editor.chips.synonymsLabel'),
+          name: t('editor.chips.synonymsName'),
+          sample: t('editor.chips.sampleSynonyms'),
           size: 15,
           weight: 'normal',
           color: '#5f6368',
@@ -1111,8 +1113,8 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 오디오',
-          name: '오디오',
+          label: t('editor.chips.audioLabel'),
+          name: t('editor.chips.audioName'),
           sample: `[sound:${langId}_audio.mp3]`,
           size: 15,
           weight: 'normal',
@@ -1121,9 +1123,9 @@ document.addEventListener('DOMContentLoaded', () => {
           showBack: true
         },
         {
-          label: '+ 학습 메모',
-          name: '메모',
-          sample: '학습 메모 및 팁',
+          label: t('editor.chips.memoLabel'),
+          name: t('editor.chips.memoName'),
+          sample: t('editor.chips.sampleMemo'),
           size: 15,
           weight: 'normal',
           color: '#70757a',
@@ -1142,7 +1144,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const langObj = getSelectedLanguage();
     if (badge) {
-      badge.textContent = `(${langObj.name} 추천)`;
+      badge.textContent = t('editor.chips.langBadge', { lang: i18n.langName(langObj) });
     }
 
     container.innerHTML = '';
@@ -1153,7 +1155,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.type = 'button';
       btn.className = 'chip-btn';
       btn.textContent = chip.label;
-      btn.title = `'${chip.name}' 필드를 카드 서식에 즉시 추가합니다`;
+      btn.title = t('editor.chips.chipTitle', { name: chip.name });
       btn.addEventListener('click', () => {
         addOptionalField({
           name: chip.name,
@@ -1165,7 +1167,7 @@ document.addEventListener('DOMContentLoaded', () => {
           color: chip.color,
           hasDictLink: false
         }, true);
-        showToast(`'${chip.name}' 필드가 추가되었습니다.`);
+        showToast(t('editor.toast.fieldAdded', { name: chip.name }));
       });
       container.appendChild(btn);
     });
@@ -1178,18 +1180,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const fNum = idx + 1;
       const fName = f.nameInput.value.trim() || (idx === 0 ? 'Front' : (idx === 1 ? 'Back' : `Field${fNum}`));
 
-      let sideText = '미노출';
+      let sideText = t('editor.field.sideNone');
       if (f.showFront.checked && f.showBack.checked) {
-        sideText = '앞·뒷면';
+        sideText = t('editor.field.sideBoth');
       } else if (f.showFront.checked) {
-        sideText = '앞면';
+        sideText = t('editor.field.sideFront');
       } else if (f.showBack.checked) {
-        sideText = '뒷면';
+        sideText = t('editor.field.sideBack');
       }
 
-      let badgeText = `${fNum}번째 필드 (${sideText} / ${fName})`;
+      let badgeText = t('editor.field.badge', { num: fNum, side: sideText, name: fName });
 
-      if (f.hasDictLink) badgeText += ' · 🌐 외국어사전';
+      if (f.hasDictLink) badgeText += ` · ${t('editor.field.dictLink')}`;
       if (f.hasWikiLink) badgeText += ` · ${getSubDictLabel()}`;
       if (f.hasDictLink || f.hasWikiLink) {
         f.badgeEl.className = 'field-badge field-badge-primary';
@@ -1215,7 +1217,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fields.forEach((f, idx) => {
       const fNum = idx + 1;
-      const fName = f.nameInput.value.trim() || `필드 ${fNum}`;
+      const fName = f.nameInput.value.trim() || t('editor.field.fallbackName', { num: fNum });
 
       // 상단 헤더 미니 토글도 동기화
       if (f.dictLinkCheck) {
@@ -1229,16 +1231,16 @@ document.addEventListener('DOMContentLoaded', () => {
       row.className = 'dict-target-item dict-target-row';
 
       const span = document.createElement('span');
-      const recTag = (idx === 1) ? ' <span style="color: var(--primary); font-size: 0.8em; font-weight: 700;">(기본 권장)</span>' : '';
+      const recTag = (idx === 1) ? ' <span style="color: var(--primary); font-size: 0.8em; font-weight: 700;">' + t('editor.dictList.recommended') + '</span>' : '';
       span.className = 'dict-target-name';
-      span.innerHTML = `<strong>${fNum}번째 필드 [${escapeHtml(fName)}]</strong>${recTag}`;
+      span.innerHTML = `<strong>${t('editor.field.numberedName', { num: fNum, name: escapeHtml(fName) })}</strong>${recTag}`;
       row.appendChild(span);
 
       const options = document.createElement('div');
       options.className = 'dict-target-options';
 
       [
-        { type: 'dict', text: '🌐 외국어사전', checked: Boolean(f.hasDictLink) },
+        { type: 'dict', text: t('editor.field.dictLink'), checked: Boolean(f.hasDictLink) },
         { type: 'wiki', text: getSubDictLabel(), checked: Boolean(f.hasWikiLink) },
       ].forEach(opt => {
         const label = document.createElement('label');
@@ -1418,7 +1420,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (addFieldBtn) {
       addFieldBtn.addEventListener('click', () => {
         addOptionalField(null, true);
-        showToast(`${fields.length}번째 필드가 추가되었습니다.`);
+        showToast(t('editor.toast.fieldAddedNumbered', { num: fields.length }));
       });
     }
 
@@ -1456,7 +1458,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ankiCardWrapper.classList.toggle('dark-mode');
       const isDark = ankiCardWrapper.classList.contains('dark-mode');
       toggleDarkModeBtn.textContent = isDark ? '☀️' : '🌙';
-      toggleDarkModeBtn.title = isDark ? '라이트 모드로 전환' : '다크 모드로 전환';
+      toggleDarkModeBtn.title = isDark ? t('editor.preview.toLightMode') : t('editor.preview.toDarkMode');
       renderPreview();
     });
 
@@ -1476,9 +1478,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 복사 버튼
-    copyFrontBtn.addEventListener('click', () => copyToClipboard(codeFrontText.textContent, '앞면 서식이'));
-    copyBackBtn.addEventListener('click', () => copyToClipboard(codeBackText.textContent, '뒷면 서식이'));
-    copyCssBtn.addEventListener('click', () => copyToClipboard(codeCssText.textContent, '스타일(CSS) 서식이'));
+    copyFrontBtn.addEventListener('click', () => copyToClipboard(codeFrontText.textContent, t('editor.code.copyFrontLabel')));
+    copyBackBtn.addEventListener('click', () => copyToClipboard(codeBackText.textContent, t('editor.code.copyBackLabel')));
+    copyCssBtn.addEventListener('click', () => copyToClipboard(codeCssText.textContent, t('editor.code.copyCssLabel')));
 
     // 모바일 화면 전환 로직 (<= 768px 모바일 전용 탭 네비게이션 & 좌우 전환 플로팅 버튼)
     const btnMobileEditTab = document.getElementById('btnMobileEditTab');
@@ -1696,11 +1698,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function buildLinkButtons(field, isForPreview, fieldName, sampleValue) {
     const linkTargets = [];
     if (field.hasDictLink) {
-      linkTargets.push({ cls: 'dict-btn', icon: '🌐', title: '외국어사전 검색', url: dictUrlInput.value.trim() });
+      linkTargets.push({ cls: 'dict-btn', icon: '🌐', title: t('editor.link.dictTitle'), url: dictUrlInput.value.trim() });
     }
     if (field.hasWikiLink) {
       const sub = getSubDict();
-      linkTargets.push({ cls: 'subdict-btn', icon: sub.icon, title: `${sub.name} 검색`, url: wikiUrlInput ? wikiUrlInput.value.trim() : sub.url });
+      linkTargets.push({ cls: 'subdict-btn', icon: sub.icon, title: t('editor.link.subDictTitle', { name: sub.name }), url: wikiUrlInput ? wikiUrlInput.value.trim() : sub.url });
     }
 
     if (linkTargets.length === 0) return '';
@@ -1856,7 +1858,7 @@ a {
   cursor: pointer;
 }
 
-/* 텍스트 옆 외국어사전 / 보조 사전 아이콘 버튼 */
+/* ${t('editor.cssComment.linkButtons')} */
 .link-btn {
   font-size: 0.6em;
   margin-left: 0.35em;
@@ -1869,10 +1871,10 @@ a {
   opacity: 1;
 }
 
-/* 필드별 기본 서식 (라이트 모드) */${fieldStyles}
+/* ${t('editor.cssComment.fieldStyles')} */${fieldStyles}
 
 /* =======================================
-   🌙 Anki 다크모드 (Night Mode) 완벽 대응
+   ${t('editor.cssComment.nightMode')}
    ======================================= */
 .nightMode .card,
 .night_mode .card {
@@ -1909,14 +1911,14 @@ a {
   }
 }
 
-/* 다크모드 필드별 텍스트 색상 자동 최적화 반전 */${nightModeStyles}
+/* ${t('editor.cssComment.nightModeFields')} */${nightModeStyles}
 `;
   }
 
   // 7. 실시간 미리보기 렌더링
   function renderPreview() {
     const isFront = (currentPreviewSide === 'front');
-    currentCardSideBadge.textContent = isFront ? '앞면 (Front)' : '뒷면 (Back)';
+    currentCardSideBadge.textContent = isFront ? t('editor.preview.sideFront') : t('editor.preview.sideBack');
 
     const isRtl = rtlForce.checked;
     liveCardRender.style.direction = isRtl ? 'rtl' : 'ltr';
@@ -1940,7 +1942,7 @@ a {
       });
 
       if (activeFrontFields.length === 0) {
-        html = '<div style="color: #94a3b8; font-style: italic;">앞면에 표시할 필드를 설정에서 선택해주세요.</div>';
+        html = '<div style="color: #94a3b8; font-style: italic;">' + t('editor.preview.emptyFront') + '</div>';
       } else {
         html = activeFrontFields.map(item => buildFieldBlock(item.field, true, item.index)).join('\n');
       }
@@ -1973,7 +1975,7 @@ a {
       });
 
       if (activeBackFields.length === 0 && parts.length === 0) {
-        html = '<div style="color: #94a3b8; font-style: italic;">뒷면에 표시할 필드를 설정에서 선택해주세요.</div>';
+        html = '<div style="color: #94a3b8; font-style: italic;">' + t('editor.preview.emptyBack') + '</div>';
       } else {
         parts.push(...activeBackFields.map(item => buildFieldBlock(item.field, true, item.index)));
         html = parts.join('\n');
@@ -2011,7 +2013,7 @@ a {
   const saveStatusIndicator = document.getElementById('saveStatusIndicator');
   let saveTimer = null;
 
-  function updateSaveIndicator(text = '✓ 자동 저장됨') {
+  function updateSaveIndicator(text = t('common.autoSaved')) {
     if (!saveStatusIndicator) return;
     saveStatusIndicator.textContent = text;
     saveStatusIndicator.classList.add('active');
@@ -2068,7 +2070,7 @@ a {
         }
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      updateSaveIndicator('✓ 자동 저장됨');
+      updateSaveIndicator(t('common.autoSaved'));
     } catch (err) {
       console.warn('localStorage 저장 실패:', err);
     }
@@ -2085,7 +2087,7 @@ a {
       if (data.langId) {
         languageSelect.value = data.langId;
         const lang = getSelectedLanguage();
-        if (langSearchInput) langSearchInput.value = lang.name;
+        if (langSearchInput) langSearchInput.value = i18n.langName(lang);
         if (dictNameTag) dictNameTag.textContent = lang.dictName;
       }
 
@@ -2242,7 +2244,7 @@ a {
 
   // 10. 전체 설정 초기화 (기본값으로 복원)
   function resetAllSettings() {
-    if (!confirm('카드 서식 에디터의 모든 설정을 처음 기본값으로 초기화하시겠습니까?\n\n(※ AI 프롬프트 생성기 등 다른 도구의 저장 설정에는 영향을 주지 않습니다.)')) {
+    if (!confirm(t('editor.confirm.resetAll'))) {
       return;
     }
     try {
@@ -2359,15 +2361,15 @@ a {
 
     updateAll(false);
     saveSettingsToStorage();
-    updateSaveIndicator('기본값 초기화 완료');
-    showToast('카드 서식 에디터 설정이 기본값으로 초기화되었습니다.');
+    updateSaveIndicator(t('common.resetDone'));
+    showToast(t('editor.toast.resetDone'));
   }
 
   // 클립보드 복사 헬퍼
   function copyToClipboard(text, label) {
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(text).then(() => {
-        showToast(`${label} 클립보드에 복사되었습니다!`);
+        showToast(t('common.copied', { label }));
       }).catch(() => fallbackCopy(text, label));
     } else {
       fallbackCopy(text, label);
@@ -2384,9 +2386,9 @@ a {
     textarea.select();
     try {
       document.execCommand('copy');
-      showToast(`${label} 클립보드에 복사되었습니다!`);
+      showToast(t('common.copied', { label }));
     } catch (err) {
-      showToast('복사에 실패했습니다. 수동으로 드래그하여 복사해주세요.');
+      showToast(t('common.copyFailed'));
     }
     document.body.removeChild(textarea);
   }
@@ -2411,6 +2413,7 @@ a {
 
   // 초기화 실행 (순서: 옵션 목록 초기화 -> 이벤트 등록 -> 로컬스토리지 복원 -> 초기 렌더링)
   initLanguageSelect();
+  updateSubDictLabels();
   initEventListeners();
   initInspectorEvents();
 

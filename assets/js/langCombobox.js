@@ -84,6 +84,25 @@
     return -1;
   }
 
+  // 다국어 지원 (i18n.js가 없으면 한국어 기본 문구 사용)
+  const FALLBACK_TEXT = {
+    'combobox.count': '총 {count}개 언어',
+    'combobox.groupRecent': '최근 선택',
+    'combobox.groupMajor': '주요 언어',
+    'combobox.groupOthers': '그 외 언어 (가나다순)',
+    'combobox.empty': "'{query}' 검색 결과가 없습니다.",
+  };
+
+  function tr(key, params) {
+    if (window.i18n) return window.i18n.t(key, params);
+    return (FALLBACK_TEXT[key] || key).replace(/\{(\w+)\}/g, (m, name) => (params && params[name] !== undefined ? params[name] : m));
+  }
+
+  // 화면에 보여줄 언어 이름 (UI 언어로 번역된 이름, 없으면 한국어 이름)
+  function displayName(lang) {
+    return window.i18n ? window.i18n.langName(lang) : lang.name;
+  }
+
   function escapeHtml(str) {
     return String(str || '')
       .replace(/&/g, '&amp;')
@@ -129,9 +148,10 @@
     const { container, select, input, clearBtn, toggleBtn, dropdown, list, countEl, languages, onSelect } = opts;
     let focusIndex = -1;
 
+    const uiLocale = window.i18n ? window.i18n.getLocale() : 'ko';
     const sortedOthers = languages
       .filter(l => !MAJOR_LANG_IDS.includes(l.id))
-      .sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+      .sort((a, b) => displayName(a).localeCompare(displayName(b), uiLocale));
     const majors = MAJOR_LANG_IDS.map(id => languages.find(l => l.id === id)).filter(Boolean);
 
     function getLang(id) {
@@ -140,7 +160,7 @@
 
     function currentName() {
       const lang = getLang(select.value);
-      return lang ? lang.name : '';
+      return lang ? displayName(lang) : '';
     }
 
     // 별칭 중 단어 앞부분이 검색어로 시작하는 위치 (예: 'span' → 'Spanish', 'bahasa i' → 'Bahasa Indonesia')
@@ -159,13 +179,18 @@
 
     // 검색 점수: 낮을수록 위
     // 0: 언어 코드 완전 일치 또는 한국어 이름 앞부분 일치, 1: 한국어 이름 포함, 2: 코드 앞부분, 3: 영어·현지어 이름
+    // 화면에 보이는 이름(UI 언어)으로 먼저 찾고, UI 언어가 한국어가 아니면 한국어 이름도 별칭처럼 검색
     function matchLanguage(lang, query) {
       const q = query.toLowerCase();
-      const nameIdx = findMatchIndex(lang.name, query);
+      const nameIdx = findMatchIndex(displayName(lang), query);
       if (lang.id.toLowerCase() === q) return { score: 0, nameIdx, alias: null };
       if (nameIdx === 0) return { score: 0, nameIdx, alias: null };
       if (nameIdx > 0) return { score: 1, nameIdx, alias: null };
       if (lang.id.toLowerCase().startsWith(q)) return { score: 2, nameIdx: -1, alias: null };
+      if (displayName(lang) !== lang.name) {
+        const koIdx = findMatchIndex(lang.name, query);
+        if (koIdx >= 0) return { score: 3, nameIdx: -1, alias: { alias: lang.name, idx: koIdx } };
+      }
       const alias = findAliasMatch(lang, q);
       if (alias) return { score: 3, nameIdx: -1, alias };
       return null;
@@ -180,7 +205,7 @@
       if (isSelected) li.classList.add('selected');
       li.setAttribute('aria-selected', isSelected ? 'true' : 'false');
 
-      const nameHtml = matchInfo ? highlight(lang.name, matchInfo.nameIdx, query.length) : escapeHtml(lang.name);
+      const nameHtml = matchInfo ? highlight(displayName(lang), matchInfo.nameIdx, query.length) : escapeHtml(displayName(lang));
       const aliasHtml = matchInfo && matchInfo.alias
         ? `<span class="lang-alias">${highlight(matchInfo.alias.alias, matchInfo.alias.idx, query.length)}</span>`
         : '';
@@ -215,15 +240,15 @@
       focusIndex = -1;
 
       if (!query) {
-        countEl.textContent = languages.length;
+        countEl.textContent = tr('combobox.count', { count: languages.length });
         const recent = loadRecent().map(getLang).filter(Boolean);
         if (recent.length > 0) {
-          addGroupLabel('최근 선택');
+          addGroupLabel(tr('combobox.groupRecent'));
           recent.forEach(l => list.appendChild(buildItem(l, '', null)));
         }
-        addGroupLabel('주요 언어');
+        addGroupLabel(tr('combobox.groupMajor'));
         majors.forEach(l => list.appendChild(buildItem(l, '', null)));
-        addGroupLabel('그 외 언어 (가나다순)');
+        addGroupLabel(tr('combobox.groupOthers'));
         sortedOthers.forEach(l => list.appendChild(buildItem(l, '', null)));
         return;
       }
@@ -233,11 +258,11 @@
         .filter(m => m.info)
         .sort((a, b) => a.info.score - b.info.score || a.order - b.order);
 
-      countEl.textContent = matched.length;
+      countEl.textContent = tr('combobox.count', { count: matched.length });
       if (matched.length === 0) {
         const empty = document.createElement('li');
         empty.className = 'dropdown-empty';
-        empty.textContent = `'${query}' 검색 결과가 없습니다.`;
+        empty.textContent = tr('combobox.empty', { query });
         list.appendChild(empty);
         return;
       }
@@ -366,7 +391,7 @@
     languages.forEach(lang => {
       const option = document.createElement('option');
       option.value = lang.id;
-      option.textContent = lang.name;
+      option.textContent = displayName(lang);
       select.appendChild(option);
     });
 
