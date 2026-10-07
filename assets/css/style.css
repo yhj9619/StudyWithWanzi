@@ -2841,6 +2841,42 @@ body {
   font-weight: 600;
 }
 
+/* 기기별 메뉴 위치 (PC · AnkiDroid · AnkiMobile) */
+.guide-device-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+
+@media (max-width: 768px) {
+  .guide-device-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.guide-device-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.75rem;
+}
+
+.guide-device-name {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+}
+
+.guide-device-card p {
+  font-size: 0.82rem;
+  color: #475569;
+  margin: 0;
+  line-height: 1.5;
+}
+
 /* 자세히 보기 토글 */
 .guide-details {
   margin-top: 1.25rem;
