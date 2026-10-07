@@ -26,6 +26,30 @@
   const RECENT_STORAGE_KEY = 'swz_recent_languages';
   const RECENT_MAX = 3;
 
+  // 마지막으로 사용자가 직접 고른 언어 (카드 에디터 ↔ 프롬프트 생성기 언어 연동용)
+  // 각 도구는 열릴 때 이 값이 자기 언어와 다르면 이 언어로 맞춤. 설정 초기화 시 삭제
+  const SHARED_LANG_KEY = 'swz_last_language';
+
+  function getSharedLanguage() {
+    try {
+      return localStorage.getItem(SHARED_LANG_KEY);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function setSharedLanguage(id) {
+    try {
+      localStorage.setItem(SHARED_LANG_KEY, id);
+    } catch (e) {}
+  }
+
+  function clearSharedLanguage() {
+    try {
+      localStorage.removeItem(SHARED_LANG_KEY);
+    } catch (e) {}
+  }
+
   const CHOSUNG_LIST = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
 
   function getChosungChar(ch) {
@@ -267,6 +291,7 @@
     function choose(id) {
       select.value = id;
       saveRecent(id);
+      setSharedLanguage(id);
       close();
       if (onSelect) onSelect(id);
     }
@@ -356,6 +381,12 @@
         input.value = currentName();
         updateClearBtn();
       },
+      // 다른 도구에서 마지막으로 고른 언어 (없거나 목록에 없는 언어면 null)
+      getSharedLanguage() {
+        const id = getSharedLanguage();
+        return id && getLang(id) ? id : null;
+      },
+      clearSharedLanguage,
     };
   }
 

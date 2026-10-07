@@ -186,6 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let selectedFieldIndex = 0;
 
   let langCombobox = null;
+  const DEFAULT_LANG_ID = 'en'; // 첫 방문 기본 언어 (사용자가 가장 많은 영어)
 
   // 1. 언어 검색형 콤보박스 초기화 (공용 컴포넌트: assets/js/langCombobox.js)
   function initLanguageSelect() {
@@ -201,8 +202,15 @@ document.addEventListener('DOMContentLoaded', () => {
       languages: window.LANGUAGES_DATA || LANGUAGES_DATA,
       onSelect: () => onLanguageChange(true),
     });
-    // 중국어를 기본 선택 (사용자 기존 예시가 zh.dict.naver.com 및 pinyin이었음)
-    langCombobox.setValue('zh');
+    langCombobox.setValue(DEFAULT_LANG_ID);
+  }
+
+  // 3번째 필드 기본 구성 (중국어는 병음, 그 외는 예문)
+  function getDefaultThirdField(lang) {
+    const sample = (lang.sample && lang.sample.field3) || '';
+    return lang.id === 'zh'
+      ? { name: 'pinyin', sample: sample || 'nǐ hǎo' }
+      : { name: 'Example', sample };
   }
 
   function getSelectedLanguage() {
@@ -2169,10 +2177,11 @@ a {
       localStorage.removeItem(STORAGE_KEY);
     } catch (e) {}
 
-    // 1. 언어 기본값 (중국어)
-    languageSelect.value = 'zh';
+    // 1. 언어 기본값 (영어) · 다른 도구와의 언어 연동 기록도 초기화
+    langCombobox.setValue(DEFAULT_LANG_ID);
+    langCombobox.clearSharedLanguage();
     const lang = getSelectedLanguage();
-    if (langSearchInput) langSearchInput.value = lang.name;
+    const sample = lang.sample || {};
     dictUrlInput.value = lang.dictUrl;
     dictNameTag.textContent = lang.dictName;
     if (wikiUrlInput) wikiUrlInput.value = DEFAULT_WIKI_URL;
@@ -2210,7 +2219,7 @@ a {
 
     // 필드 1 기본값 (Front / 한국어 뜻)
     fields[0].nameInput.value = 'Front';
-    fields[0].sampleInput.value = '안녕, 안녕하세요';
+    fields[0].sampleInput.value = sample.field1 || '';
     fields[0].showFront.checked = true;
     fields[0].showBack.checked = false;
     fields[0].sizeSlider.value = 24;
@@ -2231,7 +2240,7 @@ a {
 
     // 필드 2 기본값 (Back / 외국어 단어 · 사전 링크)
     fields[1].nameInput.value = 'Back';
-    fields[1].sampleInput.value = '你好';
+    fields[1].sampleInput.value = sample.field2 || '';
     fields[1].showFront.checked = false;
     fields[1].showBack.checked = true;
     fields[1].sizeSlider.value = 24;
@@ -2256,8 +2265,7 @@ a {
     fields.splice(2);
 
     addOptionalField({
-      name: 'pinyin',
-      sample: 'nǐ hǎo',
+      ...getDefaultThirdField(lang),
       showFront: false,
       showBack: true,
       size: 20,
@@ -2273,7 +2281,7 @@ a {
       if (f.dictLinkCheck) f.dictLinkCheck.checked = Boolean(f.hasDictLink);
       if (f.wikiLinkCheck) f.wikiLinkCheck.checked = Boolean(f.hasWikiLink);
     });
-    renderEditorQuickChips('zh');
+    renderEditorQuickChips(lang.id);
 
     updateAll(false);
     saveSettingsToStorage();
@@ -2332,14 +2340,22 @@ a {
   initEventListeners();
   initInspectorEvents();
 
+  // 프롬프트 생성기에서 마지막으로 고른 언어 (언어 연동)
+  const sharedLangId = langCombobox.getSharedLanguage();
+
   const restored = loadSettingsFromStorage();
   if (!restored) {
-    // 저장된 설정이 없을 때 기본 3번째 필드 1개 생성 및 초기 언어 반영
+    // 저장된 설정이 없을 때: 연동 언어(없으면 영어)로 시작, 기본 3번째 필드 1개 생성 및 예시값 반영
+    if (sharedLangId) langCombobox.setValue(sharedLangId);
     const optionalContainer = document.getElementById('optionalFieldsContainer');
     if (optionalContainer) optionalContainer.innerHTML = '';
     fields.splice(2);
     addOptionalField(null, false);
-    onLanguageChange(false, false);
+    onLanguageChange(true, false);
+  } else if (sharedLangId && sharedLangId !== languageSelect.value) {
+    // 저장된 설정이 있어도 다른 도구에서 언어를 바꿨다면 그 언어로 맞춤
+    langCombobox.setValue(sharedLangId);
+    onLanguageChange(true, true);
   }
 
   // 초기 렌더링 (저장하지 않고 렌더링만 수행하여 localStorage 원본 보존)

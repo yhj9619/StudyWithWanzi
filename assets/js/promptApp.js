@@ -865,7 +865,10 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.removeItem(STORAGE_KEY);
     } catch (e) {}
 
-    if (langCombobox) langCombobox.setValue(DEFAULT_LANG_ID);
+    if (langCombobox) {
+      langCombobox.setValue(DEFAULT_LANG_ID);
+      langCombobox.clearSharedLanguage(); // 다른 도구와의 언어 연동 기록도 초기화
+    }
     activeLangId = DEFAULT_LANG_ID;
     setMode('text', false);
     sourceTextInput.value = '';
@@ -1237,4 +1240,12 @@ document.addEventListener('DOMContentLoaded', () => {
   syncLevelRowState();
   renderFields();
   updatePromptAndPreview(false);
+
+  // 카드 에디터에서 마지막으로 고른 언어가 다르면 그 언어로 맞춤 (언어 연동)
+  // 언어 변경 처리(시험·필드 자동 조정 및 저장)는 기존 change 핸들러를 그대로 사용
+  const sharedLangId = langCombobox.getSharedLanguage();
+  if (sharedLangId && sharedLangId !== promptLangSelect.value) {
+    langCombobox.setValue(sharedLangId);
+    promptLangSelect.dispatchEvent(new Event('change'));
+  }
 });
