@@ -59,7 +59,7 @@
           <span class="prompt-hero-icon">🎨</span>
           <div>
             <strong>내 Anki 카드를 보기 좋게, 찾아보기 쉽게 만드세요:</strong><br>
-            글씨 크기·색상·폰트는 물론, 단어 옆에 <strong>🔗 어학사전 · 📖 위키</strong> 아이콘을 달아 복습하다 궁금한 단어를 바로 찾아볼 수 있습니다. 필드명만 맞추면 Anki에 붙여넣을 서식 코드가 바로 완성됩니다.
+            글씨 크기·색상·폰트는 물론, 단어 옆에 <strong>🌐 외국어사전 · 📘 국어사전</strong> 아이콘을 달아 복습하다 궁금한 단어를 바로 찾아볼 수 있습니다. 필드명만 맞추면 Anki에 붙여넣을 서식 코드가 바로 완성됩니다.
           </div>
         </div>
 
@@ -115,10 +115,15 @@
 
           <div class="form-group">
             <div class="label-with-action">
-              <label for="wikiUrlInput" class="form-label">위키 검색 URL</label>
-              <button type="button" id="resetWikiUrlBtn" class="btn-text" title="한국어 위키백과 URL로 복원">기본값 복원</button>
+              <label for="subDictSelect" class="form-label">보조 사전 (한국어 뜻 찾아보기용)</label>
+              <button type="button" id="resetWikiUrlBtn" class="btn-text" title="선택한 보조 사전의 기본 URL로 복원">기본값 복원</button>
             </div>
-            <input type="url" id="wikiUrlInput" class="form-input" placeholder="https://ko.wikipedia.org/wiki/" value="https://ko.wikipedia.org/wiki/">
+            <select id="subDictSelect" class="form-select">
+              <option value="ko" selected>📘 네이버 국어사전</option>
+              <option value="wiki">📖 한국어 위키백과</option>
+              <option value="custom">🔎 직접 입력 (다른 사전 URL)</option>
+            </select>
+            <input type="url" id="wikiUrlInput" class="form-input" style="margin-top: 0.5rem;" placeholder="https://ko.dict.naver.com/#/search?query=" value="https://ko.dict.naver.com/#/search?query=">
           </div>
 
           <div class="form-group inline-checkbox">
@@ -157,13 +162,13 @@
                   <input type="checkbox" id="f1_show_back">
                   <span>뒷면 표시</span>
                 </label>
-                <label class="mini-toggle mini-toggle-link" title="네이버 사전 링크 연결">
+                <label class="mini-toggle mini-toggle-link" title="외국어사전 링크 연결">
                   <input type="checkbox" id="f1_dict_link">
-                  <span>🔗 사전 링크</span>
+                  <span>🌐 외국어사전</span>
                 </label>
-                <label class="mini-toggle mini-toggle-link" title="위키 링크 연결">
+                <label class="mini-toggle mini-toggle-link" title="보조 사전 링크 연결">
                   <input type="checkbox" id="f1_wiki_link">
-                  <span>📖 위키 링크</span>
+                  <span class="sub-dict-label">📘 국어사전</span>
                 </label>
               </div>
             </div>
@@ -236,7 +241,7 @@
           <!-- Field 2 Settings -->
           <div class="field-setting-box" id="boxField2">
             <div class="field-setting-header">
-              <div class="field-badge field-badge-primary" id="f2_badge">2번째 필드 (뒷면 / Back) · 🔗 사전 링크</div>
+              <div class="field-badge field-badge-primary" id="f2_badge">2번째 필드 (뒷면 / Back) · 🌐 외국어사전</div>
               <div class="field-visibility-toggles">
                 <label class="mini-toggle" title="앞면 카드 노출 여부">
                   <input type="checkbox" id="f2_show_front">
@@ -246,13 +251,13 @@
                   <input type="checkbox" id="f2_show_back" checked>
                   <span>뒷면 표시</span>
                 </label>
-                <label class="mini-toggle mini-toggle-link" title="네이버 사전 링크 연결">
+                <label class="mini-toggle mini-toggle-link" title="외국어사전 링크 연결">
                   <input type="checkbox" id="f2_dict_link" checked>
-                  <span>🔗 사전 링크</span>
+                  <span>🌐 외국어사전</span>
                 </label>
-                <label class="mini-toggle mini-toggle-link" title="위키 링크 연결">
+                <label class="mini-toggle mini-toggle-link" title="보조 사전 링크 연결">
                   <input type="checkbox" id="f2_wiki_link">
-                  <span>📖 위키 링크</span>
+                  <span class="sub-dict-label">📘 국어사전</span>
                 </label>
               </div>
             </div>
@@ -427,11 +432,12 @@
           <!-- 3번에서 각 필드별 네이버 사전 링크 여부 선택 (단어·예문 다중 선택 가능) -->
           <div class="dict-link-selection-box">
             <div class="dict-link-box-header">
-              <span class="dict-link-box-title">🔗 사전 / 📖 위키 링크 적용 필드 (다중 선택 가능)</span>
-              <span class="helper-badge">사전 · 위키 동시 적용 가능</span>
+              <span class="dict-link-box-title">🌐 외국어사전 / 보조 사전 링크 적용 필드 (다중 선택 가능)</span>
+              <span class="helper-badge">두 사전 동시 적용 가능</span>
             </div>
             <p class="helper-text">
-              체크된 필드의 텍스트 옆에 🔗(사전) · 📖(위키) 아이콘 버튼이 생기고, 누르면 검색 결과로 바로 연결됩니다.
+              체크된 필드의 텍스트 옆에 사전 아이콘이 생기고, 누르면 검색 결과로 바로 연결됩니다.
+              💡 외국어사전은 한국어로 검색해도 결과가 나오므로, 한국어 뜻 필드(Front)에 🌐를 걸면 "이 뜻을 외국어로 뭐라고 하지?"를 바로 찾아볼 수 있습니다.
             </p>
             <div id="dictFieldChecklist" class="checkbox-list">
               <!-- JS에서 각 필드별 체크박스가 동적으로 렌더링됨 -->
@@ -491,7 +497,7 @@
               <!-- Dynamically injected card markup -->
             </div>
           </div>
-          <p class="preview-hint">💡 미리보기 카드 속 필드를 클릭하면 아래에서 바로 서식을 편집할 수 있습니다. 텍스트 옆 🔗(사전) · 📖(위키) 아이콘을 누르면 실제 검색 페이지로 이동합니다.</p>
+          <p class="preview-hint">💡 미리보기 카드 속 필드를 클릭하면 아래에서 바로 서식을 편집할 수 있습니다. 텍스트 옆 🌐(외국어사전) · 보조 사전 아이콘을 누르면 실제 검색 페이지로 이동합니다.</p>
 
           <!-- 선택한 필드 스타일 편집 패널 (모든 필드 공용) -->
           <div class="field-style-inspector" id="fieldStyleInspector">

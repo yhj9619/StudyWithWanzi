@@ -20,6 +20,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const wikiUrlInput = document.getElementById('wikiUrlInput');
   const resetWikiUrlBtn = document.getElementById('resetWikiUrlBtn');
   const DEFAULT_WIKI_URL = 'https://ko.wikipedia.org/wiki/';
+  const subDictSelect = document.getElementById('subDictSelect');
+
+  // 보조 사전 (한국어 뜻 찾아보기용) 프리셋 - 링크 URL은 wikiUrlInput에 보관 (기존 저장값 호환)
+  const SUB_DICT_PRESETS = {
+    ko: { name: '국어사전', icon: '📘', url: 'https://ko.dict.naver.com/#/search?query=' },
+    wiki: { name: '위키', icon: '📖', url: DEFAULT_WIKI_URL },
+    custom: { name: '보조 사전', icon: '🔎', url: '' },
+  };
+  const DEFAULT_SUB_DICT = 'ko';
+
+  function getSubDict() {
+    return SUB_DICT_PRESETS[subDictSelect ? subDictSelect.value : DEFAULT_SUB_DICT] || SUB_DICT_PRESETS[DEFAULT_SUB_DICT];
+  }
+
+  function getSubDictLabel() {
+    const sub = getSubDict();
+    return `${sub.icon} ${sub.name}`;
+  }
+
+  // 필드 헤더의 보조 사전 토글 이름을 선택한 사전에 맞춤
+  function updateSubDictLabels() {
+    document.querySelectorAll('.sub-dict-label').forEach(el => {
+      el.textContent = getSubDictLabel();
+    });
+  }
   // 사전 / 위키 아이콘 버튼 인라인 스타일 (CSS 미적용 환경에서도 동일하게 보이도록)
   const LINK_BTN_INLINE_STYLE = 'font-size: 0.6em; margin-left: 0.35em; text-decoration: none; opacity: 0.75; vertical-align: middle;';
 
@@ -297,7 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
       updateAll();
     });
 
-    // 사전 / 위키 링크 체크박스 (헤더 미니 토글, 둘 중 하나만 선택)
+    // 외국어사전 / 보조 사전 링크 체크박스 (헤더 미니 토글, 동시 적용 가능)
     if (f.dictLinkCheck) {
       f.dictLinkCheck.addEventListener('change', () => {
         setFieldLink(f, 'dict', f.dictLinkCheck.checked);
@@ -431,7 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 필드 링크 적용 여부 설정 (type: 'dict' | 'wiki') - 사전 / 위키 동시 적용 가능
+  // 필드 링크 적용 여부 설정 (type: 'dict' 외국어사전 | 'wiki' 보조 사전) - 동시 적용 가능
   function setFieldLink(f, type, enabled) {
     if (type === 'dict') f.hasDictLink = enabled;
     if (type === 'wiki') f.hasWikiLink = enabled;
@@ -579,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // 미리보기 카드 속 필드 텍스트 클릭 → 편집 대상 선택 (사전 / 위키 아이콘은 그대로 링크 이동)
+    // 미리보기 카드 속 필드 텍스트 클릭 → 편집 대상 선택 (사전 아이콘은 그대로 링크 이동)
     liveCardRender.addEventListener('click', (e) => {
       if (e.target.closest('a')) return;
       const item = e.target.closest('.field-item, .front-preview-hint');
@@ -660,13 +685,13 @@ document.addEventListener('DOMContentLoaded', () => {
               <input type="checkbox" class="f-show-back"${showBack ? ' checked' : ''}>
               <span>뒷면 표시</span>
             </label>
-            <label class="mini-toggle mini-toggle-link" title="네이버 사전 링크 연결">
+            <label class="mini-toggle mini-toggle-link" title="외국어사전 링크 연결">
               <input type="checkbox" class="f-dict-link"${hasDictLink ? ' checked' : ''}>
-              <span>🔗 사전 링크</span>
+              <span>🌐 외국어사전</span>
             </label>
-            <label class="mini-toggle mini-toggle-link" title="위키 링크 연결">
+            <label class="mini-toggle mini-toggle-link" title="보조 사전 링크 연결">
               <input type="checkbox" class="f-wiki-link"${hasWikiLink ? ' checked' : ''}>
-              <span>📖 위키 링크</span>
+              <span class="sub-dict-label">${getSubDictLabel()}</span>
             </label>
           </div>
           <button type="button" class="btn-delete-field" title="이 필드 삭제">
@@ -1164,8 +1189,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       let badgeText = `${fNum}번째 필드 (${sideText} / ${fName})`;
 
-      if (f.hasDictLink) badgeText += ' · 🔗 사전';
-      if (f.hasWikiLink) badgeText += ' · 📖 위키';
+      if (f.hasDictLink) badgeText += ' · 🌐 외국어사전';
+      if (f.hasWikiLink) badgeText += ` · ${getSubDictLabel()}`;
       if (f.hasDictLink || f.hasWikiLink) {
         f.badgeEl.className = 'field-badge field-badge-primary';
       } else {
@@ -1173,7 +1198,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       f.badgeEl.textContent = badgeText;
 
-      // 상단 헤더의 사전 / 위키 링크 미니 토글 동기화
+      // 상단 헤더의 외국어사전 / 보조 사전 미니 토글 동기화
       if (f.dictLinkCheck) {
         f.dictLinkCheck.checked = Boolean(f.hasDictLink);
       }
@@ -1183,7 +1208,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 3번 영역의 각 필드별 사전 / 위키 링크 체크박스 목록 동적 갱신 (단어·예문 다중 선택 지원)
+  // 3번 영역의 각 필드별 외국어사전 / 보조 사전 체크박스 목록 동적 갱신 (단어·예문 다중 선택 지원)
   function updateDictFieldChecklist() {
     if (!dictFieldChecklist) return;
     dictFieldChecklist.innerHTML = '';
@@ -1213,8 +1238,8 @@ document.addEventListener('DOMContentLoaded', () => {
       options.className = 'dict-target-options';
 
       [
-        { type: 'dict', text: '🔗 사전 링크', checked: Boolean(f.hasDictLink) },
-        { type: 'wiki', text: '📖 위키 링크', checked: Boolean(f.hasWikiLink) },
+        { type: 'dict', text: '🌐 외국어사전', checked: Boolean(f.hasDictLink) },
+        { type: 'wiki', text: getSubDictLabel(), checked: Boolean(f.hasWikiLink) },
       ].forEach(opt => {
         const label = document.createElement('label');
         label.className = 'custom-checkbox';
@@ -1252,13 +1277,43 @@ document.addEventListener('DOMContentLoaded', () => {
     dictUrlInput.addEventListener('input', updateAll);
     dictUrlInput.addEventListener('change', updateAll);
 
+    // 보조 사전 선택 → URL 자동 입력 (직접 입력은 URL을 비워 사용자가 입력)
+    if (subDictSelect) {
+      subDictSelect.addEventListener('change', () => {
+        const sub = getSubDict();
+        if (subDictSelect.value === 'custom') {
+          wikiUrlInput.focus();
+        } else {
+          wikiUrlInput.value = sub.url;
+        }
+        updateSubDictLabels();
+        updateFieldBadges();
+        updateDictFieldChecklist();
+        updateAll();
+      });
+    }
     if (wikiUrlInput) {
-      wikiUrlInput.addEventListener('input', updateAll);
-      wikiUrlInput.addEventListener('change', updateAll);
+      // 프리셋 URL을 직접 고치면 '직접 입력'으로 전환
+      const onSubUrlEdit = () => {
+        if (subDictSelect && subDictSelect.value !== 'custom' && wikiUrlInput.value.trim() !== getSubDict().url) {
+          subDictSelect.value = 'custom';
+          updateSubDictLabels();
+          updateFieldBadges();
+          updateDictFieldChecklist();
+        }
+        updateAll();
+      };
+      wikiUrlInput.addEventListener('input', onSubUrlEdit);
+      wikiUrlInput.addEventListener('change', onSubUrlEdit);
     }
     if (resetWikiUrlBtn) {
       resetWikiUrlBtn.addEventListener('click', () => {
-        wikiUrlInput.value = DEFAULT_WIKI_URL;
+        // 직접 입력 상태면 기본 보조 사전(국어사전)으로 복원
+        if (subDictSelect && subDictSelect.value === 'custom') subDictSelect.value = DEFAULT_SUB_DICT;
+        wikiUrlInput.value = getSubDict().url;
+        updateSubDictLabels();
+        updateFieldBadges();
+        updateDictFieldChecklist();
         updateAll();
       });
     }
@@ -1637,14 +1692,15 @@ document.addEventListener('DOMContentLoaded', () => {
       : template;
   }
 
-  // 텍스트 옆 사전 / 위키 아이콘 버튼 (한 필드에 둘 다 적용 가능)
+  // 텍스트 옆 외국어사전 / 보조 사전 아이콘 버튼 (한 필드에 둘 다 적용 가능)
   function buildLinkButtons(field, isForPreview, fieldName, sampleValue) {
     const linkTargets = [];
     if (field.hasDictLink) {
-      linkTargets.push({ cls: 'dict-btn', icon: '🔗', title: '사전 검색', url: dictUrlInput.value.trim() });
+      linkTargets.push({ cls: 'dict-btn', icon: '🌐', title: '외국어사전 검색', url: dictUrlInput.value.trim() });
     }
     if (field.hasWikiLink) {
-      linkTargets.push({ cls: 'wiki-btn', icon: '📖', title: '위키 검색', url: wikiUrlInput ? wikiUrlInput.value.trim() : DEFAULT_WIKI_URL });
+      const sub = getSubDict();
+      linkTargets.push({ cls: 'subdict-btn', icon: sub.icon, title: `${sub.name} 검색`, url: wikiUrlInput ? wikiUrlInput.value.trim() : sub.url });
     }
 
     if (linkTargets.length === 0) return '';
@@ -1800,7 +1856,7 @@ a {
   cursor: pointer;
 }
 
-/* 텍스트 옆 사전 / 위키 아이콘 버튼 */
+/* 텍스트 옆 외국어사전 / 보조 사전 아이콘 버튼 */
 .link-btn {
   font-size: 0.6em;
   margin-left: 0.35em;
@@ -1977,7 +2033,8 @@ a {
         langId: languageSelect.value,
         dictLinkTargets: fields.map(f => Boolean(f.hasDictLink)),
         dictUrl: dictUrlInput.value,
-        wikiUrl: wikiUrlInput ? wikiUrlInput.value : DEFAULT_WIKI_URL,
+        subDict: subDictSelect ? subDictSelect.value : DEFAULT_SUB_DICT,
+        wikiUrl: wikiUrlInput ? wikiUrlInput.value : SUB_DICT_PRESETS[DEFAULT_SUB_DICT].url,
         linkNewTab: linkNewTab.checked,
         linkCleanQuery: linkCleanQuery ? linkCleanQuery.checked : true,
         showHrAnswer: showHrAnswer.checked,
@@ -2033,7 +2090,6 @@ a {
       }
 
       if (data.dictUrl !== undefined) dictUrlInput.value = data.dictUrl;
-      if (data.wikiUrl !== undefined && wikiUrlInput) wikiUrlInput.value = data.wikiUrl;
       if (data.linkNewTab !== undefined) linkNewTab.checked = Boolean(data.linkNewTab);
       if (data.linkCleanQuery !== undefined && linkCleanQuery) linkCleanQuery.checked = Boolean(data.linkCleanQuery);
 
@@ -2144,6 +2200,22 @@ a {
         });
       }
 
+      // 보조 사전 복원
+      // 이전 버전(위키만 지원) 저장본: 위키 링크를 실제로 쓰던 경우에만 위키/직접 입력으로 유지하고, 아니면 새 기본값(국어사전) 적용
+      if (subDictSelect && wikiUrlInput) {
+        if (data.subDict && SUB_DICT_PRESETS[data.subDict]) {
+          subDictSelect.value = data.subDict;
+          if (data.wikiUrl !== undefined) wikiUrlInput.value = data.wikiUrl;
+        } else if (data.wikiUrl !== undefined && fields.some(f => f.hasWikiLink)) {
+          subDictSelect.value = data.wikiUrl.trim() === DEFAULT_WIKI_URL ? 'wiki' : 'custom';
+          wikiUrlInput.value = data.wikiUrl;
+        } else {
+          subDictSelect.value = DEFAULT_SUB_DICT;
+          wikiUrlInput.value = SUB_DICT_PRESETS[DEFAULT_SUB_DICT].url;
+        }
+        updateSubDictLabels();
+      }
+
       updateFieldBadges();
       updateDictFieldChecklist();
 
@@ -2184,7 +2256,9 @@ a {
     const sample = lang.sample || {};
     dictUrlInput.value = lang.dictUrl;
     dictNameTag.textContent = lang.dictName;
-    if (wikiUrlInput) wikiUrlInput.value = DEFAULT_WIKI_URL;
+    if (subDictSelect) subDictSelect.value = DEFAULT_SUB_DICT;
+    if (wikiUrlInput) wikiUrlInput.value = SUB_DICT_PRESETS[DEFAULT_SUB_DICT].url;
+    updateSubDictLabels();
     linkNewTab.checked = true;
     if (linkCleanQuery) linkCleanQuery.checked = true;
 
