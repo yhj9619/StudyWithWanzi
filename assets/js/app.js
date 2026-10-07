@@ -1791,8 +1791,16 @@ document.addEventListener('DOMContentLoaded', () => {
     styleParts.push(`margin-bottom: 8px;`);
 
     const divStyle = styleParts.join(' ');
+    const linkButtons = buildLinkButtons(field, isForPreview, fieldName, sampleValue);
 
-    // 텍스트 옆 사전 / 위키 아이콘 버튼 (한 필드에 둘 다 적용 가능)
+    if (isForPreview) {
+      return `<div class="field-item f-field-${fieldIndex}" style="${divStyle}">${escapeHtml(sampleValue)}${linkButtons}</div>`;
+    }
+    return `<div class="field-item f-field-${fieldIndex}" style="font-size: ${size}px;${fieldFontCss ? ` font-family: ${fieldFontCss};` : ''}${weight && weight !== 'normal' ? ` font-weight: ${weight};` : ''} color: ${color}; margin-bottom: 8px;">{{${fieldName}}}${linkButtons}</div>`;
+  }
+
+  // 텍스트 옆 사전 / 위키 아이콘 버튼 (한 필드에 둘 다 적용 가능)
+  function buildLinkButtons(field, isForPreview, fieldName, sampleValue) {
     const linkTargets = [];
     if (field.hasDictLink) {
       linkTargets.push({ cls: 'dict-btn', icon: '🔗', title: '사전 검색', url: dictUrlInput.value.trim() });
@@ -1801,20 +1809,14 @@ document.addEventListener('DOMContentLoaded', () => {
       linkTargets.push({ cls: 'wiki-btn', icon: '📖', title: '위키 검색', url: wikiUrlInput ? wikiUrlInput.value.trim() : DEFAULT_WIKI_URL });
     }
 
-    let linkButtons = '';
-    if (linkTargets.length > 0) {
-      const targetAttr = linkNewTab.checked ? ' target="_blank"' : '';
-      linkButtons = linkTargets.map(t => {
-        // 미리보기용: 예시값으로 실제 검색 링크 생성 / Anki 템플릿용: {{FieldName}} 태그 사용
-        const href = isForPreview ? t.url + encodeURIComponent(sampleValue) : `${t.url}{{${fieldName}}}`;
-        return `<a class="link-btn ${t.cls}" href="${href}"${targetAttr} title="${t.title}" style="${LINK_BTN_INLINE_STYLE}">${t.icon}</a>`;
-      }).join('');
-    }
+    if (linkTargets.length === 0) return '';
 
-    if (isForPreview) {
-      return `<div class="field-item f-field-${fieldIndex}" style="${divStyle}">${escapeHtml(sampleValue)}${linkButtons}</div>`;
-    }
-    return `<div class="field-item f-field-${fieldIndex}" style="font-size: ${size}px;${fieldFontCss ? ` font-family: ${fieldFontCss};` : ''}${weight && weight !== 'normal' ? ` font-weight: ${weight};` : ''} color: ${color}; margin-bottom: 8px;">{{${fieldName}}}${linkButtons}</div>`;
+    const targetAttr = linkNewTab.checked ? ' target="_blank"' : '';
+    return linkTargets.map(t => {
+      // 미리보기용: 예시값으로 실제 검색 링크 생성 / Anki 템플릿용: {{FieldName}} 태그 사용
+      const href = isForPreview ? t.url + encodeURIComponent(sampleValue) : `${t.url}{{${fieldName}}}`;
+      return `<a class="link-btn ${t.cls}" href="${href}"${targetAttr} title="${t.title}" style="${LINK_BTN_INLINE_STYLE}">${t.icon}</a>`;
+    }).join('');
   }
 
   // 4. Anki 앞면 서식 생성
@@ -1847,7 +1849,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const f1Color = (frontOnBackKeepStyle && frontOnBackKeepStyle.checked) ? fields[0].colorInput.value : '#64748b';
       const f1FontCss = getFieldFontCss(fields[0]);
 
-      parts.push(`<div class="front-preview-hint" style="color: ${f1Color}; font-size: ${f1Size}px;${f1Weight !== 'normal' ? ` font-weight: ${f1Weight};` : ''}${f1FontCss ? ` font-family: ${f1FontCss};` : ''} margin-bottom: 8px;">{{${frontName}}}</div>`);
+      parts.push(`<div class="front-preview-hint" style="color: ${f1Color}; font-size: ${f1Size}px;${f1Weight !== 'normal' ? ` font-weight: ${f1Weight};` : ''}${f1FontCss ? ` font-family: ${f1FontCss};` : ''} margin-bottom: 8px;">{{${frontName}}}${buildLinkButtons(fields[0], false, frontName)}</div>`);
     }
 
     // 정답 구분선 hr 여부
@@ -2047,7 +2049,7 @@ a {
         const f1Color = isDark ? getDarkModeColor(f1BaseColor) : f1BaseColor;
         const f1FontCss = getFieldFontCss(fields[0]);
 
-        parts.push(`<div class="front-preview-hint" style="color: ${f1Color}; font-size: ${f1Size}px;${f1Weight !== 'normal' ? ` font-weight: ${f1Weight};` : ''}${f1FontCss ? ` font-family: ${f1FontCss};` : ''} margin-bottom: 8px;">${escapeHtml(f1Sample)}</div>`);
+        parts.push(`<div class="front-preview-hint" style="color: ${f1Color}; font-size: ${f1Size}px;${f1Weight !== 'normal' ? ` font-weight: ${f1Weight};` : ''}${f1FontCss ? ` font-family: ${f1FontCss};` : ''} margin-bottom: 8px;">${escapeHtml(f1Sample)}${buildLinkButtons(fields[0], true, '', f1Sample)}</div>`);
       }
 
       // 구분선

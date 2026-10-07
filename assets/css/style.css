@@ -2578,6 +2578,219 @@ body {
   transform: translateY(-1px);
 }
 
+/* 한눈에 보는 4단계 */
+.guide-quickstart {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .guide-quickstart {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.guide-quick-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.1rem 1rem;
+  text-decoration: none;
+  color: #475569;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s ease;
+}
+
+.guide-quick-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.guide-quick-card strong {
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.guide-quick-num {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--primary);
+  background: #eff6ff;
+  border-radius: 9999px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.guide-quick-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+  margin-bottom: 0.2rem;
+}
+
+/* 꼭 기억할 것 */
+.guide-must-know {
+  background: #fffbeb;
+  border: 1.5px solid #fcd34d;
+  border-radius: var(--radius-lg);
+  padding: 1.15rem 1.35rem;
+  margin-bottom: 2rem;
+}
+
+.guide-must-know-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #78350f;
+  margin-bottom: 0.7rem;
+}
+
+.guide-must-know-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem 1.25rem;
+  margin: 0;
+  padding-left: 1.3rem;
+  color: #78350f;
+}
+
+@media (max-width: 576px) {
+  .guide-must-know-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+.guide-must-know-list li {
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.guide-must-know-list li::marker {
+  font-weight: 800;
+}
+
+.guide-must-know-list strong {
+  display: block;
+  color: #451a03;
+}
+
+/* 핵심 숫자 카드 */
+.guide-key-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin: 0.75rem 0 1.25rem 0;
+}
+
+.guide-key-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  text-align: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 1rem;
+}
+
+.guide-key-card.again {
+  border-top: 4px solid #ef4444;
+}
+
+.guide-key-card.good {
+  border-top: 4px solid #22c55e;
+  background: #f0fdf4;
+}
+
+.guide-key-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.guide-key-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.guide-key-desc {
+  font-size: 0.8rem;
+  color: #475569;
+  line-height: 1.4;
+}
+
+.guide-field-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+}
+
+/* 자세히 보기 토글 */
+.guide-details {
+  margin-top: 1.25rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: #ffffff;
+}
+
+.guide-details summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.85rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  user-select: none;
+}
+
+.guide-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.guide-details summary::before {
+  content: '▶';
+  font-size: 0.7rem;
+  transition: transform 0.15s ease;
+}
+
+.guide-details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.guide-details summary:hover {
+  background: #f8fafc;
+  border-radius: var(--radius-md);
+}
+
+.guide-details-body {
+  padding: 0 1.25rem 1.25rem 1.25rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.guide-details-body > h4:first-child {
+  margin-top: 1.25rem;
+}
+
 .guide-section-card {
   background: #ffffff;
   border: 1px solid var(--border-color);
