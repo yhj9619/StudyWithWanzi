@@ -438,6 +438,19 @@
   gap: 0.5rem;
 }
 
+/* 테마 묶음 제목 (기본 테마 / 전통 테마): 한 줄 전체 */
+.theme-group-title {
+  grid-column: 1 / -1;
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.theme-group-title:first-child {
+  margin-top: 0;
+}
+
 .theme-swatch {
   display: flex;
   flex-direction: column;

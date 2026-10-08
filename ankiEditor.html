@@ -628,6 +628,9 @@
                       <option value="grid" data-i18n="editor.deco.patternGrid">격자 (모눈종이)</option>
                       <option value="lines" data-i18n="editor.deco.patternLines">줄노트</option>
                       <option value="fiber" data-i18n="editor.deco.patternFiber">한지 결</option>
+                      <option value="jogakbo" data-i18n="editor.deco.patternJogakbo">조각보</option>
+                      <option value="munsal" data-i18n="editor.deco.patternMunsal">문살 (한옥 창살)</option>
+                      <option value="irworobong" data-i18n="editor.deco.patternIrworobong">일월오봉도 그림</option>
                     </select>
                   </div>
                   <div class="deco-colors">
@@ -668,6 +671,10 @@
                     <option value="thin" data-i18n="editor.deco.borderThin">얇은 선</option>
                     <option value="thick" data-i18n="editor.deco.borderThick">두꺼운 선</option>
                     <option value="left" data-i18n="editor.deco.borderLeft">왼쪽 강조 띠</option>
+                    <option value="obang" data-i18n="editor.deco.borderObang">오방색 띠 (위·아래)</option>
+                    <option value="dancheong" data-i18n="editor.deco.borderDancheong">단청 띠 (위·아래)</option>
+                    <option value="najeon" data-i18n="editor.deco.borderNajeon">자개 띠 (위·아래)</option>
+                    <option value="bangwi" data-i18n="editor.deco.borderBangwi">방위 오방색 (위 북·오른쪽 동)</option>
                   </select>
                   <div class="deco-colors" id="decoBorderColorRow">
                     <label class="deco-color">
@@ -684,13 +691,25 @@
                     <option value="solid" data-i18n="editor.deco.dividerSolid">실선</option>
                     <option value="dashed" data-i18n="editor.deco.dividerDashed">점선</option>
                     <option value="double" data-i18n="editor.deco.dividerDouble">이중선</option>
+                    <option value="obang" data-i18n="editor.deco.dividerObang">오방색 띠</option>
+                    <option value="dancheong" data-i18n="editor.deco.dividerDancheong">단청 띠</option>
+                    <option value="najeon" data-i18n="editor.deco.dividerNajeon">자개 띠</option>
                   </select>
-                  <div class="deco-colors">
+                  <div class="deco-colors" id="decoDividerColorRow">
                     <label class="deco-color">
                       <input type="color" id="decoDividerColor" value="#cbd5e1" class="form-color">
                       <span data-i18n="editor.deco.dividerColor">구분선 색</span>
                     </label>
                   </div>
+                </div>
+
+                <!-- 장식 (태극 문양 + 건곤감리) -->
+                <div class="deco-item">
+                  <label for="decoOrnament" class="form-label" data-i18n="editor.deco.ornamentTitle">장식</label>
+                  <select id="decoOrnament" class="form-select small-select">
+                    <option value="none" data-i18n="editor.deco.ornamentNone">없음</option>
+                    <option value="taegeuk" data-i18n="editor.deco.ornamentTaegeuk">태극 문양 + 건곤감리</option>
+                  </select>
                 </div>
 
                 <!-- 아이콘 위치 (🌐 사전 · 📘 보조 사전 · 🔊 읽어주기): 글자 옆 / 글자 아래 따로 한 줄 -->

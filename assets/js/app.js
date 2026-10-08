@@ -342,19 +342,83 @@ document.addEventListener('DOMContentLoaded', () => {
     borderColor: '#cbd5e1',
     divider: 'solid',       // solid 실선 | dashed 점선 | double 이중선
     dividerColor: '#cbd5e1',
+    ornament: 'none',       // none | taegeuk 태극 문양(위 가운데) + 건곤감리(네 모서리)
     textColor: '#202124',
     mutedColor: '#64748b',
   };
   const DECO_CHOICES = {
     bgType: ['solid', 'gradient', 'pattern'],
     bgDir: ['down', 'right', 'diagonal'],
-    bgPattern: ['dots', 'grid', 'lines', 'fiber'],
+    bgPattern: ['dots', 'grid', 'lines', 'fiber', 'jogakbo', 'munsal', 'irworobong'],
     box: ['none', 'round', 'shadow', 'sheet'],
-    border: ['none', 'thin', 'thick', 'left'],
-    divider: ['solid', 'dashed', 'double'],
+    border: ['none', 'thin', 'thick', 'left', 'obang', 'dancheong', 'najeon', 'bangwi'],
+    divider: ['solid', 'dashed', 'double', 'obang', 'dancheong', 'najeon'],
+    ornament: ['none', 'taegeuk'],
   };
   const DECO_COLOR_KEYS = ['bgColor', 'bgColor2', 'boxColor', 'borderColor', 'dividerColor', 'textColor', 'mutedColor'];
   const BG_DIR_CSS = { down: 'to bottom', right: 'to right', diagonal: '135deg' };
+
+  // 전통 색 띠 (테두리 obang/dancheong = 위·아래 띠, 구분선 obang/dancheong = 띠 한 줄)
+  // 색이 정해져 있어 테두리 색 · 구분선 색은 쓰지 않음
+  const STRIPE_COLORS = {
+    // 오방색: 청 · 적 · 황 · 백 · 흑 (백은 밝은 바탕에서 빈칸처럼 보이지 않게 살짝 어두운 흰색)
+    obang: ['#1f4e9c', '#c8102e', '#f2b705', '#e3dccb', '#1a1a1a'],
+    dancheong: ['#1d3f8f', '#f4efe4', '#2e7d5b', '#e8b51a', '#b8321f', '#e8b51a', '#2e7d5b', '#f4efe4', '#1d3f8f'], // 단청 머리초 띠
+    najeon: ['#e9f3f1', '#bfe3e6', '#d9c9ef', '#f3d6e4', '#c9eadb', '#f6efd9', '#c4d7f2'], // 자개: 무지갯빛 조각
+  };
+
+  // 태극 문양 + 건곤감리 (그림 파일 없이 CSS 그라데이션 층으로 그림 → 인터넷 없이도 보임)
+  // 태극: 위 빨강 · 아래 파랑 / 괘: 건(왼쪽 위) · 감(오른쪽 위) · 리(왼쪽 아래) · 곤(오른쪽 아래), 1 = 이어진 막대, 0 = 끊어진 막대
+  const TAEGEUK_RED = '#cd2e3a';
+  const TAEGEUK_BLUE = '#0047a0';
+  const TRIGRAMS = [
+    { bars: [1, 1, 1], x: 'left', y: 'top' },     // 건 ☰
+    { bars: [0, 1, 0], x: 'right', y: 'top' },    // 감 ☵
+    { bars: [1, 0, 1], x: 'left', y: 'bottom' },  // 리 ☲
+    { bars: [0, 0, 0], x: 'right', y: 'bottom' }, // 곤 ☷
+  ];
+  // 반환: [{ img, pos, size }] (위에 그려질 층이 먼저), s = 크기 배율 (1보다 작으면 테마 버튼용: 괘 없이 오른쪽 위에 태극만)
+  function getOrnamentLayers(kind, lineColor, s = 1) {
+    if (kind !== 'taegeuk') return [];
+    const px = n => `${Number((n * s).toFixed(2))}px`;
+    const R = 13; // 태극 반지름
+    const mini = s < 1;
+    const top = mini ? 3 : 12;
+    const at = y => (mini ? `right ${px(3 / s)} top ${px(y)}` : `center top ${px(y)}`);
+    const layers = [
+      { img: `radial-gradient(circle ${px(R / 2)} at ${px(R / 2)} ${px(R)}, ${TAEGEUK_RED} ${px(R / 2 - 0.5)}, transparent ${px(R / 2)})`, pos: at(top), size: `${px(R * 2)} ${px(R * 2)}` },
+      { img: `radial-gradient(circle ${px(R / 2)} at ${px(R * 1.5)} ${px(R)}, ${TAEGEUK_BLUE} ${px(R / 2 - 0.5)}, transparent ${px(R / 2)})`, pos: at(top), size: `${px(R * 2)} ${px(R * 2)}` },
+      { img: `radial-gradient(circle ${px(R)} at 50% 100%, ${TAEGEUK_RED} ${px(R - 0.5)}, transparent ${px(R)})`, pos: at(top), size: `${px(R * 2)} ${px(R)}` },
+      { img: `radial-gradient(circle ${px(R)} at 50% 0%, ${TAEGEUK_BLUE} ${px(R - 0.5)}, transparent ${px(R)})`, pos: at(top + R), size: `${px(R * 2)} ${px(R)}` },
+    ];
+    if (mini) return layers;
+    // 괘: 막대 폭 18 · 두께 3 · 간격 3, 끊어진 막대는 7 + 7 (가운데 4 비움)
+    const W = 18, H = 3, GAP = 3, INSET = 12, HALF = 7;
+    const bar = `linear-gradient(${lineColor}, ${lineColor})`;
+    TRIGRAMS.forEach(tg => {
+      tg.bars.forEach((solid, row) => {
+        const offY = tg.y === 'top' ? INSET + row * (H + GAP) : INSET + (2 - row) * (H + GAP);
+        const segs = solid ? [{ off: 0, w: W }] : [{ off: 0, w: HALF }, { off: W - HALF, w: HALF }];
+        segs.forEach(seg => {
+          // 오른쪽 괘는 오른쪽 끝에서 잰 거리로 위치 지정
+          const offX = tg.x === 'left' ? INSET + seg.off : INSET + (W - seg.off - seg.w);
+          layers.push({ img: bar, pos: `${tg.x} ${px(offX)} ${tg.y} ${px(offY)}`, size: `${px(seg.w)} ${px(H)}` });
+        });
+      });
+    });
+    return layers;
+  }
+  const isStripe = value => Object.prototype.hasOwnProperty.call(STRIPE_COLORS, value);
+  // 색동처럼 가는 색 줄이 가로로 반복 (seg = 한 색의 폭 px, 작은 테마 버튼은 좁게)
+  // 오방색은 반복 없이 다섯 색을 크게 한 번씩 (폭을 똑같이 나눔)
+  function getStripeImage(kind, seg = 12) {
+    const colors = STRIPE_COLORS[kind];
+    if (kind === 'obang') {
+      const pct = i => `${i * (100 / colors.length)}%`;
+      return `linear-gradient(90deg, ${colors.map((c, i) => `${c} ${pct(i)} ${pct(i + 1)}`).join(', ')})`;
+    }
+    return `repeating-linear-gradient(90deg, ${colors.map((c, i) => `${c} ${i * seg}px ${(i + 1) * seg}px`).join(', ')})`;
+  }
   const deco = { ...DECO_DEFAULTS };
 
   // 한 번에 꾸미기 (테마): 배경 · 상자 · 테두리 · 구분선 · 카드 글꼴 · 필드 색 (1번째 = 본문, 2번째 = 강조, 나머지 = 연하게)
@@ -374,8 +438,58 @@ document.addEventListener('DOMContentLoaded', () => {
       deco: { bgType: 'gradient', bgColor: '#161c2f', bgColor2: '#0b0f1b', bgDir: 'down', box: 'shadow', boxColor: '#1c2339', border: 'thin', borderColor: '#9c8240', divider: 'double', dividerColor: '#b8954a', textColor: '#f2ead8', mutedColor: '#a9aec0' },
     },
     {
-      id: 'hanji', icon: '🏯', font: 'serif', colors: ['#1f1a16', '#9e2a2b', '#6b5d4f'],
-      deco: { bgType: 'pattern', bgColor: '#f3ead7', bgColor2: '#8a6a3f', bgPattern: 'fiber', border: 'thin', borderColor: '#c9b48f', divider: 'double', dividerColor: '#9e2a2b', textColor: '#1f1a16', mutedColor: '#6b5d4f' },
+      id: 'hanji', group: 'trad', icon: '📜', font: 'serif', colors: ['#1f1a16', '#9e2a2b', '#6b5d4f'],
+      deco: { bgType: 'pattern', bgColor: '#faf6ec', bgColor2: '#a08560', bgPattern: 'fiber', border: 'thin', borderColor: '#ddd0b6', divider: 'double', dividerColor: '#9e2a2b', textColor: '#1f1a16', mutedColor: '#6b5d4f' },
+    },
+    {
+      // 오방색: 미색 바탕 + 가운데 구분선 한 줄만 오방색 띠 (여백을 살림), 1번째 = 청, 2번째 = 적, 나머지 = 황(진한 황토)
+      id: 'obang', group: 'trad', icon: '🌈', font: 'gothic', colors: ['#1f4e9c', '#c8102e', '#8a6100'],
+      deco: { bgType: 'solid', bgColor: '#fbf8f1', border: 'none', borderColor: '#1f4e9c', divider: 'obang', dividerColor: '#c8102e', textColor: '#1a1a1a', mutedColor: '#6b6252' },
+    },
+    {
+      // 방위 오방색: 카드 판 = 중앙 황(옅은 노랑), 네 변 = 동서남북 (지도처럼 위가 북)
+      id: 'bangwi', group: 'trad', icon: '🧭', font: 'gothic', colors: ['#1f4e9c', '#c8102e', '#8a6100'],
+      deco: { bgType: 'solid', bgColor: '#e8e2d2', box: 'round', boxColor: '#fdf6d6', border: 'bangwi', borderColor: '#1f4e9c', divider: 'solid', dividerColor: '#e0c35a', textColor: '#1a1a1a', mutedColor: '#6b6252' },
+    },
+    {
+      // 일월오봉도: 군청 하늘 + 해 · 달 · 다섯 봉우리 · 물결, 가운데 미색 판
+      id: 'irworobong', group: 'trad', icon: '🌄', font: 'serif', colors: ['#2b2118', '#b8321f', '#1d3f8f'],
+      deco: { bgType: 'pattern', bgColor: '#23406e', bgColor2: '#2f7a6a', bgPattern: 'irworobong', box: 'shadow', boxColor: '#f8f3e6', border: 'thin', borderColor: '#c9a24a', divider: 'double', dividerColor: '#c9a24a', textColor: '#2b2118', mutedColor: '#6b5d4f' },
+    },
+    {
+      // 단청: 뇌록(청록) 바탕 위 미색 판 + 단청 띠
+      id: 'dancheong', group: 'trad', icon: '🖌️', font: 'serif', colors: ['#2b2118', '#b8321f', '#1d3f8f'],
+      deco: { bgType: 'solid', bgColor: '#2b5547', box: 'round', boxColor: '#f6efe0', border: 'dancheong', borderColor: '#b8321f', divider: 'dancheong', dividerColor: '#b8321f', textColor: '#2b2118', mutedColor: '#6b5d4f' },
+    },
+    {
+      // 태극: 흰 바탕 + 위 가운데 태극 문양 + 네 모서리 건곤감리, 1번째 = 청, 2번째 = 홍
+      id: 'taegeuk', group: 'trad', icon: '☯️', font: 'gothic', colors: ['#0047a0', '#cd2e3a', '#444444'],
+      deco: { bgType: 'solid', bgColor: '#ffffff', border: 'thin', borderColor: '#d5d9e0', ornament: 'taegeuk', divider: 'solid', dividerColor: '#9fb3d1', textColor: '#1a1a1a', mutedColor: '#5f6368' },
+    },
+    {
+      // 조각보: 색 천 조각 바탕 위에 흰 판
+      id: 'jogakbo', group: 'trad', icon: '🧵', font: 'gothic', colors: ['#3b3330', '#b5446e', '#5f7d6b'],
+      deco: { bgType: 'pattern', bgColor: '#f7f2e8', bgColor2: '#ffffff', bgPattern: 'jogakbo', box: 'shadow', boxColor: '#fffdf8', divider: 'dashed', dividerColor: '#e7a9b4', textColor: '#3b3330', mutedColor: '#7a6d66' },
+    },
+    {
+      // 청자: 비취색 그라데이션 + 맑은 판
+      id: 'celadon', group: 'trad', icon: '🏺', font: 'serif', colors: ['#1f3a31', '#2e6b5a', '#5d7a6e'],
+      deco: { bgType: 'gradient', bgColor: '#d7e8de', bgColor2: '#a8c9b6', bgDir: 'down', box: 'shadow', boxColor: '#f3f8f3', border: 'thin', borderColor: '#86ad99', divider: 'double', dividerColor: '#86ad99', textColor: '#1f3a31', mutedColor: '#5d7a6e' },
+    },
+    {
+      // 자개: 검은 옻칠 바탕 + 무지갯빛 자개 띠
+      id: 'najeon', group: 'trad', icon: '🐚', font: 'serif', colors: ['#f1ece4', '#f0b7c9', '#a9c7cf'],
+      deco: { bgType: 'solid', bgColor: '#141216', box: 'shadow', boxColor: '#1c1a1f', border: 'najeon', borderColor: '#c4d7f2', divider: 'najeon', dividerColor: '#c4d7f2', textColor: '#f1ece4', mutedColor: '#a9a4b0' },
+    },
+    {
+      // 문살: 한옥 창살 무늬 바탕 + 한지 판 + 나무 테두리
+      id: 'munsal', group: 'trad', icon: '🪟', font: 'serif', colors: ['#2b2118', '#8a3b1f', '#6b5d4f'],
+      deco: { bgType: 'pattern', bgColor: '#efe3c8', bgColor2: '#8a5a36', bgPattern: 'munsal', box: 'round', boxColor: '#f8f2e4', border: 'thick', borderColor: '#7a5230', divider: 'solid', dividerColor: '#b08a5f', textColor: '#2b2118', mutedColor: '#6b5d4f' },
+    },
+    {
+      // 민화: 모란 분홍 · 연두 그라데이션 + 따뜻한 판
+      id: 'minhwa', group: 'trad', icon: '🌺', font: 'gothic', colors: ['#3d2b2b', '#c43d6b', '#4f7a3a'],
+      deco: { bgType: 'gradient', bgColor: '#fbe1e7', bgColor2: '#e9f3d6', bgDir: 'diagonal', box: 'shadow', boxColor: '#fffaf5', divider: 'dashed', dividerColor: '#e79bb1', textColor: '#3d2b2b', mutedColor: '#7a6a62' },
     },
     {
       id: 'chalk', icon: '🟩', font: 'gothic', colors: ['#f3f1e7', '#f6d76b', '#b9c8bc'],
@@ -404,6 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
     borderColor: document.getElementById('decoBorderColor'),
     divider: document.getElementById('decoDivider'),
     dividerColor: document.getElementById('decoDividerColor'),
+    ornament: document.getElementById('decoOrnament'),
   };
   const themeSwatches = document.getElementById('themeSwatches');
 
@@ -2143,7 +2258,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const look = {
       hasBox,
-      hasWrapper: hasBox || d.border !== 'none',
+      hasWrapper: hasBox || d.border !== 'none' || d.ornament !== 'none',
       surfaceDark,
       text,
       bgColor: d.bgColor,
@@ -2152,6 +2267,7 @@ document.addEventListener('DOMContentLoaded', () => {
       borderColor: d.borderColor,
       dividerColor: d.dividerColor,
       shadow: '0 6px 24px rgba(15, 23, 42, 0.12)',
+      ornamentLine: surfaceDark ? 'rgba(255, 255, 255, 0.45)' : 'rgba(0, 0, 0, 0.55)', // 건곤감리 막대 색
       fieldColor: color => color,
     };
     if (!isNight) return look;
@@ -2177,6 +2293,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ? mixHex(color, nightSurface, 0.6)
         : mixHex(getDarkModeColor(color), nightSurface, 0.3));
       look.text = '#f8fafc';
+      look.ornamentLine = 'rgba(255, 255, 255, 0.45)';
       // 꾸민 카드는 바탕색이 다양하므로 글자가 충분히 또렷해질 때까지(대비 4.5 이상) 더 밝게 보정
       // (꾸미기 기본값이면 예전과 같은 색 그대로)
       // 원래 채도를 살려(연한 회색은 연한 회색 그대로) 밝기만 올림 → 테마 분위기 유지
@@ -2190,8 +2307,25 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 은은한 무늬 (그림 파일 없이 CSS 그라데이션만 사용 → 인터넷 없이도 보임)
-  function getPatternCss(pattern, color) {
+  // base: 바탕색 (조각보 천 색을 바탕에 맞춰 밝게/어둡게)
+  function getPatternCss(pattern, color, base = '#ffffff') {
     switch (pattern) {
+      case 'jogakbo': {
+        // 조각보: 네 가지 색 천 조각 + 바느질 선(무늬 색) — 96×72 칸이 반복
+        const dark = isDarkColor(base);
+        const [p1, p2, p3, p4] = ['#f3c9cf', '#cfe5da', '#f5e4ab', '#d8cfe8'].map(c => mixHex(c, base, dark ? 0.72 : 0.08));
+        return {
+          image: [
+            `linear-gradient(90deg, ${color} 0 2px, transparent 2px 35px, ${color} 35px 37px, transparent 37px)`,
+            `linear-gradient(${color} 0 2px, transparent 2px 43px, ${color} 43px 45px, transparent 45px)`,
+            `conic-gradient(from 90deg at 36px 44px, ${p1} 0 25%, ${p2} 0 50%, ${p3} 0 75%, ${p4} 0)`,
+          ].join(', '),
+          size: '96px 72px',
+        };
+      }
+      case 'munsal':
+        // 문살: 한옥 창살처럼 굵은 나무 격자 (세로로 긴 칸)
+        return { image: `linear-gradient(${color} 3px, transparent 3px), linear-gradient(90deg, ${color} 3px, transparent 3px)`, size: '28px 40px' };
       case 'grid':
         return { image: `linear-gradient(${color} 1px, transparent 1px), linear-gradient(90deg, ${color} 1px, transparent 1px)`, size: '22px 22px' };
       case 'lines':
@@ -2219,23 +2353,72 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 배경 그림 선언 목록 (background-color 제외, 단색이면 빈 목록)
   // forAnki: Anki 카드는 그라데이션을 화면에 고정해 길게 스크롤해도 끊기지 않게
-  function getBackgroundImageDecls(look, d = deco, forAnki = true) {
+  function getBackgroundImageDecls(look, d = deco, forAnki = true, s = 1) {
     if (d.bgType === 'gradient') {
       const decls = [`background-image: linear-gradient(${BG_DIR_CSS[d.bgDir] || 'to bottom'}, ${look.bgColor}, ${look.bgColor2});`];
       if (forAnki) decls.push('background-attachment: fixed;', 'background-repeat: no-repeat;');
       return decls;
     }
+    if (d.bgType === 'pattern' && d.bgPattern === 'irworobong') {
+      // 일월오봉도: 그림 전체가 화면 하나에 맞게 (Anki는 화면에 고정해 스크롤해도 그대로)
+      const layers = getIrworobongLayers(look.bgColor2, s);
+      const decls = [
+        `background-image: ${layers.map(l => l.img).join(', ')};`,
+        `background-position: ${layers.map(l => l.pos).join(', ')};`,
+        `background-size: ${layers.map(l => l.size).join(', ')};`,
+        `background-repeat: ${layers.map(l => l.repeat || 'no-repeat').join(', ')};`,
+      ];
+      if (forAnki) decls.push('background-attachment: fixed;');
+      return decls;
+    }
     if (d.bgType === 'pattern') {
-      const p = getPatternCss(d.bgPattern, look.bgColor2);
+      const p = getPatternCss(d.bgPattern, look.bgColor2, look.bgColor);
       return p.size ? [`background-image: ${p.image};`, `background-size: ${p.size};`] : [`background-image: ${p.image};`];
     }
     return [];
+  }
+
+  // 일월오봉도 (해 · 달 · 다섯 봉우리 · 물결): 그림 파일 없이 CSS 도형으로 단순하게
+  // 봉우리는 'to bottom right/left' 그라데이션의 50% 경계(칸의 대각선)로 삼각형 반쪽씩 그림
+  // mountain = 봉우리 색 (무늬 색), s = 크기 배율 (테마 버튼은 작게)
+  function getIrworobongLayers(mountain, s = 1) {
+    const px = n => `${Number((n * s).toFixed(2))}px`;
+    const SUN = '#d23a2f';
+    const MOON = '#f3efe2';
+    const WATER = '#3f78ad';
+    const layers = [
+      { img: `radial-gradient(circle ${px(30)} at 76% 50%, ${SUN} ${px(29)}, transparent ${px(30)})`, pos: '0 0', size: '100% 100%' },
+      { img: `radial-gradient(circle ${px(27)} at 24% 50%, ${MOON} ${px(26)}, transparent ${px(27)})`, pos: '0 0', size: '100% 100%' },
+      // 물결: 흰 물마루 + 파란 테두리가 가로로 반복
+      { img: `radial-gradient(circle at 50% 100%, ${MOON} 0 ${px(11)}, ${WATER} ${px(11)} ${px(16)}, transparent ${px(16)})`, pos: `left 0 bottom ${px(14)}`, size: `${px(34)} ${px(17)}`, repeat: 'repeat-x' },
+      { img: `linear-gradient(${WATER}, ${WATER})`, pos: 'left bottom', size: `100% ${px(15)}` },
+    ];
+    // 봉우리: 둥근 꼭대기의 반타원, 가운데가 가장 높고 바깥으로 갈수록 낮게 (가운데 = 조금 더 짙은 색, 먼저 = 위에 그려짐)
+    const peaks = [
+      { cx: 50, w: 30, h: 46, color: mixHex(mountain, '#000000', 0.15) },
+      { cx: 27, w: 28, h: 36, color: mountain },
+      { cx: 73, w: 28, h: 36, color: mountain },
+      { cx: 8, w: 26, h: 26, color: mixHex(mountain, '#ffffff', 0.12) },
+      { cx: 92, w: 26, h: 26, color: mixHex(mountain, '#ffffff', 0.12) },
+    ];
+    // background-position %는 '칸의 x% 지점을 화면의 x% 지점에' 맞추므로 왼쪽 끝 위치를 그 값으로 바꿈
+    const posX = (left, tile) => `${Number((left / (100 - tile) * 100).toFixed(2))}%`;
+    peaks.forEach(pk => {
+      layers.push({ img: `radial-gradient(ellipse 50% 100% at 50% 100%, ${pk.color} 99%, transparent 100%)`, pos: `${posX(pk.cx - pk.w / 2, pk.w)} 100%`, size: `${pk.w}% ${pk.h}%` });
+    });
+    return layers;
   }
 
   // 구분선 (hr#answer) 선 모양
   function getDividerCss(color, d = deco) {
     const line = { solid: '1px solid', dashed: '2px dashed', double: '3px double' }[d.divider] || '1px solid';
     return `${line} ${color}`;
+  }
+
+  // 구분선 (hr#answer) 선언 목록: 전통 색 띠는 선 대신 얇은 줄무늬 막대
+  function getDividerDecls(color, d = deco) {
+    if (isStripe(d.divider)) return ['border: none;', 'height: 5px;', `background-image: ${getStripeImage(d.divider)};`];
+    return ['border: none;', `border-top: ${getDividerCss(color, d)};`];
   }
 
   // 📊 표 모양 (스프레드시트) 색: 칸 선 · 머리글(열 글자·행 번호)
@@ -2324,6 +2507,11 @@ ${sel('::after')} {
     return rules.join('\n\n');
   }
 
+  // 카드 상자 바탕색: 일월오봉도처럼 그림 배경은 상자를 살짝 비치게 해 뒤의 해 · 달 · 봉우리가 보이게
+  function getBoxFill(look, d = deco) {
+    return d.bgType === 'pattern' && d.bgPattern === 'irworobong' ? hexToRgba(look.boxColor, 0.8) : look.boxColor;
+  }
+
   // 카드 상자 (.card-box) 선언 목록: 둥근 카드 · 그림자 · 테두리 · 표 모양
   function getCardBoxDecls(look, d = deco) {
     if (d.box === 'sheet') {
@@ -2342,7 +2530,7 @@ ${sel('::after')} {
     }
     const decls = ['box-sizing: border-box;', 'max-width: 560px;', 'margin: 0 auto;'];
     if (look.hasBox) {
-      decls.push('padding: 1.5rem 1.25rem;', 'border-radius: 16px;', `background-color: ${look.boxColor};`);
+      decls.push('padding: 1.5rem 1.25rem;', 'border-radius: 16px;', `background-color: ${getBoxFill(look, d)};`);
       if (d.box === 'shadow') decls.push(`box-shadow: ${look.shadow};`);
     } else {
       decls.push('padding: 1rem 1.25rem;');
@@ -2351,7 +2539,39 @@ ${sel('::after')} {
     if (d.border === 'thin') decls.push(`border: 1px solid ${look.borderColor};`);
     if (d.border === 'thick') decls.push(`border: 3px solid ${look.borderColor};`);
     if (d.border === 'left') decls.push(`border-left: 6px solid ${look.borderColor};`);
-    return decls;
+    if (d.border === 'bangwi') decls.push(...getBangwiBorderDecls(7), 'border-radius: 4px;');
+    if (d.ornament !== 'none') decls.push('padding-top: 3.25rem;');
+    return decls.concat(getBoxLayerDecls(look, d));
+  }
+
+  // 방위 오방색 테두리 (지도식): 위 = 북 흑 · 오른쪽 = 동 청 · 아래 = 남 적 · 왼쪽 = 서 백, 카드 판 = 중앙 황
+  // 서쪽의 백은 밝은 바탕에서도 보이게 아주 옅은 회색빛 흰색
+  const BANGWI_COLORS = { top: '#1a1a1a', right: '#1f4e9c', bottom: '#c8102e', left: '#fbfaf5' };
+  function getBangwiBorderDecls(width) {
+    const c = BANGWI_COLORS;
+    return ['border-style: solid;', `border-width: ${width}px;`, `border-color: ${c.top} ${c.right} ${c.bottom} ${c.left};`];
+  }
+
+  // 상자 배경 그림 층: 전통 색 띠(위·아래) + 장식(태극 등)
+  // 배경 그림이라 둥근 모서리 안쪽으로 잘리고, 글자·아이콘 클릭을 막지 않음
+  function getBoxLayers(look, d = deco, s = 1) {
+    const layers = getOrnamentLayers(d.ornament, look.ornamentLine, s);
+    if (isStripe(d.border)) {
+      const img = getStripeImage(d.border, s < 1 ? 4 : 12);
+      const h = `${Math.max(2, Math.round(6 * s))}px`;
+      layers.push({ img, pos: 'left top', size: `100% ${h}` }, { img, pos: 'left bottom', size: `100% ${h}` });
+    }
+    return layers;
+  }
+  function getBoxLayerDecls(look, d = deco, s = 1) {
+    const layers = getBoxLayers(look, d, s);
+    if (!layers.length) return [];
+    return [
+      `background-image: ${layers.map(l => l.img).join(', ')};`,
+      `background-position: ${layers.map(l => l.pos).join(', ')};`,
+      `background-size: ${layers.map(l => l.size).join(', ')};`,
+      'background-repeat: no-repeat;',
+    ];
   }
 
   // 카드 상자를 쓰면 앞면·뒷면 내용을 <div class="card-box">로 감쌈
@@ -2375,7 +2595,8 @@ ${sel('::after')} {
     toggleRow('decoBgDirRow', deco.bgType === 'gradient');
     toggleRow('decoBgPatternRow', deco.bgType === 'pattern');
     toggleRow('decoBoxColorRow', deco.box !== 'none');
-    toggleRow('decoBorderColorRow', deco.border !== 'none');
+    toggleRow('decoBorderColorRow', deco.border !== 'none' && deco.border !== 'bangwi' && !isStripe(deco.border));
+    toggleRow('decoDividerColorRow', !isStripe(deco.divider));
     if (themeSwatches) {
       themeSwatches.querySelectorAll('.theme-swatch').forEach(btn => {
         const active = btn.dataset.theme === deco.theme;
@@ -2389,41 +2610,57 @@ ${sel('::after')} {
   function renderThemeSwatches() {
     if (!themeSwatches) return;
     themeSwatches.innerHTML = '';
-    THEMES.forEach(theme => {
-      const d = { ...DECO_DEFAULTS, ...theme.deco };
-      const look = getDecoLook(false, d);
-      const bgStyle = [`background-color: ${getBackgroundColor(look, d)};`, ...getBackgroundImageDecls(look, d, false)];
-      if (d.bgType === 'pattern' && d.bgPattern === 'lines') bgStyle.push('background-size: 100% 12px;');
-      // 작은 버튼에 맞게 줄인 상자 · 테두리 · 구분선
-      const boxStyle = [];
-      if (look.hasBox) boxStyle.push(`background-color: ${look.boxColor};`, 'border-radius: 6px;');
-      if (d.box === 'shadow') boxStyle.push('box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);');
-      if (!look.hasBox && (d.border === 'thin' || d.border === 'thick')) boxStyle.push('border-radius: 4px;');
-      if (d.border === 'thin') boxStyle.push(`border: 1px solid ${look.borderColor};`);
-      if (d.border === 'thick') boxStyle.push(`border: 2px solid ${look.borderColor};`);
-      if (d.border === 'left') boxStyle.push(`border-left: 3px solid ${look.borderColor};`);
-      if (d.box === 'sheet') {
-        // 표 모양: 작은 칸 선 + 위·왼쪽 머리글 띠
-        const c = getSheetColors(look);
-        boxStyle.push(`background-image: ${getSheetGridImage(c.line)};`, 'background-size: 16px 8px;', 'border-radius: 0;',
-          `box-shadow: inset 0 6px 0 ${c.head}, inset 7px 0 0 ${c.head};`, `outline: 1px solid ${c.line};`);
-      }
-      const lineStyle = `${{ solid: '1px solid', dashed: '1px dashed', double: '3px double' }[d.divider]} ${look.dividerColor}`;
-      const name = t(`editor.theme.${theme.id}`);
-
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'theme-swatch';
-      btn.dataset.theme = theme.id;
-      btn.title = t('editor.deco.themeApplyTitle', { name });
-      btn.innerHTML = `<span class="theme-swatch-card" style="${escapeHtml(bgStyle.join(' '))}">`
-        // 견본 글자(가 A)는 CSS 가짜 요소로 그려 버튼 이름 글자에 섞이지 않게 함 (editor.css .theme-swatch-box)
-        + `<span class="theme-swatch-box" style="${escapeHtml(boxStyle.join(' '))} font-family: ${escapeHtml(getFontFamilyCss(theme.font))}; --swatch-main: ${theme.colors[0]}; --swatch-accent: ${theme.colors[1]};">`
-        + `<span class="theme-swatch-line" style="border-top: ${lineStyle};"></span>`
-        + `</span></span><span class="theme-swatch-name">${theme.icon} ${escapeHtml(name)}</span>`;
-      btn.addEventListener('click', () => applyTheme(theme.id));
-      themeSwatches.appendChild(btn);
+    // 기본 테마 / 전통 테마 묶음으로 나눠 보여 줌 (묶음 제목은 한 줄 전체)
+    const groups = [['basic', THEMES.filter(th => !th.group)], ['trad', THEMES.filter(th => th.group === 'trad')]];
+    groups.forEach(([groupId, list]) => {
+      const title = document.createElement('div');
+      title.className = 'theme-group-title';
+      title.textContent = t(groupId === 'trad' ? 'editor.deco.themeGroupTrad' : 'editor.deco.themeGroupBasic');
+      themeSwatches.appendChild(title);
+      list.forEach(theme => renderThemeSwatch(theme));
     });
+  }
+
+  // 테마 버튼 하나
+  function renderThemeSwatch(theme) {
+    const d = { ...DECO_DEFAULTS, ...theme.deco };
+    const look = getDecoLook(false, d);
+    const bgStyle = [`background-color: ${getBackgroundColor(look, d)};`, ...getBackgroundImageDecls(look, d, false, 0.3)];
+    if (d.bgType === 'pattern' && d.bgPattern === 'lines') bgStyle.push('background-size: 100% 12px;');
+    // 작은 버튼에 맞게 줄인 상자 · 테두리 · 구분선
+    const boxStyle = [];
+    if (look.hasBox) boxStyle.push(`background-color: ${getBoxFill(look, d)};`, 'border-radius: 6px;');
+    if (d.box === 'shadow') boxStyle.push('box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);');
+    if (!look.hasBox && (d.border === 'thin' || d.border === 'thick')) boxStyle.push('border-radius: 4px;');
+    if (d.border === 'thin') boxStyle.push(`border: 1px solid ${look.borderColor};`);
+    if (d.border === 'thick') boxStyle.push(`border: 2px solid ${look.borderColor};`);
+    if (d.border === 'left') boxStyle.push(`border-left: 3px solid ${look.borderColor};`);
+    if (d.box === 'sheet') {
+      // 표 모양: 작은 칸 선 + 위·왼쪽 머리글 띠
+      const c = getSheetColors(look);
+      boxStyle.push(`background-image: ${getSheetGridImage(c.line)};`, 'background-size: 16px 8px;', 'border-radius: 0;',
+        `box-shadow: inset 0 6px 0 ${c.head}, inset 7px 0 0 ${c.head};`, `outline: 1px solid ${c.line};`);
+    }
+    if (d.border === 'bangwi') boxStyle.push(...getBangwiBorderDecls(3), 'border-radius: 3px;');
+    if (d.box !== 'sheet') boxStyle.push(...getBoxLayerDecls(look, d, 0.45));
+
+    const lineStyle = isStripe(d.divider)
+      ? `height: 3px; background-image: ${getStripeImage(d.divider, 4)};`
+      : `border-top: ${{ solid: '1px solid', dashed: '1px dashed', double: '3px double' }[d.divider]} ${look.dividerColor};`;
+    const name = t(`editor.theme.${theme.id}`);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'theme-swatch';
+    btn.dataset.theme = theme.id;
+    btn.title = t('editor.deco.themeApplyTitle', { name });
+    btn.innerHTML = `<span class="theme-swatch-card" style="${escapeHtml(bgStyle.join(' '))}">`
+      // 견본 글자(가 A)는 CSS 가짜 요소로 그려 버튼 이름 글자에 섞이지 않게 함 (editor.css .theme-swatch-box)
+      + `<span class="theme-swatch-box" style="${escapeHtml(boxStyle.join(' '))} font-family: ${escapeHtml(getFontFamilyCss(theme.font))}; --swatch-main: ${theme.colors[0]}; --swatch-accent: ${theme.colors[1]};">`
+      + `<span class="theme-swatch-line" style="${escapeHtml(lineStyle)}"></span>`
+      + `</span></span><span class="theme-swatch-name">${theme.icon} ${escapeHtml(name)}</span>`;
+    btn.addEventListener('click', () => applyTheme(theme.id));
+    themeSwatches.appendChild(btn);
   }
 
   // 테마 적용: 꾸미기 설정 · 카드 글꼴 · 필드 색을 한 번에 바꿈 (적용 후에도 하나씩 더 고칠 수 있음)
@@ -2748,9 +2985,11 @@ ${indentDecls(getCardBoxDecls(look))}}`;
         if (deco.border === 'left') nightBoxDecls.push(`border-left-color: ${night.borderColor};`);
         if (deco.border === 'thin' || deco.border === 'thick') nightBoxDecls.push(`outline-color: ${night.borderColor};`);
       } else {
-        if (look.hasBox && night.boxColor !== look.boxColor) nightBoxDecls.push(`background-color: ${night.boxColor};`);
-        if (deco.border !== 'none' && night.borderColor !== look.borderColor) nightBoxDecls.push(`border-color: ${night.borderColor};`);
+        if (look.hasBox && night.boxColor !== look.boxColor) nightBoxDecls.push(`background-color: ${getBoxFill(night)};`);
+        if (deco.border !== 'none' && deco.border !== 'bangwi' && night.borderColor !== look.borderColor) nightBoxDecls.push(`border-color: ${night.borderColor};`);
         if (deco.box === 'shadow' && night.shadow !== look.shadow) nightBoxDecls.push(`box-shadow: ${night.shadow};`);
+        // 태극 장식의 괘 막대는 어두운 화면에서 밝은 색으로
+        if (deco.ornament !== 'none' && night.ornamentLine !== look.ornamentLine) nightBoxDecls.push(getBoxLayerDecls(night)[0]);
       }
       if (deco.box === 'sheet' && night.boxColor !== look.boxColor) {
         nightDecoSections += `\n\n${getSheetCss(night, ['.nightMode ', '.night_mode '], false)}`;
@@ -2830,11 +3069,7 @@ ${bgImageLines}  line-height: ${cardLineHeightVal};
 }
 
 hr#answer {
-  border: none;
-  border-top: ${getDividerCss(look.dividerColor)};
-  margin: 1.25rem 0;
-  width: 100%;
-}
+${indentDecls([...getDividerDecls(look.dividerColor), 'margin: 1.25rem 0;', 'width: 100%;'])}}
 
 a {
   color: inherit;
@@ -2901,6 +3136,8 @@ ${nightBgImageLines}}
     cardStyle.backgroundColor = decoOn ? getBackgroundColor(pLook) : '';
     cardStyle.backgroundImage = '';
     cardStyle.backgroundSize = '';
+    cardStyle.backgroundPosition = '';
+    cardStyle.backgroundRepeat = '';
     cardStyle.color = decoOn ? pLook.text : '';
     if (decoOn) {
       getBackgroundImageDecls(pLook, deco, false).forEach(decl => {
@@ -2909,7 +3146,7 @@ ${nightBgImageLines}}
       });
     }
     const hrHtml = decoOn
-      ? `<hr id="answer" style="${escapeHtml(`border: none; border-top: ${getDividerCss(pLook.dividerColor)};`)}">`
+      ? `<hr id="answer" style="${escapeHtml(getDividerDecls(pLook.dividerColor).join(' '))}">`
       : '<hr id="answer">';
 
     let html = '';
