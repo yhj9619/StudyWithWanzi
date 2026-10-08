@@ -477,8 +477,8 @@ document.addEventListener('DOMContentLoaded', () => {
       deco: { bgType: 'solid', bgColor: '#2b5547', box: 'round', boxColor: '#f6efe0', border: 'dancheong', borderColor: '#b8321f', divider: 'dancheong', dividerColor: '#b8321f', textColor: '#2b2118', mutedColor: '#6b5d4f' },
     },
     {
-      // 태극: 흰 바탕 + 위 가운데 태극 문양 + 네 모서리 건곤감리, 1번째 = 청, 2번째 = 홍
-      id: 'taegeuk', group: 'trad', icon: '☯️', font: 'gothic', colors: ['#0047a0', '#cd2e3a', '#444444'],
+      // 태극: 흰 바탕 + 위 가운데 태극 문양 + 네 모서리 건곤감리, 1번째 = 홍(상), 2번째 = 청(하)
+      id: 'taegeuk', group: 'trad', icon: '☯️', font: 'gothic', colors: ['#cd2e3a', '#0047a0', '#444444'],
       deco: { bgType: 'solid', bgColor: '#ffffff', border: 'thin', borderColor: '#d5d9e0', ornament: 'taegeuk', divider: 'solid', dividerColor: '#9fb3d1', textColor: '#1a1a1a', mutedColor: '#5f6368' },
     },
     {
