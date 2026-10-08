@@ -86,7 +86,7 @@ i18nRegister('en', {
   'guide.step2.flow3.desc': 'Clear out what\'s already in each tab (<kbd>Ctrl</kbd> + <kbd>A</kbd>, then paste) and replace it. When all 3 are in, press <b>[Save]</b>.',
   'guide.shot.templateWindow': 'The [Card Types] window — paste one into each tab at the top: Front Template · Back Template · Styling',
   'guide.step2.syncTip': '<strong>Easiest way: paste once, on your computer</strong><br>The card template is saved with the note type, so syncing applies it to your phone as well. If pasting long text on the phone is a hassle, do it on the computer and sync.',
-  'guide.step2.cta.title': '⚡ Anki Card Template Editor',
+  'guide.step2.cta.title': '🌄 Anki Card Template Editor',
   'guide.step2.cta.desc': 'Just match your target language (46 languages) and field names — the front template, back template, and styling to paste are made instantly.',
   'guide.step2.cta.button': 'Open the Card Template Editor ➔',
   'guide.step2.detail.summary': 'Learn more — the 3 tabs of the [Card Types] window, another way to open it',

@@ -17,7 +17,7 @@ i18nRegister('zh', {
   'manual.toc.faq.desc': '遇到问题时先确认的 12 件事',
 
   'manual.editor.badge': '工具 1',
-  'manual.editor.title': '⚡ 卡片模板编辑器',
+  'manual.editor.title': '🌄 卡片模板编辑器',
   'manual.editor.lead': '选好学习语言和字段、设计好卡片后，复制 ① 正面模板 ② 背面模板 ③ 样式，粘贴到 Anki 的工具。',
   'manual.editor.layoutTitle': '🖥️ 画面布局',
   'manual.editor.layout1': '<strong>左边 = 设置</strong>：依次是 ① 学习语言 → ② 字段 → ⚙️ 高级设置。',
@@ -31,7 +31,7 @@ i18nRegister('zh', {
   'manual.editor.fields2': '<strong>正面显示 · 背面显示</strong>：选择这个字段显示在卡片正面（题目）还是背面（答案）。两个都打开也可以。',
   'manual.editor.fields3': '<strong>🌐 外语词典 · 📘 辅助词典</strong>：打开后，卡片上这段文字旁边会出现词典图标，点一下就能直接打开搜索结果。📘 是用来查韩语释义的词典（默认是 Naver 韩语词典）。',
   'manual.editor.fields4': '<strong>🔊 朗读</strong>：打开后，Anki 会把这个字段的文字读出来。详情请看<a href="#tts">下方的 🔊 朗读</a>。',
-  'manual.editor.fields5': '<strong>⚡ 这个语言常用的字段</strong>：点一下拼音 · 假名注音 · 例句等所选语言常用的字段，就会马上添加。想自己起名字，请点 <b>[➕ 再添加一个空白字段]</b>。不需要的字段用 <b>[🗑️ 删除]</b> 删掉。',
+  'manual.editor.fields5': '<strong>✨ 这个语言常用的字段</strong>：点一下拼音 · 假名注音 · 例句等所选语言常用的字段，就会马上添加。想自己起名字，请点 <b>[➕ 再添加一个空白字段]</b>。不需要的字段用 <b>[🗑️ 删除]</b> 删掉。',
   'manual.editor.fields6': '<strong>修改字号 · 颜色</strong>：在右边的预览卡片上点击文字，就能在正下方的 <b>🎨 文字样式</b> 中修改字号 · 粗细 · 字体 · 颜色，改动会马上显示出来。',
   'manual.editor.fields7': '<strong>预览中显示的示例</strong>：只用于预览卡片的示例文字，和导入 Anki 的卡片内容无关。',
 
@@ -93,7 +93,7 @@ i18nRegister('zh', {
   'manual.copy.item2': '复制后按钮旁会显示 <b>✓ 已复制</b>，三栏都复制完会出现 🎉 提示。点 <b>[查看要粘贴的内容]</b> 可以确认要粘贴的内容。',
   'manual.copy.item3': '如果改了主题或字段，请把<b>三个全部重新</b>复制粘贴。只替换其中一个，卡片外观可能会错乱。',
   'manual.copy.item4': '打开 [卡片模板] 窗口的位置（电脑 · AnkiDroid · AnkiMobile）在 <a href="ankiGuide.html#templates">Anki 指南 Step 2</a> 中有配图说明。',
-  'manual.editor.cta.title': '⚡ Anki 卡片模板编辑器',
+  'manual.editor.cta.title': '🌄 Anki 卡片模板编辑器',
   'manual.editor.cta.desc': '看完说明就来设计卡片吧。设置会自动保存。',
   'manual.editor.cta.button': '打开卡片模板编辑器 ➔',
 
@@ -114,8 +114,8 @@ i18nRegister('zh', {
   'manual.prompt.countBody': '从名词 · 动词 · 形容词 · 副词 · 惯用语中选择要收录的单词种类，并设定最多提取多少个。',
   'manual.prompt.columnsTitle': '④ 单词表中放哪些项目、按什么顺序',
   'manual.prompt.columns1': '从上到下依次成为单词表文件的第 1 列、第 2 列……请<b>和 Anki 的字段顺序完全一致</b>。不一致的话，导入时内容会错位，比如例句跑到释义的位置。',
-  'manual.prompt.columns2': '用 <b>⚡ 点击添加项目</b> 中的按钮（拼音 · 例句等）或 <b>[➕ 手动添加项目]</b> 添加项目，再用上 · 下按钮调整顺序或删除。',
-  'manual.prompt.columns3': '点 <b>⚙️ 高级设置 ➔ [⚡ 导入卡片模板编辑器的字段]</b>，就会原样导入在编辑器中设定的字段顺序。<b>[🔄 重置为默认项目]</b> 会恢复成当前所选语言的默认项目。',
+  'manual.prompt.columns2': '用 <b>✨ 点击添加项目</b> 中的按钮（拼音 · 例句等）或 <b>[➕ 手动添加项目]</b> 添加项目，再用上 · 下按钮调整顺序或删除。',
+  'manual.prompt.columns3': '点 <b>⚙️ 高级设置 ➔ [📥 导入卡片模板编辑器的字段]</b>，就会原样导入在编辑器中设定的字段顺序。<b>[🔄 重置为默认项目]</b> 会恢复成当前所选语言的默认项目。',
   'manual.prompt.columns4': '在 <b>📌 每一行单词会是这样</b> 中可以预览一行的样子。第 1 列的 <b>“[품사]한국어”</b> 格式有助于区分释义相同的不同单词。',
   'manual.prompt.advSummary': '⚙️ 高级设置——分隔各列的符号 · 一并发给 AI 的细节要求',
   'manual.prompt.adv1': '<strong>导入 / 恢复项目</strong>：上面 ④ 中介绍的两个按钮就在这里。',

@@ -17,7 +17,7 @@ i18nRegister('en', {
   'manual.toc.faq.desc': '12 things to check first when you get stuck',
 
   'manual.editor.badge': 'Tool 1',
-  'manual.editor.title': '⚡ Card Template Editor',
+  'manual.editor.title': '🌄 Card Template Editor',
   'manual.editor.lead': 'Choose your language and fields, design the card, then copy ① Front template ② Back template ③ Styling and paste them into Anki.',
   'manual.editor.layoutTitle': '🖥️ Screen layout',
   'manual.editor.layout1': '<strong>Left = settings</strong>: ① language → ② fields → ⚙️ Advanced settings, in that order.',
@@ -31,7 +31,7 @@ i18nRegister('en', {
   'manual.editor.fields2': '<strong>Show on front · Show on back</strong>: choose whether the field appears on the front (question) or the back (answer) of the card. You can turn on both.',
   'manual.editor.fields3': '<strong>🌐 Foreign dictionary · 📘 secondary dictionary</strong>: turn one on and a dictionary icon appears next to that text on the card; tap it to open the search result right away. 📘 is the dictionary for looking up Korean meanings (Naver Korean Dictionary by default).',
   'manual.editor.fields4': '<strong>🔊 Read aloud</strong>: turn it on and Anki reads that field out loud. See <a href="#tts">🔊 Read aloud below</a> for details.',
-  'manual.editor.fields5': '<strong>⚡ Common fields for this language</strong>: tap a field that\'s often used for your language — pinyin, furigana, example sentence, and so on — to add it right away. To name a field yourself, press <b>[➕ Add one more blank field]</b>. Remove fields you don\'t need with <b>[🗑️ Delete]</b>.',
+  'manual.editor.fields5': '<strong>✨ Common fields for this language</strong>: tap a field that\'s often used for your language — pinyin, furigana, example sentence, and so on — to add it right away. To name a field yourself, press <b>[➕ Add one more blank field]</b>. Remove fields you don\'t need with <b>[🗑️ Delete]</b>.',
   'manual.editor.fields6': '<strong>Change text size · color</strong>: tap the text on the preview card on the right, and change its size · weight · font · color in <b>🎨 Text style</b> just below. You see the change instantly.',
   'manual.editor.fields7': '<strong>Example shown in the preview</strong>: sample text used only on the preview card. It has nothing to do with the card content that goes into Anki.',
 
@@ -93,7 +93,7 @@ i18nRegister('en', {
   'manual.copy.item2': 'After copying, <b>✓ Copied</b> appears next to the button, and once all three are copied you\'ll see a 🎉 message. To check what will be pasted, press <b>[Show what will be pasted]</b>.',
   'manual.copy.item3': 'If you changed the theme or the fields, copy and paste <b>all three again</b>. Replacing just one can make the card look wrong.',
   'manual.copy.item4': 'Where to open the [Card Template] window (PC · AnkiDroid · AnkiMobile) is shown with pictures in <a href="ankiGuide.html#templates">Anki Guide Step 2</a>.',
-  'manual.editor.cta.title': '⚡ Anki Card Template Editor',
+  'manual.editor.cta.title': '🌄 Anki Card Template Editor',
   'manual.editor.cta.desc': 'Read enough? Go ahead and design your card. Your settings are saved automatically.',
   'manual.editor.cta.button': 'Open the Card Template Editor ➔',
 
@@ -114,8 +114,8 @@ i18nRegister('en', {
   'manual.prompt.countBody': 'Choose which word types to include — nouns · verbs · adjectives · adverbs · idioms — and the maximum number of words.',
   'manual.prompt.columnsTitle': '④ What goes in your word list, and in what order',
   'manual.prompt.columns1': 'From top to bottom, the items become column 1, column 2… of your word list file. Put them in <b>exactly the same order as your Anki fields</b>. Otherwise things get mixed up on import — e.g. example sentences end up where the meaning should be.',
-  'manual.prompt.columns2': 'Add items with the buttons under <b>⚡ Tap to add an item</b> (pinyin · example, etc.) or <b>[➕ Add an item]</b>, and use the up · down buttons to reorder or delete them.',
-  'manual.prompt.columns3': '<b>⚙️ Advanced settings ➔ [⚡ Import fields from the Card Template Editor]</b> brings in the field order you set in the editor as is. <b>[🔄 Reset to default items]</b> resets to the default items for the language you picked.',
+  'manual.prompt.columns2': 'Add items with the buttons under <b>✨ Tap to add an item</b> (pinyin · example, etc.) or <b>[➕ Add an item]</b>, and use the up · down buttons to reorder or delete them.',
+  'manual.prompt.columns3': '<b>⚙️ Advanced settings ➔ [📥 Import fields from the Card Template Editor]</b> brings in the field order you set in the editor as is. <b>[🔄 Reset to default items]</b> resets to the default items for the language you picked.',
   'manual.prompt.columns4': '<b>📌 Each word line will look like this</b> shows what one line will look like. The <b>"[품사]한국어"</b> format of the 1st column helps tell apart different words that share a meaning.',
   'manual.prompt.advSummary': '⚙️ Advanced settings — column separator · extra requests sent to the AI',
   'manual.prompt.adv1': '<strong>Import / reset items</strong>: the two buttons described in ④ above are here.',

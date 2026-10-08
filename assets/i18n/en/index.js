@@ -13,7 +13,7 @@ i18nRegister('en', {
   'index.path.step1.desc': 'Install Anki and create slots (fields) for the meaning, word, pronunciation, and example.',
   'index.path.step1.where': '📖 Anki Guide, Step 1',
   'index.path.step2.desc': 'Design how your card looks, then copy it in numbered order and paste it into Anki.',
-  'index.path.step2.where': '⚡ Card Template Editor',
+  'index.path.step2.where': '🌄 Card Template Editor',
   'index.path.step3.desc': 'Ask an AI to pick out words, then download its answer as a word list file.',
   'index.path.step3.where': '🤖 AI Prompt Generator',
   'index.path.step4.desc': 'Import the word list file into Anki and review for 10 minutes a day.',

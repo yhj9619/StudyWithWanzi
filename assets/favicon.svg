@@ -1,50 +1,89 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
-    <!-- Background Gradient (Brand Blue) -->
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#3b82f6"/>
-      <stop offset="100%" stop-color="#1d4ed8"/>
-    </linearGradient>
-    
-    <!-- Lightning Bolt Gradient (Vibrant Gold) -->
-    <linearGradient id="boltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#fef08a"/>
-      <stop offset="100%" stop-color="#f59e0b"/>
+    <!-- Background Gradient: Traditional Deep Indigo & Teal Sky -->
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="65%" stop-color="#1e3a5f"/>
+      <stop offset="100%" stop-color="#0f3b4c"/>
     </linearGradient>
 
-    <!-- Subtle Drop Shadow -->
-    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="1.2" stdDeviation="1.2" flood-color="#0f172a" flood-opacity="0.25"/>
+    <!-- Sun Gradient (Crimson Red) -->
+    <radialGradient id="sunGrad" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#f87171"/>
+      <stop offset="85%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#991b1b"/>
+    </radialGradient>
+
+    <!-- Moon Gradient (Pure Silver / Jade) -->
+    <radialGradient id="moonGrad" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="75%" stop-color="#e2e8f0"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </radialGradient>
+
+    <!-- Center Mountain Gradient (Royal Emerald Indigo) -->
+    <linearGradient id="peakCenter" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#14b8a6"/>
+      <stop offset="40%" stop-color="#0f766e"/>
+      <stop offset="100%" stop-color="#115e59"/>
+    </linearGradient>
+
+    <!-- Inner Mountains Gradient (Deep Azure) -->
+    <linearGradient id="peakInner" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+
+    <!-- Outer Mountains Gradient (Deep Indigo) -->
+    <linearGradient id="peakOuter" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="60%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+
+    <!-- Soft Drop Shadow -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="2" flood-color="#000000" flood-opacity="0.35"/>
     </filter>
   </defs>
 
   <!-- Background Squircle -->
-  <rect width="64" height="64" rx="16" fill="url(#bgGrad)"/>
-  
-  <!-- Subtle Highlighting Border -->
-  <rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="rgba(255, 255, 255, 0.22)" stroke-width="1.5"/>
+  <rect width="64" height="64" rx="16" fill="url(#skyGrad)"/>
+  <rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.5"/>
 
-  <!-- Open Book Graphic -->
-  <g filter="url(#softShadow)">
-    <!-- Book Base / Cover Rim -->
-    <path d="M12 47 C20 44 26 46 32 50 C38 46 44 44 52 47 L52 43.5 C44 40.5 38 42.5 32 46.5 C26 42.5 20 40.5 12 43.5 Z" fill="#1e3a8a"/>
-    <!-- Book Pages -->
-    <path d="M12 44 C20 41 27 43 32 47 C37 43 44 41 52 44 L52 27 C44 24 37 26 32 30 C27 26 20 24 12 27 Z" fill="#ffffff"/>
-    <!-- Spine Line -->
-    <line x1="32" y1="30" x2="32" y2="47" stroke="#93c5fd" stroke-width="1.8" stroke-linecap="round"/>
-    <!-- Page Content Lines -->
-    <line x1="18" y1="33" x2="26" y2="34.5" stroke="#bfdbfe" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="18" y1="38" x2="26" y2="39.5" stroke="#bfdbfe" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="38" y1="34.5" x2="46" y2="33" stroke="#bfdbfe" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="38" y1="39.5" x2="46" y2="38" stroke="#bfdbfe" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Celestial Bodies: Moon (Left) & Sun (Right) -->
+  <g filter="url(#softGlow)">
+    <!-- White Moon (월 - 陰) -->
+    <circle cx="17" cy="18" r="6.5" fill="url(#moonGrad)"/>
+    <circle cx="17" cy="18" r="6.5" fill="none" stroke="#f1f5f9" stroke-width="0.8" opacity="0.6"/>
+
+    <!-- Red Sun (일 - 陽) -->
+    <circle cx="47" cy="18" r="6.5" fill="url(#sunGrad)"/>
+    <circle cx="47" cy="18" r="6.5" fill="none" stroke="#fecaca" stroke-width="0.8" opacity="0.6"/>
   </g>
 
-  <!-- Golden Lightning Bolt (⚡ Study with Wanzi Symbol) -->
-  <g filter="url(#softShadow)">
-    <path d="M33 7 L23 22 L31 22 L27 33 L41 18 L33 18 Z" fill="url(#boltGrad)" stroke="#d97706" stroke-width="0.8" stroke-linejoin="round"/>
-    <!-- Sparkles -->
-    <polygon points="45,9 46.5,6 48,9 51,10.5 48,12 46.5,15 45,12 42,10.5" fill="#fef08a"/>
-    <polygon points="20,13 21,11 22,13 24,14 22,15 21,17 20,15 18,14" fill="#fef08a"/>
+  <!-- Five Peaks (오봉: 일월오봉도) -->
+  <g filter="url(#softGlow)">
+    <!-- Outer Left Peak (1) -->
+    <path d="M2 55 L11 36 Q13 33 15 36 L24 55 Z" fill="url(#peakOuter)"/>
+
+    <!-- Outer Right Peak (5) -->
+    <path d="M40 55 L49 36 Q51 33 53 36 L62 55 Z" fill="url(#peakOuter)"/>
+
+    <!-- Inner Left Peak (2) -->
+    <path d="M8 55 L20 27 Q22 24 24 27 L36 55 Z" fill="url(#peakInner)"/>
+
+    <!-- Inner Right Peak (4) -->
+    <path d="M28 55 L40 27 Q42 24 44 27 L56 55 Z" fill="url(#peakInner)"/>
+
+    <!-- Center Main Peak (3 - Highest) -->
+    <path d="M18 55 L30 20 Q32 17 34 20 L46 55 Z" fill="url(#peakCenter)"/>
+    <!-- Center Peak Ridge Line -->
+    <line x1="32" y1="19" x2="32" y2="55" stroke="rgba(255, 255, 255, 0.25)" stroke-width="1.2" stroke-linecap="round"/>
   </g>
+
+  <!-- Traditional Golden Waves at the Base (파도/물결) -->
+  <path d="M4 54 C10 51, 16 57, 22 54 C28 51, 34 57, 40 54 C46 51, 52 57, 60 54" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M7 57 C13 54, 19 60, 25 57 C31 54, 37 60, 43 57 C49 54, 55 60, 59 57" fill="none" stroke="#f59e0b" stroke-width="1.4" opacity="0.75" stroke-linecap="round"/>
 </svg>
-

@@ -108,7 +108,7 @@ i18nRegister('ko', {
   'editor.color.purple': '보라',
 
   // 언어별 추천 필드 빠른 추가 칩
-  'editor.chips.title': '⚡ 이 언어에 자주 쓰는 필드 (누르면 바로 추가돼요):',
+  'editor.chips.title': '✨ 이 언어에 자주 쓰는 필드 (누르면 바로 추가돼요):',
   'editor.chips.langBadge': '({lang} 추천)',
   'editor.chips.langFallback': '해당 언어',
   'editor.chips.chipTitle': "'{name}' 필드를 카드에 바로 추가해요",

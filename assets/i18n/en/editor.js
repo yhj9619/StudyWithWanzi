@@ -108,7 +108,7 @@ i18nRegister('en', {
   'editor.color.purple': 'Purple',
 
   // Recommended field quick-add chips
-  'editor.chips.title': '⚡ Common fields for this language (tap to add):',
+  'editor.chips.title': '✨ Common fields for this language (tap to add):',
   'editor.chips.langBadge': '(for {lang})',
   'editor.chips.langFallback': 'this language',
   'editor.chips.chipTitle': "Add the '{name}' field to the card right away",

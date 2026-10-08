@@ -90,7 +90,7 @@ i18nRegister('ko', {
   'guide.step2.flow3.desc': '탭에 원래 있던 내용은 모두 지우고(<kbd>Ctrl</kbd> + <kbd>A</kbd> 후 붙여넣기) 바꿔 넣으세요. 3개를 다 넣었으면 아래 <b>[저장하기]</b>를 누릅니다.',
   'guide.shot.templateWindow': '[카드 유형] 창 — 위쪽의 앞면 서식 · 뒷면 서식 · 스타일 탭에 하나씩 붙여넣어요',
   'guide.step2.syncTip': '<strong>가장 편한 방법: PC에서 한 번만 붙여넣기</strong><br>카드 서식은 노트 유형에 함께 저장되어서, 동기화하면 폰에도 그대로 적용돼요. 폰에서 긴 서식을 붙여넣기 번거롭다면 PC에서 하고 동기화하세요.',
-  'guide.step2.cta.title': '⚡ Anki 카드 서식 에디터',
+  'guide.step2.cta.title': '🌄 Anki 카드 서식 에디터',
   'guide.step2.cta.desc': '학습 언어(46개 언어)와 필드 이름만 맞추면, 붙여넣을 앞면 서식 · 뒷면 서식 · 스타일이 바로 만들어져요.',
   'guide.step2.cta.button': '카드 서식 에디터 열기 ➔',
   'guide.step2.detail.summary': '자세히 보기 — [카드 유형] 창의 3개 탭, 창을 여는 다른 방법',

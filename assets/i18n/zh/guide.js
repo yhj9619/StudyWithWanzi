@@ -86,7 +86,7 @@ i18nRegister('zh', {
   'guide.step2.flow3.desc': '先清空标签页里原有的内容（<kbd>Ctrl</kbd> + <kbd>A</kbd> 后粘贴）再替换。3 个都放好后点击 <b>[保存]</b>。',
   'guide.shot.templateWindow': '[卡片模板] 窗口——在上方的 正面模板 · 背面模板 · 样式 标签页中各粘贴一个',
   'guide.step2.syncTip': '<strong>最省事的方法：只在电脑上粘贴一次</strong><br>卡片模板和笔记模板保存在一起，同步后手机上也会自动生效。如果在手机上粘贴长内容太麻烦，就在电脑上粘贴后同步即可。',
-  'guide.step2.cta.title': '⚡ Anki 卡片模板编辑器',
+  'guide.step2.cta.title': '🌄 Anki 卡片模板编辑器',
   'guide.step2.cta.desc': '只要对好学习语言（支持 46 种语言）和字段名，要粘贴的正面模板 · 背面模板 · 样式就会马上生成。',
   'guide.step2.cta.button': '打开卡片模板编辑器 ➔',
   'guide.step2.detail.summary': '查看详情——[卡片模板] 窗口的 3 个标签页、打开窗口的其他方法',

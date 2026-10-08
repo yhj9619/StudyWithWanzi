@@ -13,7 +13,7 @@ i18nRegister('zh', {
   'index.path.step1.desc': '安装 Anki，建好放释义 · 单词 · 发音 · 例句的栏位（字段）。',
   'index.path.step1.where': '📖 Anki 指南 Step 1',
   'index.path.step2.desc': '设计好卡片外观，按编号复制后粘贴到 Anki。',
-  'index.path.step2.where': '⚡ 卡片模板编辑器',
+  'index.path.step2.where': '🌄 卡片模板编辑器',
   'index.path.step3.desc': '请 AI 帮你挑出单词，把回答下载成单词表文件。',
   'index.path.step3.where': '🤖 AI 提示词生成器',
   'index.path.step4.desc': '把单词表文件导入 Anki，每天复习 10 分钟。',

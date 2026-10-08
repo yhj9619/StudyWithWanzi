@@ -427,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 한 번에 꾸미기 (테마): 배경 · 상자 · 테두리 · 구분선 · 카드 글꼴 · 필드 색 (1번째 = 본문, 2번째 = 강조, 나머지 = 연하게)
   // sizes가 있는 테마는 글씨 크기도 바꿈 (1번째, 2번째, 나머지)
   const THEMES = [
-    { id: 'default', icon: '🤍', font: 'gothic', colors: ['#202124', '#1a73e8', '#5f6368'], sizes: [24, 24, 20], deco: {} },
+    { id: 'default', icon: '🤍', font: 'gothic', colors: ['#202124', '#1a73e8', '#5f6368'], sizes: [26, 26, 22], deco: {} },
     {
       id: 'flashcard', icon: '🏷️', font: 'gothic', colors: ['#0f172a', '#2563eb', '#64748b'],
       deco: { bgType: 'pattern', bgColor: '#f8f7f2', bgColor2: '#e2e8f0', bgPattern: 'lines', box: 'shadow', boxColor: '#ffffff', border: 'thin', borderColor: '#e2e8f0', divider: 'solid', dividerColor: '#cbd5e1', textColor: '#0f172a', mutedColor: '#64748b' },
@@ -1067,7 +1067,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let sample = '';
     let showFront = false;
     let showBack = true;
-    let size = 20;
+    let size = 22;
     let weight = 'normal';
     let font = 'inherit';
     let color = '#5f6368';
@@ -1368,7 +1368,7 @@ document.addEventListener('DOMContentLoaded', () => {
           label: t('editor.chips.exampleLabel'),
           name: t('editor.chips.exampleName'),
           sample: '你好，很高兴认识你。',
-          size: 20,
+          size: 22,
           weight: 'normal',
           color: '#5f6368',
           showFront: false,
@@ -1441,7 +1441,7 @@ document.addEventListener('DOMContentLoaded', () => {
           label: t('editor.chips.exampleLabel'),
           name: t('editor.chips.exampleName'),
           sample: (langObj.sample && langObj.sample.field3) || 'I eat an apple every morning.',
-          size: 20,
+          size: 22,
           weight: 'normal',
           color: '#5f6368',
           showFront: false,
@@ -1514,7 +1514,7 @@ document.addEventListener('DOMContentLoaded', () => {
           label: t('editor.chips.exampleLabel'),
           name: t('editor.chips.exampleName'),
           sample: (langObj.sample && langObj.sample.field3) || t('editor.chips.sampleExample', { lang: langName }),
-          size: 20,
+          size: 22,
           weight: 'normal',
           color: '#5f6368',
           showFront: false,

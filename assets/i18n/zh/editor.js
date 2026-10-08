@@ -108,7 +108,7 @@ i18nRegister('zh', {
   'editor.color.purple': '紫色',
 
   // 按语言推荐字段快捷添加
-  'editor.chips.title': '⚡ 这个语言常用的字段（点一下即可添加）：',
+  'editor.chips.title': '✨ 这个语言常用的字段（点一下即可添加）：',
   'editor.chips.langBadge': '（{lang}推荐）',
   'editor.chips.langFallback': '该语言',
   'editor.chips.chipTitle': '立即把「{name}」字段添加到卡片',

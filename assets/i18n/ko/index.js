@@ -14,7 +14,7 @@ i18nRegister('ko', {
   'index.path.step1.desc': 'Anki를 설치하고, 뜻 · 단어 · 발음 · 예문을 담을 칸(필드)을 만들어요.',
   'index.path.step1.where': '📖 Anki 가이드 Step 1',
   'index.path.step2.desc': '카드 모양을 꾸민 뒤, 번호대로 복사해 Anki에 붙여넣어요.',
-  'index.path.step2.where': '⚡ 카드 서식 에디터',
+  'index.path.step2.where': '🌄 카드 서식 에디터',
   'index.path.step3.desc': 'AI로 필요한 단어를 추출하고, 결과를 Anki용 단어장 파일(CSV)로 받아요.',
   'index.path.step3.where': '🤖 AI 프롬프트 생성기',
   'index.path.step4.desc': '단어장 파일을 Anki로 가져오고, 매일 10분씩 복습해요.',

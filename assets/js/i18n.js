@@ -142,7 +142,7 @@
       home.className = 'site-nav-home';
       home.href = 'index.html';
       home.title = t('common.backToHubTitle');
-      home.textContent = '⚡ Study with Wanzi';
+      home.textContent = '🌄 Study with Wanzi';
       if (current === 'home') home.setAttribute('aria-current', 'page');
 
       const menuId = 'siteNavMenu';

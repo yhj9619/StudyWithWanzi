@@ -5,7 +5,7 @@ i18nRegister('zh', {
   'common.backToHubTitle': '返回 Study with Wanzi 主菜单',
   'common.navGuide': '📖 Anki 指南',
   'common.navGuideTitle': '前往 Anki 指南（从安装到复习的 4 个步骤）',
-  'common.navEditor': '⚡ 卡片模板编辑器',
+  'common.navEditor': '🌄 卡片模板编辑器',
   'common.navEditorTitle': '前往 Anki 卡片模板编辑器',
   'common.navPrompt': '🤖 AI 提示词生成器',
   'common.navPromptTitle': '前往 Anki AI 提示词生成器',

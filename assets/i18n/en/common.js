@@ -5,7 +5,7 @@ i18nRegister('en', {
   'common.backToHubTitle': 'Back to the Study with Wanzi main menu',
   'common.navGuide': '📖 Anki Guide',
   'common.navGuideTitle': 'Go to the Anki Guide (4 steps from install to review)',
-  'common.navEditor': '⚡ Card Template Editor',
+  'common.navEditor': '🌄 Card Template Editor',
   'common.navEditorTitle': 'Go to the Anki Card Template Editor',
   'common.navPrompt': '🤖 AI Prompt Generator',
   'common.navPromptTitle': 'Go to the Anki AI Prompt Generator',
