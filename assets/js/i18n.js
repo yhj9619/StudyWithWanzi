@@ -60,16 +60,24 @@
 
   function apply(root) {
     const scope = root || document;
+    // 번역이 없으면(t가 키를 그대로 돌려주면) 덮어쓰지 않고 HTML의 한국어 원문을 그대로 둠
+    // — 브라우저가 예전 문구 파일을 캐시해 새 키가 없을 때 화면에 키 이름이 보이지 않게
     scope.querySelectorAll('[data-i18n]').forEach(el => {
-      el.textContent = t(el.getAttribute('data-i18n'));
+      const key = el.getAttribute('data-i18n');
+      const text = t(key);
+      if (text !== key) el.textContent = text;
     });
     scope.querySelectorAll('[data-i18n-html]').forEach(el => {
-      el.innerHTML = t(el.getAttribute('data-i18n-html'));
+      const key = el.getAttribute('data-i18n-html');
+      const html = t(key);
+      if (html !== key) el.innerHTML = html;
     });
     scope.querySelectorAll('[data-i18n-attr]').forEach(el => {
       el.getAttribute('data-i18n-attr').split(';').forEach(pair => {
         const [attr, key] = pair.split(':').map(s => s && s.trim());
-        if (attr && key) el.setAttribute(attr, t(key));
+        if (!attr || !key) return;
+        const value = t(key);
+        if (value !== key) el.setAttribute(attr, value);
       });
     });
   }
@@ -117,6 +125,7 @@
     { id: 'guide', href: 'ankiGuide.html', key: 'common.navGuide', titleKey: 'common.navGuideTitle' },
     { id: 'editor', href: 'ankiEditor.html', key: 'common.navEditor', titleKey: 'common.navEditorTitle' },
     { id: 'prompt', href: 'ankiPrompt.html', key: 'common.navPrompt', titleKey: 'common.navPromptTitle' },
+    { id: 'manual', href: 'manual.html', key: 'common.navManual', titleKey: 'common.navManualTitle' },
   ];
 
   function renderSiteNavs() {

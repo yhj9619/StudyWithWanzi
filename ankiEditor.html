@@ -12,8 +12,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+Arabic:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="assets/css/editor.css">
+  <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
+  <link rel="stylesheet" href="assets/css/style.css?v=20261008a">
+  <link rel="stylesheet" href="assets/css/editor.css?v=20261008a">
 </head>
 <body>
   <!-- 모든 페이지 공통 메뉴줄 (i18n.js가 그림): PC는 한 줄, 휴대폰은 ☰ 버튼으로 여닫기 -->
@@ -30,7 +31,7 @@
       </div>
       <div class="header-actions">
         <span id="saveStatusIndicator" class="save-status-badge" data-i18n="common.autoSaved" data-i18n-attr="title:common.autoSavedTitle" title="설정은 이 브라우저에 자동으로 저장돼요">✓ 자동 저장됨</span>
-        <button type="button" id="resetAllSettingsBtn" class="btn-outline-danger" data-i18n="common.resetAll" data-i18n-attr="title:common.resetAllTitle" title="모든 설정을 처음 기본값으로 되돌립니다">
+        <button type="button" id="resetAllSettingsBtn" class="btn-outline-danger" data-i18n="common.resetAll" data-i18n-attr="title:common.resetAllTitle" title="모든 설정을 초기화해요">
           🔄 설정 초기화
         </button>
       </div>
@@ -297,18 +298,10 @@
           <!-- 3번째 이상 선택 필드 컨테이너 -->
           <div id="optionalFieldsContainer"></div>
 
-          <!-- 🔊 읽어주기 안내 · 읽는 속도 (읽어주기를 켠 필드가 있거나, 읽어주기를 쓸 수 없는 언어일 때만 보임) -->
+          <!-- 🔊 읽어주기 한 줄 안내 (읽어주기를 켠 필드가 있거나, 읽어주기를 쓸 수 없는 언어일 때만 보임)
+               자세한 설명(자동 재생 끄기 · 소리가 안 날 때 · 읽는 속도)은 사용 설명서(manual.html#tts)로 -->
           <div class="tts-info-box hidden" id="ttsInfoBox">
-            <p class="tts-info-title" data-i18n="editor.tts.title">🔊 읽어주기 (Anki가 글자를 소리 내어 읽어줘요)</p>
-            <div id="ttsInfoBody">
-              <ul class="tts-info-list">
-                <li data-i18n="editor.tts.autoPlay">카드를 열면 🔊를 켠 필드를 자동으로 읽어주고, ▶ 버튼을 누르면 다시 들을 수 있어요.</li>
-                <li data-i18n="editor.tts.stopAutoPlay">자동으로 읽는 게 싫으면 덱 옵션의 오디오 항목에서 자동 재생을 끌 수 있어요.</li>
-                <li data-i18n-html="editor.tts.noSoundHtml">소리가 안 나면 기기에 그 언어의 목소리(음성 데이터)를 설치해 주세요. <a href="ankiGuide.html#faq">자주 묻는 질문 보기</a></li>
-                <li data-i18n="editor.tts.speedWhere">읽는 속도는 아래 ⚙️ 고급 설정에서 바꾸고 미리 들어 볼 수 있어요.</li>
-                <li data-i18n="editor.tts.support">Anki PC(2.1.20 이상) · AnkiMobile · AnkiDroid(2.17 이상)에서 돼요.</li>
-              </ul>
-            </div>
+            <p class="tts-info-line" id="ttsInfoBody" data-i18n-html="editor.tts.shortHtml">🔊 읽어주기를 켰어요. 자동 재생 끄기 · 소리가 안 날 때 · 읽는 속도 → <a href="manual.html#tts">사용 설명서</a></p>
             <p class="tts-unsupported hidden" id="ttsUnsupportedNote" data-i18n="editor.tts.unsupported">이 언어는 기기에 읽어주는 목소리가 거의 없어서 🔊 읽어주기를 쓸 수 없어요.</p>
           </div>
 
@@ -341,7 +334,7 @@
             <div class="form-group">
               <div class="label-with-action">
                 <label for="dictUrlInput" class="form-label" data-i18n="editor.step1.dictUrlLabel">사전 주소 (보통은 바꿀 필요 없어요)</label>
-                <button type="button" id="resetDictUrlBtn" class="btn-text" data-i18n="editor.step1.resetDefault" data-i18n-attr="title:editor.step1.resetDictUrlTitle" title="이 언어의 기본 사전 주소로 되돌리기">원래대로</button>
+                <button type="button" id="resetDictUrlBtn" class="btn-text" data-i18n="editor.step1.resetDefault" data-i18n-attr="title:editor.step1.resetDictUrlTitle" title="이 언어의 기본 사전 주소로 초기화">초기화</button>
               </div>
               <input type="url" id="dictUrlInput" class="form-input" placeholder="https://en.dict.naver.com/#/search?query=">
               <span id="dictUrlWarn" class="notice-badge hidden" role="alert"></span>
@@ -350,7 +343,7 @@
             <div class="form-group">
               <div class="label-with-action">
                 <label for="subDictSelect" class="form-label" data-i18n="editor.step1.subDictLabel">보조 사전 (한국어 뜻 찾아보기용)</label>
-                <button type="button" id="resetWikiUrlBtn" class="btn-text" data-i18n="editor.step1.resetDefault" data-i18n-attr="title:editor.step1.resetSubDictTitle" title="고른 보조 사전의 기본 주소로 되돌리기">원래대로</button>
+                <button type="button" id="resetWikiUrlBtn" class="btn-text" data-i18n="editor.step1.resetDefault" data-i18n-attr="title:editor.step1.resetSubDictTitle" title="고른 보조 사전의 기본 주소로 초기화">초기화</button>
               </div>
               <select id="subDictSelect" class="form-select">
                 <option value="ko" selected data-i18n="editor.step1.subDictOptionKo">📘 네이버 국어사전</option>
@@ -743,7 +736,7 @@
               <li data-i18n-html="editor.paste.whereDroidHtml"><strong>🤖 AnkiDroid:</strong> 카드 추가(+) 화면 맨 아래 [카드: Card 1]</li>
               <li data-i18n-html="editor.paste.whereIosHtml"><strong>🍎 AnkiMobile:</strong> 공부 화면 [도구] ➔ Card Template</li>
             </ul>
-            <a href="ankiGuide.html#templates" class="paste-guide-link" data-i18n="editor.paste.guideLink">📖 그림으로 자세히 보기 (사용 가이드)</a>
+            <a href="ankiGuide.html#templates" class="paste-guide-link" data-i18n="editor.paste.guideLink">📖 그림으로 자세히 보기 (Anki 가이드)</a>
             <p class="paste-sync-tip" data-i18n-html="editor.paste.syncTipHtml">💡 <strong>PC에서 붙여넣고 동기화하면 폰에도 적용돼요.</strong></p>
           </div>
 
@@ -828,15 +821,16 @@
     <p data-i18n="editor.footer">Study with Wanzi © 2026. Made for language learners.</p>
   </footer>
 
-  <script src="assets/js/i18n.js"></script>
-  <script src="assets/i18n/ko/common.js"></script>
-  <script src="assets/i18n/ko/editor.js"></script>
-  <script src="assets/i18n/en/common.js"></script>
-  <script src="assets/i18n/en/editor.js"></script>
-  <script src="assets/i18n/zh/common.js"></script>
-  <script src="assets/i18n/zh/editor.js"></script>
-  <script src="assets/js/languages.js"></script>
-  <script src="assets/js/langCombobox.js"></script>
-  <script src="assets/js/app.js"></script>
+  <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
+  <script src="assets/js/i18n.js?v=20261008a"></script>
+  <script src="assets/i18n/ko/common.js?v=20261008a"></script>
+  <script src="assets/i18n/ko/editor.js?v=20261008a"></script>
+  <script src="assets/i18n/en/common.js?v=20261008a"></script>
+  <script src="assets/i18n/en/editor.js?v=20261008a"></script>
+  <script src="assets/i18n/zh/common.js?v=20261008a"></script>
+  <script src="assets/i18n/zh/editor.js?v=20261008a"></script>
+  <script src="assets/js/languages.js?v=20261008a"></script>
+  <script src="assets/js/langCombobox.js?v=20261008a"></script>
+  <script src="assets/js/app.js?v=20261008a"></script>
 </body>
 </html>

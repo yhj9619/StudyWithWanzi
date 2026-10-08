@@ -12,8 +12,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="assets/css/index.css">
+  <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
+  <link rel="stylesheet" href="assets/css/style.css?v=20261008a">
+  <link rel="stylesheet" href="assets/css/index.css?v=20261008a">
 </head>
 <body>
   <!-- 모든 페이지 공통 메뉴줄 (i18n.js가 그림): PC는 한 줄, 휴대폰은 ☰ 버튼으로 여닫기 -->
@@ -27,7 +28,7 @@
           <h1 class="logo-title">Study with Wanzi</h1>
           <p class="logo-subtitle" data-i18n="index.header.subtitle">Anki 단어 공부를 쉽게 만들어 주는 무료 도구 모음</p>
         </div>
-      </div>
+      </div>
     </div>
   </header>
 
@@ -49,7 +50,7 @@
             <span class="start-path-body">
               <strong class="start-path-name"><span class="start-path-icon" aria-hidden="true">📋</span> <span data-i18n="common.journey.step1">Anki 준비</span></strong>
               <span class="start-path-desc" data-i18n="index.path.step1.desc">Anki를 설치하고, 뜻 · 단어 · 발음 · 예문을 담을 칸(필드)을 만들어요.</span>
-              <span class="start-path-where" data-i18n="index.path.step1.where">📖 사용 가이드 Step 1</span>
+              <span class="start-path-where" data-i18n="index.path.step1.where">📖 Anki 가이드 Step 1</span>
             </span>
           </a>
         </li>
@@ -79,7 +80,7 @@
             <span class="start-path-body">
               <strong class="start-path-name"><span class="start-path-icon" aria-hidden="true">🔁</span> <span data-i18n="common.journey.step4">가져오기 · 복습</span></strong>
               <span class="start-path-desc" data-i18n="index.path.step4.desc">단어장 파일을 Anki로 가져오고, 매일 10분씩 복습해요.</span>
-              <span class="start-path-where" data-i18n="index.path.step4.where">📖 사용 가이드 Step 4</span>
+              <span class="start-path-where" data-i18n="index.path.step4.where">📖 Anki 가이드 Step 4</span>
             </span>
           </a>
         </li>
@@ -95,14 +96,14 @@
           <span class="tool-card-icon">📖</span>
           <span class="tool-status-badge active" data-i18n="index.card.statusAvailable">● 바로 사용 가능</span>
         </div>
-        <h3 class="tool-card-title" data-i18n="index.card.guide.title">Anki 사용 가이드</h3>
-        <p class="tool-card-desc" data-i18n="index.card.guide.desc">Anki 설치부터 카드 서식 붙여넣기, AI 단어장 가져오기, 매일 복습하는 요령까지 처음 쓰는 분도 따라 할 수 있게 4단계로 정리했어요. 막혔을 때 볼 수 있는 자주 묻는 질문도 있어요.</p>
+        <h3 class="tool-card-title" data-i18n="index.card.guide.title">Anki 가이드</h3>
+        <p class="tool-card-desc" data-i18n="index.card.guide.desc">Anki 설치부터 카드 서식 붙여넣기, AI 단어장 가져오기, 매일 복습하는 요령까지 처음 쓰는 분도 따라 할 수 있게 4단계로 정리했어요.</p>
         <div class="tool-card-tags">
           <span class="tool-tag-pill" data-i18n="index.card.guide.tag1">처음 시작하기</span>
           <span class="tool-tag-pill" data-i18n="index.card.guide.tag2">필드 만들기</span>
           <span class="tool-tag-pill" data-i18n="index.card.guide.tag3">단어장 가져오기</span>
           <span class="tool-tag-pill" data-i18n="index.card.guide.tag4">복습 요령</span>
-          <span class="tool-tag-pill" data-i18n="index.card.guide.tag5">자주 묻는 질문</span>
+          <span class="tool-tag-pill" data-i18n="index.card.guide.tag5">덱 옵션</span>
         </div>
         <a href="ankiGuide.html" class="btn-tool-launch" id="btnLaunchGuide" data-i18n="index.card.guide.launch">가이드 읽어보기 ➔</a>
       </article>
@@ -142,6 +143,24 @@
         </div>
         <a href="ankiPrompt.html" class="btn-tool-launch" id="btnLaunchPrompt" data-i18n="index.card.prompt.launch">프롬프트 생성기 열기 ➔</a>
       </article>
+
+      <!-- Tool Card 4: 사용 설명서 (도구 화면별 설명 · 자주 묻는 질문) -->
+      <article class="tool-card">
+        <div class="tool-card-header">
+          <span class="tool-card-icon">❓</span>
+          <span class="tool-status-badge active" data-i18n="index.card.statusAvailable">● 바로 사용 가능</span>
+        </div>
+        <h3 class="tool-card-title" data-i18n="index.card.manual.title">사용 설명서</h3>
+        <p class="tool-card-desc" data-i18n="index.card.manual.desc">카드 서식 에디터와 AI 프롬프트 생성기를 화면별로 설명해요. 읽어주기 · 꾸미기 · 초기화 버튼 · CSV 파일까지 다루고, 막혔을 때 볼 자주 묻는 질문도 모아 두었어요.</p>
+        <div class="tool-card-tags">
+          <span class="tool-tag-pill" data-i18n="index.card.manual.tag1">에디터 사용법</span>
+          <span class="tool-tag-pill" data-i18n="index.card.manual.tag2">프롬프트 생성기 사용법</span>
+          <span class="tool-tag-pill" data-i18n="index.card.manual.tag3">🔊 읽어주기</span>
+          <span class="tool-tag-pill" data-i18n="index.card.manual.tag4">초기화 버튼</span>
+          <span class="tool-tag-pill" data-i18n="index.card.manual.tag5">자주 묻는 질문</span>
+        </div>
+        <a href="manual.html" class="btn-tool-launch" id="btnLaunchManual" data-i18n="index.card.manual.launch">사용 설명서 보기 ➔</a>
+      </article>
     </section>
 
     <!-- Notice Box -->
@@ -154,12 +173,13 @@
   <footer class="app-footer">
     <p data-i18n="common.footer">Study with Wanzi &copy; 2026. Made with care for language learners.</p>
   </footer>
-  <script src="assets/js/i18n.js"></script>
-  <script src="assets/i18n/ko/common.js"></script>
-  <script src="assets/i18n/ko/index.js"></script>
-  <script src="assets/i18n/en/common.js"></script>
-  <script src="assets/i18n/en/index.js"></script>
-  <script src="assets/i18n/zh/common.js"></script>
-  <script src="assets/i18n/zh/index.js"></script>
+  <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
+  <script src="assets/js/i18n.js?v=20261008a"></script>
+  <script src="assets/i18n/ko/common.js?v=20261008a"></script>
+  <script src="assets/i18n/ko/index.js?v=20261008a"></script>
+  <script src="assets/i18n/en/common.js?v=20261008a"></script>
+  <script src="assets/i18n/en/index.js?v=20261008a"></script>
+  <script src="assets/i18n/zh/common.js?v=20261008a"></script>
+  <script src="assets/i18n/zh/index.js?v=20261008a"></script>
 </body>
 </html>

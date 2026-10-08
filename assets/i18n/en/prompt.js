@@ -11,7 +11,7 @@ i18nRegister('en', {
   'prompt.header.subtitle': 'Build a word-list request for AI, then turn the AI\'s answer into a file for Anki',
   'prompt.header.navEditor': '⚡ Card Template Editor',
   'prompt.header.autoSavedTitle': 'Your settings are saved automatically in this browser',
-  'prompt.header.resetAllTitle': 'Restore all settings to their defaults',
+  'prompt.header.resetAllTitle': 'Reset all settings',
 
   // 모바일 화면 전환
   'prompt.mobile.navLabel': 'Mobile view tabs',
@@ -155,8 +155,8 @@ i18nRegister('en', {
   'prompt.step4.addFieldTitle': 'Add one more item (column)',
   'prompt.step4.importEditor': '⚡ Import fields from the Card Template Editor',
   'prompt.step4.importEditorTitle': 'Copy the field order saved in the Card Template Editor',
-  'prompt.step4.resetFields': '🔄 Back to default items',
-  'prompt.step4.resetFieldsTitle': 'Go back to the default items for the selected language',
+  'prompt.step4.resetFields': '🔄 Reset to default items',
+  'prompt.step4.resetFieldsTitle': 'Reset to the default items for the selected language',
   'prompt.step4.delimiterLabel': 'Symbol that separates columns',
   'prompt.step4.delimComma': 'Comma ( , ) — default (recommended)',
   'prompt.step4.delimTab': 'Tab (wide blank space) — when examples have many commas',
@@ -165,7 +165,7 @@ i18nRegister('en', {
   'prompt.adv.delimHelp': 'If you\'re not sure, keep the comma. [Download CSV file] also builds the file with this symbol.',
 
   // 필드 목록 (JS)
-  'prompt.fields.resetToLang': '🔄 Back to \'{lang}\' default items',
+  'prompt.fields.resetToLang': '🔄 Reset to \'{lang}\' default items',
   'prompt.fields.selectedLangFallback': 'selected language',
   'prompt.fields.colBadge': 'Col {n}',
   'prompt.fields.namePlaceholder': 'Item name (e.g. [품사]한국어, 중국어, 병음, 예문)',

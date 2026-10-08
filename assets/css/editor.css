@@ -327,35 +327,31 @@
   background: #f0fdfa;
 }
 
+/* 🔊 읽어주기 한 줄 안내 (자세한 설명은 사용 설명서) */
 .tts-info-box {
-  margin-top: 0.85rem;
-  padding: 0.7rem 0.85rem;
+  margin-top: 0.75rem;
+  padding: 0.45rem 0.75rem;
   background: #f0fdfa;
   border: 1px solid #99f6e4;
   border-radius: var(--radius-md);
   font-size: 0.8rem;
-  line-height: 1.55;
+  line-height: 1.5;
   color: #134e4a;
 }
 
-.tts-info-title {
-  font-weight: 700;
-  font-size: 0.85rem;
-  margin-bottom: 0.3rem;
+.tts-info-line {
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
-.tts-info-list {
-  margin: 0 0 0.55rem;
-  padding-left: 1.1rem;
-}
-
-.tts-info-list li {
-  padding: 0.08rem 0;
-}
-
-.tts-info-list a {
+.tts-info-line a {
   color: #0f766e;
   font-weight: 700;
+  white-space: nowrap;
+}
+
+.tts-info-line + .tts-unsupported:not(.hidden) {
+  margin-top: 0.3rem;
 }
 
 .tts-speed-row {

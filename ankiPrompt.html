@@ -12,8 +12,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="assets/css/prompt.css">
+  <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
+  <link rel="stylesheet" href="assets/css/style.css?v=20261008a">
+  <link rel="stylesheet" href="assets/css/prompt.css?v=20261008a">
 </head>
 <body>
   <!-- Header -->
@@ -31,7 +32,7 @@
       </div>
       <div class="header-actions">
         <span id="saveStatusIndicator" class="save-status-badge" title="설정은 이 브라우저에 자동으로 저장돼요" data-i18n="common.autoSaved" data-i18n-attr="title:prompt.header.autoSavedTitle">✓ 자동 저장됨</span>
-        <button type="button" id="resetPromptSettingsBtn" class="btn-outline-danger" title="모든 설정을 기본값으로 되돌립니다" data-i18n="common.resetAll" data-i18n-attr="title:prompt.header.resetAllTitle">
+        <button type="button" id="resetPromptSettingsBtn" class="btn-outline-danger" title="모든 설정을 초기화해요" data-i18n="common.resetAll" data-i18n-attr="title:prompt.header.resetAllTitle">
           🔄 설정 초기화
         </button>
       </div>
@@ -272,15 +273,15 @@
           <summary><span data-i18n="common.advanced.title">⚙️ 고급 설정</span> <span class="advanced-hint" data-i18n="common.advanced.hint">기본값 그대로 써도 괜찮아요</span></summary>
           <div class="advanced-body">
 
-            <!-- 항목 불러오기 · 되돌리기 -->
+            <!-- 항목 불러오기 · 초기화 -->
             <div class="adv-group">
-              <h3 class="adv-group-title" data-i18n="prompt.adv.fieldsTitle">항목 불러오기 · 되돌리기</h3>
+              <h3 class="adv-group-title" data-i18n="prompt.adv.fieldsTitle">항목 불러오기 · 초기화</h3>
               <div class="add-field-action-row" style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
                 <button type="button" id="btnImportEditorFields" class="btn-add-field" style="flex: 1 1 200px;" title="카드 서식 에디터에 저장된 필드 순서를 그대로 가져옵니다" data-i18n="prompt.step4.importEditor" data-i18n-attr="title:prompt.step4.importEditorTitle">
                   ⚡ 카드 서식 에디터의 필드 불러오기
                 </button>
-                <button type="button" id="btnResetFieldsToLang" class="btn-add-field" style="flex: 1 1 200px; border-color: #cbd5e1; color: var(--text-secondary);" title="지금 고른 언어의 기본 항목으로 되돌립니다" data-i18n="prompt.step4.resetFields" data-i18n-attr="title:prompt.step4.resetFieldsTitle">
-                  🔄 기본 항목으로 되돌리기
+                <button type="button" id="btnResetFieldsToLang" class="btn-add-field" style="flex: 1 1 200px; border-color: #cbd5e1; color: var(--text-secondary);" title="지금 고른 언어의 기본 항목으로 초기화해요" data-i18n="prompt.step4.resetFields" data-i18n-attr="title:prompt.step4.resetFieldsTitle">
+                  🔄 기본 항목으로 초기화
                 </button>
               </div>
             </div>
@@ -450,16 +451,17 @@
     <p data-i18n="common.footer">Study with Wanzi &copy; 2026. Made with care for language learners.</p>
   </footer>
 
-  <script src="assets/js/i18n.js"></script>
-  <script src="assets/i18n/ko/common.js"></script>
-  <script src="assets/i18n/ko/prompt.js"></script>
-  <script src="assets/i18n/en/common.js"></script>
-  <script src="assets/i18n/en/prompt.js"></script>
-  <script src="assets/i18n/zh/common.js"></script>
-  <script src="assets/i18n/zh/prompt.js"></script>
-  <script src="assets/js/languages.js"></script>
-  <script src="assets/js/langCombobox.js"></script>
-  <script src="assets/js/promptApp.js"></script>
+  <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
+  <script src="assets/js/i18n.js?v=20261008a"></script>
+  <script src="assets/i18n/ko/common.js?v=20261008a"></script>
+  <script src="assets/i18n/ko/prompt.js?v=20261008a"></script>
+  <script src="assets/i18n/en/common.js?v=20261008a"></script>
+  <script src="assets/i18n/en/prompt.js?v=20261008a"></script>
+  <script src="assets/i18n/zh/common.js?v=20261008a"></script>
+  <script src="assets/i18n/zh/prompt.js?v=20261008a"></script>
+  <script src="assets/js/languages.js?v=20261008a"></script>
+  <script src="assets/js/langCombobox.js?v=20261008a"></script>
+  <script src="assets/js/promptApp.js?v=20261008a"></script>
 </body>
 </html>
 

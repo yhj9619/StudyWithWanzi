@@ -43,7 +43,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* 공통 메뉴줄 (모든 페이지 맨 위, i18n.js가 그림): PC는 한 줄로 고정, 좁은 화면은 ☰로 여닫기 */
+/* 공통 메뉴줄 (모든 페이지 맨 위, i18n.js가 그림): PC는 한 줄로 고정, 좁은 화면은 ☰로 여닫기
+   링크 4개 + 언어 버튼이 영어 기준 1000px에서 한 줄에 들어가도록 글자 · 여백을 맞춤 (그보다 좁으면 ☰) */
 .site-nav {
   background: #0f172a;
   color: #e2e8f0;
@@ -76,17 +77,17 @@ body {
 .site-nav-menu {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.15rem;
   flex: 1;
   min-width: 0;
 }
 
 .site-nav-link {
   color: #cbd5e1;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 600;
   text-decoration: none;
-  padding: 0.35rem 0.7rem;
+  padding: 0.35rem 0.55rem;
   border-radius: var(--radius-sm);
   white-space: nowrap;
   transition: background-color 0.15s ease, color 0.15s ease;
@@ -121,7 +122,7 @@ body {
   cursor: pointer;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 999px) {
   .site-nav {
     position: static;
   }

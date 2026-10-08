@@ -1,13 +1,13 @@
 // guide 페이지 문구 (한국어 · 기본 언어)
 // 단계 이름(Anki 준비 / 카드 서식 꾸미기 / AI로 단어장 만들기 / 가져오기 · 복습)은 common.journey.step1~4 를 그대로 사용
 i18nRegister('ko', {
-  'guide.meta.title': 'Anki 사용 가이드 - Study with Wanzi',
-  'guide.meta.description': 'Anki 설치와 필드 만들기부터 카드 서식 붙여넣기, AI 단어장 가져오기, 매일 복습하는 법까지 4단계로 정리한 Anki 사용 가이드',
-  'guide.header.title': 'Anki 완전 정복 가이드',
+  'guide.meta.title': 'Anki 가이드 - Study with Wanzi',
+  'guide.meta.description': 'Anki 설치와 필드 만들기부터 카드 서식 붙여넣기, AI 단어장 가져오기, 매일 복습하는 법까지 4단계로 정리한 Anki 가이드',
+  'guide.header.title': 'Anki 가이드',
   'guide.header.subtitle': '처음 쓰는 분도 4단계로 따라 하기 — 준비 · 카드 서식 · AI 단어장 · 복습',
   'guide.hero.tag': '✨ Anki가 처음이라면 여기부터',
   'guide.hero.title': '4단계만 따라 하면 시작할 수 있어요',
-  'guide.hero.subtitle': '각 단계는 핵심만 짧게 정리했어요. 더 알고 싶으면 <strong>[자세히 보기]</strong>를, 막히면 맨 아래 <strong>[자주 묻는 질문]</strong>을 펼쳐 보세요.',
+  'guide.hero.subtitle': '각 단계는 핵심만 짧게 정리했어요. 더 알고 싶으면 <strong>[자세히 보기]</strong>를 펼쳐 보세요. 도구 사용법과 막혔을 때 볼 <strong>자주 묻는 질문</strong>은 <a href="manual.html">사용 설명서</a>에 있어요.',
 
   // 한눈에 보는 4단계 (제목은 common.journey.step1~4)
   'guide.quick.ariaLabel': '한눈에 보는 4단계',
@@ -15,7 +15,7 @@ i18nRegister('ko', {
   'guide.quick.step2.desc': '에디터에서 카드를 꾸미고 Anki에 붙여넣어요',
   'guide.quick.step3.desc': 'AI에게 단어를 받아 단어장 파일로 저장해요',
   'guide.quick.step4.desc': '파일을 Anki로 가져오고 매일 10분 복습해요',
-  'guide.quick.faqLink': '❓ 막히면 → 자주 묻는 질문 보기',
+  'guide.quick.faqLink': '❓ 막히면 → 사용 설명서의 자주 묻는 질문 보기',
 
   // 꼭 기억할 것
   'guide.mustKnow.ariaLabel': '이것만은 꼭 기억하세요',
@@ -93,7 +93,7 @@ i18nRegister('ko', {
   'guide.step2.cta.title': '⚡ Anki 카드 서식 에디터',
   'guide.step2.cta.desc': '학습 언어(46개 언어)와 필드 이름만 맞추면, 붙여넣을 앞면 서식 · 뒷면 서식 · 스타일이 바로 만들어져요.',
   'guide.step2.cta.button': '카드 서식 에디터 열기 ➔',
-  'guide.step2.detail.summary': '자세히 보기 — [카드 유형] 창의 3개 탭, 에디터로 할 수 있는 것',
+  'guide.step2.detail.summary': '자세히 보기 — [카드 유형] 창의 3개 탭, 창을 여는 다른 방법',
   'guide.step2.detail.partsTitle': '🎨 [카드 유형] 창의 3개 탭',
   'guide.step2.detail.partsIntro': 'Anki의 [카드 유형] 창은 탭 3개로 되어 있어요. 에디터의 ① ② ③이 각 탭에 하나씩 들어갑니다.',
   'guide.step2.detail.partFrontTitle': '① 앞면 서식',
@@ -102,11 +102,8 @@ i18nRegister('ko', {
   'guide.step2.detail.partBackDesc': '정답 쪽 화면이에요. 뜻과 함께 단어 · 발음 · 예문, 그리고 <b>🌐 외국어사전 · 📘 국어사전 아이콘</b>이 보여요.',
   'guide.step2.detail.partStyleTitle': '③ 스타일',
   'guide.step2.detail.partStyleDesc': '글꼴, 글자 크기, 색, 다크 모드일 때의 색처럼 카드의 겉모습을 정해요.',
-  'guide.step2.detail.featuresTitle': '⚡ 카드 서식 에디터로 할 수 있는 것',
-  'guide.step2.detail.feature1': '단어 옆 <strong>🌐 아이콘</strong>을 누르면 그 단어의 네이버 사전(46개 언어)이 바로 열려요. 한국어 뜻을 찾아볼 📘 국어사전(또는 위키 · 원하는 사전) 아이콘도 달 수 있어요.',
-  'guide.step2.detail.feature2': '미리보기 카드에서 필드를 눌러 글자 크기 · 색 · 굵기 · 글꼴을 바꾸고 바로 확인할 수 있어요.',
-  'guide.step2.detail.feature3': '필드 이름을 내 Anki와 맞춘 뒤 ① ② ③의 <b>[복사]</b> 버튼만 누르면 준비 끝이에요.',
   'guide.step2.detail.openTip': '<strong>[카드 유형] 창을 여는 다른 방법</strong><br>카드 추가 창(<kbd>A</kbd>)이나 탐색 창(<kbd>B</kbd>)에서 <b>[카드...]</b> 버튼을 눌러도 같은 창이 열려요.',
+  'guide.step2.manualLink': '📘 에디터의 화면별 자세한 사용법(테마 · 읽어주기 · 초기화 등)은 <a href="manual.html#editor">사용 설명서 → 카드 서식 에디터</a>에서 볼 수 있어요.',
 
   // Step 3: AI로 단어장 만들기
   'guide.step3.badge': 'Step 3',
@@ -128,12 +125,9 @@ i18nRegister('ko', {
   'guide.step3.detail.fail1': 'the, is, I처럼 이미 아는 쉬운 단어까지 마구 섞여 나와요.',
   'guide.step3.detail.fail2': '표 모양이 깨지거나 쉼표(,)가 뒤섞여서 Anki로 가져올 때 오류가 나요.',
   'guide.step3.detail.fail3': '칸 순서가 내 필드 순서와 달라서 하나하나 손으로 고쳐야 해요.',
-  'guide.step3.detail.solveTitle': '✨ AI 프롬프트 생성기가 도와주는 것',
-  'guide.step3.detail.solve1': '<strong>실제 어학시험 등급으로 고르기</strong>: 일본어 JLPT(N1~N5), 중국어 HSK(1~6급), 유럽 언어 CEFR(A1~C2), 프랑스어 DELF, 독일어 괴테 등 그 언어에 실제로 있는 시험 등급을 고를 수 있어요.',
-  'guide.step3.detail.solve2': '<strong>내 필드 순서에 맞춘 칸 순서</strong>: 1번째 칸부터 한국어 뜻, 단어, 발음, 예문 등의 순서를 끌어서 옮기거나 버튼으로 원하는 대로 정할 수 있어요.',
-  'guide.step3.detail.solve3': '<strong>복사 한 번, 파일 받기 한 번</strong>: 프롬프트를 AI에 붙여넣고, 받은 답변을 다시 붙여넣으면 바로 단어장 파일이 만들어져요.',
   'guide.step3.detail.fallbackTitle': '📝 메모장으로 직접 만들고 싶다면',
   'guide.step3.detail.fallbackBody': 'AI 답변에서 단어 줄만 복사해 메모장에 붙여넣고, <b>[파일] ➔ [다른 이름으로 저장]</b>에서 파일 이름을 <code>words.csv</code>로 적은 뒤 아래쪽 <b>인코딩을 [UTF-8]</b>로 골라 저장하세요. UTF-8이 아니면 한글 · 한자 · 성조가 깨져요.',
+  'guide.step3.manualLink': '📘 프롬프트 생성기의 자세한 사용법(난이도 · 항목 순서 · CSV 파일 등)은 <a href="manual.html#prompt">사용 설명서 → AI 프롬프트 생성기</a>에서 볼 수 있어요.',
 
   // Step 4: 가져오기 · 복습
   'guide.step4.badge': 'Step 4',
@@ -188,33 +182,5 @@ i18nRegister('ko', {
   'guide.step4.detail.rule2Body': '한 카드에 어려운 문법과 뜻 5개를 몽땅 넣지 마세요. 카드 한 장에 단어 하나, 뜻 하나만 담아야 머리가 덜 지쳐요.',
   'guide.step4.detail.rule3Title': '소리 내어 읽고, 예문으로 익히기',
   'guide.step4.detail.rule3Body': '눈으로만 넘기지 말고 소리 내어 발음해 보세요. 예문 속에서 단어가 어떻게 쓰이는지 함께 읽으면 말할 때 바로 튀어나와요.',
-
-  // 자주 묻는 질문
-  'guide.faq.badge': 'FAQ',
-  'guide.faq.title': '❓ 자주 묻는 질문',
-  'guide.faq.lead': '막혔을 때 여기부터 확인해 보세요. 질문을 누르면 답이 펼쳐져요.',
-  'guide.faq.q1': '카드에 {{Front}} 같은 글자가 그대로 보이거나, "필드를 찾을 수 없음" 오류가 나요',
-  'guide.faq.a1': '에디터에 적은 필드 이름과 Anki의 필드 이름이 달라서 생겨요. 글자 · 띄어쓰기 · 대소문자까지 똑같아야 합니다. Anki의 <b>[도구] ➔ [노트 유형 관리] ➔ [필드...]</b>에서 이름을 확인하고, 에디터의 필드 이름을 똑같이 고친 뒤 ① ② ③을 다시 붙여넣으세요.',
-  'guide.faq.q2': '가져오기 했더니 뜻 자리에 예문이 들어갔어요',
-  'guide.faq.a2': '단어장 파일의 칸 순서와 Anki의 필드 순서가 달라서 생겨요. 잘못 들어간 카드는 <b>[탐색]</b>에서 골라 지우고, 가져오기 창의 <b>[필드 배정]</b>에서 칸 ↔ 필드 짝을 바로잡아 다시 가져오세요. 다음부터는 프롬프트 생성기의 칸 순서를 Step 1의 필드 순서와 똑같이 맞춰 두면 됩니다.',
-  'guide.faq.q3': '한글 · 한자 · 성조가 깨져서 보여요',
-  'guide.faq.a3': '프롬프트 생성기의 <b>[CSV 파일 받기]</b>로 받은 파일을 쓰면 깨지지 않아요. 메모장으로 직접 만들었다면 저장할 때 아래쪽 인코딩을 <b>UTF-8</b>로 골라 다시 저장하세요.',
-  'guide.faq.q4': '사전 아이콘(🌐 📘)이 안 보여요',
-  'guide.faq.a4': '세 가지를 확인하세요.<br> ① 앞면 서식 · 뒷면 서식 · 스타일 3곳 중 빠뜨린 곳이 없는지<br> ② 그 카드의 해당 필드가 비어 있지 않은지 (비어 있으면 아이콘도 숨겨져요)<br> ③ 에디터에서 그 필드의 사전 아이콘이 켜져 있는지',
-  'guide.faq.q5': '다크 모드에서 글씨가 안 보여요',
-  'guide.faq.a5': '다크 모드일 때의 색은 <b>③ 스타일</b>에 들어 있어요. [카드 유형] 창의 <b>스타일</b> 탭에 ③을 붙여넣고 <b>[저장하기]</b>를 눌렀는지 확인하세요.',
-  'guide.faq.q6': '폰에서 카드 서식을 붙여넣기가 어려워요',
-  'guide.faq.a6': 'PC에서 한 번만 붙여넣고 동기화하세요. 카드 서식은 노트 유형과 함께 동기화되어 폰에도 그대로 적용돼요. 필드를 추가하거나 지운 뒤 동기화하면 "어느 쪽에 맞출지" 묻는 창이 뜰 수 있는데, 방금 고친 <b>PC 쪽(AnkiWeb에 올리기)</b>을 고르면 됩니다.',
-  'guide.faq.q7': 'AI가 표나 설명을 섞어서 답해요',
-  'guide.faq.a7': '괜찮아요. 답변 전체를 그대로 <b>[AI 답변 붙여넣기]</b> 칸에 붙여넣으면 단어 줄만 골라 정리해 줘요. 그래도 결과가 이상하면 AI에게 "설명 없이 CSV만 다시 보내 줘"라고 다시 요청하세요.',
-  'guide.faq.q8': '같은 단어가 두 번 들어가요 / 뜻이 같은 단어가 빠졌어요',
-  'guide.faq.a8': 'Anki는 <b>1번째 필드(한국어 뜻)</b>가 같으면 같은 카드로 봐요. 같은 단어가 두 번 들어갔다면 1번째 칸의 뜻이 조금 달랐던 거라서, <b>[탐색]</b>에서 하나를 지우면 됩니다. 뜻이 같은 다른 단어가 빠졌다면 <b>보다(눈으로)</b> · <b>보다(만나다)</b>처럼 뜻을 조금씩 다르게 적어 다시 가져오세요.',
-  'guide.faq.q9': '새 카드는 하루 몇 장이 좋아요? 복습이 너무 많아요',
-  'guide.faq.a9': '처음엔 하루 <b>10~20장</b>을 추천해요. 복습이 너무 많다면 복습 한도(9999)는 그대로 두고, 며칠 동안 새 카드를 <b>0~5장</b>으로 줄이세요. 밀린 복습이 줄어들면 다시 늘리면 됩니다.',
-  'guide.faq.q10': '에디터 · 프롬프트 생성기의 설정이 사라졌어요',
-  'guide.faq.a10': '설정은 지금 쓰는 <b>브라우저 안에</b> 자동으로 저장돼요. 다른 기기 · 다른 브라우저 · 시크릿 창에서는 따로 저장되고, 브라우저의 방문 기록(사이트 데이터)을 지우면 사라집니다. 늘 같은 PC, 같은 브라우저에서 작업하는 게 가장 편해요.',
-  'guide.faq.q11': '🔊 읽어주기 소리가 안 나요',
-  'guide.faq.a11': '읽어주기는 <b>기기에 들어 있는 음성</b>으로 읽기 때문에, 그 언어 음성이 없으면 소리가 나지 않아요.<br> • <b>PC(Windows)</b>: [설정] ➔ [시간 및 언어] ➔ [음성]에서 해당 언어 음성을 추가하세요. (Mac은 [시스템 설정] ➔ [손쉬운 사용] ➔ [읽기 및 말하기])<br> • <b>아이폰(AnkiMobile)</b>: [설정] ➔ [손쉬운 사용] ➔ [읽기 및 말하기] ➔ [음성]에서 해당 언어 음성을 받으세요.<br> • <b>안드로이드(AnkiDroid)</b>: 앱을 <b>최신 버전(2.17 이상)</b>으로 업데이트하고, 폰 설정의 [텍스트 음성 변환(TTS)]에서 해당 언어 음성 데이터를 받으세요.<br>그래도 안 되면 폰이 무음 모드인지, 음량이 켜져 있는지도 확인해 보세요.',
-  'guide.faq.q12': '카드를 열 때마다 자동으로 읽어주는 게 싫어요',
-  'guide.faq.a12': 'Anki는 카드가 열리면 소리를 자동으로 재생해요. 덱 이름 옆 톱니바퀴 ⚙️ ➔ [옵션]의 <b>오디오</b> 항목에서 자동 재생을 끌 수 있어요. 자동 재생을 꺼도 단어 옆 <b>▶ 버튼</b>을 누르면 언제든 다시 들을 수 있습니다.',
+  'guide.faqMoved': '<strong>자주 묻는 질문은 사용 설명서로 옮겼어요</strong><br>막혔을 때 볼 질문과 답, 그리고 에디터 · 프롬프트 생성기 사용법을 한곳에 모았어요. <a href="manual.html#faq">자주 묻는 질문 보기 ➔</a>',
 });

@@ -10,7 +10,7 @@ i18nRegister('ko', {
   'prompt.header.subtitle': 'AI에게 보낼 단어장 요청문을 만들고, AI 답변을 Anki용 파일로 바꿔 줍니다',
   'prompt.header.navEditor': '⚡ 카드 서식 에디터',
   'prompt.header.autoSavedTitle': '설정은 이 브라우저에 자동으로 저장돼요',
-  'prompt.header.resetAllTitle': '모든 설정을 기본값으로 되돌립니다',
+  'prompt.header.resetAllTitle': '모든 설정을 초기화해요',
 
   // 모바일 화면 전환
   'prompt.mobile.navLabel': '모바일 화면 전환 탭',
@@ -154,17 +154,17 @@ i18nRegister('ko', {
   'prompt.step4.addFieldTitle': '새 항목(칸)을 하나 추가합니다',
   'prompt.step4.importEditor': '⚡ 카드 서식 에디터의 필드 불러오기',
   'prompt.step4.importEditorTitle': '카드 서식 에디터에 저장된 필드 순서를 그대로 가져옵니다',
-  'prompt.step4.resetFields': '🔄 기본 항목으로 되돌리기',
-  'prompt.step4.resetFieldsTitle': '지금 고른 언어의 기본 항목으로 되돌립니다',
+  'prompt.step4.resetFields': '🔄 기본 항목으로 초기화',
+  'prompt.step4.resetFieldsTitle': '지금 고른 언어의 기본 항목으로 초기화해요',
   'prompt.step4.delimiterLabel': '칸 나누는 기호',
   'prompt.step4.delimComma': '쉼표 ( , ) — 기본 (추천)',
   'prompt.step4.delimTab': '탭 (넓은 빈칸) — 예문에 쉼표가 많을 때',
   'prompt.step4.delimSemicolon': '세미콜론 ( ; )',
-  'prompt.adv.fieldsTitle': '항목 불러오기 · 되돌리기',
+  'prompt.adv.fieldsTitle': '항목 불러오기 · 초기화',
   'prompt.adv.delimHelp': '잘 모르겠으면 쉼표 그대로 두세요. [CSV 파일 받기]도 이 기호에 맞춰 파일을 만들어요.',
 
   // 필드 목록 (JS)
-  'prompt.fields.resetToLang': '🔄 \'{lang}\' 기본 항목으로 되돌리기',
+  'prompt.fields.resetToLang': '🔄 \'{lang}\' 기본 항목으로 초기화',
   'prompt.fields.selectedLangFallback': '선택 언어',
   'prompt.fields.colBadge': '{n}번 칸',
   'prompt.fields.namePlaceholder': '항목 이름 (예: [품사]한국어, 중국어, 병음, 예문)',
@@ -267,7 +267,7 @@ i18nRegister('ko', {
   'prompt.toast.editorFieldsImported': '카드 서식 에디터의 필드 {count}개를 같은 순서로 불러왔어요. 항목 이름이 내용을 잘 설명하는지 확인하세요.',
   'prompt.confirm.deleteField': '\'{name}\' 항목을 정말 삭제할까요?',
   'prompt.confirm.deleteFieldIndex': '{n}번째 항목을 정말 삭제할까요?',
-  'prompt.confirm.resetAll': 'AI 프롬프트 생성기의 모든 설정을 처음 기본값으로 초기화하시겠습니까?\n\n(※ Anki 카드 서식 에디터 등 다른 도구의 저장 설정에는 영향을 주지 않습니다.)',
+  'prompt.confirm.resetAll': 'AI 프롬프트 생성기의 모든 설정을 초기화할까요?\n\n(※ Anki 카드 서식 에디터 등 다른 도구의 저장 설정에는 영향을 주지 않습니다.)',
 
   // ===== 생성되는 AI 프롬프트 본문 (prompt.out.*) =====
   // 구분자 이름

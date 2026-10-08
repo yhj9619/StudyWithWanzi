@@ -11,7 +11,7 @@ i18nRegister('zh', {
   'prompt.header.subtitle': '生成发给 AI 的单词表请求，并把 AI 的回答转换成 Anki 文件',
   'prompt.header.navEditor': '⚡ 卡片模板编辑器',
   'prompt.header.autoSavedTitle': '设置会自动保存在此浏览器中',
-  'prompt.header.resetAllTitle': '将所有设置恢复为默认值',
+  'prompt.header.resetAllTitle': '重置所有设置',
 
   // 모바일 화면 전환
   'prompt.mobile.navLabel': '移动端视图切换标签',
@@ -155,17 +155,17 @@ i18nRegister('zh', {
   'prompt.step4.addFieldTitle': '再添加一个项目（列）',
   'prompt.step4.importEditor': '⚡ 导入卡片模板编辑器的字段',
   'prompt.step4.importEditorTitle': '直接沿用卡片模板编辑器中保存的字段顺序',
-  'prompt.step4.resetFields': '🔄 恢复默认项目',
-  'prompt.step4.resetFieldsTitle': '恢复为当前所选语言的默认项目',
+  'prompt.step4.resetFields': '🔄 重置为默认项目',
+  'prompt.step4.resetFieldsTitle': '重置为当前所选语言的默认项目',
   'prompt.step4.delimiterLabel': '分隔各列的符号',
   'prompt.step4.delimComma': '逗号 ( , ) — 默认（推荐）',
   'prompt.step4.delimTab': '制表符（较宽的空白）— 例句中逗号较多时',
   'prompt.step4.delimSemicolon': '分号 ( ; )',
-  'prompt.adv.fieldsTitle': '导入 / 恢复项目',
+  'prompt.adv.fieldsTitle': '导入 / 重置项目',
   'prompt.adv.delimHelp': '不确定的话，保持逗号即可。[下载 CSV 文件] 也会按此符号生成文件。',
 
   // 필드 목록 (JS)
-  'prompt.fields.resetToLang': '🔄 恢复「{lang}」默认项目',
+  'prompt.fields.resetToLang': '🔄 重置为「{lang}」默认项目',
   'prompt.fields.selectedLangFallback': '所选语言',
   'prompt.fields.colBadge': '第 {n} 列',
   'prompt.fields.namePlaceholder': '项目名称（例：[품사]한국어、중국어、병음、예문）',

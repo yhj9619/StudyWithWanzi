@@ -156,6 +156,91 @@
   overflow-wrap: anywhere;
 }
 
+/* 단계 끝의 "자세한 사용법은 사용 설명서에서" 한 줄 */
+.guide-manual-link {
+  margin: 1rem 0 0;
+  padding: 0.65rem 0.9rem;
+  background: #f8fafc;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.guide-manual-link a,
+.guide-faq-moved a {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* 가이드 맨 아래: 자주 묻는 질문을 사용 설명서로 옮겼다는 안내 (예전 #faq 링크가 여기로 옴) */
+/* 어두운 머리 상자 안의 링크 (Anki 가이드 ↔ 사용 설명서) */
+.guide-hero-subtitle a {
+  color: #93c5fd;
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.guide-hero-subtitle a:hover {
+  color: #bfdbfe;
+}
+
+.guide-faq-moved {
+  margin: 0 0 2.5rem;
+  scroll-margin-top: 4rem;
+}
+
+/* =======================================
+   사용 설명서(manual.html)
+   ======================================= */
+
+/* 차례 · 함께 보기: 카드 3개 (좁은 화면은 한 줄에 하나) */
+.guide-quickstart.manual-toc {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .guide-quickstart.manual-toc {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.manual-more-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 0.85rem;
+}
+
+/* 링크로 바로 오는 자리(#tts, #faq-tts-sound 등): PC의 고정 메뉴줄에 가리지 않게 */
+.guide-prose h4[id],
+.guide-faq-item[id],
+.guide-details[id] {
+  scroll-margin-top: 4rem;
+}
+
+.guide-section-card[id] {
+  scroll-margin-top: 3.5rem;
+}
+
+.manual-reset-table {
+  min-width: 560px;
+}
+
+.manual-reset-table td,
+.manual-reset-table th {
+  vertical-align: top;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.manual-reset-table td:first-child {
+  white-space: nowrap;
+}
+
 @media (max-width: 576px) {
   .guide-faq-item > summary {
     font-size: 0.9rem;
@@ -163,5 +248,44 @@
   }
   .guide-faq-answer {
     padding: 0 0.85rem 0.9rem 0.85rem;
+  }
+}
+
+/* 사용 설명서 초기화 버튼 표: 휴대폰에서는 버튼별 카드로 (옆으로 밀어 볼 필요 없게)
+   각 칸 위에 머리글(위치 · 초기화되는 것 · 그대로 남는 것)을 data-label로 표시 */
+@media (max-width: 600px) {
+  .manual-reset-table thead {
+    display: none;
+  }
+
+  .manual-reset-table,
+  .manual-reset-table tbody,
+  .manual-reset-table tr,
+  .manual-reset-table td {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .manual-reset-table tr {
+    padding: 0.75rem 0.85rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .manual-reset-table tr:last-child {
+    border-bottom: none;
+  }
+
+  .manual-reset-table td {
+    border: none;
+    padding: 0.2rem 0;
+  }
+
+  .manual-reset-table td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
   }
 }
