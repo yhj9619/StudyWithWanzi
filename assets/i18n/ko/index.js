@@ -2,11 +2,11 @@
 // 4단계 경로의 단계 이름은 common.journey.step1~4 를 그대로 사용
 i18nRegister('ko', {
   'index.meta.title': 'Study with Wanzi - 언어 학습 도구 모음',
-  'index.meta.description': 'Anki 카드 꾸미기부터 AI 단어장 만들기, 매일 복습하는 법까지 — Anki 단어 공부를 쉽게 만들어 주는 무료 도구 모음',
-  'index.header.subtitle': 'Anki 단어 공부를 쉽게 만들어 주는 무료 도구 모음',
+  'index.meta.description': 'Anki 카드 서식 설정부터 AI 단어장 생성, 복습 요령까지 — 복잡한 Anki 사용을 도와주는 무료 학습 도구',
+  'index.header.subtitle': '복잡한 Anki 사용을 도와주는 무료 학습 도구',
   'index.hero.tag': '✨ Study with Wanzi',
-  'index.hero.title': 'Anki 단어 공부, 여기서 다 준비하세요',
-  'index.hero.subtitle': '설치나 회원가입 없이 브라우저에서 바로 쓰는 무료 도구예요. 처음이라면 아래 4단계를 순서대로 따라 하세요.',
+  'index.hero.title': '어려운 Anki 사용을 도와드립니다',
+  'index.hero.subtitle': '설치나 회원가입 없이 브라우저에서 바로 쓸 수 있는 무료 도구입니다. 처음 사용하신다면 아래 4단계를 순서대로 따라 해 보세요.',
 
   // 처음 시작하는 4단계 경로
   'index.path.title': '처음이세요? 이 순서대로 하세요',
@@ -15,7 +15,7 @@ i18nRegister('ko', {
   'index.path.step1.where': '📖 Anki 가이드 Step 1',
   'index.path.step2.desc': '카드 모양을 꾸민 뒤, 번호대로 복사해 Anki에 붙여넣어요.',
   'index.path.step2.where': '⚡ 카드 서식 에디터',
-  'index.path.step3.desc': 'AI에게 단어를 뽑아 달라고 부탁하고, 답변을 단어장 파일로 받아요.',
+  'index.path.step3.desc': 'AI로 필요한 단어를 추출하고, 결과를 Anki용 단어장 파일(CSV)로 받아요.',
   'index.path.step3.where': '🤖 AI 프롬프트 생성기',
   'index.path.step4.desc': '단어장 파일을 Anki로 가져오고, 매일 10분씩 복습해요.',
   'index.path.step4.where': '📖 Anki 가이드 Step 4',
@@ -40,7 +40,7 @@ i18nRegister('ko', {
   'index.card.editor.tag5': '설정 자동 저장',
   'index.card.editor.launch': '에디터 열기 ➔',
   'index.card.prompt.title': 'Anki AI 프롬프트 생성기',
-  'index.card.prompt.desc': 'AI(ChatGPT · Gemini · Claude)에게 원하는 난이도(HSK · JLPT · CEFR 등)의 단어만 골라 달라고 부탁하는 글(프롬프트)을 만들어 줘요. AI 답변을 붙여넣으면 Anki에 바로 넣을 수 있는 단어장 파일(CSV)로 받을 수 있어요.',
+  'index.card.prompt.desc': '원하는 난이도(HSK · JLPT · CEFR 등)의 단어를 추출하는 AI 프롬프트를 만들고, AI의 답변을 Anki에 바로 가져올 수 있는 단어장 파일(CSV)로 변환해 줘요.',
   'index.card.prompt.tag1': 'AI로 단어 뽑기',
   'index.card.prompt.tag2': '단어장 파일(CSV) 받기',
   'index.card.prompt.tag3': '난이도 · 급수 고르기',

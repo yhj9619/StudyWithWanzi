@@ -38,7 +38,7 @@ i18nRegister('zh', {
   'editor.step1.subDictOptionWiki': '📖 韩语维基百科',
   'editor.step1.subDictOptionCustom': '🔎 自定义（其他词典地址）',
   'editor.step1.newTabHtml': '在新窗口中打开词典',
-  'editor.step1.cleanQueryHtml': '整理搜索词：去掉 [ ]、( ) 里的内容，有多个释义时只搜索第一个（例：[名词] 苹果, 苹果树 ➔ 苹果）',
+  'editor.step1.cleanQueryHtml': '整理搜索词：去掉 [ ]、( ) 里的内容，有多个释义时只搜索第一个（例：[名词] 苹果、苹果树 ➔ 苹果）',
   'editor.step1.urlEmptyWarning': '词典地址为空，因此不会添加这个词典的图标。',
   'editor.step1.urlInvalidWarning': '词典地址需要以 http:// 或 https:// 开头，才能添加图标。',
 
