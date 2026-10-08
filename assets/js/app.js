@@ -342,18 +342,18 @@ document.addEventListener('DOMContentLoaded', () => {
     borderColor: '#cbd5e1',
     divider: 'solid',       // solid 실선 | dashed 점선 | double 이중선
     dividerColor: '#cbd5e1',
-    ornament: 'none',       // none | taegeuk 태극 문양(위 가운데) + 건곤감리(네 모서리)
+    ornament: 'none',       // none | taegeuk 태극 문양(위 가운데) + 건곤감리(네 모서리) | irworobong 일월오봉도 그림 띠(판 아래)
     textColor: '#202124',
     mutedColor: '#64748b',
   };
   const DECO_CHOICES = {
     bgType: ['solid', 'gradient', 'pattern'],
     bgDir: ['down', 'right', 'diagonal'],
-    bgPattern: ['dots', 'grid', 'lines', 'fiber', 'jogakbo', 'munsal', 'irworobong'],
+    bgPattern: ['dots', 'grid', 'lines', 'fiber', 'jogakbo', 'munsal'],
     box: ['none', 'round', 'shadow', 'sheet'],
     border: ['none', 'thin', 'thick', 'left', 'obang', 'dancheong', 'najeon', 'bangwi'],
     divider: ['solid', 'dashed', 'double', 'obang', 'dancheong', 'najeon'],
-    ornament: ['none', 'taegeuk'],
+    ornament: ['none', 'taegeuk', 'irworobong'],
   };
   const DECO_COLOR_KEYS = ['bgColor', 'bgColor2', 'boxColor', 'borderColor', 'dividerColor', 'textColor', 'mutedColor'];
   const BG_DIR_CSS = { down: 'to bottom', right: 'to right', diagonal: '135deg' };
@@ -379,6 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
   // 반환: [{ img, pos, size }] (위에 그려질 층이 먼저), s = 크기 배율 (1보다 작으면 테마 버튼용: 괘 없이 오른쪽 위에 태극만)
   function getOrnamentLayers(kind, lineColor, s = 1) {
+    if (kind === 'irworobong') return getIrworobongLayers(s);
     if (kind !== 'taegeuk') return [];
     const px = n => `${Number((n * s).toFixed(2))}px`;
     const R = 13; // 태극 반지름
@@ -411,8 +412,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const isStripe = value => Object.prototype.hasOwnProperty.call(STRIPE_COLORS, value);
   // 색동처럼 가는 색 줄이 가로로 반복 (seg = 한 색의 폭 px, 작은 테마 버튼은 좁게)
   // 오방색은 반복 없이 다섯 색을 크게 한 번씩 (폭을 똑같이 나눔)
-  function getStripeImage(kind, seg = 12) {
-    const colors = STRIPE_COLORS[kind];
+  // night: 어두운 화면에서는 흑이 바탕에 묻히지 않게 회색으로
+  const NIGHT_BLACK = '#777777';
+  function getStripeImage(kind, seg = 12, night = false) {
+    const colors = STRIPE_COLORS[kind].map(c => (night && c === '#1a1a1a' ? NIGHT_BLACK : c));
     if (kind === 'obang') {
       const pct = i => `${i * (100 / colors.length)}%`;
       return `linear-gradient(90deg, ${colors.map((c, i) => `${c} ${pct(i)} ${pct(i + 1)}`).join(', ')})`;
@@ -452,9 +455,9 @@ document.addEventListener('DOMContentLoaded', () => {
       deco: { bgType: 'solid', bgColor: '#e8e2d2', box: 'round', boxColor: '#fdf6d6', border: 'bangwi', borderColor: '#1f4e9c', divider: 'solid', dividerColor: '#e0c35a', textColor: '#1a1a1a', mutedColor: '#6b6252' },
     },
     {
-      // 일월오봉도: 군청 하늘 + 해 · 달 · 다섯 봉우리 · 물결, 가운데 미색 판
+      // 일월오봉도: 군청 바탕 + 미색 판, 판 아래에 해 · 달 · 다섯 봉우리 · 물결 그림 띠
       id: 'irworobong', group: 'trad', icon: '🌄', font: 'serif', colors: ['#2b2118', '#b8321f', '#1d3f8f'],
-      deco: { bgType: 'pattern', bgColor: '#23406e', bgColor2: '#2f7a6a', bgPattern: 'irworobong', box: 'shadow', boxColor: '#f8f3e6', border: 'thin', borderColor: '#c9a24a', divider: 'double', dividerColor: '#c9a24a', textColor: '#2b2118', mutedColor: '#6b5d4f' },
+      deco: { bgType: 'solid', bgColor: '#23406e', box: 'shadow', boxColor: '#f8f3e6', border: 'thin', borderColor: '#c9a24a', ornament: 'irworobong', divider: 'double', dividerColor: '#c9a24a', textColor: '#2b2118', mutedColor: '#6b5d4f' },
     },
     {
       // 단청: 뇌록(청록) 바탕 위 미색 판 + 단청 띠
@@ -2266,6 +2269,7 @@ document.addEventListener('DOMContentLoaded', () => {
       boxColor: d.boxColor,
       borderColor: d.borderColor,
       dividerColor: d.dividerColor,
+      isNight,
       shadow: '0 6px 24px rgba(15, 23, 42, 0.12)',
       ornamentLine: surfaceDark ? 'rgba(255, 255, 255, 0.45)' : 'rgba(0, 0, 0, 0.55)', // 건곤감리 막대 색
       fieldColor: color => color,
@@ -2359,18 +2363,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (forAnki) decls.push('background-attachment: fixed;', 'background-repeat: no-repeat;');
       return decls;
     }
-    if (d.bgType === 'pattern' && d.bgPattern === 'irworobong') {
-      // 일월오봉도: 그림 전체가 화면 하나에 맞게 (Anki는 화면에 고정해 스크롤해도 그대로)
-      const layers = getIrworobongLayers(look.bgColor2, s);
-      const decls = [
-        `background-image: ${layers.map(l => l.img).join(', ')};`,
-        `background-position: ${layers.map(l => l.pos).join(', ')};`,
-        `background-size: ${layers.map(l => l.size).join(', ')};`,
-        `background-repeat: ${layers.map(l => l.repeat || 'no-repeat').join(', ')};`,
-      ];
-      if (forAnki) decls.push('background-attachment: fixed;');
-      return decls;
-    }
     if (d.bgType === 'pattern') {
       const p = getPatternCss(d.bgPattern, look.bgColor2, look.bgColor);
       return p.size ? [`background-image: ${p.image};`, `background-size: ${p.size};`] : [`background-image: ${p.image};`];
@@ -2378,34 +2370,68 @@ document.addEventListener('DOMContentLoaded', () => {
     return [];
   }
 
-  // 일월오봉도 (해 · 달 · 다섯 봉우리 · 물결): 그림 파일 없이 CSS 도형으로 단순하게
-  // 봉우리는 'to bottom right/left' 그라데이션의 50% 경계(칸의 대각선)로 삼각형 반쪽씩 그림
-  // mountain = 봉우리 색 (무늬 색), s = 크기 배율 (테마 버튼은 작게)
-  function getIrworobongLayers(mountain, s = 1) {
-    const px = n => `${Number((n * s).toFixed(2))}px`;
+  // 일월오봉도 화면 전체 그림 (세로로 긴 휴대폰 화면용): 해 · 달 · 봉우리 위치를 화면 비율(%)로 정함
+  // 가로로 넓은 화면은 봉우리가 해 · 달 높이까지 올라오므로 그림 띠(아래 함수)를 씀
+  function getIrworobongFullLayers() {
     const SUN = '#d23a2f';
     const MOON = '#f3efe2';
     const WATER = '#3f78ad';
+    const MOUNTAIN = '#2f7a6a';
     const layers = [
-      { img: `radial-gradient(circle ${px(30)} at 76% 50%, ${SUN} ${px(29)}, transparent ${px(30)})`, pos: '0 0', size: '100% 100%' },
-      { img: `radial-gradient(circle ${px(27)} at 24% 50%, ${MOON} ${px(26)}, transparent ${px(27)})`, pos: '0 0', size: '100% 100%' },
-      // 물결: 흰 물마루 + 파란 테두리가 가로로 반복
-      { img: `radial-gradient(circle at 50% 100%, ${MOON} 0 ${px(11)}, ${WATER} ${px(11)} ${px(16)}, transparent ${px(16)})`, pos: `left 0 bottom ${px(14)}`, size: `${px(34)} ${px(17)}`, repeat: 'repeat-x' },
-      { img: `linear-gradient(${WATER}, ${WATER})`, pos: 'left bottom', size: `100% ${px(15)}` },
+      { img: `radial-gradient(circle 30px at 76% 50%, ${SUN} 29px, transparent 30px)`, pos: '0 0', size: '100% 100%' },
+      { img: `radial-gradient(circle 27px at 24% 50%, ${MOON} 26px, transparent 27px)`, pos: '0 0', size: '100% 100%' },
+      { img: `radial-gradient(circle at 50% 100%, ${MOON} 0 11px, ${WATER} 11px 16px, transparent 16px)`, pos: 'left 0 bottom 14px', size: '34px 17px', repeat: 'repeat-x' },
+      { img: `linear-gradient(${WATER}, ${WATER})`, pos: 'left bottom', size: '100% 15px' },
     ];
-    // 봉우리: 둥근 꼭대기의 반타원, 가운데가 가장 높고 바깥으로 갈수록 낮게 (가운데 = 조금 더 짙은 색, 먼저 = 위에 그려짐)
     const peaks = [
-      { cx: 50, w: 30, h: 46, color: mixHex(mountain, '#000000', 0.15) },
-      { cx: 27, w: 28, h: 36, color: mountain },
-      { cx: 73, w: 28, h: 36, color: mountain },
-      { cx: 8, w: 26, h: 26, color: mixHex(mountain, '#ffffff', 0.12) },
-      { cx: 92, w: 26, h: 26, color: mixHex(mountain, '#ffffff', 0.12) },
+      { cx: 50, w: 30, h: 46, color: mixHex(MOUNTAIN, '#000000', 0.15) },
+      { cx: 27, w: 28, h: 36, color: MOUNTAIN },
+      { cx: 73, w: 28, h: 36, color: MOUNTAIN },
+      { cx: 8, w: 26, h: 26, color: mixHex(MOUNTAIN, '#ffffff', 0.12) },
+      { cx: 92, w: 26, h: 26, color: mixHex(MOUNTAIN, '#ffffff', 0.12) },
     ];
-    // background-position %는 '칸의 x% 지점을 화면의 x% 지점에' 맞추므로 왼쪽 끝 위치를 그 값으로 바꿈
     const posX = (left, tile) => `${Number((left / (100 - tile) * 100).toFixed(2))}%`;
     peaks.forEach(pk => {
       layers.push({ img: `radial-gradient(ellipse 50% 100% at 50% 100%, ${pk.color} 99%, transparent 100%)`, pos: `${posX(pk.cx - pk.w / 2, pk.w)} 100%`, size: `${pk.w}% ${pk.h}%` });
     });
+    return layers;
+  }
+
+  // 일월오봉도 (해 · 달 · 다섯 봉우리 · 물결): 카드 판 맨 아래에 높이가 정해진 그림 띠로 그림
+  // 화면 크기와 상관없이 같은 모양 (PC · 휴대폰 · 아이폰 모두), 그림 파일 없이 CSS 도형으로 단순하게
+  // s = 크기 배율 (테마 버튼은 작게)
+  const IRWOROBONG_BAND = 120; // 그림 띠 높이 (px)
+  function getIrworobongLayers(s = 1) {
+    const px = n => `${Number((n * s).toFixed(2))}px`;
+    const band = px(IRWOROBONG_BAND);
+    const SKY = '#23406e';
+    const SUN = '#d23a2f';
+    const MOON = '#f3efe2';
+    const WATER = '#3f78ad';
+    const MOUNTAIN = '#2f7a6a';
+    // 해 · 달: 띠 위쪽 (띠 크기 칸 안에서 위치 지정)
+    const layers = [
+      { img: `radial-gradient(circle ${px(15)} at 77% ${px(32)}, ${SUN} ${px(14)}, transparent ${px(15)})`, pos: 'left bottom', size: `100% ${band}` },
+      { img: `radial-gradient(circle ${px(13)} at 23% ${px(32)}, ${MOON} ${px(12)}, transparent ${px(13)})`, pos: 'left bottom', size: `100% ${band}` },
+      // 물결: 흰 물마루 + 파란 테두리가 가로로 반복
+      { img: `radial-gradient(circle at 50% 100%, ${MOON} 0 ${px(7)}, ${WATER} ${px(7)} ${px(10)}, transparent ${px(10)})`, pos: `left 0 bottom ${px(9)}`, size: `${px(22)} ${px(11)}`, repeat: 'repeat-x' },
+      { img: `linear-gradient(${WATER}, ${WATER})`, pos: 'left bottom', size: `100% ${px(10)}` },
+    ];
+    // 봉우리: 둥근 꼭대기의 반타원, 가운데가 가장 높고 바깥으로 갈수록 낮게 (가운데 = 조금 더 짙은 색, 먼저 = 위에 그려짐)
+    const peaks = [
+      { cx: 50, w: 30, h: 88, color: mixHex(MOUNTAIN, '#000000', 0.15) },
+      { cx: 27, w: 28, h: 62, color: MOUNTAIN },
+      { cx: 73, w: 28, h: 62, color: MOUNTAIN },
+      { cx: 8, w: 26, h: 42, color: mixHex(MOUNTAIN, '#ffffff', 0.12) },
+      { cx: 92, w: 26, h: 42, color: mixHex(MOUNTAIN, '#ffffff', 0.12) },
+    ];
+    // background-position %는 '칸의 x% 지점을 판의 x% 지점에' 맞추므로 왼쪽 끝 위치를 그 값으로 바꿈
+    const posX = (left, tile) => `${Number((left / (100 - tile) * 100).toFixed(2))}%`;
+    peaks.forEach(pk => {
+      layers.push({ img: `radial-gradient(ellipse 50% 100% at 50% 100%, ${pk.color} 99%, transparent 100%)`, pos: `${posX(pk.cx - pk.w / 2, pk.w)} bottom`, size: `${pk.w}% ${px(pk.h)}` });
+    });
+    // 맨 아래 층: 군청 하늘
+    layers.push({ img: `linear-gradient(${SKY}, ${SKY})`, pos: 'left bottom', size: `100% ${band}` });
     return layers;
   }
 
@@ -2416,8 +2442,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 구분선 (hr#answer) 선언 목록: 전통 색 띠는 선 대신 얇은 줄무늬 막대
-  function getDividerDecls(color, d = deco) {
-    if (isStripe(d.divider)) return ['border: none;', 'height: 5px;', `background-image: ${getStripeImage(d.divider)};`];
+  function getDividerDecls(color, d = deco, night = false) {
+    if (isStripe(d.divider)) return ['border: none;', 'height: 5px;', `background-image: ${getStripeImage(d.divider, 12, night)};`];
     return ['border: none;', `border-top: ${getDividerCss(color, d)};`];
   }
 
@@ -2507,11 +2533,6 @@ ${sel('::after')} {
     return rules.join('\n\n');
   }
 
-  // 카드 상자 바탕색: 일월오봉도처럼 그림 배경은 상자를 살짝 비치게 해 뒤의 해 · 달 · 봉우리가 보이게
-  function getBoxFill(look, d = deco) {
-    return d.bgType === 'pattern' && d.bgPattern === 'irworobong' ? hexToRgba(look.boxColor, 0.8) : look.boxColor;
-  }
-
   // 카드 상자 (.card-box) 선언 목록: 둥근 카드 · 그림자 · 테두리 · 표 모양
   function getCardBoxDecls(look, d = deco) {
     if (d.box === 'sheet') {
@@ -2530,7 +2551,7 @@ ${sel('::after')} {
     }
     const decls = ['box-sizing: border-box;', 'max-width: 560px;', 'margin: 0 auto;'];
     if (look.hasBox) {
-      decls.push('padding: 1.5rem 1.25rem;', 'border-radius: 16px;', `background-color: ${getBoxFill(look, d)};`);
+      decls.push('padding: 1.5rem 1.25rem;', 'border-radius: 16px;', `background-color: ${look.boxColor};`);
       if (d.box === 'shadow') decls.push(`box-shadow: ${look.shadow};`);
     } else {
       decls.push('padding: 1rem 1.25rem;');
@@ -2539,17 +2560,19 @@ ${sel('::after')} {
     if (d.border === 'thin') decls.push(`border: 1px solid ${look.borderColor};`);
     if (d.border === 'thick') decls.push(`border: 3px solid ${look.borderColor};`);
     if (d.border === 'left') decls.push(`border-left: 6px solid ${look.borderColor};`);
-    if (d.border === 'bangwi') decls.push(...getBangwiBorderDecls(7), 'border-radius: 4px;');
-    if (d.ornament !== 'none') decls.push('padding-top: 3.25rem;');
+    if (d.border === 'bangwi') decls.push(...getBangwiBorderDecls(7, look.isNight), 'border-radius: 4px;');
+    if (d.ornament === 'taegeuk') decls.push('padding-top: 3.25rem;');
+    if (d.ornament === 'irworobong') decls.push(`padding-bottom: ${IRWOROBONG_BAND + 20}px;`);
     return decls.concat(getBoxLayerDecls(look, d));
   }
 
   // 방위 오방색 테두리 (지도식): 위 = 북 흑 · 오른쪽 = 동 청 · 아래 = 남 적 · 왼쪽 = 서 백, 카드 판 = 중앙 황
   // 서쪽의 백은 밝은 바탕에서도 보이게 아주 옅은 회색빛 흰색
   const BANGWI_COLORS = { top: '#1a1a1a', right: '#1f4e9c', bottom: '#c8102e', left: '#fbfaf5' };
-  function getBangwiBorderDecls(width) {
+  function getBangwiBorderDecls(width, night = false) {
     const c = BANGWI_COLORS;
-    return ['border-style: solid;', `border-width: ${width}px;`, `border-color: ${c.top} ${c.right} ${c.bottom} ${c.left};`];
+    const top = night ? NIGHT_BLACK : c.top;
+    return ['border-style: solid;', `border-width: ${width}px;`, `border-color: ${top} ${c.right} ${c.bottom} ${c.left};`];
   }
 
   // 상자 배경 그림 층: 전통 색 띠(위·아래) + 장식(태극 등)
@@ -2557,7 +2580,7 @@ ${sel('::after')} {
   function getBoxLayers(look, d = deco, s = 1) {
     const layers = getOrnamentLayers(d.ornament, look.ornamentLine, s);
     if (isStripe(d.border)) {
-      const img = getStripeImage(d.border, s < 1 ? 4 : 12);
+      const img = getStripeImage(d.border, s < 1 ? 4 : 12, look.isNight);
       const h = `${Math.max(2, Math.round(6 * s))}px`;
       layers.push({ img, pos: 'left top', size: `100% ${h}` }, { img, pos: 'left bottom', size: `100% ${h}` });
     }
@@ -2570,7 +2593,7 @@ ${sel('::after')} {
       `background-image: ${layers.map(l => l.img).join(', ')};`,
       `background-position: ${layers.map(l => l.pos).join(', ')};`,
       `background-size: ${layers.map(l => l.size).join(', ')};`,
-      'background-repeat: no-repeat;',
+      `background-repeat: ${layers.map(l => l.repeat || 'no-repeat').join(', ')};`,
     ];
   }
 
@@ -2629,7 +2652,7 @@ ${sel('::after')} {
     if (d.bgType === 'pattern' && d.bgPattern === 'lines') bgStyle.push('background-size: 100% 12px;');
     // 작은 버튼에 맞게 줄인 상자 · 테두리 · 구분선
     const boxStyle = [];
-    if (look.hasBox) boxStyle.push(`background-color: ${getBoxFill(look, d)};`, 'border-radius: 6px;');
+    if (look.hasBox) boxStyle.push(`background-color: ${look.boxColor};`, 'border-radius: 6px;');
     if (d.box === 'shadow') boxStyle.push('box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);');
     if (!look.hasBox && (d.border === 'thin' || d.border === 'thick')) boxStyle.push('border-radius: 4px;');
     if (d.border === 'thin') boxStyle.push(`border: 1px solid ${look.borderColor};`);
@@ -2985,11 +3008,13 @@ ${indentDecls(getCardBoxDecls(look))}}`;
         if (deco.border === 'left') nightBoxDecls.push(`border-left-color: ${night.borderColor};`);
         if (deco.border === 'thin' || deco.border === 'thick') nightBoxDecls.push(`outline-color: ${night.borderColor};`);
       } else {
-        if (look.hasBox && night.boxColor !== look.boxColor) nightBoxDecls.push(`background-color: ${getBoxFill(night)};`);
+        if (look.hasBox && night.boxColor !== look.boxColor) nightBoxDecls.push(`background-color: ${night.boxColor};`);
         if (deco.border !== 'none' && deco.border !== 'bangwi' && night.borderColor !== look.borderColor) nightBoxDecls.push(`border-color: ${night.borderColor};`);
         if (deco.box === 'shadow' && night.shadow !== look.shadow) nightBoxDecls.push(`box-shadow: ${night.shadow};`);
         // 태극 장식의 괘 막대는 어두운 화면에서 밝은 색으로
-        if (deco.ornament !== 'none' && night.ornamentLine !== look.ornamentLine) nightBoxDecls.push(getBoxLayerDecls(night)[0]);
+        if ((deco.ornament === 'taegeuk' && night.ornamentLine !== look.ornamentLine) || deco.border === 'obang') nightBoxDecls.push(getBoxLayerDecls(night)[0]);
+        // 방위 오방색: 위(북 흑) 테두리는 어두운 화면에서 회색으로
+        if (deco.border === 'bangwi') nightBoxDecls.push(`border-top-color: ${NIGHT_BLACK};`);
       }
       if (deco.box === 'sheet' && night.boxColor !== look.boxColor) {
         nightDecoSections += `\n\n${getSheetCss(night, ['.nightMode ', '.night_mode '], false)}`;
@@ -2998,6 +3023,30 @@ ${indentDecls(getCardBoxDecls(look))}}`;
         nightDecoSections += `\n\n.nightMode .card-box,
 .night_mode .card-box {
 ${indentDecls(nightBoxDecls)}}`;
+      }
+      if (deco.ornament === 'irworobong' && deco.box !== 'sheet') {
+        // 🌄 일월오봉도: 세로로 긴 화면(휴대폰)은 판 아래 띠 대신 화면 전체 그림
+        // html 높이를 화면에 맞춰, 배경 고정이 안 되는 기기(아이폰)에서도 그림이 글자 판 높이로 눌리지 않게
+        const full = getIrworobongFullLayers();
+        const rest = getBoxLayerDecls(look, { ...deco, ornament: 'none' });
+        decoSections += `\n\n@media (orientation: portrait) {
+  html {
+    min-height: 100%;
+  }
+
+  body.card {
+    background-image: ${full.map(l => l.img).join(', ')};
+    background-position: ${full.map(l => l.pos).join(', ')};
+    background-size: ${full.map(l => l.size).join(', ')};
+    background-repeat: ${full.map(l => l.repeat || 'no-repeat').join(', ')};
+    background-attachment: fixed;
+  }
+
+  body.card .card-box {
+${(rest.length ? rest : ['background-image: none;']).map(decl => `    ${decl}`).join('\n')}
+    padding-bottom: 1.5rem;
+  }
+}`;
       }
     }
     if (fields.some((f, idx) => buildTtsTag(f, idx))) {
@@ -3103,8 +3152,7 @@ ${nightBgImageLines}}
 
 .nightMode hr#answer,
 .night_mode hr#answer {
-  border-top-color: ${night.dividerColor};
-}${nightDecoSections}
+${indentDecls(deco.divider === 'obang' ? [getDividerDecls(night.dividerColor, deco, true)[2]] : [`border-top-color: ${night.dividerColor};`])}}${nightDecoSections}
 
 .nightMode .front-preview-hint,
 .night_mode .front-preview-hint {
@@ -3146,7 +3194,7 @@ ${nightBgImageLines}}
       });
     }
     const hrHtml = decoOn
-      ? `<hr id="answer" style="${escapeHtml(getDividerDecls(pLook.dividerColor).join(' '))}">`
+      ? `<hr id="answer" style="${escapeHtml(getDividerDecls(pLook.dividerColor, deco, isDark).join(' '))}">`
       : '<hr id="answer">';
 
     let html = '';
