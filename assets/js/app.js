@@ -429,6 +429,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const THEMES = [
     { id: 'default', icon: '🤍', font: 'gothic', colors: ['#202124', '#1a73e8', '#5f6368'], sizes: [24, 24, 20], deco: {} },
     {
+      id: 'flashcard', icon: '🏷️', font: 'gothic', colors: ['#0f172a', '#2563eb', '#64748b'],
+      deco: { bgType: 'pattern', bgColor: '#f8f7f2', bgColor2: '#e2e8f0', bgPattern: 'lines', box: 'shadow', boxColor: '#ffffff', border: 'thin', borderColor: '#e2e8f0', divider: 'solid', dividerColor: '#cbd5e1', textColor: '#0f172a', mutedColor: '#64748b' },
+    },
+    {
+      id: 'sticky', icon: '🟨', font: 'gothic', colors: ['#292524', '#b45309', '#78716c'],
+      deco: { bgType: 'solid', bgColor: '#f4f4f5', box: 'shadow', boxColor: '#fef9c3', border: 'none', borderColor: '#fde047', divider: 'dashed', dividerColor: '#ca8a04', textColor: '#292524', mutedColor: '#78716c' },
+    },
+    {
+      id: 'forest', icon: '🌿', font: 'gothic', colors: ['#1b382b', '#2d6a4f', '#52796f'],
+      deco: { bgType: 'solid', bgColor: '#edf3ee', box: 'round', boxColor: '#ffffff', border: 'thin', borderColor: '#b7d5bf', divider: 'solid', dividerColor: '#a3c9ad', textColor: '#1b382b', mutedColor: '#52796f' },
+    },
+    {
       id: 'paper', icon: '📒', font: 'gothic', colors: ['#3a3631', '#2f6496', '#6f6658'],
       deco: { bgType: 'pattern', bgColor: '#fcf7ea', bgColor2: '#d3e0ec', bgPattern: 'lines', border: 'left', borderColor: '#eba9a3', divider: 'dashed', dividerColor: '#c8bba2', textColor: '#3a3631', mutedColor: '#6f6658' },
     },
@@ -2538,7 +2550,7 @@ ${sel('::after')} {
     if (d.box === 'sheet') {
       const c = getSheetColors(look);
       const decls = [
-        'box-sizing: border-box;', 'position: relative;', 'max-width: 720px;', 'min-height: 192px;', 'margin: 0 auto;',
+        'box-sizing: border-box;', 'position: relative;', 'max-width: 720px;', 'min-height: 192px;', 'margin: 0.8rem auto;',
         `padding: ${SHEET_ROW + 10}px 14px 14px ${SHEET_HEAD + 14}px;`, 'overflow: hidden;',
         `background-color: ${look.boxColor};`, `background-image: ${getSheetGridImage(c.line)};`,
         `background-size: ${SHEET_COL}px ${SHEET_ROW}px;`, `background-position: ${SHEET_HEAD}px ${SHEET_ROW}px;`,
@@ -2549,7 +2561,7 @@ ${sel('::after')} {
       if (d.border === 'left') decls.push(`border-left: 6px solid ${look.borderColor};`);
       return decls;
     }
-    const decls = ['box-sizing: border-box;', 'max-width: 560px;', 'margin: 0 auto;'];
+    const decls = ['box-sizing: border-box;', 'max-width: 560px;', 'margin: 0.8rem auto;'];
     if (look.hasBox) {
       decls.push('padding: 1.5rem 1.25rem;', 'border-radius: 16px;', `background-color: ${look.boxColor};`);
       if (d.box === 'shadow') decls.push(`box-shadow: ${look.shadow};`);
