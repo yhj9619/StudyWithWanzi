@@ -49,8 +49,41 @@ document.addEventListener('DOMContentLoaded', () => {
       el.textContent = getSubDictLabel();
     });
   }
-  // 미리보기 전용 사전 / 보조 사전 아이콘 버튼 인라인 스타일 (미리보기는 생성된 CSS를 불러오지 않음, Anki 서식은 CSS의 .link-btn 규칙 사용)
-  const LINK_BTN_INLINE_STYLE = 'font-size: 0.6em; margin-left: 0.35em; text-decoration: none; opacity: 0.75; vertical-align: middle;';
+  // 아이콘 (🌐 외국어사전 · 📘📖🔎 보조 사전 · 🔊 읽어주기): 잘못 누르지 않게 크게 · 넉넉한 간격
+  // 미리보기(인라인 스타일)와 생성 CSS(.field-icons · .link-btn · .tts-btn 규칙)가 같은 값을 쓰도록 공유
+  // 버튼 하나의 누르는 자리: 글씨의 0.85배 아이콘 + 안쪽 여백 → 필드 글씨 24px 기준 약 33px
+  const ICON_BTN_DECLS = [
+    'display: inline-flex;', 'align-items: center;', 'justify-content: center;', 'box-sizing: border-box;',
+    'min-width: 1.6em;', 'min-height: 1.6em;', 'padding: 0.15em;', 'margin: 0 0.2em;', 'border-radius: 0.45em;', 'line-height: 1;',
+  ];
+  const LINK_BTN_DECLS = [...ICON_BTN_DECLS, 'font-size: 0.85em;', 'text-decoration: none;', 'opacity: 0.8;'];
+  // 누를 때 · 마우스를 올렸을 때 은은한 둥근 바탕 (밝은 카드 · 어두운 카드 모두 보이는 중간 회색 반투명)
+  const ICON_HOVER_BG = 'rgba(127, 127, 127, 0.16)';
+  // 아이콘 위치: beside 글자 옆 | below 글자 아래 따로 한 줄
+  // 처음 방문 · 꾸미기 초기화는 '글자 아래', 이 설정이 없던 예전 저장본은 '글자 옆' (기존 카드 모양 유지)
+  const ICON_POSITIONS = ['beside', 'below'];
+  const DEFAULT_ICON_POSITION = 'below';
+  const LEGACY_ICON_POSITION = 'beside';
+  const iconPositionSelect = document.getElementById('iconPosition');
+
+  // 🔊 읽어주기 (Anki 자체 TTS): 학습 언어 → Anki 언어 코드 ({{tts 언어코드:필드}})
+  // 기기마다 목소리 이름이 달라 voices=는 넣지 않고 언어 코드만 사용
+  // 목록에 없는 언어(테툼어·고대 히브리어·고대 그리스어·라틴어)는 기기 목소리가 거의 없어 읽어주기를 끔
+  const TTS_LANG_CODES = {
+    en: 'en_US', ja: 'ja_JP', zh: 'zh_CN', fr: 'fr_FR', de: 'de_DE', es: 'es_ES', ru: 'ru_RU', it: 'it_IT',
+    th: 'th_TH', vi: 'vi_VN', id: 'id_ID', ar: 'ar_SA', ne: 'ne_NP', lo: 'lo_LA', mn: 'mn_MN', my: 'my_MM',
+    sw: 'sw_KE', ur: 'ur_PK', uz: 'uz_UZ', kk: 'kk_KZ', km: 'km_KH', tl: 'fil_PH', fa: 'fa_IR', ha: 'ha_NG',
+    he: 'he_IL', hi: 'hi_IN', el: 'el_GR', nl: 'nl_NL', no: 'nb_NO', da: 'da_DK', ro: 'ro_RO', sv: 'sv_SE',
+    sq: 'sq_AL', uk: 'uk_UA', ka: 'ka_GE', cs: 'cs_CZ', hr: 'hr_HR', tr: 'tr_TR', pt: 'pt_BR', pl: 'pl_PL',
+    fi: 'fi_FI', hu: 'hu_HU',
+  };
+  const TTS_SPEEDS = ['1.0', '0.8', '0.6'];
+  const DEFAULT_TTS_SPEED = '1.0';
+  const ttsSpeedSelect = document.getElementById('ttsSpeed');
+  const ttsInfoBox = document.getElementById('ttsInfoBox');
+  const ttsInfoBody = document.getElementById('ttsInfoBody');
+  const ttsUnsupportedNote = document.getElementById('ttsUnsupportedNote');
+  const previewTtsNote = document.getElementById('previewTtsNote');
 
   // Common Layout & Typography Options
   const showHrAnswer = document.getElementById('showHrAnswer');
@@ -65,92 +98,68 @@ document.addEventListener('DOMContentLoaded', () => {
   const rtlForce = document.getElementById('rtlForce');
 
   const cardBaseFont = document.getElementById('cardBaseFont');
-  const cardBaseFontCustom = document.getElementById('cardBaseFontCustom');
   const cardLineHeight = document.getElementById('cardLineHeight');
   const cardLineHeightNum = document.getElementById('cardLineHeightNum');
   const cardLineHeightVal = document.getElementById('cardLineHeightVal');
 
-  // Font Presets Definition
+  // 글꼴 목록: Windows · macOS · iOS(AnkiMobile) · Android(AnkiDroid)에 이미 들어 있는 글꼴만 사용
+  // (웹폰트를 불러오지 않아 인터넷 없이도 보이고, 기기마다 그 기기의 비슷한 글꼴로 표시)
+  // 서식 미리보기의 style="..." 속성에도 들어가므로 글꼴 이름은 작은따옴표만 사용
   const FONT_PRESETS = {
-    'system': {
-      name: t('editor.font.system'),
-      css: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif"
+    // 기본 고딕: 애플 기기 → 윈도우(맑은 고딕) → 안드로이드(Noto CJK) → 중국어·일본어 고딕 → 영문 고딕
+    'gothic': {
+      css: "-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', 'Noto Sans KR', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans', 'Yu Gothic', Roboto, 'Segoe UI', sans-serif"
     },
-    'noto-sans-kr': {
-      name: t('editor.font.notoSansKr'),
-      css: "'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif"
+    // 명조 (바탕체 느낌): 애플 명조 → 윈도우 바탕 → 안드로이드 Noto Serif CJK → 중국어·일본어 명조 → 영문 세리프
+    'serif': {
+      css: "'AppleMyungjo', 'Batang', 'Noto Serif CJK KR', 'Noto Serif KR', 'Songti SC', 'SimSun', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, 'Times New Roman', serif"
     },
-    'noto-serif-kr': {
-      name: t('editor.font.notoSerifKr'),
-      css: "'Noto Serif KR', 'Nanum Myeongjo', 'Batang', serif"
-    },
-    'nanum-gothic': {
-      name: t('editor.font.nanumGothic'),
-      css: "'Nanum Gothic', 'Malgun Gothic', sans-serif"
-    },
-    'inter': {
-      name: t('editor.font.inter'),
-      css: "'Inter', 'Roboto', -apple-system, sans-serif"
-    },
-    'noto-sans-jp': {
-      name: t('editor.font.notoSansJp'),
-      css: "'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif"
-    },
-    'noto-sans-sc': {
-      name: t('editor.font.notoSansSc'),
-      css: "'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif"
-    },
-    'monospace': {
-      name: t('editor.font.monospace'),
-      css: "Consolas, Menlo, Monaco, 'Courier New', monospace"
-    },
-    'cursive': {
-      name: t('editor.font.cursive'),
-      css: "Caveat, 'Nanum Pen Script', cursive, sans-serif"
+    // 타자기체: 영문·숫자 폭이 일정 (한글은 기기의 고딕으로 표시됨)
+    // 맥·아이폰·안드로이드는 한글을 알아서 고딕으로 그리지만 윈도우는 명조 비슷한 글꼴로 그려서 맑은 고딕을 끝에 넣음
+    'mono': {
+      css: "Menlo, Consolas, 'Droid Sans Mono', 'Courier New', 'Malgun Gothic', monospace"
     }
   };
+  const DEFAULT_CARD_FONT = 'gothic';
 
-  // 구글 웹폰트 import 대상 (프리셋 키 → css2 family 파라미터)
-  const WEB_FONT_FAMILIES = {
-    'noto-sans-kr': 'Noto+Sans+KR:wght@400;700',
-    'noto-serif-kr': 'Noto+Serif+KR:wght@400;700',
-    'nanum-gothic': 'Nanum+Gothic:wght@400;700',
-    'inter': 'Inter:wght@400;600',
-    'noto-sans-jp': 'Noto+Sans+JP:wght@400;700',
-    'noto-sans-sc': 'Noto+Sans+SC:wght@400;700',
-    'cursive': 'Caveat:wght@600',
+  // 예전 글꼴 선택값 → 지금 글꼴 (예전 저장본 복원용: 웹폰트 · 손글씨체 · 사무용 · 직접 입력은 기본 고딕으로)
+  const LEGACY_FONT_MAP = {
+    'system': 'gothic',
+    'noto-sans-kr': 'gothic',
+    'nanum-gothic': 'gothic',
+    'inter': 'gothic',
+    'noto-sans-jp': 'gothic',
+    'noto-sans-sc': 'gothic',
+    'office': 'gothic',
+    'cursive': 'gothic',
+    'custom': 'gothic',
+    'noto-serif-kr': 'serif',
+    'monospace': 'mono',
   };
-  const GENERIC_FONT_FAMILIES = ['serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui'];
 
-  // 직접 입력한 글꼴명 정리: 따옴표·<>;{}\ 제거 후 쉼표로 나눠 각 글꼴을 작은따옴표로 감쌈
-  // (style="..." 속성과 CSS 어디에 넣어도 깨지지 않도록 큰따옴표를 쓰지 않음)
-  function sanitizeCustomFontList(customVal) {
-    return String(customVal || '')
-      .replace(/["'<>;{}\\]/g, '')
-      .split(',')
-      .map(name => name.trim().replace(/\s+/g, ' '))
-      .filter(Boolean)
-      .map(name => (GENERIC_FONT_FAMILIES.includes(name.toLowerCase()) ? name.toLowerCase() : `'${name}'`))
-      .join(', ');
+  // 저장본의 카드 글꼴 값 정리 (모르는 값은 기본 고딕)
+  function normalizeCardFontKey(key) {
+    const val = String(key || '');
+    if (FONT_PRESETS[val]) return val;
+    return LEGACY_FONT_MAP[val] || DEFAULT_CARD_FONT;
   }
 
-  function getFontFamilyCss(key, customVal) {
-    if (key === 'custom') {
-      const list = sanitizeCustomFontList(customVal);
-      return list ? `${list}, sans-serif` : FONT_PRESETS['system'].css;
-    }
-    if (FONT_PRESETS[key]) {
-      return FONT_PRESETS[key].css;
-    }
-    return FONT_PRESETS['system'].css;
+  // 저장본의 필드 글꼴 값 정리 ('inherit' = 카드 글꼴 그대로, 모르는 값도 카드 글꼴 그대로)
+  function normalizeFieldFontKey(key) {
+    const val = String(key || '');
+    if (val === 'inherit' || FONT_PRESETS[val]) return val;
+    return LEGACY_FONT_MAP[val] || 'inherit';
+  }
+
+  function getFontFamilyCss(key) {
+    return FONT_PRESETS[normalizeCardFontKey(key)].css;
   }
 
   function getFieldFontCss(field) {
     if (!field || !field.fontSelect) return '';
     const val = field.fontSelect.value;
     if (val === 'inherit') return '';
-    const custom = field.fontCustomInput ? field.fontCustomInput.value : '';
-    return getFontFamilyCss(val, custom);
+    return getFontFamilyCss(val);
   }
 
   // 필드명 비었을 때의 기본 이름 (배지·서식 코드·미리보기 공통: Front / Back / Field{n})
@@ -235,17 +244,18 @@ document.addEventListener('DOMContentLoaded', () => {
       showBack: document.getElementById('f1_show_back'),
       dictLinkCheck: document.getElementById('f1_dict_link'),
       wikiLinkCheck: document.getElementById('f1_wiki_link'),
+      ttsCheck: document.getElementById('f1_tts'),
       sizeSlider: document.getElementById('f1_size'),
       sizeNum: document.getElementById('f1_size_num'),
       sizeVal: document.getElementById('f1_size_val'),
       weightSelect: document.getElementById('f1_weight'),
       fontSelect: document.getElementById('f1_font'),
-      fontCustomInput: document.getElementById('f1_font_custom'),
       colorInput: document.getElementById('f1_color'),
       colorText: document.getElementById('f1_color_text'),
       deleteBtn: null,
       hasDictLink: false,
       hasWikiLink: false,
+      hasTts: false,
     },
     {
       boxEl: box2,
@@ -257,17 +267,18 @@ document.addEventListener('DOMContentLoaded', () => {
       showBack: document.getElementById('f2_show_back'),
       dictLinkCheck: document.getElementById('f2_dict_link'),
       wikiLinkCheck: document.getElementById('f2_wiki_link'),
+      ttsCheck: document.getElementById('f2_tts'),
       sizeSlider: document.getElementById('f2_size'),
       sizeNum: document.getElementById('f2_size_num'),
       sizeVal: document.getElementById('f2_size_val'),
       weightSelect: document.getElementById('f2_weight'),
       fontSelect: document.getElementById('f2_font'),
-      fontCustomInput: document.getElementById('f2_font_custom'),
       colorInput: document.getElementById('f2_color'),
       colorText: document.getElementById('f2_color_text'),
       deleteBtn: null,
       hasDictLink: true,
       hasWikiLink: false,
+      hasTts: true, // 처음 방문 시 외국어 단어 필드는 읽어주기 켬 (예전 저장본은 키가 없으면 끔)
     }
   ];
 
@@ -310,12 +321,91 @@ document.addEventListener('DOMContentLoaded', () => {
   const inspectorSizeVal = document.getElementById('inspectorSizeVal');
   const inspectorWeight = document.getElementById('inspectorWeight');
   const inspectorFont = document.getElementById('inspectorFont');
-  const inspectorFontCustom = document.getElementById('inspectorFontCustom');
   const inspectorColor = document.getElementById('inspectorColor');
   const inspectorColorText = document.getElementById('inspectorColorText');
   const inspectorPresets = document.getElementById('inspectorPresets');
 
   let selectedFieldIndex = 0;
+
+  // 🎨 더 꾸미기: 배경 · 카드 상자 · 테두리 · 구분선 (기본값 그대로면 생성되는 카드 서식은 예전과 똑같음)
+  // textColor(필드 밖 글자색) · mutedColor(뒷면 위 문제 글씨를 연하게 할 때 색)는 테마가 정하고 화면에는 따로 없음
+  const DECO_DEFAULTS = {
+    theme: 'default',
+    bgType: 'solid',        // solid 단색 | gradient 그라데이션 | pattern 은은한 무늬
+    bgColor: '#ffffff',
+    bgColor2: '#dbeafe',    // 그라데이션 두 번째 색 / 무늬 색
+    bgDir: 'down',          // down 위→아래 | right 왼쪽→오른쪽 | diagonal 대각선
+    bgPattern: 'dots',      // dots 점 | grid 격자 | lines 줄노트 | fiber 한지 결
+    box: 'none',            // none | round 둥근 카드 | shadow 둥근 카드 + 그림자 | sheet 표 모양 (스프레드시트)
+    boxColor: '#ffffff',
+    border: 'none',         // none | thin 얇은 선 | thick 두꺼운 선 | left 왼쪽 강조 띠
+    borderColor: '#cbd5e1',
+    divider: 'solid',       // solid 실선 | dashed 점선 | double 이중선
+    dividerColor: '#cbd5e1',
+    textColor: '#202124',
+    mutedColor: '#64748b',
+  };
+  const DECO_CHOICES = {
+    bgType: ['solid', 'gradient', 'pattern'],
+    bgDir: ['down', 'right', 'diagonal'],
+    bgPattern: ['dots', 'grid', 'lines', 'fiber'],
+    box: ['none', 'round', 'shadow', 'sheet'],
+    border: ['none', 'thin', 'thick', 'left'],
+    divider: ['solid', 'dashed', 'double'],
+  };
+  const DECO_COLOR_KEYS = ['bgColor', 'bgColor2', 'boxColor', 'borderColor', 'dividerColor', 'textColor', 'mutedColor'];
+  const BG_DIR_CSS = { down: 'to bottom', right: 'to right', diagonal: '135deg' };
+  const deco = { ...DECO_DEFAULTS };
+
+  // 한 번에 꾸미기 (테마): 배경 · 상자 · 테두리 · 구분선 · 카드 글꼴 · 필드 색 (1번째 = 본문, 2번째 = 강조, 나머지 = 연하게)
+  // sizes가 있는 테마는 글씨 크기도 바꿈 (1번째, 2번째, 나머지)
+  const THEMES = [
+    { id: 'default', icon: '🤍', font: 'gothic', colors: ['#202124', '#1a73e8', '#5f6368'], sizes: [24, 24, 20], deco: {} },
+    {
+      id: 'paper', icon: '📒', font: 'gothic', colors: ['#3a3631', '#2f6496', '#6f6658'],
+      deco: { bgType: 'pattern', bgColor: '#fcf7ea', bgColor2: '#d3e0ec', bgPattern: 'lines', border: 'left', borderColor: '#eba9a3', divider: 'dashed', dividerColor: '#c8bba2', textColor: '#3a3631', mutedColor: '#6f6658' },
+    },
+    {
+      id: 'pastel', icon: '🌸', font: 'gothic', colors: ['#4a4358', '#b83d70', '#6b6480'],
+      deco: { bgType: 'gradient', bgColor: '#fde4ec', bgColor2: '#dcebfd', bgDir: 'diagonal', box: 'shadow', boxColor: '#ffffff', divider: 'dashed', dividerColor: '#f1bfd0', textColor: '#4a4358', mutedColor: '#6b6480' },
+    },
+    {
+      id: 'dark', icon: '🖤', font: 'serif', colors: ['#f2ead8', '#e2bf68', '#a9aec0'],
+      deco: { bgType: 'gradient', bgColor: '#161c2f', bgColor2: '#0b0f1b', bgDir: 'down', box: 'shadow', boxColor: '#1c2339', border: 'thin', borderColor: '#9c8240', divider: 'double', dividerColor: '#b8954a', textColor: '#f2ead8', mutedColor: '#a9aec0' },
+    },
+    {
+      id: 'hanji', icon: '🏯', font: 'serif', colors: ['#1f1a16', '#9e2a2b', '#6b5d4f'],
+      deco: { bgType: 'pattern', bgColor: '#f3ead7', bgColor2: '#8a6a3f', bgPattern: 'fiber', border: 'thin', borderColor: '#c9b48f', divider: 'double', dividerColor: '#9e2a2b', textColor: '#1f1a16', mutedColor: '#6b5d4f' },
+    },
+    {
+      id: 'chalk', icon: '🟩', font: 'gothic', colors: ['#f3f1e7', '#f6d76b', '#b9c8bc'],
+      deco: { bgType: 'pattern', bgColor: '#2c4a3e', bgColor2: '#e8f0e8', bgPattern: 'fiber', border: 'thick', borderColor: '#8a5a36', divider: 'dashed', dividerColor: '#d9d6c4', textColor: '#f3f1e7', mutedColor: '#b9c8bc' },
+    },
+    {
+      id: 'ocean', icon: '🌊', font: 'gothic', colors: ['#12324a', '#0b7a8a', '#587386'],
+      deco: { bgType: 'gradient', bgColor: '#b5e3ec', bgColor2: '#4f8fc0', bgDir: 'down', box: 'shadow', boxColor: '#ffffff', divider: 'solid', dividerColor: '#a7d3e2', textColor: '#12324a', mutedColor: '#587386' },
+    },
+    {
+      // 스프레드시트: 표 모양 카드 (테두리 색은 테두리를 고를 때만 쓰임)
+      id: 'sheet', icon: '📊', font: 'gothic', colors: ['#1f1f1f', '#1f1f1f', '#595959'], sizes: [16, 16, 14],
+      deco: { bgType: 'solid', bgColor: '#ffffff', box: 'sheet', boxColor: '#ffffff', border: 'none', borderColor: '#217346', divider: 'solid', dividerColor: '#d4d4d4', textColor: '#1f1f1f', mutedColor: '#595959' },
+    },
+  ];
+
+  const decoControls = {
+    bgType: document.getElementById('decoBgType'),
+    bgColor: document.getElementById('decoBgColor'),
+    bgColor2: document.getElementById('decoBgColor2'),
+    bgDir: document.getElementById('decoBgDir'),
+    bgPattern: document.getElementById('decoBgPattern'),
+    box: document.getElementById('decoBox'),
+    boxColor: document.getElementById('decoBoxColor'),
+    border: document.getElementById('decoBorder'),
+    borderColor: document.getElementById('decoBorderColor'),
+    divider: document.getElementById('decoDivider'),
+    dividerColor: document.getElementById('decoDividerColor'),
+  };
+  const themeSwatches = document.getElementById('themeSwatches');
 
   let langCombobox = null;
   const DEFAULT_LANG_ID = 'en'; // 첫 방문 기본 언어 (사용자가 가장 많은 영어)
@@ -460,6 +550,12 @@ document.addEventListener('DOMContentLoaded', () => {
         setFieldLink(f, 'wiki', f.wikiLinkCheck.checked);
       });
     }
+    // 🔊 읽어주기 토글
+    if (f.ttsCheck) {
+      f.ttsCheck.addEventListener('change', () => {
+        setFieldLink(f, 'tts', f.ttsCheck.checked);
+      });
+    }
 
     // 크기 슬라이더 & 숫자 입력 동기화
     f.sizeSlider.addEventListener('input', (e) => {
@@ -497,22 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 글꼴 (폰트)
     if (f.fontSelect) {
-      f.fontSelect.addEventListener('change', () => {
-        if (f.fontCustomInput) {
-          if (f.fontSelect.value === 'custom') {
-            f.fontCustomInput.classList.remove('hidden');
-            f.fontCustomInput.focus();
-          } else {
-            f.fontCustomInput.classList.add('hidden');
-          }
-        }
-        updateAll();
-      });
-    }
-
-    if (f.fontCustomInput) {
-      f.fontCustomInput.addEventListener('input', () => updateAll());
-      f.fontCustomInput.addEventListener('change', () => updateAll());
+      f.fontSelect.addEventListener('change', () => updateAll());
     }
 
     // 색상 피커 & 텍스트 동기화
@@ -585,10 +666,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 필드 링크 적용 여부 설정 (type: 'dict' 외국어사전 | 'wiki' 보조 사전) - 동시 적용 가능
+  // 필드 링크 적용 여부 설정 (type: 'dict' 외국어사전 | 'wiki' 보조 사전 | 'tts' 🔊 읽어주기) - 동시 적용 가능
   function setFieldLink(f, type, enabled) {
     if (type === 'dict') f.hasDictLink = enabled;
     if (type === 'wiki') f.hasWikiLink = enabled;
+    if (type === 'tts') f.hasTts = enabled;
     updateFieldBadges();
     updateDictFieldChecklist();
     updateAll();
@@ -623,8 +705,6 @@ document.addEventListener('DOMContentLoaded', () => {
     inspectorSizeVal.textContent = f.sizeSlider.value;
     setIfIdle(inspectorWeight, f.weightSelect.value);
     setIfIdle(inspectorFont, f.fontSelect ? f.fontSelect.value : 'inherit');
-    setIfIdle(inspectorFontCustom, f.fontCustomInput ? f.fontCustomInput.value : '');
-    inspectorFontCustom.classList.toggle('hidden', inspectorFont.value !== 'custom');
     setIfIdle(inspectorColor, f.colorInput.value);
     setIfIdle(inspectorColorText, f.colorInput.value);
 
@@ -685,14 +765,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!f || !f.fontSelect) return;
       f.fontSelect.value = inspectorFont.value;
       f.fontSelect.dispatchEvent(new Event('change'));
-      if (inspectorFont.value === 'custom') inspectorFontCustom.focus();
-    });
-
-    inspectorFontCustom.addEventListener('input', () => {
-      const f = target();
-      if (!f || !f.fontCustomInput) return;
-      f.fontCustomInput.value = inspectorFontCustom.value;
-      f.fontCustomInput.dispatchEvent(new Event('input'));
     });
 
     const applyColor = (color) => {
@@ -739,6 +811,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 미리보기 카드 속 필드 텍스트 클릭 → 편집 대상 선택 (사전 아이콘은 그대로 링크 이동)
     liveCardRender.addEventListener('click', (e) => {
+      // 🔊 버튼: 예시값 읽어 보기
+      const ttsBtn = e.target.closest('.preview-tts-btn');
+      if (ttsBtn) {
+        speakPreview(parseInt(ttsBtn.dataset.ttsField, 10));
+        return;
+      }
       if (e.target.closest('a')) return;
       const item = e.target.closest('.field-item, .front-preview-hint');
       if (!item) return;
@@ -748,6 +826,106 @@ document.addEventListener('DOMContentLoaded', () => {
       if (match) idx = parseInt(match[1], 10) - 1;
       if (fields[idx] && idx !== selectedFieldIndex) selectField(idx);
     });
+  }
+
+  // 슬라이더 대신 [−] [숫자] [+] 조절기
+  // 슬라이더(range)는 숨겨서 값 보관용으로 그대로 두고, 버튼은 숫자 칸 값을 바꾼 뒤 숫자 칸의 input/change 이벤트를 그대로 발생시킴
+  // → 범위 보정 · 1번째 필드와 뒷면 문제 크기 맞추기 · 서식 갱신 · 저장 등 기존 로직을 그대로 씀
+  const steppers = [];
+  const STEPPER_HOLD_DELAY = 400; // 누르고 있으면 이 시간 뒤부터 반복
+  const STEPPER_HOLD_REPEAT = 80;
+
+  function enhanceStepper(container) {
+    if (!container || container.dataset.stepper) return;
+    const range = container.querySelector('input[type="range"]');
+    const num = container.querySelector('input[type="number"]');
+    if (!range || !num) return;
+    container.dataset.stepper = '1';
+    container.classList.add('stepper');
+
+    const isLineHeight = range === cardLineHeight;
+    const step = parseFloat(range.getAttribute('step')) || 1;
+    const decimals = isLineHeight ? 1 : 0;
+    const factor = Math.pow(10, decimals);
+
+    const makeBtn = (dir) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `stepper-btn stepper-${dir < 0 ? 'down' : 'up'}`;
+      btn.textContent = dir < 0 ? '−' : '+';
+      const label = t(`editor.stepper.${isLineHeight ? 'line' : 'size'}${dir < 0 ? 'Down' : 'Up'}`);
+      btn.setAttribute('aria-label', label);
+      btn.title = label;
+      return btn;
+    };
+    const minus = makeBtn(-1);
+    const plus = makeBtn(1);
+    container.insertBefore(minus, num);
+    num.insertAdjacentElement('afterend', plus);
+    const unit = document.createElement('span');
+    unit.className = 'stepper-unit';
+    unit.textContent = isLineHeight ? t('editor.step3.lineHeightUnit') : 'px';
+    plus.insertAdjacentElement('afterend', unit);
+
+    // 한 칸 올리기/내리기 (끝에 닿아 바뀌지 않으면 false)
+    const nudge = (dir) => {
+      const min = parseFloat(range.min);
+      const max = parseFloat(range.max);
+      const cur = parseFloat(range.value);
+      const next = Math.min(max, Math.max(min, Math.round((cur + dir * step) * factor) / factor));
+      if (!isFinite(next) || next === cur) return false;
+      num.value = next.toFixed(decimals);
+      num.dispatchEvent(new Event('input'));
+      num.dispatchEvent(new Event('change'));
+      return true;
+    };
+
+    // 누르고 있으면 반복 (손을 떼거나 · 버튼 밖으로 나가거나 · 취소되면 멈춤)
+    [[minus, -1], [plus, 1]].forEach(([btn, dir]) => {
+      let holdTimer = null;
+      let repeatTimer = null;
+      const stop = () => {
+        clearTimeout(holdTimer);
+        clearInterval(repeatTimer);
+        holdTimer = null;
+        repeatTimer = null;
+      };
+      btn.addEventListener('pointerdown', (e) => {
+        if (e.button !== undefined && e.button !== 0) return;
+        stop();
+        if (!nudge(dir)) return;
+        holdTimer = setTimeout(() => {
+          repeatTimer = setInterval(() => {
+            if (btn.disabled || !nudge(dir)) stop();
+          }, STEPPER_HOLD_REPEAT);
+        }, STEPPER_HOLD_DELAY);
+      });
+      ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach(type => btn.addEventListener(type, stop));
+      // 키보드(Enter · 스페이스)로 누른 경우만 click에서 처리 (마우스·터치는 pointerdown에서 이미 처리)
+      btn.addEventListener('click', (e) => {
+        if (e.detail === 0) nudge(dir);
+      });
+      // 길게 누를 때 휴대폰의 메뉴(복사 등)가 뜨지 않게
+      btn.addEventListener('contextmenu', (e) => e.preventDefault());
+    });
+
+    steppers.push({ container, range, num, minus, plus, decimals });
+  }
+
+  // 조절기 화면 갱신: 숫자 칸 표시(입력 중인 칸은 그대로) · 끝에 닿은 버튼 끄기
+  function refreshSteppers() {
+    for (let i = steppers.length - 1; i >= 0; i--) {
+      const s = steppers[i];
+      if (!s.container.isConnected) {
+        steppers.splice(i, 1); // 삭제된 필드의 조절기
+        continue;
+      }
+      const val = parseFloat(s.range.value);
+      if (!isFinite(val)) continue;
+      if (document.activeElement !== s.num) s.num.value = val.toFixed(s.decimals);
+      s.minus.disabled = val <= parseFloat(s.range.min);
+      s.plus.disabled = val >= parseFloat(s.range.max);
+    }
   }
 
   // 동적 필드 추가 함수 (3번째 이상 선택 필드)
@@ -762,10 +940,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let size = 20;
     let weight = 'normal';
     let font = 'inherit';
-    let fontCustom = '';
     let color = '#5f6368';
     let hasDictLink = false;
     let hasWikiLink = false;
+    let hasTts = false;
 
     if (fieldData) {
       // 저장본에서 복원하는 값은 형식을 검사 (잘못된 값은 기본값 유지)
@@ -775,11 +953,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (fieldData.showBack !== undefined) showBack = Boolean(fieldData.showBack);
       if (fieldData.size !== undefined) size = Math.round(clampNumber(fieldData.size, SIZE_MIN, SIZE_MAX, size));
       if (WEIGHT_VALUES.includes(String(fieldData.weight))) weight = String(fieldData.weight);
-      if (fieldData.font !== undefined && (fieldData.font === 'inherit' || fieldData.font === 'custom' || FONT_PRESETS[fieldData.font])) font = fieldData.font;
-      if (fieldData.fontCustom !== undefined) fontCustom = String(fieldData.fontCustom);
+      // 예전 글꼴 값은 지금 글꼴로 바꿔 복원 (모르는 값은 카드 글꼴 그대로)
+      if (fieldData.font !== undefined) font = normalizeFieldFontKey(fieldData.font);
       if (fieldData.color !== undefined) color = normalizeHexColor(fieldData.color) || color;
       if (fieldData.hasDictLink !== undefined) hasDictLink = Boolean(fieldData.hasDictLink);
       if (fieldData.hasWikiLink !== undefined) hasWikiLink = Boolean(fieldData.hasWikiLink);
+      if (fieldData.hasTts !== undefined) hasTts = Boolean(fieldData.hasTts);
     } else {
       if (index === 3) {
         if (currentLang.id === 'zh') {
@@ -811,6 +990,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="field-badge field-badge-secondary"></div>
         <div class="field-header-actions">
           <div class="field-visibility-toggles">
+            <div class="toggle-row">
             <label class="mini-toggle" title="${t('editor.field.showFrontTitle')}">
               <input type="checkbox" class="f-show-front"${showFront ? ' checked' : ''}>
               <span>${t('editor.field.showFront')}</span>
@@ -819,6 +999,8 @@ document.addEventListener('DOMContentLoaded', () => {
               <input type="checkbox" class="f-show-back"${showBack ? ' checked' : ''}>
               <span>${t('editor.field.showBack')}</span>
             </label>
+            </div>
+            <div class="toggle-row">
             <label class="mini-toggle mini-toggle-link" title="${t('editor.field.dictLinkTitle')}">
               <input type="checkbox" class="f-dict-link"${hasDictLink ? ' checked' : ''}>
               <span>${t('editor.field.dictLink')}</span>
@@ -827,6 +1009,11 @@ document.addEventListener('DOMContentLoaded', () => {
               <input type="checkbox" class="f-wiki-link"${hasWikiLink ? ' checked' : ''}>
               <span class="sub-dict-label">${getSubDictLabel()}</span>
             </label>
+            <label class="mini-toggle mini-toggle-tts" title="${t('editor.field.ttsTitle')}">
+              <input type="checkbox" class="f-tts"${hasTts ? ' checked' : ''}>
+              <span>${t('editor.field.tts')}</span>
+            </label>
+            </div>
           </div>
           <button type="button" class="btn-delete-field" title="${t('editor.field.deleteTitle')}">
             ${t('editor.field.delete')}
@@ -848,7 +1035,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       <div class="style-controls-row">
         <div class="control-item">
-          <label class="sub-label">${t('editor.style.sizeLabel')} <span class="f-size-val">${size}</span>px</label>
+          <label class="sub-label">${t('editor.style.sizeLabel')}<span class="stepper-label-val"> <span class="f-size-val">${size}</span>px</span></label>
           <div class="slider-with-number">
             <input type="range" min="${SIZE_MIN}" max="${SIZE_MAX}" value="${size}" class="form-range f-size">
             <input type="number" min="${SIZE_MIN}" max="${SIZE_MAX}" value="${size}" class="num-input f-size-num">
@@ -868,18 +1055,10 @@ document.addEventListener('DOMContentLoaded', () => {
           <label class="sub-label">${t('editor.style.fontLabel')}</label>
           <select class="form-select small-select f-font">
             <option value="inherit"${font === 'inherit' ? ' selected' : ''}>${t('editor.font.inherit')}</option>
-            <option value="system"${font === 'system' ? ' selected' : ''}>${t('editor.font.system')}</option>
-            <option value="noto-sans-kr"${font === 'noto-sans-kr' ? ' selected' : ''}>${t('editor.font.notoSansKr')}</option>
-            <option value="noto-serif-kr"${font === 'noto-serif-kr' ? ' selected' : ''}>${t('editor.font.notoSerifKr')}</option>
-            <option value="nanum-gothic"${font === 'nanum-gothic' ? ' selected' : ''}>${t('editor.font.nanumGothic')}</option>
-            <option value="inter"${font === 'inter' ? ' selected' : ''}>${t('editor.font.inter')}</option>
-            <option value="noto-sans-jp"${font === 'noto-sans-jp' ? ' selected' : ''}>${t('editor.font.notoSansJp')}</option>
-            <option value="noto-sans-sc"${font === 'noto-sans-sc' ? ' selected' : ''}>${t('editor.font.notoSansSc')}</option>
-            <option value="monospace"${font === 'monospace' ? ' selected' : ''}>${t('editor.font.monospace')}</option>
-            <option value="cursive"${font === 'cursive' ? ' selected' : ''}>${t('editor.font.cursive')}</option>
-            <option value="custom"${font === 'custom' ? ' selected' : ''}>${t('editor.font.custom')}</option>
+            <option value="gothic"${font === 'gothic' ? ' selected' : ''}>${t('editor.font.gothic')}</option>
+            <option value="serif"${font === 'serif' ? ' selected' : ''}>${t('editor.font.serif')}</option>
+            <option value="mono"${font === 'mono' ? ' selected' : ''}>${t('editor.font.mono')}</option>
           </select>
-          <input type="text" class="form-input font-custom-input f-font-custom${font === 'custom' ? '' : ' hidden'}" value="${escapeHtml(fontCustom || '')}" placeholder="${t('editor.style.fontCustomPlaceholder')}">
         </div>
 
         <div class="control-item">
@@ -901,6 +1080,7 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     optionalFieldsContainer.appendChild(box);
+    enhanceStepper(box.querySelector('.slider-with-number'));
 
     const fObj = {
       boxEl: box,
@@ -912,17 +1092,18 @@ document.addEventListener('DOMContentLoaded', () => {
       showBack: box.querySelector('.f-show-back'),
       dictLinkCheck: box.querySelector('.f-dict-link'),
       wikiLinkCheck: box.querySelector('.f-wiki-link'),
+      ttsCheck: box.querySelector('.f-tts'),
       sizeSlider: box.querySelector('.f-size'),
       sizeNum: box.querySelector('.f-size-num'),
       sizeVal: box.querySelector('.f-size-val'),
       weightSelect: box.querySelector('.f-weight'),
       fontSelect: box.querySelector('.f-font'),
-      fontCustomInput: box.querySelector('.f-font-custom'),
       colorInput: box.querySelector('.f-color'),
       colorText: box.querySelector('.f-color-text'),
       deleteBtn: box.querySelector('.btn-delete-field'),
       hasDictLink: hasDictLink,
       hasWikiLink: hasWikiLink,
+      hasTts: hasTts,
     };
 
     fields.push(fObj);
@@ -1330,6 +1511,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (f.hasDictLink) badgeText += ` · ${t('editor.field.dictLink')}`;
       if (f.hasWikiLink) badgeText += ` · ${getSubDictLabel()}`;
+      if (f.hasTts && isTtsSupported()) badgeText += ` · ${t('editor.field.tts')}`;
       if (f.hasDictLink || f.hasWikiLink) {
         f.badgeEl.className = 'field-badge field-badge-primary';
       } else {
@@ -1345,6 +1527,71 @@ document.addEventListener('DOMContentLoaded', () => {
         f.wikiLinkCheck.checked = Boolean(f.hasWikiLink);
       }
     });
+    updateTtsUi();
+  }
+
+  // 🔊 읽어주기: 지금 학습 언어의 Anki 언어 코드 (읽어주기를 쓸 수 없는 언어면 빈 문자열)
+  function getTtsLangCode() {
+    return TTS_LANG_CODES[languageSelect.value] || '';
+  }
+
+  function isTtsSupported() {
+    return Boolean(getTtsLangCode());
+  }
+
+  function getTtsSpeed() {
+    const val = ttsSpeedSelect ? ttsSpeedSelect.value : DEFAULT_TTS_SPEED;
+    return TTS_SPEEDS.includes(val) ? val : DEFAULT_TTS_SPEED;
+  }
+
+  // 읽어주기 토글·안내 상자 갱신 (쓸 수 없는 언어면 토글을 끄고 안내 표시, 켜 둔 값은 보관해 언어를 바꾸면 되살림)
+  function updateTtsUi() {
+    const supported = isTtsSupported();
+    fields.forEach(f => {
+      if (!f.ttsCheck) return;
+      f.ttsCheck.disabled = !supported;
+      f.ttsCheck.checked = supported && Boolean(f.hasTts);
+      const label = f.ttsCheck.closest('label');
+      if (label) {
+        label.classList.toggle('is-disabled', !supported);
+        label.title = supported ? t('editor.field.ttsTitle') : t('editor.field.ttsUnsupportedTitle');
+      }
+    });
+    const anyOn = supported && fields.some(f => f.hasTts);
+    if (ttsInfoBox) ttsInfoBox.classList.toggle('hidden', supported && !anyOn);
+    if (ttsInfoBody) ttsInfoBody.classList.toggle('hidden', !supported);
+    if (ttsUnsupportedNote) ttsUnsupportedNote.classList.toggle('hidden', supported);
+    if (previewTtsNote) previewTtsNote.classList.toggle('hidden', !anyOn);
+  }
+
+  // 미리보기 🔊: 이 브라우저의 목소리로 예시값 읽기 (실제 Anki 목소리는 기기마다 다름)
+  function speakPreview(idx) {
+    const f = fields[idx];
+    if (!f) return;
+    const code = getTtsLangCode();
+    const synth = window.speechSynthesis;
+    if (!code || !synth || typeof window.SpeechSynthesisUtterance !== 'function') {
+      showToast(t('editor.tts.noVoice'));
+      return;
+    }
+    const lang = code.replace('_', '-'); // zh_CN → zh-CN
+    const prefix = lang.split('-')[0].toLowerCase();
+    const voiceLang = v => String(v.lang || '').replace('_', '-').toLowerCase();
+    const voices = synth.getVoices() || [];
+    const voice = voices.find(v => voiceLang(v) === lang.toLowerCase())
+      || voices.find(v => voiceLang(v).split('-')[0] === prefix);
+    // 목소리 목록을 아직 못 받았으면 그대로 시도, 목록이 있는데 맞는 언어가 없으면 안내
+    if (voices.length && !voice) {
+      showToast(t('editor.tts.noVoice'));
+      return;
+    }
+    const text = f.sampleInput.value.trim() || getFieldDisplayName(f, idx);
+    synth.cancel();
+    const utter = new window.SpeechSynthesisUtterance(text);
+    utter.lang = lang;
+    if (voice) utter.voice = voice;
+    utter.rate = parseFloat(getTtsSpeed());
+    synth.speak(utter);
   }
 
   // 고급 설정의 필드별 외국어사전 / 보조 사전 체크박스 목록 동적 갱신 (단어·예문 다중 선택 지원)
@@ -1376,16 +1623,23 @@ document.addEventListener('DOMContentLoaded', () => {
       const options = document.createElement('div');
       options.className = 'dict-target-options';
 
+      const ttsSupported = isTtsSupported();
       [
         { type: 'dict', text: t('editor.field.dictLink'), checked: Boolean(f.hasDictLink) },
         { type: 'wiki', text: getSubDictLabel(), checked: Boolean(f.hasWikiLink) },
+        { type: 'tts', text: t('editor.field.tts'), checked: ttsSupported && Boolean(f.hasTts), disabled: !ttsSupported },
       ].forEach(opt => {
         const label = document.createElement('label');
         label.className = 'custom-checkbox';
+        if (opt.disabled) {
+          label.classList.add('is-disabled');
+          label.title = t('editor.field.ttsUnsupportedTitle');
+        }
 
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.checked = opt.checked;
+        checkbox.disabled = Boolean(opt.disabled);
         checkbox.dataset.fieldIndex = idx;
         checkbox.addEventListener('change', () => {
           setFieldLink(f, opt.type, checkbox.checked);
@@ -1459,6 +1713,30 @@ document.addEventListener('DOMContentLoaded', () => {
     linkNewTab.addEventListener('change', updateAll);
     if (linkCleanQuery) linkCleanQuery.addEventListener('change', updateAll);
 
+    // 🔊 읽는 속도
+    if (ttsSpeedSelect) ttsSpeedSelect.addEventListener('change', () => updateAll());
+    // 아이콘 위치 (글자 옆 / 글자 아래)
+    if (iconPositionSelect) iconPositionSelect.addEventListener('change', () => updateAll());
+
+    // 🎨 더 꾸미기: 하나씩 바꾸기 (값을 deco에 옮기고 관련 칸 보이기/숨기기)
+    Object.keys(decoControls).forEach(key => {
+      const el = decoControls[key];
+      if (!el) return;
+      const onChange = () => {
+        if (el.type === 'color') {
+          const color = normalizeHexColor(el.value);
+          if (!color) return;
+          deco[key] = color;
+        } else if (DECO_CHOICES[key] && DECO_CHOICES[key].includes(el.value)) {
+          deco[key] = el.value;
+        }
+        syncDecoControls();
+        updateAll();
+      };
+      el.addEventListener('change', onChange);
+      if (el.type === 'color') el.addEventListener('input', onChange);
+    });
+
     showHrAnswer.addEventListener('change', updateAll);
     keepFrontOnBack.addEventListener('change', () => {
       if (frontOnBackSettings) {
@@ -1516,21 +1794,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 카드 공통 폰트 & 줄간격 이벤트
     if (cardBaseFont) {
-      cardBaseFont.addEventListener('change', () => {
-        if (cardBaseFontCustom) {
-          if (cardBaseFont.value === 'custom') {
-            cardBaseFontCustom.classList.remove('hidden');
-            cardBaseFontCustom.focus();
-          } else {
-            cardBaseFontCustom.classList.add('hidden');
-          }
-        }
-        updateAll();
-      });
-    }
-    if (cardBaseFontCustom) {
-      cardBaseFontCustom.addEventListener('input', updateAll);
-      cardBaseFontCustom.addEventListener('change', updateAll);
+      cardBaseFont.addEventListener('change', updateAll);
     }
     if (cardLineHeight) {
       cardLineHeight.addEventListener('input', (e) => {
@@ -1686,11 +1950,16 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // 전체 설정 초기화 버튼
+    // 전체 설정 초기화 버튼 (머리글)
     const resetAllSettingsBtn = document.getElementById('resetAllSettingsBtn');
     if (resetAllSettingsBtn) {
       resetAllSettingsBtn.addEventListener('click', resetAllSettings);
     }
+    // 묶음별 초기화 버튼 (📝 ② 필드 아래 · 🎨 더 꾸미기 안)
+    const resetContentBtn = document.getElementById('resetContentBtn');
+    if (resetContentBtn) resetContentBtn.addEventListener('click', resetContentSettings);
+    const resetDesignBtn = document.getElementById('resetDesignBtn');
+    if (resetDesignBtn) resetDesignBtn.addEventListener('click', resetDesignSettings);
 
     if (window.innerWidth <= 768) {
       showMobileEditView();
@@ -1774,6 +2043,423 @@ document.addEventListener('DOMContentLoaded', () => {
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   }
 
+  // ===== 🎨 더 꾸미기: 색 계산 도우미 =====
+  function hexToRgb(hex) {
+    const v = normalizeHexColor(hex) || '#ffffff';
+    return [parseInt(v.slice(1, 3), 16), parseInt(v.slice(3, 5), 16), parseInt(v.slice(5, 7), 16)];
+  }
+
+  // 밝기 (0~255, getDarkModeColor와 같은 계산)
+  function getLuminance(hex) {
+    const [r, g, b] = hexToRgb(hex);
+    return 0.299 * r + 0.587 * g + 0.114 * b;
+  }
+
+  function isDarkColor(hex) {
+    return getLuminance(hex) < 128;
+  }
+
+  // 두 색 섞기 (ratio: 두 번째 색 비율 0~1)
+  function mixHex(a, b, ratio) {
+    const ca = hexToRgb(a);
+    const cb = hexToRgb(b);
+    return '#' + ca.map((v, i) => Math.round(v + (cb[i] - v) * ratio).toString(16).padStart(2, '0')).join('');
+  }
+
+  function hexToRgba(hex, alpha) {
+    const [r, g, b] = hexToRgb(hex);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  // 두 색의 명암 대비 (WCAG 방식, 1~21)
+  function getContrastRatio(a, b) {
+    const lum = hex => {
+      const [r, g, b2] = hexToRgb(hex).map(v => {
+        const c = v / 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b2;
+    };
+    const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
+    return (hi + 0.05) / (lo + 0.05);
+  }
+
+  // 어두운 바탕 위 글자색이 너무 흐리면 흰색 쪽으로 조금씩 밝힘
+  function ensureContrast(color, background, minRatio) {
+    let result = color;
+    for (let i = 1; i <= 10 && getContrastRatio(result, background) < minRatio; i++) {
+      result = mixHex(color, '#ffffff', i * 0.1);
+    }
+    return result;
+  }
+
+  // 같은 색 계열에서 밝기만 바꾼 색 (밝은 테마의 다크모드 배경·상자용, 채도는 maxSat 이하로 차분하게)
+  function toNightTone(hex, lightness, maxSat = 0.35) {
+    const [r, g, b] = hexToRgb(hex).map(v => v / 255);
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const delta = max - min;
+    const l = (max + min) / 2;
+    const s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+    let h = 0;
+    if (delta !== 0) {
+      if (max === r) h = ((g - b) / delta) % 6;
+      else if (max === g) h = (b - r) / delta + 2;
+      else h = (r - g) / delta + 4;
+      h = Math.round(h * 60);
+      if (h < 0) h += 360;
+      if (h >= 360) h -= 360;
+    }
+    return hslToHex(h, Math.min(s, maxSat), lightness);
+  }
+
+  // 꾸민 카드의 다크모드 글자색: 이미 밝은 색은 그대로, 어두운 색은 같은 색 계열에서 밝게 (채도는 원래 값 유지)
+  function getNightFieldColor(hex) {
+    if (getLuminance(hex) >= 150) return normalizeHexColor(hex) || '#f8fafc';
+    const [r, g, b] = hexToRgb(hex).map(v => v / 255);
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const l = (max + min) / 2;
+    const s = max === min ? 0 : (max - min) / (1 - Math.abs(2 * l - 1));
+    return toNightTone(hex, s < 0.25 ? 0.8 : 0.72, s < 0.25 ? 0.15 : 0.85);
+  }
+
+  // 꾸미기 설정이 기본값 그대로인지 (테마 이름은 제외하고 실제 모양만 비교)
+  function isDecoDefault(d = deco) {
+    return Object.keys(DECO_DEFAULTS).every(key => key === 'theme' || d[key] === DECO_DEFAULTS[key]);
+  }
+
+  // 카드 모양 계산 (isNight: Anki 다크모드)
+  // 어두운 바탕(고급 다크 · 칠판 등)은 다크모드에서도 그대로, 밝은 바탕은 같은 색 계열의 어두운 색으로 바꾸고 글자색은 밝게 보정
+  function getDecoLook(isNight, d = deco) {
+    const hasBox = d.box !== 'none';
+    const bgAvg = d.bgType === 'gradient' ? mixHex(d.bgColor, d.bgColor2, 0.5) : d.bgColor;
+    const surfaceDark = isDarkColor(hasBox ? d.boxColor : bgAvg);
+
+    // 필드 밖 글자색: 바탕과 대비가 안 되면 자동으로 바꿈
+    let text = d.textColor;
+    if (surfaceDark && isDarkColor(text)) text = '#f1f5f9';
+    if (!surfaceDark && !isDarkColor(text)) text = '#202124';
+
+    const look = {
+      hasBox,
+      hasWrapper: hasBox || d.border !== 'none',
+      surfaceDark,
+      text,
+      bgColor: d.bgColor,
+      bgColor2: d.bgColor2,
+      boxColor: d.boxColor,
+      borderColor: d.borderColor,
+      dividerColor: d.dividerColor,
+      shadow: '0 6px 24px rgba(15, 23, 42, 0.12)',
+      fieldColor: color => color,
+    };
+    if (!isNight) return look;
+
+    if (!isDarkColor(bgAvg)) {
+      // 기본 흰 바탕은 예전과 같은 다크모드 색 (#2f2f31)
+      look.bgColor = (d.bgType === 'solid' && d.bgColor === '#ffffff')
+        ? '#2f2f31'
+        : toNightTone(d.bgColor, d.bgType === 'gradient' ? 0.14 : 0.13);
+      if (d.bgType === 'gradient') look.bgColor2 = toNightTone(d.bgColor2, 0.09);
+      else if (d.bgType === 'pattern') look.bgColor2 = d.bgPattern === 'fiber' ? toNightTone(d.bgColor2, 0.7, 0.3) : toNightTone(d.bgColor2, 0.3, 0.3);
+    }
+    if (hasBox && !isDarkColor(d.boxColor)) {
+      // 표 모양은 차분한 진회색 시트, 나머지 상자는 배경과 어울리는 어두운 색
+      look.boxColor = d.box === 'sheet'
+        ? toNightTone(d.boxColor, 0.12, 0.05)
+        : toNightTone(mixHex(d.boxColor, bgAvg, 0.5), 0.18);
+      look.shadow = '0 6px 24px rgba(0, 0, 0, 0.45)';
+    }
+    if (!surfaceDark) {
+      const nightSurface = hasBox ? look.boxColor : look.bgColor;
+      const nightLine = color => (getLuminance(color) >= 140
+        ? mixHex(color, nightSurface, 0.6)
+        : mixHex(getDarkModeColor(color), nightSurface, 0.3));
+      look.text = '#f8fafc';
+      // 꾸민 카드는 바탕색이 다양하므로 글자가 충분히 또렷해질 때까지(대비 4.5 이상) 더 밝게 보정
+      // (꾸미기 기본값이면 예전과 같은 색 그대로)
+      // 원래 채도를 살려(연한 회색은 연한 회색 그대로) 밝기만 올림 → 테마 분위기 유지
+      look.fieldColor = isDecoDefault(d)
+        ? color => getDarkModeColor(color)
+        : color => ensureContrast(getNightFieldColor(color), nightSurface, 4.5);
+      look.borderColor = nightLine(d.borderColor);
+      look.dividerColor = d.dividerColor === DECO_DEFAULTS.dividerColor ? '#4b5563' : nightLine(d.dividerColor);
+    }
+    return look;
+  }
+
+  // 은은한 무늬 (그림 파일 없이 CSS 그라데이션만 사용 → 인터넷 없이도 보임)
+  function getPatternCss(pattern, color) {
+    switch (pattern) {
+      case 'grid':
+        return { image: `linear-gradient(${color} 1px, transparent 1px), linear-gradient(90deg, ${color} 1px, transparent 1px)`, size: '22px 22px' };
+      case 'lines':
+        return { image: `linear-gradient(transparent 31px, ${color} 31px)`, size: '100% 32px' };
+      case 'fiber':
+        // 한지 결: 엇갈린 가는 결 + 군데군데 옅은 얼룩
+        return {
+          image: [
+            `repeating-linear-gradient(115deg, ${hexToRgba(color, 0.06)} 0 1px, transparent 1px 7px)`,
+            `repeating-linear-gradient(35deg, ${hexToRgba(color, 0.05)} 0 1px, transparent 1px 11px)`,
+            `radial-gradient(circle at 25% 20%, ${hexToRgba(color, 0.1)}, transparent 45%)`,
+            `radial-gradient(circle at 80% 75%, ${hexToRgba(color, 0.08)}, transparent 50%)`,
+          ].join(', '),
+          size: '',
+        };
+      default:
+        return { image: `radial-gradient(${color} 1.2px, transparent 1.6px)`, size: '18px 18px' };
+    }
+  }
+
+  // 배경 색 (그라데이션은 끝 색을 바탕색으로 두어 카드가 길어져도 자연스럽게 이어지게)
+  function getBackgroundColor(look, d = deco) {
+    return d.bgType === 'gradient' ? look.bgColor2 : look.bgColor;
+  }
+
+  // 배경 그림 선언 목록 (background-color 제외, 단색이면 빈 목록)
+  // forAnki: Anki 카드는 그라데이션을 화면에 고정해 길게 스크롤해도 끊기지 않게
+  function getBackgroundImageDecls(look, d = deco, forAnki = true) {
+    if (d.bgType === 'gradient') {
+      const decls = [`background-image: linear-gradient(${BG_DIR_CSS[d.bgDir] || 'to bottom'}, ${look.bgColor}, ${look.bgColor2});`];
+      if (forAnki) decls.push('background-attachment: fixed;', 'background-repeat: no-repeat;');
+      return decls;
+    }
+    if (d.bgType === 'pattern') {
+      const p = getPatternCss(d.bgPattern, look.bgColor2);
+      return p.size ? [`background-image: ${p.image};`, `background-size: ${p.size};`] : [`background-image: ${p.image};`];
+    }
+    return [];
+  }
+
+  // 구분선 (hr#answer) 선 모양
+  function getDividerCss(color, d = deco) {
+    const line = { solid: '1px solid', dashed: '2px dashed', double: '3px double' }[d.divider] || '1px solid';
+    return `${line} ${color}`;
+  }
+
+  // 📊 표 모양 (스프레드시트) 색: 칸 선 · 머리글(열 글자·행 번호)
+  const SHEET_COL = 80; // 칸 너비 (px)
+  const SHEET_ROW = 24; // 칸 높이 (px)
+  const SHEET_HEAD = 40; // 행 번호 띠 너비 (px)
+  function getSheetColors(look) {
+    const box = look.boxColor;
+    const dark = isDarkColor(box);
+    return {
+      line: dark ? mixHex(box, '#ffffff', 0.12) : mixHex(box, '#000000', 0.12),
+      head: dark ? mixHex(box, '#ffffff', 0.07) : mixHex(box, '#000000', 0.045),
+      headText: dark ? '#a3a3a3' : '#666666',
+    };
+  }
+
+  // 표 모양의 칸 선 (상자 배경 그림)
+  function getSheetGridImage(line) {
+    return `linear-gradient(${line} 1px, transparent 1px), linear-gradient(90deg, ${line} 1px, transparent 1px)`;
+  }
+
+  // 표 모양 꾸밈 규칙: 위쪽 열 글자(A B C…) · 왼쪽 행 번호(1 2 3…) (필드는 모두 보통 칸처럼 보임)
+  // 장식은 ::before / ::after 가짜 요소라서 선택·복사되지 않고, 사전 아이콘 스크립트·읽어주기 버튼에 영향 없음
+  // prefixes: 선택자 앞부분 ('' = 밝은 화면, '.nightMode ' 등 = 다크모드, '#liveCardRender ' = 미리보기)
+  // withLayout: 위치·크기 같은 모양 규칙도 넣을지 (다크모드는 색만 바꿈)
+  function getSheetCss(look, prefixes, withLayout) {
+    const c = getSheetColors(look);
+    const sel = suffix => prefixes.map(pre => `${pre}.card-box${suffix}`).join(',\n');
+    const rules = [];
+    if (withLayout) {
+      const cols = 'A B C D E F G H I J K L M N';
+      const rows = Array.from({ length: 60 }, (_, i) => i + 1).join('\\A ');
+      rules.push(`${sel('::before')},
+${sel('::after')} {
+  position: absolute;
+  box-sizing: border-box;
+  direction: ltr;
+  font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+  font-size: 11px;
+  font-weight: normal;
+  font-style: normal;
+  overflow: hidden;
+  white-space: pre;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}`);
+      rules.push(`${sel('::before')} {
+  content: "${cols}";
+  top: 0;
+  left: 0;
+  right: 0;
+  height: ${SHEET_ROW}px;
+  line-height: ${SHEET_ROW - 1}px;
+  text-align: left;
+  padding-left: ${SHEET_HEAD + SHEET_COL / 2 - 4}px;
+  word-spacing: ${SHEET_COL - 11}px;
+  background-size: ${SHEET_COL}px 100%;
+  background-position: ${SHEET_HEAD}px 0;
+  border-bottom: 1px solid;
+}`);
+      rules.push(`${sel('::after')} {
+  content: "${rows}";
+  top: ${SHEET_ROW}px;
+  left: 0;
+  bottom: 0;
+  width: ${SHEET_HEAD}px;
+  line-height: ${SHEET_ROW}px;
+  text-align: center;
+  background-size: 100% ${SHEET_ROW}px;
+  border-right: 1px solid;
+}`);
+    }
+    rules.push(`${sel('::before')} {
+  background-color: ${c.head};
+  background-image: linear-gradient(90deg, ${c.line} 1px, transparent 1px);
+  color: ${c.headText};
+  border-color: ${c.line};
+}`);
+    rules.push(`${sel('::after')} {
+  background-color: ${c.head};
+  background-image: linear-gradient(${c.line} 1px, transparent 1px);
+  color: ${c.headText};
+  border-color: ${c.line};
+}`);
+    return rules.join('\n\n');
+  }
+
+  // 카드 상자 (.card-box) 선언 목록: 둥근 카드 · 그림자 · 테두리 · 표 모양
+  function getCardBoxDecls(look, d = deco) {
+    if (d.box === 'sheet') {
+      const c = getSheetColors(look);
+      const decls = [
+        'box-sizing: border-box;', 'position: relative;', 'max-width: 720px;', 'min-height: 192px;', 'margin: 0 auto;',
+        `padding: ${SHEET_ROW + 10}px 14px 14px ${SHEET_HEAD + 14}px;`, 'overflow: hidden;',
+        `background-color: ${look.boxColor};`, `background-image: ${getSheetGridImage(c.line)};`,
+        `background-size: ${SHEET_COL}px ${SHEET_ROW}px;`, `background-position: ${SHEET_HEAD}px ${SHEET_ROW}px;`,
+        `border: 1px solid ${c.line};`,
+      ];
+      if (d.border === 'thin') decls.push(`outline: 1px solid ${look.borderColor};`);
+      if (d.border === 'thick') decls.push(`outline: 3px solid ${look.borderColor};`);
+      if (d.border === 'left') decls.push(`border-left: 6px solid ${look.borderColor};`);
+      return decls;
+    }
+    const decls = ['box-sizing: border-box;', 'max-width: 560px;', 'margin: 0 auto;'];
+    if (look.hasBox) {
+      decls.push('padding: 1.5rem 1.25rem;', 'border-radius: 16px;', `background-color: ${look.boxColor};`);
+      if (d.box === 'shadow') decls.push(`box-shadow: ${look.shadow};`);
+    } else {
+      decls.push('padding: 1rem 1.25rem;');
+      if (d.border === 'thin' || d.border === 'thick') decls.push('border-radius: 6px;');
+    }
+    if (d.border === 'thin') decls.push(`border: 1px solid ${look.borderColor};`);
+    if (d.border === 'thick') decls.push(`border: 3px solid ${look.borderColor};`);
+    if (d.border === 'left') decls.push(`border-left: 6px solid ${look.borderColor};`);
+    return decls;
+  }
+
+  // 카드 상자를 쓰면 앞면·뒷면 내용을 <div class="card-box">로 감쌈
+  function wrapCardBox(content) {
+    return getDecoLook(false).hasWrapper ? `<div class="card-box">\n${content}\n</div>` : content;
+  }
+
+  // 꾸미기 컨트롤 화면 갱신 (값 표시 · 관련 칸만 보이기 · 테마 버튼 선택 표시)
+  function syncDecoControls() {
+    Object.keys(decoControls).forEach(key => {
+      const el = decoControls[key];
+      if (el && document.activeElement !== el) el.value = deco[key];
+    });
+    const toggleRow = (id, show) => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('hidden', !show);
+    };
+    toggleRow('decoBgColor2Row', deco.bgType !== 'solid');
+    toggleRow('decoBgColor2LabelGradient', deco.bgType === 'gradient');
+    toggleRow('decoBgColor2LabelPattern', deco.bgType === 'pattern');
+    toggleRow('decoBgDirRow', deco.bgType === 'gradient');
+    toggleRow('decoBgPatternRow', deco.bgType === 'pattern');
+    toggleRow('decoBoxColorRow', deco.box !== 'none');
+    toggleRow('decoBorderColorRow', deco.border !== 'none');
+    if (themeSwatches) {
+      themeSwatches.querySelectorAll('.theme-swatch').forEach(btn => {
+        const active = btn.dataset.theme === deco.theme;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+    }
+  }
+
+  // 테마 미리보기 버튼 (작은 카드 모양: 배경 · 상자 · 글자색 · 이름)
+  function renderThemeSwatches() {
+    if (!themeSwatches) return;
+    themeSwatches.innerHTML = '';
+    THEMES.forEach(theme => {
+      const d = { ...DECO_DEFAULTS, ...theme.deco };
+      const look = getDecoLook(false, d);
+      const bgStyle = [`background-color: ${getBackgroundColor(look, d)};`, ...getBackgroundImageDecls(look, d, false)];
+      if (d.bgType === 'pattern' && d.bgPattern === 'lines') bgStyle.push('background-size: 100% 12px;');
+      // 작은 버튼에 맞게 줄인 상자 · 테두리 · 구분선
+      const boxStyle = [];
+      if (look.hasBox) boxStyle.push(`background-color: ${look.boxColor};`, 'border-radius: 6px;');
+      if (d.box === 'shadow') boxStyle.push('box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);');
+      if (!look.hasBox && (d.border === 'thin' || d.border === 'thick')) boxStyle.push('border-radius: 4px;');
+      if (d.border === 'thin') boxStyle.push(`border: 1px solid ${look.borderColor};`);
+      if (d.border === 'thick') boxStyle.push(`border: 2px solid ${look.borderColor};`);
+      if (d.border === 'left') boxStyle.push(`border-left: 3px solid ${look.borderColor};`);
+      if (d.box === 'sheet') {
+        // 표 모양: 작은 칸 선 + 위·왼쪽 머리글 띠
+        const c = getSheetColors(look);
+        boxStyle.push(`background-image: ${getSheetGridImage(c.line)};`, 'background-size: 16px 8px;', 'border-radius: 0;',
+          `box-shadow: inset 0 6px 0 ${c.head}, inset 7px 0 0 ${c.head};`, `outline: 1px solid ${c.line};`);
+      }
+      const lineStyle = `${{ solid: '1px solid', dashed: '1px dashed', double: '3px double' }[d.divider]} ${look.dividerColor}`;
+      const name = t(`editor.theme.${theme.id}`);
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'theme-swatch';
+      btn.dataset.theme = theme.id;
+      btn.title = t('editor.deco.themeApplyTitle', { name });
+      btn.innerHTML = `<span class="theme-swatch-card" style="${escapeHtml(bgStyle.join(' '))}">`
+        // 견본 글자(가 A)는 CSS 가짜 요소로 그려 버튼 이름 글자에 섞이지 않게 함 (editor.css .theme-swatch-box)
+        + `<span class="theme-swatch-box" style="${escapeHtml(boxStyle.join(' '))} font-family: ${escapeHtml(getFontFamilyCss(theme.font))}; --swatch-main: ${theme.colors[0]}; --swatch-accent: ${theme.colors[1]};">`
+        + `<span class="theme-swatch-line" style="border-top: ${lineStyle};"></span>`
+        + `</span></span><span class="theme-swatch-name">${theme.icon} ${escapeHtml(name)}</span>`;
+      btn.addEventListener('click', () => applyTheme(theme.id));
+      themeSwatches.appendChild(btn);
+    });
+  }
+
+  // 테마 적용: 꾸미기 설정 · 카드 글꼴 · 필드 색을 한 번에 바꿈 (적용 후에도 하나씩 더 고칠 수 있음)
+  function applyTheme(themeId) {
+    const theme = THEMES.find(th => th.id === themeId) || THEMES[0];
+    Object.assign(deco, DECO_DEFAULTS, theme.deco, { theme: theme.id });
+    if (cardBaseFont) cardBaseFont.value = theme.font;
+    fields.forEach((f, idx) => {
+      const color = theme.colors[Math.min(idx, 2)];
+      f.colorInput.value = color;
+      f.colorText.value = color;
+      if (theme.sizes) {
+        // 글씨 크기는 기존 슬라이더 이벤트로 바꿔 숫자 칸·뒷면 문제 크기 맞추기도 함께 처리
+        f.sizeSlider.value = theme.sizes[Math.min(idx, 2)];
+        f.sizeSlider.dispatchEvent(new Event('input'));
+      }
+    });
+    syncDecoControls();
+    updateAll();
+    showToast(t('editor.deco.themeApplied', { name: t(`editor.theme.${theme.id}`) }));
+  }
+
+  // 저장본의 꾸미기 설정 복원 (형식이 맞지 않는 값은 기본값)
+  function restoreDeco(saved) {
+    Object.assign(deco, DECO_DEFAULTS);
+    if (!saved || typeof saved !== 'object') return;
+    if (THEMES.some(th => th.id === saved.theme)) deco.theme = saved.theme;
+    Object.keys(DECO_CHOICES).forEach(key => {
+      if (DECO_CHOICES[key].includes(saved[key])) deco[key] = saved[key];
+    });
+    DECO_COLOR_KEYS.forEach(key => {
+      const color = normalizeHexColor(saved[key]);
+      if (color) deco[key] = color;
+    });
+  }
+
   // 3. 필드 렌더 마크업 생성 헬퍼
   // 필드 글씨 서식 선언 목록 (미리보기 인라인 스타일과 생성 CSS의 .f-field-N 규칙이 같은 값을 쓰도록 공유)
   function getFieldStyleDecls(field, colorOverride) {
@@ -1796,7 +2482,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return {
       size: frontOnBackSize ? frontOnBackSize.value : f1.sizeSlider.value,
       weight: keepStyle ? f1.weightSelect.value : 'normal',
-      color: keepStyle ? f1.colorInput.value : '#64748b',
+      color: keepStyle ? f1.colorInput.value : deco.mutedColor,
       fontCss: getFieldFontCss(f1),
     };
   }
@@ -1811,6 +2497,27 @@ document.addEventListener('DOMContentLoaded', () => {
     return decls;
   }
 
+  function getIconPosition() {
+    const val = iconPositionSelect ? iconPositionSelect.value : DEFAULT_ICON_POSITION;
+    return ICON_POSITIONS.includes(val) ? val : DEFAULT_ICON_POSITION;
+  }
+
+  // 아이콘 묶음(.field-icons) 선언 목록
+  // 글자 옆: 한 덩어리로 붙어 있다가 자리가 모자라면 묶음째 다음 줄로 (아이콘끼리 끼어들지 않음)
+  // 글자 아래: 필드 글자 바로 아래 따로 한 줄, 카드 글자 정렬과 같게 (가운데 정렬이면 가운데, 아니면 글 시작 쪽)
+  function getFieldIconsDecls() {
+    if (getIconPosition() === 'below') {
+      return ['display: flex;', 'flex-wrap: wrap;', 'align-items: center;',
+        `justify-content: ${centerAlign.checked ? 'center' : 'flex-start'};`, 'margin-top: 0.3em;'];
+    }
+    return ['display: inline-flex;', 'align-items: center;', 'vertical-align: middle;', 'white-space: nowrap;', 'margin: 0 0.25em;'];
+  }
+
+  // 미리보기용 아이콘 묶음 (아이콘이 없으면 빈 문자열)
+  function wrapPreviewIcons(iconsHtml) {
+    return iconsHtml ? `<span class="field-icons" style="${escapeHtml(getFieldIconsDecls().join(' '))}">${iconsHtml}</span>` : '';
+  }
+
   function buildFieldBlock(field, isForPreview = false, fieldIndex = 1) {
     const idx = fieldIndex - 1;
 
@@ -1818,13 +2525,31 @@ document.addEventListener('DOMContentLoaded', () => {
       // 미리보기는 생성된 CSS를 불러오지 않으므로 같은 서식을 인라인 스타일로 적용
       const sampleValue = field.sampleInput.value.trim() || getFieldDisplayName(field, idx);
       const isDarkMode = Boolean(ankiCardWrapper && ankiCardWrapper.classList.contains('dark-mode'));
-      const color = isDarkMode ? getDarkModeColor(field.colorInput.value) : field.colorInput.value;
+      const color = getDecoLook(isDarkMode).fieldColor(field.colorInput.value);
       const divStyle = getFieldStyleDecls(field, color).join(' ');
-      return `<div class="field-item f-field-${fieldIndex}" style="${escapeHtml(divStyle)}">${escapeHtml(sampleValue)}${buildPreviewLinkButtons(field, sampleValue)}</div>`;
+      return `<div class="field-item f-field-${fieldIndex}" style="${escapeHtml(divStyle)}">${escapeHtml(sampleValue)}${wrapPreviewIcons(buildPreviewLinkButtons(field, sampleValue) + buildPreviewTtsButton(field, idx))}</div>`;
     }
 
     // Anki 서식: 스타일은 생성 CSS(.f-field-N)에만 두어 Anki [스타일] 탭에서 고칠 수 있게 함
     return `<div class="field-item f-field-${fieldIndex}">${buildAnkiFieldContent(field, idx)}</div>`;
+  }
+
+  // Anki 읽어주기 태그 ({{tts zh_CN:Back}} · 속도가 보통이 아니면 speed= 추가), 꺼져 있거나 쓸 수 없는 언어면 빈 문자열
+  function buildTtsTag(field, idx) {
+    if (!field.hasTts) return '';
+    const code = getTtsLangCode();
+    if (!code) return '';
+    const speed = getTtsSpeed();
+    const opts = speed === DEFAULT_TTS_SPEED ? code : `${code} speed=${speed}`;
+    return `<span class="tts-btn">{{tts ${opts}:${getAnkiFieldName(field, idx)}}}</span>`;
+  }
+
+  // 미리보기용 🔊 버튼 (누르면 이 브라우저 목소리로 예시값을 읽음)
+  // 실제 Anki 카드의 읽어주기 버튼(.tts-btn .replay-button → 🔊)과 같은 크기 · 모양으로 보이게 사전 아이콘과 같은 스타일 사용
+  function buildPreviewTtsButton(field, idx) {
+    if (!field.hasTts || !isTtsSupported()) return '';
+    const title = escapeHtml(t('editor.tts.previewTitle'));
+    return `<button type="button" class="preview-tts-btn" data-tts-field="${idx}" title="${title}" aria-label="${title}" style="${LINK_BTN_DECLS.join(' ')}">🔊</button>`;
   }
 
   // 링크 검색어 정리: [품사]·(괄호) 내용 제거, 뜻이 여러 개면 첫 번째 뜻만 사용
@@ -1890,23 +2615,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const shouldClean = Boolean(linkCleanQuery && linkCleanQuery.checked);
     const query = shouldClean ? cleanLinkQuery(sampleValue) : sampleValue;
     return linkTargets.map(target =>
-      `<a class="link-btn ${target.cls}" href="${escapeHtml(target.url + encodeURIComponent(query))}"${targetAttr} title="${escapeHtml(target.title)}" style="${LINK_BTN_INLINE_STYLE}">${target.icon}</a>`
+      `<a class="link-btn ${target.cls}" href="${escapeHtml(target.url + encodeURIComponent(query))}"${targetAttr} title="${escapeHtml(target.title)}" style="${LINK_BTN_DECLS.join(' ')}">${target.icon}</a>`
     ).join('');
   }
 
   // Anki 서식용 필드 내용: 링크가 있으면 필드 값을 .link-src로 감싸고, 아이콘은 필드가 비어 있지 않을 때만 표시
   // (href에는 사전 주소만 넣고, 검색어는 카드 스크립트가 .link-src 텍스트로 채움 → & # " 등이 들어 있어도 안전)
-  function buildAnkiFieldContent(field, idx) {
+  // 🔊 읽어주기는 사전 아이콘 뒤에 붙이고, 필드가 비어 있으면 표시하지 않음
+  // 아이콘은 같은 필드 블록 안의 <span class="field-icons">로 묶음 → 위치(글자 옆 / 글자 아래)는 CSS만 바꾸고,
+  // 카드 스크립트는 그대로 같은 필드 블록에서 .link-src 와 아이콘을 찾음
+  // withTts=false: 뒷면 위쪽 문제(앞면) 표시용 → 같은 소리가 뒷면에서 또 자동 재생되지 않게 뺌
+  function buildAnkiFieldContent(field, idx, withTts = true) {
     const name = getAnkiFieldName(field, idx);
     const linkTargets = getLinkTargets(field);
-    if (linkTargets.length === 0) return `{{${name}}}`;
+    const tts = withTts ? buildTtsTag(field, idx) : '';
+    if (linkTargets.length === 0) return tts ? `{{${name}}}{{#${name}}}<span class="field-icons">${tts}</span>{{/${name}}}` : `{{${name}}}`;
 
     const targetAttr = linkNewTab.checked ? ' target="_blank"' : '';
     const buttons = linkTargets.map(target => {
       const base = escapeHtml(target.url);
       return `<a class="link-btn ${target.cls}" href="${base}" data-base="${base}"${targetAttr} title="${escapeHtml(target.title)}">${target.icon}</a>`;
     }).join('');
-    return `<span class="link-src">{{${name}}}</span>{{#${name}}}${buttons}{{/${name}}}`;
+    return `<span class="link-src">{{${name}}}</span>{{#${name}}}<span class="field-icons">${buttons}${tts}</span>{{/${name}}}`;
   }
 
   // 사전 URL 입력칸 아래 안내 (비었거나 http/https가 아니면 링크를 만들지 않음을 알림)
@@ -1954,10 +2684,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (activeFrontFields.length === 0) {
       // 아무것도 선택되지 않았을 경우 1번째 필드 기본
-      return `{{${getAnkiFieldName(fields[0], 0)}}}`;
+      return wrapCardBox(`{{${getAnkiFieldName(fields[0], 0)}}}`);
     }
 
-    return withLinkQueryScript(activeFrontFields.map(item => buildFieldBlock(item.field, false, item.index)).join('\n\n'));
+    return withLinkQueryScript(wrapCardBox(activeFrontFields.map(item => buildFieldBlock(item.field, false, item.index)).join('\n\n')));
   }
 
   // 5. Anki 뒷면 서식 생성
@@ -1966,7 +2696,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 앞면 내용 유지 여부 (서식은 생성 CSS의 .front-preview-hint 규칙)
     if (keepFrontOnBack.checked && fields[0]) {
-      parts.push(`<div class="front-preview-hint">${buildAnkiFieldContent(fields[0], 0)}</div>`);
+      parts.push(`<div class="front-preview-hint">${buildAnkiFieldContent(fields[0], 0, false)}</div>`);
     }
 
     // 정답 구분선 hr 여부
@@ -1981,7 +2711,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    return withLinkQueryScript(parts.join('\n\n'));
+    return withLinkQueryScript(wrapCardBox(parts.join('\n\n')));
   }
 
   // 6. Anki CSS 서식 생성 (다크모드 완벽 대응)
@@ -1989,32 +2719,84 @@ document.addEventListener('DOMContentLoaded', () => {
     const isRtl = rtlForce.checked;
     const align = centerAlign.checked ? 'center' : (isRtl ? 'right' : 'left');
 
-    const cardFontKey = cardBaseFont ? cardBaseFont.value : 'system';
-    const cardFontCustom = cardBaseFontCustom ? cardBaseFontCustom.value : '';
-    const cardFontCss = getFontFamilyCss(cardFontKey, cardFontCustom);
+    const cardFontCss = getFontFamilyCss(cardBaseFont ? cardBaseFont.value : DEFAULT_CARD_FONT);
     const cardLineHeightVal = cardLineHeight ? cardLineHeight.value : '1.5';
 
-    const darkF1ColorOnBack = getDarkModeColor(getFrontHintStyle().color);
-    const frontHintDecls = getFrontHintDecls().join('\n  ');
-
-    // 구글 웹폰트 import: 실제로 쓰는 글꼴(카드 기본 글꼴 + 필드별 글꼴)만 불러옴
-    const usedFontKeys = new Set([cardFontKey]);
-    fields.forEach(f => {
-      if (f.fontSelect && f.fontSelect.value !== 'inherit') usedFontKeys.add(f.fontSelect.value);
-    });
-    const webFontParams = Object.keys(WEB_FONT_FAMILIES)
-      .filter(key => usedFontKeys.has(key))
-      .map(key => `family=${WEB_FONT_FAMILIES[key]}`);
-    const fontImportHeader = webFontParams.length
-      ? `@import url('https://fonts.googleapis.com/css2?${webFontParams.join('&')}&display=swap');\n\n`
+    // 🎨 꾸미기 (기본값이면 아래 추가 내용은 모두 빈 문자열 → 예전과 같은 서식)
+    const look = getDecoLook(false);
+    const night = getDecoLook(true);
+    const indentDecls = decls => decls.map(decl => `  ${decl}\n`).join('');
+    const bgImageLines = indentDecls(getBackgroundImageDecls(look));
+    // 밝은 바탕만 다크모드 배경 그림을 바꿈 (어두운 바탕은 그대로)
+    const nightBgImageDecls = getBackgroundImageDecls(night).filter(decl => decl.startsWith('background-image'));
+    const nightBgImageLines = (deco.bgType !== 'solid' && nightBgImageDecls.join() !== getBackgroundImageDecls(look).filter(decl => decl.startsWith('background-image')).join())
+      ? indentDecls(nightBgImageDecls)
       : '';
+
+    let decoSections = '';
+    let nightDecoSections = '';
+    if (look.hasWrapper) {
+      decoSections += `\n\n/* ${t('editor.cssComment.cardBox')} */
+.card-box {
+${indentDecls(getCardBoxDecls(look))}}`;
+      const nightBoxDecls = [];
+      if (deco.box === 'sheet') {
+        // 📊 표 모양: 열 글자 · 행 번호 (다크모드는 진회색 시트에 맞춰 색만 바꿈)
+        decoSections += `\n\n${getSheetCss(look, [''], true)}`;
+        const nightLine = getSheetColors(night).line;
+        nightBoxDecls.push(`background-color: ${night.boxColor};`, `background-image: ${getSheetGridImage(nightLine)};`, `border-color: ${nightLine};`);
+        if (deco.border === 'left') nightBoxDecls.push(`border-left-color: ${night.borderColor};`);
+        if (deco.border === 'thin' || deco.border === 'thick') nightBoxDecls.push(`outline-color: ${night.borderColor};`);
+      } else {
+        if (look.hasBox && night.boxColor !== look.boxColor) nightBoxDecls.push(`background-color: ${night.boxColor};`);
+        if (deco.border !== 'none' && night.borderColor !== look.borderColor) nightBoxDecls.push(`border-color: ${night.borderColor};`);
+        if (deco.box === 'shadow' && night.shadow !== look.shadow) nightBoxDecls.push(`box-shadow: ${night.shadow};`);
+      }
+      if (deco.box === 'sheet' && night.boxColor !== look.boxColor) {
+        nightDecoSections += `\n\n${getSheetCss(night, ['.nightMode ', '.night_mode '], false)}`;
+      }
+      if (nightBoxDecls.length && !(deco.box === 'sheet' && night.boxColor === look.boxColor)) {
+        nightDecoSections += `\n\n.nightMode .card-box,
+.night_mode .card-box {
+${indentDecls(nightBoxDecls)}}`;
+      }
+    }
+    if (fields.some((f, idx) => buildTtsTag(f, idx))) {
+      // Anki가 {{tts}} 자리에 그리는 자체 재생 그림(동그라미 ▶, svg)은 숨기고, 미리보기와 같은 🔊 아이콘으로 표시
+      // (사전 아이콘과 같은 크기 · 간격 · 누르는 자리. 누르면 Anki 재생 기능은 그대로 동작)
+      decoSections += `\n\n/* ${t('editor.cssComment.tts')} */
+.tts-btn {
+  display: inline-flex;
+  white-space: nowrap;
+}
+
+.tts-btn .replay-button {
+${indentDecls(LINK_BTN_DECLS)}}
+
+.tts-btn .replay-button:hover,
+.tts-btn .replay-button:active {
+  background-color: ${ICON_HOVER_BG};
+  opacity: 1;
+}
+
+.tts-btn .replay-button svg {
+  display: none !important;
+}
+
+.tts-btn .replay-button::before {
+  content: '🔊';
+}`;
+    }
+
+    const darkF1ColorOnBack = night.fieldColor(getFrontHintStyle().color);
+    const frontHintDecls = getFrontHintDecls().join('\n  ');
 
     let fieldStyles = '';
     let nightModeStyles = '';
 
     fields.forEach((f, idx) => {
       const fNum = idx + 1;
-      const darkColor = getDarkModeColor(f.colorInput.value);
+      const darkColor = night.fieldColor(f.colorInput.value);
 
       fieldStyles += `\n.f-field-${fNum} {
   ${getFieldStyleDecls(f).join('\n  ')}
@@ -2029,13 +2811,14 @@ document.addEventListener('DOMContentLoaded', () => {
 }`;
     });
 
-    return `${fontImportHeader}.card {
+    // 글꼴은 기기에 들어 있는 것만 쓰므로 웹폰트 불러오기(@import) 없음
+    return `.card {
   font-family: ${cardFontCss};
   font-size: 20px;
   text-align: ${align};
-${isRtl ? '  direction: rtl;\n' : ''}  color: #202124;
-  background-color: #ffffff;
-  line-height: ${cardLineHeightVal};
+${isRtl ? '  direction: rtl;\n' : ''}  color: ${look.text};
+  background-color: ${getBackgroundColor(look)};
+${bgImageLines}  line-height: ${cardLineHeightVal};
 }
 
 .field-item {
@@ -2048,7 +2831,7 @@ ${isRtl ? '  direction: rtl;\n' : ''}  color: #202124;
 
 hr#answer {
   border: none;
-  border-top: 1px solid #cbd5e1;
+  border-top: ${getDividerCss(look.dividerColor)};
   margin: 1.25rem 0;
   width: 100%;
 }
@@ -2060,17 +2843,17 @@ a {
 }
 
 /* ${t('editor.cssComment.linkButtons')} */
-.link-btn {
-  font-size: 0.6em;
-  margin-left: 0.35em;
-  text-decoration: none;
-  opacity: 0.75;
-  vertical-align: middle;
-}
+.field-icons {
+${indentDecls(getFieldIconsDecls())}}
 
-.link-btn:hover {
+.link-btn {
+${indentDecls(LINK_BTN_DECLS)}}
+
+.link-btn:hover,
+.link-btn:active {
   opacity: 1;
-}
+  background-color: ${ICON_HOVER_BG};
+}${decoSections}
 
 /* ${t('editor.cssComment.fieldStyles')} */${fieldStyles}
 
@@ -2079,14 +2862,14 @@ a {
    ======================================= */
 .card.nightMode,
 .card.night_mode {
-  color: #f8fafc;
-  background-color: #2f2f31;
-}
+  color: ${night.text};
+  background-color: ${getBackgroundColor(night)};
+${nightBgImageLines}}
 
 .nightMode hr#answer,
 .night_mode hr#answer {
-  border-top-color: #4b5563;
-}
+  border-top-color: ${night.dividerColor};
+}${nightDecoSections}
 
 .nightMode .front-preview-hint,
 .night_mode .front-preview-hint {
@@ -2106,12 +2889,28 @@ a {
     liveCardRender.style.direction = isRtl ? 'rtl' : 'ltr';
     liveCardRender.style.textAlign = centerAlign.checked ? 'center' : (isRtl ? 'right' : 'left');
 
-    const cardFontKey = cardBaseFont ? cardBaseFont.value : 'system';
-    const cardFontCustom = cardBaseFontCustom ? cardBaseFontCustom.value : '';
-    liveCardRender.style.fontFamily = getFontFamilyCss(cardFontKey, cardFontCustom);
+    liveCardRender.style.fontFamily = getFontFamilyCss(cardBaseFont ? cardBaseFont.value : DEFAULT_CARD_FONT);
     liveCardRender.style.lineHeight = cardLineHeight ? cardLineHeight.value : '1.5';
 
     const isDark = Boolean(ankiCardWrapper && ankiCardWrapper.classList.contains('dark-mode'));
+
+    // 🎨 꾸미기: 미리보기 바탕 = 카드 배경 (기본값이면 원래 미리보기 모양 그대로)
+    const decoOn = !isDecoDefault();
+    const pLook = getDecoLook(isDark);
+    const cardStyle = liveCardRender.style;
+    cardStyle.backgroundColor = decoOn ? getBackgroundColor(pLook) : '';
+    cardStyle.backgroundImage = '';
+    cardStyle.backgroundSize = '';
+    cardStyle.color = decoOn ? pLook.text : '';
+    if (decoOn) {
+      getBackgroundImageDecls(pLook, deco, false).forEach(decl => {
+        const m = decl.match(/^([a-z-]+):\s*(.+);$/);
+        if (m) cardStyle.setProperty(m[1], m[2]);
+      });
+    }
+    const hrHtml = decoOn
+      ? `<hr id="answer" style="${escapeHtml(`border: none; border-top: ${getDividerCss(pLook.dividerColor)};`)}">`
+      : '<hr id="answer">';
 
     let html = '';
 
@@ -2135,15 +2934,15 @@ a {
       if (keepFrontOnBack.checked && fields[0]) {
         const f1Sample = fields[0].sampleInput.value.trim() || getFieldDisplayName(fields[0], 0);
         const f1BaseColor = getFrontHintStyle().color;
-        const f1Color = isDark ? getDarkModeColor(f1BaseColor) : f1BaseColor;
+        const f1Color = pLook.fieldColor(f1BaseColor);
         const hintStyle = getFrontHintDecls(f1Color).join(' ');
 
-        parts.push(`<div class="front-preview-hint" style="${escapeHtml(hintStyle)}">${escapeHtml(f1Sample)}${buildPreviewLinkButtons(fields[0], f1Sample)}</div>`);
+        parts.push(`<div class="front-preview-hint" style="${escapeHtml(hintStyle)}">${escapeHtml(f1Sample)}${wrapPreviewIcons(buildPreviewLinkButtons(fields[0], f1Sample))}</div>`);
       }
 
       // 구분선
       if (showHrAnswer.checked) {
-        parts.push('<hr id="answer">');
+        parts.push(hrHtml);
       }
 
       // 뒷면 표시 필드
@@ -2162,6 +2961,14 @@ a {
       }
     }
 
+    // 카드 상자 · 테두리 (Anki 서식의 .card-box와 같은 값)
+    if (pLook.hasWrapper) {
+      const boxStyle = [...getCardBoxDecls(pLook), 'width: 100%;'].join(' ');
+      html = `<div class="card-box" style="${escapeHtml(boxStyle)}">${html}</div>`;
+      // 📊 표 모양의 열 글자·행 번호는 가짜 요소라 인라인 스타일로 못 넣으므로 미리보기 전용 <style>로 적용
+      if (deco.box === 'sheet') html = `<style>${getSheetCss(pLook, ['#liveCardRender '], true)}</style>${html}`;
+    }
+
     liveCardRender.innerHTML = html;
 
     // 공용 스타일 편집 패널의 선택 필드 강조 및 패널 값 갱신 (필드 삭제 시 범위 보정)
@@ -2169,6 +2976,7 @@ a {
     const selectedEl = liveCardRender.querySelector(`.f-field-${selectedFieldIndex + 1}`);
     if (selectedEl) selectedEl.classList.add('is-selected');
     syncInspector();
+    refreshSteppers();
   }
 
   // 8. 전체 동기화 및 코드 갱신
@@ -2191,7 +2999,130 @@ a {
   }
 
   // 9. 로컬 스토리지 (localStorage) 자동 저장 및 복원 기능
-  const STORAGE_KEY = 'anki_card_editor_settings';
+  // 설정을 두 묶음으로 나눠 저장 (묶음별로 따로 처음으로 되돌릴 수 있게)
+  // - 📝 내용: 학습 언어, 필드 목록(이름 · 예시값 · 앞면/뒷면 · 🌐/📘 사전 아이콘 · 🔊 읽어주기), 사전 주소 · 보조 사전 · 새 창 · 검색어 정리
+  // - 🎨 꾸미기: 테마 · 배경 · 상자 · 테두리 · 구분선, 카드 글꼴 · 줄 간격 · 정렬 · 오른쪽→왼쪽, 뒷면 구분선 · 뒷면 위쪽 문제 표시, 읽는 속도,
+  //             아이콘 위치, 필드별 글씨 크기 · 굵기 · 글꼴 · 색 (필드 자리(순서) 기준, fieldStyles[i] = i번째 필드)
+  const CONTENT_STORAGE_KEY = 'anki_card_editor_content';
+  const DESIGN_STORAGE_KEY = 'anki_card_editor_design';
+  // 예전 단일 저장 키: 새 키가 하나도 없을 때 첫 로드에서 두 키로 옮긴 뒤 삭제 (프롬프트 생성기는 새 키 → 예전 키 순서로 읽음)
+  const LEGACY_STORAGE_KEY = 'anki_card_editor_settings';
+  const STORAGE_VERSION = 2;
+  // 꾸미기 묶음에 들어가는 설정 이름 (나머지는 모두 내용 묶음 — 예전 저장본의 옛 항목도 잃지 않도록)
+  const DESIGN_SETTING_KEYS = [
+    'showHrAnswer', 'keepFrontOnBack', 'centerAlign', 'rtlForce',
+    // cardBaseFontCustom · fontCustom: 예전 '직접 입력' 글꼴 이름 (꾸미기 묶음으로 옮긴 뒤 migrateDesignFonts에서 삭제)
+    'cardBaseFont', 'cardBaseFontCustom', 'cardLineHeight',
+    'frontOnBackSize', 'syncFrontSizeWithF1', 'frontOnBackKeepStyle',
+    'ttsSpeed', 'iconPosition', 'deco',
+  ];
+  // 필드 항목 중 꾸미기 묶음으로 가는 글씨 모양 값
+  const FIELD_STYLE_KEYS = ['size', 'weight', 'font', 'fontCustom', 'color'];
+
+  // 꾸미기 묶음의 예전 글꼴 값을 지금 글꼴(기본 고딕 · 명조 · 타자기체)로 바꾸고 직접 입력 글꼴 이름은 지움
+  function migrateDesignFonts(design) {
+    if (!design || typeof design !== 'object') return design;
+    if (design.cardBaseFont !== undefined) design.cardBaseFont = normalizeCardFontKey(design.cardBaseFont);
+    delete design.cardBaseFontCustom;
+    if (Array.isArray(design.fieldStyles)) {
+      design.fieldStyles.forEach(style => {
+        if (!style || typeof style !== 'object') return;
+        if (style.font !== undefined) style.font = normalizeFieldFontKey(style.font);
+        delete style.fontCustom;
+      });
+    }
+    return design;
+  }
+
+  // 한 덩어리 설정(예전 저장 형식과 같은 모양)을 내용 / 꾸미기 두 묶음으로 나눔
+  function splitSettings(data) {
+    const content = {};
+    const design = {};
+    Object.keys(data || {}).forEach(key => {
+      if (key === 'fields') return;
+      if (DESIGN_SETTING_KEYS.includes(key)) design[key] = data[key];
+      else content[key] = data[key];
+    });
+    if (Array.isArray(data && data.fields)) {
+      content.fields = data.fields.map(f => {
+        const item = {};
+        Object.keys(f || {}).forEach(key => {
+          if (!FIELD_STYLE_KEYS.includes(key)) item[key] = f[key];
+        });
+        return item;
+      });
+      design.fieldStyles = data.fields.map(f => {
+        const style = {};
+        FIELD_STYLE_KEYS.forEach(key => {
+          if (f && f[key] !== undefined) style[key] = f[key];
+        });
+        return style;
+      });
+    }
+    content.version = STORAGE_VERSION;
+    design.version = STORAGE_VERSION;
+    if (data && data.savedAt) design.savedAt = data.savedAt;
+    return { content, design };
+  }
+
+  // 두 묶음을 다시 한 덩어리로 합침 (복원 코드는 예전 형식을 그대로 읽음)
+  // 필드 글씨 모양은 같은 자리의 꾸미기 값을 쓰고, 꾸미기 값이 없는 자리는 지금 테마의 기본 모양
+  function mergeSettings(content, design) {
+    const c = content || {};
+    const d = design || {};
+    const merged = { ...c };
+    DESIGN_SETTING_KEYS.forEach(key => {
+      if (d[key] !== undefined) merged[key] = d[key];
+    });
+    if (Array.isArray(c.fields)) {
+      const styles = Array.isArray(d.fieldStyles) ? d.fieldStyles : [];
+      const themeId = d.deco && d.deco.theme;
+      merged.fields = c.fields.map((f, idx) => {
+        const style = styles[idx] && typeof styles[idx] === 'object' ? styles[idx] : getDefaultFieldStyle(idx, themeId);
+        return { ...(f || {}), ...style };
+      });
+    }
+    return merged;
+  }
+
+  // 저장된 두 묶음 읽기 (새 키가 하나도 없고 예전 키만 있으면 두 키로 옮김)
+  function readStoredSettings() {
+    const parse = (key) => {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || 'null');
+        return value && typeof value === 'object' ? value : null;
+      } catch (err) {
+        return null;
+      }
+    };
+    let content = parse(CONTENT_STORAGE_KEY);
+    let design = parse(DESIGN_STORAGE_KEY);
+    if (!content && !design) {
+      const legacy = parse(LEGACY_STORAGE_KEY);
+      if (legacy) {
+        const split = splitSettings(legacy);
+        content = split.content;
+        design = split.design;
+        try {
+          localStorage.setItem(CONTENT_STORAGE_KEY, JSON.stringify(content));
+          localStorage.setItem(DESIGN_STORAGE_KEY, JSON.stringify(design));
+          // 두 키에 모두 옮겨 적은 경우에만 예전 키 삭제 (실패하면 예전 키를 남겨 다음에 다시 시도)
+          localStorage.removeItem(LEGACY_STORAGE_KEY);
+        } catch (err) {
+          // 반쯤 옮겨진 새 키는 지워서 다음 로드 때 예전 키에서 다시 옮기게 함
+          try {
+            localStorage.removeItem(CONTENT_STORAGE_KEY);
+            localStorage.removeItem(DESIGN_STORAGE_KEY);
+          } catch (e) {}
+          console.warn('localStorage 저장 형식 이전 실패:', err);
+        }
+      }
+    }
+    // 예전 글꼴 값 정리 (새 형식 · 예전 형식에서 옮긴 저장본 모두)
+    migrateDesignFonts(design);
+    return { content, design };
+  }
+
   const saveStatusIndicator = document.getElementById('saveStatusIndicator');
   let saveTimer = null;
 
@@ -2212,7 +3143,7 @@ a {
       const cssCode = generateCssTemplate();
 
       const data = {
-        version: 1,
+        version: STORAGE_VERSION,
         savedAt: new Date().toISOString(),
         langId: languageSelect.value,
         dictLinkTargets: fields.map(f => Boolean(f.hasDictLink)),
@@ -2225,12 +3156,14 @@ a {
         keepFrontOnBack: keepFrontOnBack.checked,
         centerAlign: centerAlign.checked,
         rtlForce: rtlForce.checked,
-        cardBaseFont: cardBaseFont ? cardBaseFont.value : 'system',
-        cardBaseFontCustom: cardBaseFontCustom ? cardBaseFontCustom.value : '',
+        cardBaseFont: cardBaseFont ? cardBaseFont.value : DEFAULT_CARD_FONT,
         cardLineHeight: cardLineHeight ? cardLineHeight.value : '1.5',
         frontOnBackSize: frontOnBackSize ? frontOnBackSize.value : 24,
         syncFrontSizeWithF1: syncFrontSizeWithF1 ? syncFrontSizeWithF1.checked : true,
         frontOnBackKeepStyle: frontOnBackKeepStyle ? frontOnBackKeepStyle.checked : true,
+        ttsSpeed: getTtsSpeed(),
+        iconPosition: getIconPosition(),
+        deco: { ...deco },
         fields: fields.map(f => ({
           name: f.nameInput.value,
           sample: f.sampleInput.value,
@@ -2239,10 +3172,10 @@ a {
           size: f.sizeSlider.value,
           weight: f.weightSelect.value,
           font: f.fontSelect ? f.fontSelect.value : 'inherit',
-          fontCustom: f.fontCustomInput ? f.fontCustomInput.value : '',
           color: f.colorInput.value,
           hasDictLink: Boolean(f.hasDictLink),
           hasWikiLink: Boolean(f.hasWikiLink),
+          hasTts: Boolean(f.hasTts),
         })),
         // 사용자가 직접 확인할 수 있도록 완성본 서식 전체(HTML/CSS 코드)도 통째로 함께 보관
         templates: {
@@ -2251,19 +3184,26 @@ a {
           css: cssCode
         }
       };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      // 내용 / 꾸미기 두 키로 나눠 저장 (완성본 서식 templates는 내용 묶음에 함께 보관)
+      const { content, design } = splitSettings(data);
+      localStorage.setItem(CONTENT_STORAGE_KEY, JSON.stringify(content));
+      localStorage.setItem(DESIGN_STORAGE_KEY, JSON.stringify(design));
       updateSaveIndicator(t('common.autoSaved'));
     } catch (err) {
       console.warn('localStorage 저장 실패:', err);
     }
   }
 
+  // 저장된 꾸미기 묶음 (내용 묶음 없이 꾸미기만 남아 있을 때 첫 화면을 만든 뒤 다시 적용하려고 보관)
+  let storedDesign = null;
+
+  // 반환값: 내용 묶음(언어 · 필드)을 복원했으면 true
   function loadSettingsFromStorage() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return false;
-      const data = JSON.parse(raw);
-      if (!data || typeof data !== 'object') return false;
+      const { content, design } = readStoredSettings();
+      storedDesign = design;
+      if (!content && !design) return false;
+      const data = mergeSettings(content, design);
 
       // 언어 복원
       if (data.langId) {
@@ -2283,16 +3223,9 @@ a {
       if (data.rtlForce !== undefined) rtlForce.checked = Boolean(data.rtlForce);
 
       // 카드 전반 폰트 및 줄간격 복원
+      // (예전 글꼴 값은 지금 글꼴로 바꿈, 모르는 값은 기본 고딕)
       if (data.cardBaseFont !== undefined && cardBaseFont) {
-        cardBaseFont.value = data.cardBaseFont;
-        if (cardBaseFontCustom) {
-          if (data.cardBaseFont === 'custom') {
-            cardBaseFontCustom.classList.remove('hidden');
-            cardBaseFontCustom.value = data.cardBaseFontCustom || '';
-          } else {
-            cardBaseFontCustom.classList.add('hidden');
-          }
-        }
+        cardBaseFont.value = normalizeCardFontKey(data.cardBaseFont);
       }
       if (data.cardLineHeight !== undefined && cardLineHeight) {
         cardLineHeight.value = clampNumber(data.cardLineHeight, LINE_HEIGHT_MIN, LINE_HEIGHT_MAX, 1.5);
@@ -2315,6 +3248,13 @@ a {
       if (frontOnBackSettings && keepFrontOnBack) {
         frontOnBackSettings.style.display = keepFrontOnBack.checked ? 'block' : 'none';
       }
+
+      // 🔊 읽는 속도 · 🎨 꾸미기 복원 (예전 저장본엔 없으므로 기본값)
+      if (ttsSpeedSelect) ttsSpeedSelect.value = TTS_SPEEDS.includes(data.ttsSpeed) ? data.ttsSpeed : DEFAULT_TTS_SPEED;
+      // 아이콘 위치: 이 설정이 없던 예전 저장본은 '글자 옆' 그대로 (기존 카드 모양이 갑자기 바뀌지 않게)
+      if (iconPositionSelect) iconPositionSelect.value = ICON_POSITIONS.includes(data.iconPosition) ? data.iconPosition : LEGACY_ICON_POSITION;
+      restoreDeco(data.deco);
+      syncDecoControls();
 
       // 필드 설정 복원
       if (Array.isArray(data.fields) && data.fields.length >= 2) {
@@ -2340,16 +3280,8 @@ a {
               f.sizeVal.textContent = size;
             }
             if (WEIGHT_VALUES.includes(String(fData.weight))) f.weightSelect.value = String(fData.weight);
-            if (fData.font !== undefined && f.fontSelect && [...f.fontSelect.options].some(o => o.value === fData.font)) {
-              f.fontSelect.value = fData.font;
-              if (f.fontCustomInput) {
-                if (fData.font === 'custom') {
-                  f.fontCustomInput.classList.remove('hidden');
-                  f.fontCustomInput.value = String(fData.fontCustom || '');
-                } else {
-                  f.fontCustomInput.classList.add('hidden');
-                }
-              }
+            if (fData.font !== undefined && f.fontSelect) {
+              f.fontSelect.value = normalizeFieldFontKey(fData.font);
             }
             const color = normalizeHexColor(fData.color);
             if (color) {
@@ -2360,6 +3292,7 @@ a {
               f.hasDictLink = Boolean(fData.hasDictLink);
             }
             f.hasWikiLink = Boolean(fData.hasWikiLink);
+            f.hasTts = Boolean(fData.hasTts);
           }
         }
 
@@ -2421,23 +3354,64 @@ a {
         rtlNotice.classList.add('hidden');
       }
 
-      return true;
+      return Boolean(content);
     } catch (err) {
       console.warn('localStorage 복원 실패:', err);
       return false;
     }
   }
 
-  // 10. 전체 설정 초기화 (기본값으로 복원)
-  function resetAllSettings() {
-    if (!confirm(t('editor.confirm.resetAll'))) {
-      return;
-    }
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch (e) {}
+  // 10. 설정 초기화 (📝 내용만 · 🎨 꾸미기만 · 🔄 전체)
+  // 필드 하나의 글씨 모양 값 (저장 형식과 같음)
+  function getFieldStyle(f) {
+    return {
+      size: f.sizeSlider.value,
+      weight: f.weightSelect.value,
+      font: f.fontSelect ? f.fontSelect.value : 'inherit',
+      color: f.colorInput.value,
+    };
+  }
 
-    // 1. 언어 기본값 (영어) · 다른 도구와의 언어 연동 기록도 초기화
+  // 필드 하나에 글씨 모양 값 적용 (형식이 맞지 않는 값은 지금 값 유지)
+  function applyFieldStyle(f, style) {
+    if (!f || !style) return;
+    if (style.size !== undefined) {
+      const size = Math.round(clampNumber(style.size, SIZE_MIN, SIZE_MAX, parseInt(f.sizeSlider.value, 10) || 24));
+      f.sizeSlider.value = size;
+      f.sizeNum.value = size;
+      f.sizeVal.textContent = size;
+    }
+    if (WEIGHT_VALUES.includes(String(style.weight))) f.weightSelect.value = String(style.weight);
+    if (style.font !== undefined && f.fontSelect) {
+      f.fontSelect.value = normalizeFieldFontKey(style.font);
+    }
+    const color = normalizeHexColor(style.color);
+    if (color) {
+      f.colorInput.value = color;
+      f.colorText.value = color;
+    }
+  }
+
+  // 자리(순서)별 기본 글씨 모양: 테마의 필드 색 (1번째 = 본문, 2번째 = 강조, 나머지 = 연하게) · 글씨 크기
+  // 크기를 정하지 않은 테마는 기본 테마 크기 (24, 24, 20), 1·2번째는 굵게, 글꼴은 카드 글꼴 그대로
+  function getDefaultFieldStyle(idx, themeId) {
+    const theme = THEMES.find(th => th.id === themeId) || THEMES[0];
+    const slot = Math.min(idx, 2);
+    return {
+      size: (theme.sizes || THEMES[0].sizes)[slot],
+      weight: idx < 2 ? 'bold' : 'normal',
+      font: 'inherit',
+      color: theme.colors[slot],
+    };
+  }
+
+  // 📝 내용 기본값: 학습 언어(영어) · 사전 설정 · 필드 3개(이름 · 예시값 · 앞/뒷면 · 사전 아이콘 · 읽어주기)
+  // 필드 글씨 모양은 꾸미기 묶음이라 자리별로 그대로 두고, 지금 없는 자리는 지금 테마의 기본 모양
+  function applyContentDefaults() {
+    const prevLang = getSelectedLanguage();
+    const keptStyles = fields.map(getFieldStyle);
+
+    // 언어 기본값 (영어) · 다른 도구와의 언어 연동 기록도 초기화 (남겨 두면 다시 열 때 그 언어로 돌아감)
     langCombobox.setValue(DEFAULT_LANG_ID);
     langCombobox.clearSharedLanguage();
     const lang = getSelectedLanguage();
@@ -2450,20 +3424,53 @@ a {
     linkNewTab.checked = true;
     if (linkCleanQuery) linkCleanQuery.checked = true;
 
-    // 공통 레이아웃 & 폰트
+    // 오른쪽→왼쪽 쓰기(꾸미기)는 사용자가 바꾸지 않았을 때만 바뀐 언어를 따라감 (언어 연동과 같은 규칙)
+    if (rtlForce.checked === Boolean(prevLang.isRTL)) rtlForce.checked = Boolean(lang.isRTL);
+    rtlNotice.classList.toggle('hidden', !lang.isRTL);
+
+    // 필드 1 기본값 (Front / 한국어 뜻)
+    fields[0].nameInput.value = 'Front';
+    fields[0].sampleInput.value = sample.field1 || '';
+    fields[0].showFront.checked = true;
+    fields[0].showBack.checked = false;
+    fields[0].hasDictLink = false;
+    fields[0].hasWikiLink = false;
+    fields[0].hasTts = false;
+
+    // 필드 2 기본값 (Back / 외국어 단어 · 사전 링크)
+    fields[1].nameInput.value = 'Back';
+    fields[1].sampleInput.value = sample.field2 || '';
+    fields[1].showFront.checked = false;
+    fields[1].showBack.checked = true;
+    fields[1].hasDictLink = true;
+    fields[1].hasWikiLink = false;
+    fields[1].hasTts = true; // 외국어 단어 필드는 읽어주기 켬
+
+    // 3번째 이상 선택 필드 컨테이너 비우고 기본 3번째 필드 1개 생성 (글씨 모양은 3번째 자리 값 유지)
+    const optionalContainer = document.getElementById('optionalFieldsContainer');
+    if (optionalContainer) optionalContainer.innerHTML = '';
+    fields.splice(2);
+
+    addOptionalField({
+      ...getDefaultThirdField(lang),
+      showFront: false,
+      showBack: true,
+      hasDictLink: false,
+      ...(keptStyles[2] || getDefaultFieldStyle(2, deco.theme)),
+    }, false);
+  }
+
+  // 🎨 꾸미기 기본값: 기본 테마 · 카드 글꼴 · 줄 간격 · 정렬 · 뒷면 표시 · 읽는 속도 · 필드별 글씨 모양
+  function applyDesignDefaults() {
+    const lang = getSelectedLanguage();
+
     showHrAnswer.checked = true;
     keepFrontOnBack.checked = true;
     centerAlign.checked = true;
-    rtlForce.checked = false;
-    rtlNotice.classList.add('hidden');
+    // 오른쪽→왼쪽 쓰기는 지금 학습 언어의 기본값 (아랍어·히브리어 등이면 켬)
+    rtlForce.checked = Boolean(lang.isRTL);
 
-    if (cardBaseFont) {
-      cardBaseFont.value = 'system';
-      if (cardBaseFontCustom) {
-        cardBaseFontCustom.classList.add('hidden');
-        cardBaseFontCustom.value = '';
-      }
-    }
+    if (cardBaseFont) cardBaseFont.value = DEFAULT_CARD_FONT;
     if (cardLineHeight) {
       cardLineHeight.value = 1.5;
       if (cardLineHeightNum) cardLineHeightNum.value = 1.5;
@@ -2479,63 +3486,19 @@ a {
     if (frontOnBackKeepStyle) frontOnBackKeepStyle.checked = true;
     if (frontOnBackSettings) frontOnBackSettings.style.display = 'block';
 
-    // 필드 1 기본값 (Front / 한국어 뜻)
-    fields[0].nameInput.value = 'Front';
-    fields[0].sampleInput.value = sample.field1 || '';
-    fields[0].showFront.checked = true;
-    fields[0].showBack.checked = false;
-    fields[0].sizeSlider.value = 24;
-    fields[0].sizeNum.value = 24;
-    fields[0].sizeVal.textContent = '24';
-    fields[0].weightSelect.value = 'bold';
-    if (fields[0].fontSelect) {
-      fields[0].fontSelect.value = 'inherit';
-      if (fields[0].fontCustomInput) {
-        fields[0].fontCustomInput.classList.add('hidden');
-        fields[0].fontCustomInput.value = '';
-      }
-    }
-    fields[0].colorInput.value = '#202124';
-    fields[0].colorText.value = '#202124';
-    fields[0].hasDictLink = false;
-    fields[0].hasWikiLink = false;
+    // 🔊 읽는 속도 · 아이콘 위치 · 🎨 꾸미기(테마) 기본값
+    if (ttsSpeedSelect) ttsSpeedSelect.value = DEFAULT_TTS_SPEED;
+    if (iconPositionSelect) iconPositionSelect.value = DEFAULT_ICON_POSITION;
+    Object.assign(deco, DECO_DEFAULTS);
+    syncDecoControls();
 
-    // 필드 2 기본값 (Back / 외국어 단어 · 사전 링크)
-    fields[1].nameInput.value = 'Back';
-    fields[1].sampleInput.value = sample.field2 || '';
-    fields[1].showFront.checked = false;
-    fields[1].showBack.checked = true;
-    fields[1].sizeSlider.value = 24;
-    fields[1].sizeNum.value = 24;
-    fields[1].sizeVal.textContent = '24';
-    fields[1].weightSelect.value = 'bold';
-    if (fields[1].fontSelect) {
-      fields[1].fontSelect.value = 'inherit';
-      if (fields[1].fontCustomInput) {
-        fields[1].fontCustomInput.classList.add('hidden');
-        fields[1].fontCustomInput.value = '';
-      }
-    }
-    fields[1].colorInput.value = '#1a73e8';
-    fields[1].colorText.value = '#1a73e8';
-    fields[1].hasDictLink = true;
-    fields[1].hasWikiLink = false;
+    // 필드별 글씨 모양 (필드 이름 등 내용은 그대로)
+    fields.forEach((f, idx) => applyFieldStyle(f, getDefaultFieldStyle(idx, DECO_DEFAULTS.theme)));
+  }
 
-    // 3번째 이상 선택 필드 컨테이너 비우고 기본 3번째 필드 1개 생성
-    const optionalContainer = document.getElementById('optionalFieldsContainer');
-    if (optionalContainer) optionalContainer.innerHTML = '';
-    fields.splice(2);
-
-    addOptionalField({
-      ...getDefaultThirdField(lang),
-      showFront: false,
-      showBack: true,
-      size: 20,
-      weight: 'normal',
-      color: '#5f6368',
-      hasDictLink: false,
-    }, false);
-
+  // 초기화 후 화면 갱신 · 저장 · 알림 (세 가지 초기화 공통)
+  function finishReset(toastKey) {
+    if (selectedFieldIndex >= fields.length) selectedFieldIndex = 0;
     fields.forEach(f => updateFieldNameWarning(f));
     updateFieldBadges();
     updateDictFieldChecklist();
@@ -2544,12 +3507,46 @@ a {
       if (f.dictLinkCheck) f.dictLinkCheck.checked = Boolean(f.hasDictLink);
       if (f.wikiLinkCheck) f.wikiLinkCheck.checked = Boolean(f.hasWikiLink);
     });
-    renderEditorQuickChips(lang.id);
+    renderEditorQuickChips(languageSelect.value);
 
     updateAll(false);
     saveSettingsToStorage();
     updateSaveIndicator(t('common.resetDone'));
-    showToast(t('editor.toast.resetDone'));
+    showToast(t(toastKey));
+  }
+
+  // 📝 언어·필드 처음으로 (꾸미기는 그대로)
+  function resetContentSettings() {
+    if (!confirm(t('editor.confirm.resetContent'))) {
+      return;
+    }
+    applyContentDefaults();
+    finishReset('editor.toast.resetContentDone');
+  }
+
+  // 🎨 꾸미기 처음으로 (언어·필드 내용은 그대로)
+  function resetDesignSettings() {
+    if (!confirm(t('editor.confirm.resetDesign'))) {
+      return;
+    }
+    applyDesignDefaults();
+    finishReset('editor.toast.resetDesignDone');
+  }
+
+  // 🔄 전체 설정 초기화 (내용 + 꾸미기, 언어 연동 기록도 삭제)
+  function resetAllSettings() {
+    if (!confirm(t('editor.confirm.resetAll'))) {
+      return;
+    }
+    try {
+      localStorage.removeItem(CONTENT_STORAGE_KEY);
+      localStorage.removeItem(DESIGN_STORAGE_KEY);
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+    } catch (e) {}
+
+    applyContentDefaults();
+    applyDesignDefaults();
+    finishReset('editor.toast.resetDone');
   }
 
   // 클립보드 복사 헬퍼
@@ -2608,6 +3605,10 @@ a {
   // 초기화 실행 (순서: 옵션 목록 초기화 -> 이벤트 등록 -> 로컬스토리지 복원 -> 초기 렌더링)
   initLanguageSelect();
   updateSubDictLabels();
+  renderThemeSwatches();
+  syncDecoControls();
+  // 슬라이더 → [−] [숫자] [+] 조절기 (화면에 처음부터 있는 것: 1·2번째 필드 · 공용 편집 패널 · 줄 간격 · 뒷면 문제 크기)
+  document.querySelectorAll('.slider-with-number').forEach(enhanceStepper);
   initEventListeners();
   initInspectorEvents();
 
@@ -2623,6 +3624,13 @@ a {
     fields.splice(2);
     addOptionalField(null, false);
     onLanguageChange(true, false);
+    // 꾸미기 묶음만 남아 있던 경우: 필드별 글씨 모양 · 오른쪽→왼쪽 쓰기를 저장된 값으로 다시 맞춤
+    if (storedDesign) {
+      if (Array.isArray(storedDesign.fieldStyles)) {
+        fields.forEach((f, idx) => applyFieldStyle(f, storedDesign.fieldStyles[idx]));
+      }
+      if (storedDesign.rtlForce !== undefined) rtlForce.checked = Boolean(storedDesign.rtlForce);
+    }
   } else if (sharedLangId && sharedLangId !== languageSelect.value) {
     // 저장된 설정이 있어도 다른 도구에서 언어를 바꿨다면 그 언어로 맞춤
     // (사전 URL·RTL 안내만 바꾸고, 사용자가 고친 예시값·RTL 설정은 유지)

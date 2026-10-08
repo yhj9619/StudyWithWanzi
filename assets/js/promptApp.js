@@ -43,7 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const sourceLangModeSelect = document.getElementById('sourceLangModeSelect');
   const sourceLangNotice = document.getElementById('sourceLangNotice');
   const ruleExampleFromTextText = document.getElementById('ruleExampleFromTextText');
-  const EDITOR_STORAGE_KEY = 'anki_card_editor_settings';
+  // 카드 서식 에디터 저장 키: 필드 이름은 '내용' 묶음에 있음 (예전 단일 저장 키는 아직 옮겨지지 않은 경우를 위한 예비)
+  const EDITOR_CONTENT_STORAGE_KEY = 'anki_card_editor_content';
+  const EDITOR_LEGACY_STORAGE_KEY = 'anki_card_editor_settings';
 
   const promptOutputText = document.getElementById('promptOutputText');
   const btnCopyPrompt = document.getElementById('btnCopyPrompt');
@@ -1203,14 +1205,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function importFieldsFromEditor() {
-    let editorData = null;
-    try {
-      editorData = JSON.parse(localStorage.getItem(EDITOR_STORAGE_KEY) || 'null');
-    } catch (e) {
-      editorData = null;
-    }
-
-    const editorFields = editorData && Array.isArray(editorData.fields) ? editorData.fields : [];
+    // 새 저장 키(내용 묶음)를 먼저 읽고, 필드가 없으면 예전 단일 저장 키를 읽음
+    const readEditorFields = (key) => {
+      try {
+        const data = JSON.parse(localStorage.getItem(key) || 'null');
+        return data && Array.isArray(data.fields) ? data.fields : [];
+      } catch (e) {
+        return [];
+      }
+    };
+    let editorFields = readEditorFields(EDITOR_CONTENT_STORAGE_KEY);
+    if (editorFields.length === 0) editorFields = readEditorFields(EDITOR_LEGACY_STORAGE_KEY);
     if (editorFields.length === 0) {
       showToast(i18n.t('prompt.toast.editorFieldsEmpty'));
       return;

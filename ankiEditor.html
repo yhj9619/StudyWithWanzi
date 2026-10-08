@@ -8,10 +8,10 @@
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="alternate icon" href="favicon.ico">
-  <!-- Google Fonts for global language scripts -->
+  <!-- Google Fonts: 화면 글꼴(Noto Sans KR)과 언어 예시용 문자만 (카드 글꼴 미리보기는 기기에 들어 있는 글꼴로 표시) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&family=Nanum+Gothic:wght@400;700&family=Inter:wght@400;600;700&family=Caveat:wght@600&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+Arabic:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+Arabic:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/editor.css">
 </head>
@@ -124,6 +124,7 @@
             <div class="field-setting-header">
               <div class="field-badge" id="f1_badge">1번째 필드 (앞면 / Front)</div>
               <div class="field-visibility-toggles">
+                <div class="toggle-row">
                 <label class="mini-toggle" data-i18n-attr="title:editor.field.showFrontTitle" title="이 필드를 카드 앞면(문제)에 보여주기">
                   <input type="checkbox" id="f1_show_front" checked>
                   <span data-i18n="editor.field.showFront">앞면 표시</span>
@@ -132,6 +133,8 @@
                   <input type="checkbox" id="f1_show_back">
                   <span data-i18n="editor.field.showBack">뒷면 표시</span>
                 </label>
+                </div>
+                <div class="toggle-row">
                 <label class="mini-toggle mini-toggle-link" data-i18n-attr="title:editor.field.dictLinkTitle" title="이 필드 글자 옆에 외국어사전 아이콘 붙이기">
                   <input type="checkbox" id="f1_dict_link">
                   <span data-i18n="editor.field.dictLink">🌐 외국어사전</span>
@@ -140,6 +143,11 @@
                   <input type="checkbox" id="f1_wiki_link">
                   <span class="sub-dict-label">📘 국어사전</span>
                 </label>
+                <label class="mini-toggle mini-toggle-tts" data-i18n-attr="title:editor.field.ttsTitle" title="카드를 열면 이 필드의 글자를 기기 목소리로 읽어줘요">
+                  <input type="checkbox" id="f1_tts">
+                  <span data-i18n="editor.field.tts">🔊 읽어주기</span>
+                </label>
+                </div>
               </div>
             </div>
 
@@ -157,7 +165,7 @@
 
             <div class="style-controls-row">
               <div class="control-item">
-                <label for="f1_size" class="sub-label"><span data-i18n="editor.style.sizeLabel">글씨 크기:</span> <span id="f1_size_val">24</span>px</label>
+                <label for="f1_size_num" class="sub-label"><span data-i18n="editor.style.sizeLabel">글씨 크기</span><span class="stepper-label-val"> <span id="f1_size_val">24</span>px</span></label>
                 <div class="slider-with-number">
                   <input type="range" id="f1_size" min="10" max="80" value="24" class="form-range">
                   <input type="number" id="f1_size_num" min="10" max="80" value="24" class="num-input">
@@ -177,18 +185,10 @@
                 <label for="f1_font" class="sub-label" data-i18n="editor.style.fontLabel">글꼴</label>
                 <select id="f1_font" class="form-select small-select">
                   <option value="inherit" selected data-i18n="editor.font.inherit">(카드 글꼴 그대로)</option>
-                  <option value="system" data-i18n="editor.font.system">기기 기본 글꼴</option>
-                  <option value="noto-sans-kr" data-i18n="editor.font.notoSansKr">본고딕 (Noto Sans KR)</option>
-                  <option value="noto-serif-kr" data-i18n="editor.font.notoSerifKr">명조체 (Noto Serif KR)</option>
-                  <option value="nanum-gothic" data-i18n="editor.font.nanumGothic">나눔고딕</option>
-                  <option value="inter" data-i18n="editor.font.inter">Inter (영문 고딕)</option>
-                  <option value="noto-sans-jp" data-i18n="editor.font.notoSansJp">Noto Sans JP (일본어)</option>
-                  <option value="noto-sans-sc" data-i18n="editor.font.notoSansSc">Noto Sans SC (중국어)</option>
-                  <option value="monospace" data-i18n="editor.font.monospace">타자기체 (글자 폭이 일정)</option>
-                  <option value="cursive" data-i18n="editor.font.cursive">손글씨체</option>
-                  <option value="custom" data-i18n="editor.font.custom">직접 입력...</option>
+                  <option value="gothic" data-i18n="editor.font.gothic">기본 고딕 (추천)</option>
+                  <option value="serif" data-i18n="editor.font.serif">명조 (바탕체 느낌)</option>
+                  <option value="mono" data-i18n="editor.font.mono">타자기체 (영문·숫자 폭이 일정)</option>
                 </select>
-                <input type="text" id="f1_font_custom" class="form-input font-custom-input hidden" data-i18n-attr="placeholder:editor.style.fontCustomPlaceholder" placeholder="글꼴 이름 입력 (예: Pretendard)">
               </div>
 
               <div class="control-item">
@@ -214,6 +214,7 @@
             <div class="field-setting-header">
               <div class="field-badge field-badge-primary" id="f2_badge">2번째 필드 (뒷면 / Back) · 🌐 외국어사전</div>
               <div class="field-visibility-toggles">
+                <div class="toggle-row">
                 <label class="mini-toggle" data-i18n-attr="title:editor.field.showFrontTitle" title="이 필드를 카드 앞면(문제)에 보여주기">
                   <input type="checkbox" id="f2_show_front">
                   <span data-i18n="editor.field.showFront">앞면 표시</span>
@@ -222,6 +223,8 @@
                   <input type="checkbox" id="f2_show_back" checked>
                   <span data-i18n="editor.field.showBack">뒷면 표시</span>
                 </label>
+                </div>
+                <div class="toggle-row">
                 <label class="mini-toggle mini-toggle-link" data-i18n-attr="title:editor.field.dictLinkTitle" title="이 필드 글자 옆에 외국어사전 아이콘 붙이기">
                   <input type="checkbox" id="f2_dict_link" checked>
                   <span data-i18n="editor.field.dictLink">🌐 외국어사전</span>
@@ -230,6 +233,11 @@
                   <input type="checkbox" id="f2_wiki_link">
                   <span class="sub-dict-label">📘 국어사전</span>
                 </label>
+                <label class="mini-toggle mini-toggle-tts" data-i18n-attr="title:editor.field.ttsTitle" title="카드를 열면 이 필드의 글자를 기기 목소리로 읽어줘요">
+                  <input type="checkbox" id="f2_tts" checked>
+                  <span data-i18n="editor.field.tts">🔊 읽어주기</span>
+                </label>
+                </div>
               </div>
             </div>
 
@@ -247,7 +255,7 @@
 
             <div class="style-controls-row">
               <div class="control-item">
-                <label for="f2_size" class="sub-label"><span data-i18n="editor.style.sizeLabel">글씨 크기:</span> <span id="f2_size_val">24</span>px</label>
+                <label for="f2_size_num" class="sub-label"><span data-i18n="editor.style.sizeLabel">글씨 크기</span><span class="stepper-label-val"> <span id="f2_size_val">24</span>px</span></label>
                 <div class="slider-with-number">
                   <input type="range" id="f2_size" min="10" max="80" value="24" class="form-range">
                   <input type="number" id="f2_size_num" min="10" max="80" value="24" class="num-input">
@@ -267,18 +275,10 @@
                 <label for="f2_font" class="sub-label" data-i18n="editor.style.fontLabel">글꼴</label>
                 <select id="f2_font" class="form-select small-select">
                   <option value="inherit" selected data-i18n="editor.font.inherit">(카드 글꼴 그대로)</option>
-                  <option value="system" data-i18n="editor.font.system">기기 기본 글꼴</option>
-                  <option value="noto-sans-kr" data-i18n="editor.font.notoSansKr">본고딕 (Noto Sans KR)</option>
-                  <option value="noto-serif-kr" data-i18n="editor.font.notoSerifKr">명조체 (Noto Serif KR)</option>
-                  <option value="nanum-gothic" data-i18n="editor.font.nanumGothic">나눔고딕</option>
-                  <option value="inter" data-i18n="editor.font.inter">Inter (영문 고딕)</option>
-                  <option value="noto-sans-jp" data-i18n="editor.font.notoSansJp">Noto Sans JP (일본어)</option>
-                  <option value="noto-sans-sc" data-i18n="editor.font.notoSansSc">Noto Sans SC (중국어)</option>
-                  <option value="monospace" data-i18n="editor.font.monospace">타자기체 (글자 폭이 일정)</option>
-                  <option value="cursive" data-i18n="editor.font.cursive">손글씨체</option>
-                  <option value="custom" data-i18n="editor.font.custom">직접 입력...</option>
+                  <option value="gothic" data-i18n="editor.font.gothic">기본 고딕 (추천)</option>
+                  <option value="serif" data-i18n="editor.font.serif">명조 (바탕체 느낌)</option>
+                  <option value="mono" data-i18n="editor.font.mono">타자기체 (영문·숫자 폭이 일정)</option>
                 </select>
-                <input type="text" id="f2_font_custom" class="form-input font-custom-input hidden" data-i18n-attr="placeholder:editor.style.fontCustomPlaceholder" placeholder="글꼴 이름 입력 (예: Pretendard)">
               </div>
 
               <div class="control-item">
@@ -302,6 +302,28 @@
           <!-- 3번째 이상 선택 필드 컨테이너 -->
           <div id="optionalFieldsContainer"></div>
 
+          <!-- 🔊 읽어주기 안내 · 읽는 속도 (읽어주기를 켠 필드가 있거나, 읽어주기를 쓸 수 없는 언어일 때만 보임) -->
+          <div class="tts-info-box hidden" id="ttsInfoBox">
+            <p class="tts-info-title" data-i18n="editor.tts.title">🔊 읽어주기 (Anki가 글자를 소리 내어 읽어줘요)</p>
+            <div id="ttsInfoBody">
+              <ul class="tts-info-list">
+                <li data-i18n="editor.tts.autoPlay">카드를 열면 🔊를 켠 필드를 자동으로 읽어주고, ▶ 버튼을 누르면 다시 들을 수 있어요.</li>
+                <li data-i18n="editor.tts.stopAutoPlay">자동으로 읽는 게 싫으면 덱 옵션의 오디오 항목에서 자동 재생을 끌 수 있어요.</li>
+                <li data-i18n-html="editor.tts.noSoundHtml">소리가 안 나면 기기에 그 언어의 목소리(음성 데이터)를 설치해 주세요. <a href="ankiGuide.html#faq">자주 묻는 질문 보기</a></li>
+                <li data-i18n="editor.tts.support">Anki PC(2.1.20 이상) · AnkiMobile · AnkiDroid(2.17 이상)에서 돼요.</li>
+              </ul>
+              <div class="tts-speed-row">
+                <label for="ttsSpeed" class="sub-label" data-i18n="editor.tts.speedLabel">읽는 속도</label>
+                <select id="ttsSpeed" class="form-select small-select">
+                  <option value="1.0" selected data-i18n="editor.tts.speedNormal">보통</option>
+                  <option value="0.8" data-i18n="editor.tts.speedSlow">조금 느리게</option>
+                  <option value="0.6" data-i18n="editor.tts.speedSlower">느리게</option>
+                </select>
+              </div>
+            </div>
+            <p class="tts-unsupported hidden" id="ttsUnsupportedNote" data-i18n="editor.tts.unsupported">이 언어는 기기에 읽어주는 목소리가 거의 없어서 🔊 읽어주기를 쓸 수 없어요.</p>
+          </div>
+
           <!-- 언어별 추천 필드 빠른 추가 칩 -->
           <div class="quick-chips-wrapper" style="margin-top: 1.25rem; margin-bottom: 0.75rem;">
             <div class="quick-chips-title">
@@ -318,6 +340,11 @@
             <button type="button" id="addFieldBtn" class="btn-add-field" data-i18n="editor.addField" data-i18n-attr="title:editor.addFieldTitle" title="이름을 직접 정할 새 필드를 추가해요">
               ➕ 빈 필드 하나 더 만들기
             </button>
+          </div>
+
+          <!-- 📝 내용(학습 언어 · 필드)만 처음으로 — 꾸미기(테마 · 글씨 모양)는 그대로 -->
+          <div class="group-reset-row">
+            <button type="button" id="resetContentBtn" class="btn-group-reset" data-i18n="editor.resetContent" data-i18n-attr="title:editor.resetContentTitle" title="학습 언어와 필드(이름·예시·앞면/뒷면·사전 아이콘·읽어주기)만 처음 상태로 되돌려요. 꾸미기는 그대로예요.">📝 언어·필드 처음으로</button>
           </div>
         </div>
 
@@ -387,22 +414,16 @@
                 <div class="form-group">
                   <label for="cardBaseFont" class="form-label" data-i18n="editor.step3.baseFontLabel">카드 글꼴</label>
                   <select id="cardBaseFont" class="form-select">
-                    <option value="system" selected data-i18n="editor.baseFont.system">기기 기본 글꼴 (추천)</option>
-                    <option value="noto-sans-kr" data-i18n="editor.baseFont.notoSansKr">본고딕 (Noto Sans KR · 깔끔한 고딕)</option>
-                    <option value="noto-serif-kr" data-i18n="editor.baseFont.notoSerifKr">명조체 (Noto Serif KR · 책·신문 느낌)</option>
-                    <option value="nanum-gothic" data-i18n="editor.baseFont.nanumGothic">나눔고딕 (부드러운 고딕)</option>
-                    <option value="inter" data-i18n="editor.baseFont.inter">Inter (영문이 깔끔한 글꼴)</option>
-                    <option value="noto-sans-jp" data-i18n="editor.baseFont.notoSansJp">Noto Sans JP (일본어에 잘 맞음)</option>
-                    <option value="noto-sans-sc" data-i18n="editor.baseFont.notoSansSc">Noto Sans SC (중국어 간체)</option>
-                    <option value="monospace" data-i18n="editor.baseFont.monospace">타자기체 (글자 폭이 일정)</option>
-                    <option value="cursive" data-i18n="editor.baseFont.cursive">손글씨체 (Caveat)</option>
-                    <option value="custom" data-i18n="editor.baseFont.custom">직접 입력 (글꼴 이름 쓰기)</option>
+                    <option value="gothic" selected data-i18n="editor.font.gothic">기본 고딕 (추천)</option>
+                    <option value="serif" data-i18n="editor.font.serif">명조 (바탕체 느낌)</option>
+                    <option value="mono" data-i18n="editor.font.mono">타자기체 (영문·숫자 폭이 일정)</option>
                   </select>
-                  <input type="text" id="cardBaseFontCustom" class="form-input font-custom-input hidden" data-i18n-attr="placeholder:editor.step3.baseFontCustomPlaceholder" placeholder="예: Pretendard, RIDIBatang, Gmarket Sans" style="margin-top: 0.5rem;">
+                  <!-- 글꼴 안내: 모두 기기에 들어 있는 글꼴 (인터넷 없이도 표시) -->
+                  <p class="helper-text font-help" data-i18n="editor.step3.baseFontHelp">모든 글꼴은 기기에 들어 있는 글꼴이라 PC·폰 어디서나, 인터넷 없이도 보여요. 기기마다 모양은 조금 달라요. 타자기체는 영문·숫자에만 적용되고, 한글은 고딕으로 보여요.</p>
                 </div>
 
                 <div class="form-group">
-                  <label for="cardLineHeight" class="form-label"><span data-i18n="editor.step3.lineHeightLabel">줄 간격:</span> <span id="cardLineHeightVal">1.5</span><span data-i18n="editor.step3.lineHeightUnit">배</span></label>
+                  <label for="cardLineHeightNum" class="form-label"><span data-i18n="editor.step3.lineHeightLabel">줄 간격</span><span class="stepper-label-val"> <span id="cardLineHeightVal">1.5</span><span data-i18n="editor.step3.lineHeightUnit">배</span></span></label>
                   <div class="slider-with-number" style="margin-top: 0.35rem;">
                     <input type="range" id="cardLineHeight" min="1.0" max="3.0" step="0.1" value="1.5" class="form-range">
                     <input type="number" id="cardLineHeightNum" min="1.0" max="3.0" step="0.1" value="1.5" class="num-input">
@@ -424,8 +445,8 @@
               <!-- 뒷면 상단 앞면 내용 상세 스타일 조절 -->
               <div id="frontOnBackSettings" class="sub-setting-card" style="margin: 0.25rem 0 0.85rem 1.6rem; padding: 0.75rem 0.9rem; background: #f1f5f9; border-radius: var(--radius-sm); border: 1px solid #cbd5e1;">
                 <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
-                  <label for="frontOnBackSize" class="sub-label" style="font-size: 0.82rem; margin: 0; color: #1e293b;">
-                    <span data-i18n="editor.step3.frontOnBackSizeLabel">뒷면에 보이는 문제 글씨 크기:</span> <strong id="frontOnBackSizeVal" style="color: var(--primary);">24px</strong>
+                  <label for="frontOnBackSizeNum" class="sub-label" style="font-size: 0.82rem; margin: 0; color: #1e293b;">
+                    <span data-i18n="editor.step3.frontOnBackSizeLabel">뒷면에 보이는 문제 글씨 크기</span><span class="stepper-label-val"> <strong id="frontOnBackSizeVal" style="color: var(--primary);">24px</strong></span>
                   </label>
                   <label class="custom-checkbox" style="font-size: 0.78rem; margin: 0; white-space: nowrap;">
                     <input type="checkbox" id="syncFrontSizeWithF1" checked>
@@ -510,7 +531,8 @@
               <!-- Dynamically injected card markup -->
             </div>
           </div>
-          <p class="preview-hint" data-i18n="editor.preview.hint">💡 미리보기 카드의 글자를 누르면 아래에서 그 필드의 글씨 크기·색을 바꿀 수 있어요. 글자 옆 🌐·📘 아이콘을 누르면 실제 사전이 열려요.</p>
+          <p class="preview-hint" data-i18n="editor.preview.hint">💡 미리보기 카드의 글자를 누르면 아래에서 그 필드의 글씨 크기·색을 바꿀 수 있어요. 🌐·📘 아이콘을 누르면 실제 사전이 열려요.</p>
+          <p class="preview-hint hidden" id="previewTtsNote" data-i18n="editor.tts.deviceNote">🔊를 누르면 이 브라우저 목소리로 들어볼 수 있어요. 실제 Anki 목소리는 기기마다 달라요.</p>
 
           <!-- 선택한 필드 스타일 편집 패널 (모든 필드 공용) -->
           <div class="field-style-inspector" id="fieldStyleInspector">
@@ -524,7 +546,7 @@
 
             <div class="style-controls-row">
               <div class="control-item">
-                <label for="inspectorSize" class="sub-label"><span data-i18n="editor.style.sizeLabel">글씨 크기:</span> <span id="inspectorSizeVal">24</span>px</label>
+                <label for="inspectorSizeNum" class="sub-label"><span data-i18n="editor.style.sizeLabel">글씨 크기</span><span class="stepper-label-val"> <span id="inspectorSizeVal">24</span>px</span></label>
                 <div class="slider-with-number">
                   <input type="range" id="inspectorSize" min="10" max="80" value="24" class="form-range">
                   <input type="number" id="inspectorSizeNum" min="10" max="80" value="24" class="num-input">
@@ -544,18 +566,10 @@
                 <label for="inspectorFont" class="sub-label" data-i18n="editor.style.fontLabel">글꼴</label>
                 <select id="inspectorFont" class="form-select small-select">
                   <option value="inherit" data-i18n="editor.font.inherit">(카드 글꼴 그대로)</option>
-                  <option value="system" data-i18n="editor.font.system">기기 기본 글꼴</option>
-                  <option value="noto-sans-kr" data-i18n="editor.font.notoSansKr">본고딕 (Noto Sans KR)</option>
-                  <option value="noto-serif-kr" data-i18n="editor.font.notoSerifKr">명조체 (Noto Serif KR)</option>
-                  <option value="nanum-gothic" data-i18n="editor.font.nanumGothic">나눔고딕</option>
-                  <option value="inter" data-i18n="editor.font.inter">Inter (영문 고딕)</option>
-                  <option value="noto-sans-jp" data-i18n="editor.font.notoSansJp">Noto Sans JP (일본어)</option>
-                  <option value="noto-sans-sc" data-i18n="editor.font.notoSansSc">Noto Sans SC (중국어)</option>
-                  <option value="monospace" data-i18n="editor.font.monospace">타자기체 (글자 폭이 일정)</option>
-                  <option value="cursive" data-i18n="editor.font.cursive">손글씨체</option>
-                  <option value="custom" data-i18n="editor.font.custom">직접 입력...</option>
+                  <option value="gothic" data-i18n="editor.font.gothic">기본 고딕 (추천)</option>
+                  <option value="serif" data-i18n="editor.font.serif">명조 (바탕체 느낌)</option>
+                  <option value="mono" data-i18n="editor.font.mono">타자기체 (영문·숫자 폭이 일정)</option>
                 </select>
-                <input type="text" id="inspectorFontCustom" class="form-input font-custom-input hidden" data-i18n-attr="placeholder:editor.style.fontCustomPlaceholder" placeholder="글꼴 이름 입력 (예: Pretendard)">
               </div>
 
               <div class="control-item">
@@ -577,6 +591,125 @@
               <button type="button" class="preset-dot" data-color="#9334e6" style="background:#9334e6;" data-i18n-attr="title:editor.color.purple" title="보라"></button>
             </div>
           </div>
+
+          <!-- 🎨 더 꾸미기 (기본 접힘): 테마 · 배경 · 카드 상자 · 테두리 · 구분선 — 미리보기 바로 아래라서 바꾸면서 바로 확인 -->
+          <details class="advanced-settings deco-settings" id="decoSettings">
+            <summary><span data-i18n="editor.deco.title">🎨 더 꾸미기</span> <span class="advanced-hint" data-i18n="editor.deco.hint">테마 · 배경 · 카드 모양</span></summary>
+            <div class="advanced-body">
+              <p class="deco-desc" data-i18n="editor.deco.desc">테마를 누르면 배경·글자색·글꼴이 한 번에 바뀌어요. 고른 뒤에 아래에서 하나씩 더 바꿔도 돼요. 어두운 화면(🌙)에서도 잘 보이게 자동으로 맞춰요.</p>
+
+              <h3 class="advanced-group-title" data-i18n="editor.deco.themesTitle">한 번에 꾸미기 (테마)</h3>
+              <div class="theme-swatches" id="themeSwatches" role="group" data-i18n-attr="aria-label:editor.deco.themesTitle" aria-label="한 번에 꾸미기 (테마)">
+                <!-- JS에서 테마 목록에 맞춰 동적으로 생성 -->
+              </div>
+
+              <h3 class="advanced-group-title" data-i18n="editor.deco.detailTitle">하나씩 바꾸기</h3>
+              <div class="deco-grid">
+                <!-- 배경 -->
+                <div class="deco-item">
+                  <label for="decoBgType" class="form-label" data-i18n="editor.deco.bgTitle">배경</label>
+                  <select id="decoBgType" class="form-select small-select">
+                    <option value="solid" data-i18n="editor.deco.bgSolid">단색</option>
+                    <option value="gradient" data-i18n="editor.deco.bgGradient">그라데이션 (두 색이 이어짐)</option>
+                    <option value="pattern" data-i18n="editor.deco.bgPattern">은은한 무늬</option>
+                  </select>
+                  <div class="deco-sub" id="decoBgDirRow">
+                    <label for="decoBgDir" class="sub-label" data-i18n="editor.deco.dirLabel">방향</label>
+                    <select id="decoBgDir" class="form-select small-select">
+                      <option value="down" data-i18n="editor.deco.dirDown">위 → 아래</option>
+                      <option value="right" data-i18n="editor.deco.dirRight">왼쪽 → 오른쪽</option>
+                      <option value="diagonal" data-i18n="editor.deco.dirDiagonal">대각선</option>
+                    </select>
+                  </div>
+                  <div class="deco-sub" id="decoBgPatternRow">
+                    <label for="decoBgPattern" class="sub-label" data-i18n="editor.deco.patternLabel">무늬</label>
+                    <select id="decoBgPattern" class="form-select small-select">
+                      <option value="dots" data-i18n="editor.deco.patternDots">점</option>
+                      <option value="grid" data-i18n="editor.deco.patternGrid">격자 (모눈종이)</option>
+                      <option value="lines" data-i18n="editor.deco.patternLines">줄노트</option>
+                      <option value="fiber" data-i18n="editor.deco.patternFiber">한지 결</option>
+                    </select>
+                  </div>
+                  <div class="deco-colors">
+                    <label class="deco-color">
+                      <input type="color" id="decoBgColor" value="#ffffff" class="form-color">
+                      <span data-i18n="editor.deco.bgColor">배경 색</span>
+                    </label>
+                    <label class="deco-color" id="decoBgColor2Row">
+                      <input type="color" id="decoBgColor2" value="#dbeafe" class="form-color">
+                      <span id="decoBgColor2LabelGradient" data-i18n="editor.deco.bgColor2">두 번째 색</span>
+                      <span id="decoBgColor2LabelPattern" data-i18n="editor.deco.patternColor">무늬 색</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 카드 상자 -->
+                <div class="deco-item">
+                  <label for="decoBox" class="form-label" data-i18n="editor.deco.boxTitle">카드 상자</label>
+                  <select id="decoBox" class="form-select small-select">
+                    <option value="none" data-i18n="editor.deco.boxNone">없음</option>
+                    <option value="round" data-i18n="editor.deco.boxRound">둥근 카드</option>
+                    <option value="shadow" data-i18n="editor.deco.boxShadow">둥근 카드 + 그림자</option>
+                    <option value="sheet" data-i18n="editor.deco.boxSheet">표 모양 (스프레드시트)</option>
+                  </select>
+                  <div class="deco-colors" id="decoBoxColorRow">
+                    <label class="deco-color">
+                      <input type="color" id="decoBoxColor" value="#ffffff" class="form-color">
+                      <span data-i18n="editor.deco.boxColor">상자 색</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 테두리 -->
+                <div class="deco-item">
+                  <label for="decoBorder" class="form-label" data-i18n="editor.deco.borderTitle">테두리</label>
+                  <select id="decoBorder" class="form-select small-select">
+                    <option value="none" data-i18n="editor.deco.borderNone">없음</option>
+                    <option value="thin" data-i18n="editor.deco.borderThin">얇은 선</option>
+                    <option value="thick" data-i18n="editor.deco.borderThick">두꺼운 선</option>
+                    <option value="left" data-i18n="editor.deco.borderLeft">왼쪽 강조 띠</option>
+                  </select>
+                  <div class="deco-colors" id="decoBorderColorRow">
+                    <label class="deco-color">
+                      <input type="color" id="decoBorderColor" value="#cbd5e1" class="form-color">
+                      <span data-i18n="editor.deco.borderColor">테두리 색</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 구분선 모양 (뒷면의 정답 구분선) -->
+                <div class="deco-item">
+                  <label for="decoDivider" class="form-label" data-i18n="editor.deco.dividerTitle">구분선 모양</label>
+                  <select id="decoDivider" class="form-select small-select">
+                    <option value="solid" data-i18n="editor.deco.dividerSolid">실선</option>
+                    <option value="dashed" data-i18n="editor.deco.dividerDashed">점선</option>
+                    <option value="double" data-i18n="editor.deco.dividerDouble">이중선</option>
+                  </select>
+                  <div class="deco-colors">
+                    <label class="deco-color">
+                      <input type="color" id="decoDividerColor" value="#cbd5e1" class="form-color">
+                      <span data-i18n="editor.deco.dividerColor">구분선 색</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 아이콘 위치 (🌐 사전 · 📘 보조 사전 · 🔊 읽어주기): 글자 옆 / 글자 아래 따로 한 줄 -->
+                <div class="deco-item">
+                  <label for="iconPosition" class="form-label" data-i18n="editor.deco.iconPosTitle">아이콘 위치</label>
+                  <select id="iconPosition" class="form-select small-select">
+                    <option value="beside" data-i18n="editor.deco.iconPosBeside">글자 옆</option>
+                    <option value="below" selected data-i18n="editor.deco.iconPosBelow">글자 아래 (따로 한 줄)</option>
+                  </select>
+                  <p class="deco-note" data-i18n="editor.deco.iconPosHint">🌐 사전 · 📘 보조 사전 · 🔊 읽어주기 아이콘을 놓을 자리예요. 따로 한 줄에 두면 잘못 누를 일이 줄어요.</p>
+                </div>
+              </div>
+
+              <!-- 🎨 꾸미기만 처음으로 — 학습 언어 · 필드 이름 · 예시값은 그대로 -->
+              <div class="group-reset-row">
+                <button type="button" id="resetDesignBtn" class="btn-group-reset" data-i18n="editor.deco.reset" data-i18n-attr="title:editor.deco.resetTitle" title="테마·배경·글꼴·글씨 크기와 색만 처음 상태로 되돌려요. 학습 언어와 필드는 그대로예요.">🎨 꾸미기 처음으로</button>
+              </div>
+            </div>
+          </details>
         </div>
 
         <!-- ③ 카드 서식 복사해서 Anki에 붙여넣기 (앞면 서식 → 뒷면 서식 → 스타일 순서) -->

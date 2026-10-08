@@ -1,0 +1,186 @@
+### FRONT
+<div class="field-item f-field-1">{{Front}}</div>
+### BACK
+<div class="front-preview-hint">{{Front}}</div>
+
+<hr id="answer">
+
+<div class="field-item f-field-2"><span class="link-src">{{Back}}</span>{{#Back}}<span class="field-icons"><a class="link-btn dict-btn" href="https://zh.dict.naver.com/#/search?query=" data-base="https://zh.dict.naver.com/#/search?query=" target="_blank" title="외국어사전 검색">🌐</a><span class="tts-btn">{{tts zh_CN:Back}}</span></span>{{/Back}}</div>
+
+<div class="field-item f-field-3">{{pinyin}}</div>
+
+<script>
+(function () {
+  var clean = true;
+  var each = function (list, fn) { Array.prototype.forEach.call(list, fn); };
+  each(document.querySelectorAll('.link-src'), function (src) {
+    var copy = src.cloneNode(true);
+    each(copy.querySelectorAll('.replay-button, audio, script, style'), function (el) { el.parentNode.removeChild(el); });
+    each(copy.querySelectorAll('br, div, p, li'), function (el) { el.parentNode.insertBefore(document.createTextNode(' '), el); });
+    var raw = copy.textContent.replace(/\s+/g, ' ').trim();
+    var q = clean ? (raw.replace(/\[[^\]]*\]|\([^)]*\)|（[^）]*）/g, '').split(/[,;，、；]/)[0].trim() || raw) : raw;
+    each(src.parentNode.querySelectorAll('.link-btn[data-base]'), function (a) {
+      a.setAttribute('href', a.getAttribute('data-base') + encodeURIComponent(q));
+    });
+  });
+})();
+</script>
+### CSS
+.card {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+  font-size: 20px;
+  text-align: center;
+  color: #202124;
+  background-color: #ffffff;
+  line-height: 1.5;
+}
+
+.field-item {
+  margin-bottom: 8px;
+}
+
+.front-preview-hint {
+  color: #202124;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+hr#answer {
+  border: none;
+  border-top: 1px solid #cbd5e1;
+  margin: 1.25rem 0;
+  width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* 아이콘 (외국어사전 / 보조 사전 / 읽어주기): 누르기 쉽게 크게, 넉넉한 간격 */
+.field-icons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.3em;
+}
+
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 1.6em;
+  min-height: 1.6em;
+  padding: 0.15em;
+  margin: 0 0.2em;
+  border-radius: 0.45em;
+  line-height: 1;
+  font-size: 0.85em;
+  text-decoration: none;
+  opacity: 0.8;
+}
+
+.link-btn:hover,
+.link-btn:active {
+  opacity: 1;
+  background-color: rgba(127, 127, 127, 0.16);
+}
+
+/* 🔊 읽어주기 버튼 */
+.tts-btn {
+  display: inline-flex;
+  white-space: nowrap;
+}
+
+.tts-btn .replay-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 1.6em;
+  min-height: 1.6em;
+  padding: 0.15em;
+  margin: 0 0.2em;
+  border-radius: 0.45em;
+  line-height: 1;
+  font-size: 0.85em;
+  text-decoration: none;
+  opacity: 0.8;
+}
+
+.tts-btn .replay-button:hover,
+.tts-btn .replay-button:active {
+  background-color: rgba(127, 127, 127, 0.16);
+  opacity: 1;
+}
+
+.tts-btn .replay-button svg {
+  display: none !important;
+}
+
+.tts-btn .replay-button::before {
+  content: '🔊';
+}
+
+/* 필드별 기본 서식 (라이트 모드) */
+.f-field-1 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #202124;
+  margin-bottom: 8px;
+}
+.f-field-2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1a73e8;
+  margin-bottom: 8px;
+}
+.f-field-3 {
+  font-size: 20px;
+  color: #5f6368;
+  margin-bottom: 8px;
+}
+
+/* =======================================
+   🌙 Anki 다크모드 (Night Mode) 완벽 대응
+   ======================================= */
+.card.nightMode,
+.card.night_mode {
+  color: #f8fafc;
+  background-color: #2f2f31;
+}
+
+.nightMode hr#answer,
+.night_mode hr#answer {
+  border-top-color: #4b5563;
+}
+
+.nightMode .front-preview-hint,
+.night_mode .front-preview-hint {
+  color: #f8fafc !important;
+}
+
+/* 다크모드 필드별 텍스트 색상 자동 최적화 반전 */
+.nightMode .f-field-1,
+.night_mode .f-field-1,
+.nightMode .f-field-1 a,
+.night_mode .f-field-1 a {
+  color: #f8fafc !important;
+}
+.nightMode .f-field-2,
+.night_mode .f-field-2,
+.nightMode .f-field-2 a,
+.night_mode .f-field-2 a {
+  color: #6ba5f0 !important;
+}
+.nightMode .f-field-3,
+.night_mode .f-field-3,
+.nightMode .f-field-3 a,
+.night_mode .f-field-3 a {
+  color: #e2e8f0 !important;
+}
+

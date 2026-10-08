@@ -706,16 +706,26 @@ body {
   color: #475569;
 }
 
+/* 1줄: 앞면·뒷면 표시 / 2줄: 사전·읽어주기 아이콘 (영어처럼 긴 언어도 넘치지 않게) */
 .field-visibility-toggles {
   display: inline-flex;
-  align-items: center;
-  gap: 0.85rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  max-width: 100%;
   margin-left: auto;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   padding: 0.25rem 0.65rem;
   border-radius: var(--radius-sm);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.toggle-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.85rem;
 }
 
 .mini-toggle {
@@ -1727,10 +1737,9 @@ body {
     display: flex;
     width: 100%;
     margin-left: 0;
-    justify-content: flex-start;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 0.4rem;
-    flex-wrap: wrap;
     background: #ffffff;
     padding: 0.35rem 0.5rem;
     border-radius: var(--radius-sm);

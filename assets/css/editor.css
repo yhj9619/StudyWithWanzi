@@ -3,6 +3,11 @@
    - ① 학습 언어: 연결된 사전 이름
    - 고급 설정 안의 묶음 제목
    - ③ 카드 서식 복사해서 붙여넣기 도우미 (단계별 복사 · ✓ 표시)
+   - 🔊 읽어주기 토글 · 안내 상자 · 미리보기 버튼
+   - 🎨 더 꾸미기 (테마 버튼 · 배경 · 카드 상자 · 테두리 · 구분선)
+   - 묶음별 초기화 버튼 (📝 언어·필드 / 🎨 꾸미기)
+   - 미리보기 아이콘(🌐 · 📘 · 🔊) 누르는 자리 · 꾸미기 칸 설명
+   - 슬라이더 대신 [−] [숫자] [+] 조절기
    ======================================= */
 
 /* ① 학습 언어 아래 "연결된 외국어사전" 한 줄 */
@@ -289,5 +294,408 @@
 
   .btn-copy.btn-copy-step {
     flex: 1 1 100%;
+  }
+}
+
+/* =======================================
+   🔊 읽어주기 (필드 상자 토글 · 안내 상자 · 미리보기 버튼)
+   ======================================= */
+.mini-toggle-tts {
+  color: #0f766e;
+  font-weight: 600;
+  background: #f0fdfa;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid #99f6e4;
+  transition: all 0.15s ease;
+}
+
+.mini-toggle-tts:hover {
+  color: #115e59;
+  background: #ccfbf1;
+}
+
+/* 읽어주기를 쓸 수 없는 언어: 흐리게 */
+.mini-toggle.is-disabled,
+.custom-checkbox.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mini-toggle.is-disabled:hover {
+  color: #0f766e;
+  background: #f0fdfa;
+}
+
+.tts-info-box {
+  margin-top: 0.85rem;
+  padding: 0.7rem 0.85rem;
+  background: #f0fdfa;
+  border: 1px solid #99f6e4;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: #134e4a;
+}
+
+.tts-info-title {
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
+}
+
+.tts-info-list {
+  margin: 0 0 0.55rem;
+  padding-left: 1.1rem;
+}
+
+.tts-info-list li {
+  padding: 0.08rem 0;
+}
+
+.tts-info-list a {
+  color: #0f766e;
+  font-weight: 700;
+}
+
+.tts-speed-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+}
+
+.tts-speed-row .sub-label {
+  margin: 0;
+  color: #134e4a;
+}
+
+.tts-speed-row .small-select {
+  width: auto;
+  min-width: 9rem;
+}
+
+.tts-unsupported {
+  color: #92400e;
+}
+
+/* 미리보기 카드 속 🔊 버튼 (Anki의 ▶ 다시 듣기 버튼 자리)
+   크기 · 간격 · 누르는 자리는 app.js가 사전 아이콘과 같은 값으로 인라인 지정, 여기서는 모양만 */
+/* 미리보기 🔊 버튼: 실제 Anki 카드의 읽어주기 버튼과 같게 테두리 없는 아이콘 (사전 아이콘과 같은 모양) */
+.preview-tts-btn {
+  font-family: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.preview-tts-btn:hover,
+.preview-tts-btn:active {
+  opacity: 1 !important;
+  background-color: rgba(127, 127, 127, 0.16);
+}
+
+/* 미리보기 사전 아이콘: 누르거나 마우스를 올리면 은은한 둥근 바탕 (Anki 카드의 .link-btn:hover와 같은 색) */
+#liveCardRender .link-btn:hover,
+#liveCardRender .link-btn:active {
+  opacity: 1 !important;
+  background-color: rgba(127, 127, 127, 0.16);
+}
+
+/* =======================================
+   🎨 더 꾸미기 (테마 버튼 · 하나씩 바꾸기)
+   ======================================= */
+.deco-settings {
+  margin-top: 1rem;
+}
+
+.deco-desc {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+/* 꾸미기 칸 아래 짧은 설명 (아이콘 위치 등) */
+.deco-note {
+  margin: 0.45rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* 카드 글꼴 아래 안내 (모두 기기에 들어 있는 글꼴) */
+.font-help {
+  margin: 0.45rem 0 0;
+  line-height: 1.5;
+}
+
+/* 테마 버튼: 작은 카드 모양 + 이름 */
+.theme-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.5rem;
+}
+
+.theme-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.3rem;
+  padding: 0.3rem;
+  min-width: 0;
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.theme-swatch:hover {
+  border-color: #93c5fd;
+}
+
+.theme-swatch.active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.18);
+}
+
+.theme-swatch-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+}
+
+.theme-swatch-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.15rem;
+  width: 64%;
+  padding: 0.25rem 0.2rem;
+  font-size: 0.95rem;
+  line-height: 1.1;
+}
+
+/* 견본 글자 "가 A" (본문 색 · 강조 색) */
+.theme-swatch-box::before {
+  content: '가';
+  color: var(--swatch-main);
+}
+
+.theme-swatch-box::after {
+  content: 'A';
+  order: 1;
+  color: var(--swatch-accent);
+  font-weight: 700;
+}
+
+.theme-swatch-line {
+  flex: 1 0 100%;
+  order: 2;
+  height: 0;
+  margin-top: 0.2rem;
+}
+
+.theme-swatch-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: #334155;
+  text-align: center;
+  white-space: nowrap; /* 테마 이름이 두 줄로 쪼개지지 않게 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.theme-swatch.active .theme-swatch-name {
+  color: var(--primary);
+}
+
+/* 하나씩 바꾸기: 배경 · 카드 상자 · 테두리 · 구분선 */
+.deco-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.deco-item {
+  min-width: 0;
+  padding: 0.7rem 0.75rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+}
+
+.deco-item .form-label {
+  margin-bottom: 0.35rem;
+}
+
+.deco-sub {
+  margin-top: 0.5rem;
+}
+
+.deco-sub .sub-label {
+  display: block;
+}
+
+.deco-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.9rem;
+  margin-top: 0.55rem;
+}
+
+.deco-color {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: #475569;
+  cursor: pointer;
+}
+
+.deco-color .form-color {
+  flex-shrink: 0;
+}
+
+@media (max-width: 576px) {
+  .deco-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 묶음별 초기화 버튼 (📝 언어·필드 처음으로 · 🎨 꾸미기 처음으로)
+   머리글의 빨간 "설정 초기화"보다 눈에 덜 띄게: 회색 테두리 · 오른쪽 정렬 */
+.group-reset-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+
+.btn-group-reset {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.btn-group-reset:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+.btn-group-reset:active {
+  transform: scale(0.97);
+}
+
+/* 슬라이더 대신 [−] [숫자] [+] 조절기 (app.js가 버튼을 붙임, 슬라이더는 값 보관용으로 숨김)
+   라벨의 값 표시는 숫자 칸과 겹치므로 숨김 */
+.slider-with-number .form-range,
+.stepper-label-val {
+  display: none;
+}
+
+.slider-with-number.stepper {
+  gap: 0;
+  width: auto;
+  flex-wrap: nowrap;
+}
+
+.stepper-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  font-family: inherit;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.stepper-btn.stepper-down {
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.stepper-btn.stepper-up {
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.stepper-btn:hover:not(:disabled) {
+  background-color: #eff6ff;
+  color: var(--primary);
+}
+
+.stepper-btn:active:not(:disabled) {
+  background-color: #dbeafe;
+}
+
+.stepper-btn:disabled {
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.stepper .num-input {
+  width: 56px;
+  height: 36px;
+  border-radius: 0;
+  border-color: #cbd5e1;
+  border-left: none;
+  border-right: none;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* 숫자 칸의 기본 위아래 화살표는 [−] [+] 버튼과 겹치므로 숨김 */
+.stepper .num-input::-webkit-inner-spin-button,
+.stepper .num-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.stepper-unit {
+  flex: 0 0 auto;
+  margin-left: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* 휴대폰: 누르는 자리 크게 */
+@media (max-width: 768px) {
+  .stepper-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .stepper .num-input {
+    width: 60px;
+    height: 40px;
   }
 }
