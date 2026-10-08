@@ -19,7 +19,6 @@ i18nRegister('zh', {
 
   // 设置面板介绍
   'editor.panel.ariaLabel': '卡片模板设置面板',
-  'editor.hero.html': '<strong>让你的 Anki 卡片更好看、查词更方便。</strong><br> ① 选择学习语言，② 决定卡片上要放哪些栏目（字段），③ 把做好的卡片模板复制粘贴到 Anki 就完成了。单词旁会出现 <strong>🌐 外语词典 · 📘 韩语词典</strong> 图标，复习时遇到不懂的词可以立即查询。',
 
   // 第 1 步：学习语言
   'editor.step1.title': '选择学习语言',
@@ -244,6 +243,11 @@ i18nRegister('zh', {
   'editor.tts.noSoundHtml': '没有声音时，请在设备上安装该语言的语音（语音数据）。<a href="ankiGuide.html#faq">查看常见问题</a>',
   'editor.tts.support': '可在 Anki 电脑版（2.1.20 及以上）、AnkiMobile、AnkiDroid（2.17 及以上）中使用。',
   'editor.tts.speedLabel': '朗读速度',
+  'editor.advanced.ttsTitle': '🔊 朗读',
+  'editor.tts.previewSpeed': '▶ 试听',
+  'editor.tts.previewSpeedTitle': '用所选速度朗读示例文字（使用本浏览器的声音，和 Anki 的声音略有不同）',
+  'editor.tts.speedHelp': '用所选速度朗读已开启 🔊 朗读的字段的示例文字。实际 Anki 的声音因设备而略有不同。',
+  'editor.tts.speedWhere': '朗读速度可以在下方 ⚙️ 高级设置中修改并试听。',
   'editor.tts.speedNormal': '正常',
   'editor.tts.speedSlow': '稍慢',
   'editor.tts.speedSlower': '慢',

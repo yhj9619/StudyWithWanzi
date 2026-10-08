@@ -19,7 +19,6 @@ i18nRegister('en', {
 
   // Settings panel intro
   'editor.panel.ariaLabel': 'Card template settings panel',
-  'editor.hero.html': '<strong>Make your Anki cards nicer to look at and easier to look up.</strong><br> ① Pick the language you\'re learning, ② decide which boxes (fields) go on the card, then ③ copy the finished card template into Anki — that\'s it. <strong>🌐 Foreign-language dictionary · 📘 Korean dictionary</strong> icons appear next to words, so you can look up anything while reviewing.',
 
   // Step 1: Target language
   'editor.step1.title': 'Pick the language you\'re learning',
@@ -244,6 +243,11 @@ i18nRegister('en', {
   'editor.tts.noSoundHtml': "No sound? Install that language's voice (speech data) on your device. <a href=\"ankiGuide.html#faq\">See the FAQ</a>",
   'editor.tts.support': 'Works in Anki for PC (2.1.20 or later), AnkiMobile and AnkiDroid (2.17 or later).',
   'editor.tts.speedLabel': 'Reading speed',
+  'editor.advanced.ttsTitle': '🔊 Read aloud',
+  'editor.tts.previewSpeed': '▶ Listen',
+  'editor.tts.previewSpeedTitle': 'Reads the example text at the chosen speed (uses this browser’s voice, so it sounds a little different from Anki)',
+  'editor.tts.speedHelp': 'Reads the example text of a field with 🔊 Read aloud turned on, at the chosen speed. The real Anki voice differs a little on each device.',
+  'editor.tts.speedWhere': 'You can change the reading speed and listen to it in ⚙️ Advanced settings below.',
   'editor.tts.speedNormal': 'Normal',
   'editor.tts.speedSlow': 'A bit slower',
   'editor.tts.speedSlower': 'Slow',

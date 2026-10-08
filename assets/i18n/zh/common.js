@@ -9,6 +9,7 @@ i18nRegister('zh', {
   'common.navEditorTitle': '前往 Anki 卡片模板编辑器',
   'common.navPrompt': '🤖 AI 提示词生成器',
   'common.navPromptTitle': '前往 Anki AI 提示词生成器',
+  'common.navMenu': '菜单',
   'common.autoSaved': '✓ 已自动保存',
   'common.autoSavedTitle': '设置会自动保存在这个浏览器里',
   'common.resetAll': '🔄 重置设置',

@@ -19,7 +19,6 @@ i18nRegister('ko', {
 
   // 설정 패널 소개
   'editor.panel.ariaLabel': '카드 서식 설정 패널',
-  'editor.hero.html': '<strong>내 Anki 카드를 보기 좋게, 찾아보기 쉽게 만드세요.</strong><br> ① 배우는 언어를 고르고 ② 카드에 들어갈 칸(필드)을 정한 뒤 ③ 완성된 카드 서식을 Anki에 복사해 붙여넣으면 끝이에요. 단어 옆에 <strong>🌐 외국어사전 · 📘 국어사전</strong> 아이콘이 붙어서, 복습하다 궁금한 단어를 바로 찾아볼 수 있어요.',
 
   // 1단계: 학습 언어
   'editor.step1.title': '배우는 언어 고르기',
@@ -154,8 +153,8 @@ i18nRegister('ko', {
   // 필드 추가 버튼
   'editor.addField': '➕ 빈 필드 하나 더 만들기',
   'editor.addFieldTitle': '이름을 직접 정할 새 필드를 추가해요',
-  'editor.resetContent': '📝 언어·필드 처음으로',
-  'editor.resetContentTitle': '학습 언어와 필드(이름·예시·앞면/뒷면·사전 아이콘·읽어주기)만 처음 상태로 되돌려요. 꾸미기는 그대로예요.',
+  'editor.resetContent': '📝 언어·필드 초기화',
+  'editor.resetContentTitle': '학습 언어와 필드(이름·예시·앞면/뒷면·사전 아이콘·읽어주기)만 초기화해요. 꾸미기는 그대로예요.',
 
   // 고급 설정: 카드 모양 (예전 3단계)
   'editor.step3.title': '🎨 카드 모양',
@@ -244,6 +243,11 @@ i18nRegister('ko', {
   'editor.tts.noSoundHtml': '소리가 안 나면 기기에 그 언어의 목소리(음성 데이터)를 설치해 주세요. <a href="ankiGuide.html#faq">자주 묻는 질문 보기</a>',
   'editor.tts.support': 'Anki PC(2.1.20 이상) · AnkiMobile · AnkiDroid(2.17 이상)에서 돼요.',
   'editor.tts.speedLabel': '읽는 속도',
+  'editor.advanced.ttsTitle': '🔊 읽어주기',
+  'editor.tts.previewSpeed': '▶ 미리 듣기',
+  'editor.tts.previewSpeedTitle': '고른 속도로 예시 글자를 읽어 줘요 (이 브라우저의 목소리라 Anki 목소리와는 조금 달라요)',
+  'editor.tts.speedHelp': '🔊 읽어주기를 켠 필드의 예시 글자를 고른 속도로 읽어 줘요. 실제 Anki 목소리는 기기마다 조금 달라요.',
+  'editor.tts.speedWhere': '읽는 속도는 아래 ⚙️ 고급 설정에서 바꾸고 미리 들어 볼 수 있어요.',
   'editor.tts.speedNormal': '보통',
   'editor.tts.speedSlow': '조금 느리게',
   'editor.tts.speedSlower': '느리게',
@@ -312,8 +316,8 @@ i18nRegister('ko', {
   'editor.deco.iconPosBeside': '글자 옆',
   'editor.deco.iconPosBelow': '글자 아래 (따로 한 줄)',
   'editor.deco.iconPosHint': '🌐 사전 · 📘 보조 사전 · 🔊 읽어주기 아이콘을 놓을 자리예요. 따로 한 줄에 두면 잘못 누를 일이 줄어요.',
-  'editor.deco.reset': '🎨 꾸미기 처음으로',
-  'editor.deco.resetTitle': '테마·배경·글꼴·글씨 크기와 색만 처음 상태로 되돌려요. 학습 언어와 필드는 그대로예요.',
+  'editor.deco.reset': '🎨 꾸미기 초기화',
+  'editor.deco.resetTitle': '테마·배경·글꼴·글씨 크기와 색만 초기화해요. 학습 언어와 필드는 그대로예요.',
   'editor.theme.default': '기본',
   'editor.theme.flashcard': '링 단어장',
   'editor.theme.sticky': '스티키 메모',
@@ -343,13 +347,13 @@ i18nRegister('ko', {
   'editor.toast.fieldAdded': "'{name}' 필드를 추가했어요.",
   'editor.toast.fieldAddedNumbered': '{num}번째 필드를 추가했어요.',
   'editor.toast.fieldDeleted': '필드를 삭제했어요.',
-  'editor.toast.resetDone': '카드 서식 에디터 설정을 처음 상태로 되돌렸어요.',
-  'editor.toast.resetContentDone': '학습 언어와 필드를 처음 상태로 되돌렸어요.',
-  'editor.toast.resetDesignDone': '꾸미기를 처음 상태로 되돌렸어요.',
+  'editor.toast.resetDone': '카드 서식 에디터 설정을 초기화했어요.',
+  'editor.toast.resetContentDone': '학습 언어와 필드를 초기화했어요.',
+  'editor.toast.resetDesignDone': '꾸미기를 초기화했어요.',
   'editor.confirm.deleteNamed': "'{name}' 필드를 정말 삭제할까요?",
   'editor.confirm.deleteNumbered': '{num}번째 필드를 정말 삭제할까요?',
-  'editor.confirm.resetAll': '카드 서식 에디터의 모든 설정(학습 언어·필드·꾸미기)을 처음 상태로 되돌릴까요?\n\n(※ AI 프롬프트 생성기 등 다른 도구의 설정은 그대로예요.)',
-  'editor.confirm.resetContent': '학습 언어와 필드를 처음 상태(영어, 필드 3개)로 되돌릴까요?\n\n필드 이름·예시·앞면/뒷면·사전 아이콘·읽어주기와 사전 주소 설정이 처음으로 돌아가요. 테마·글꼴·글씨 크기와 색 같은 꾸미기는 그대로예요.',
-  'editor.confirm.resetDesign': '꾸미기를 처음 상태로 되돌릴까요?\n\n테마·배경·카드 글꼴·줄 간격·읽는 속도와 필드별 글씨 크기·색·굵기가 처음으로 돌아가요. 학습 언어와 필드 이름·예시는 그대로예요.',
+  'editor.confirm.resetAll': '카드 서식 에디터의 모든 설정(학습 언어·필드·꾸미기)을 초기화할까요?\n\n(※ AI 프롬프트 생성기 등 다른 도구의 설정은 그대로예요.)',
+  'editor.confirm.resetContent': '학습 언어와 필드를 초기화할까요? (영어, 필드 3개)\n\n필드 이름·예시·앞면/뒷면·사전 아이콘·읽어주기와 사전 주소 설정이 초기화돼요. 테마·글꼴·글씨 크기와 색 같은 꾸미기는 그대로예요.',
+  'editor.confirm.resetDesign': '꾸미기를 초기화할까요?\n\n테마·배경·카드 글꼴·줄 간격·읽는 속도와 필드별 글씨 크기·색·굵기가 초기화돼요. 학습 언어와 필드 이름·예시는 그대로예요.',
   'editor.footer': 'Study with Wanzi © 2026. Made for language learners.',
 });

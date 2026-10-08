@@ -43,14 +43,130 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Header */
+/* 공통 메뉴줄 (모든 페이지 맨 위, i18n.js가 그림): PC는 한 줄로 고정, 좁은 화면은 ☰로 여닫기 */
+.site-nav {
+  background: #0f172a;
+  color: #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 110;
+}
+
+.site-nav-inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0.45rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.site-nav-home {
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-nav-home:hover {
+  color: #bfdbfe;
+}
+
+.site-nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.site-nav-link {
+  color: #cbd5e1;
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.site-nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+/* 지금 보고 있는 페이지 */
+.site-nav-link.current {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.site-nav-menu .ui-lang-switcher {
+  margin-left: auto;
+}
+
+.site-nav-toggle {
+  display: none;
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  font-size: 1.1rem;
+  line-height: 1;
+  width: 2.4rem;
+  height: 2.2rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .site-nav {
+    position: static;
+  }
+
+  .site-nav-inner {
+    padding: 0.45rem 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .site-nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ☰를 누르면 아래로 펼쳐지는 세로 메뉴 */
+  .site-nav-menu {
+    display: none;
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.15rem;
+    padding: 0.35rem 0 0.25rem;
+  }
+
+  .site-nav.open .site-nav-menu {
+    display: flex;
+  }
+
+  .site-nav-link {
+    font-size: 0.92rem;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .site-nav-menu .ui-lang-switcher {
+    margin: 0.4rem 0 0 0.5rem;
+    align-self: flex-start;
+  }
+}
+
+/* Header (페이지 제목 · 그 페이지 전용 버튼) */
 .app-header {
   background-color: var(--bg-card);
   border-bottom: 1px solid var(--border-color);
   padding: 1rem 1.5rem;
-  position: sticky;
-  top: 0;
-  z-index: 100;
   box-shadow: var(--shadow-sm);
 }
 
@@ -972,7 +1088,7 @@ body {
   min-width: 0;
   width: 100%;
   position: sticky;
-  top: 5rem;
+  top: 3.75rem; /* 공통 메뉴줄 높이만큼 아래 */
   display: flex;
   flex-direction: column;
   gap: 1.5rem;

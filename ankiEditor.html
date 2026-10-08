@@ -16,12 +16,12 @@
   <link rel="stylesheet" href="assets/css/editor.css">
 </head>
 <body>
+  <!-- 모든 페이지 공통 메뉴줄 (i18n.js가 그림): PC는 한 줄, 휴대폰은 ☰ 버튼으로 여닫기 -->
+  <nav data-site-nav="editor"></nav>
+
   <header class="app-header">
     <div class="header-container">
       <div class="logo-group">
-        <a href="index.html" class="nav-back-link" data-i18n="common.backToHub" data-i18n-attr="title:common.backToHubTitle" title="Study with Wanzi 메인 메뉴로 돌아가기">
-          ◀ Study with Wanzi
-        </a>
         <span class="logo-icon">⚡</span>
         <div>
           <h1 class="logo-title" data-i18n="editor.pageTitle">Anki 카드 서식 에디터</h1>
@@ -29,13 +29,6 @@
         </div>
       </div>
       <div class="header-actions">
-        <div data-i18n-switcher></div>
-        <a href="ankiGuide.html" class="nav-link-btn" data-i18n="common.navGuide" data-i18n-attr="title:common.navGuideTitle" title="Anki 완벽 사용 가이드로 이동">
-          📖 사용 가이드
-        </a>
-        <a href="ankiPrompt.html" class="nav-link-btn" data-i18n="common.navPrompt" data-i18n-attr="title:common.navPromptTitle" title="Anki AI 프롬프트 생성기로 이동">
-          🤖 AI 프롬프트 생성기
-        </a>
         <span id="saveStatusIndicator" class="save-status-badge" data-i18n="common.autoSaved" data-i18n-attr="title:common.autoSavedTitle" title="설정은 이 브라우저에 자동으로 저장돼요">✓ 자동 저장됨</span>
         <button type="button" id="resetAllSettingsBtn" class="btn-outline-danger" data-i18n="common.resetAll" data-i18n-attr="title:common.resetAllTitle" title="모든 설정을 처음 기본값으로 되돌립니다">
           🔄 설정 초기화
@@ -48,6 +41,9 @@
     <!-- 처음부터 끝까지 4단계 경로 표시줄 (i18n.js가 그림, 현재 2단계) -->
     <nav data-journey="2"></nav>
 
+    <!-- PC 권장 안내 (좌우 칸 위 전체 폭: 왼쪽 · 오른쪽 칸이 같은 높이에서 시작하게) -->
+    <div class="pc-notice" data-i18n-html="common.pcNotice">💻 카드 서식 붙여넣기와 단어장 가져오기는 <strong>PC에서</strong> 하는 걸 추천해요. 한 번 해 두면 동기화로 폰에도 그대로 적용되고, 폰에서는 복습만 하면 됩니다.</div>
+
     <!-- Mobile Screen View Switcher (모바일 전용 화면 전환 탭) -->
     <nav class="mobile-view-nav" id="mobileViewNav" data-i18n-attr="aria-label:editor.mobile.navAriaLabel" aria-label="모바일 화면 전환 탭">
       <button type="button" class="mobile-nav-btn active" id="btnMobileEditTab" data-i18n="editor.mobile.editTab">⚙️ 1. 설정하기</button>
@@ -59,13 +55,12 @@
       <!-- LEFT: Editor Settings Form -->
       <section class="editor-panel" data-i18n-attr="aria-label:editor.panel.ariaLabel" aria-label="카드 서식 설정 패널">
 
-        <div class="prompt-hero-box">
-          <span class="prompt-hero-icon">🎨</span>
-          <div data-i18n-html="editor.hero.html"><strong>내 Anki 카드를 보기 좋게, 찾아보기 쉽게 만드세요.</strong><br> ① 배우는 언어를 고르고 ② 카드에 들어갈 칸(필드)을 정한 뒤 ③ 완성된 카드 서식을 Anki에 복사해 붙여넣으면 끝이에요. 단어 옆에 <strong>🌐 외국어사전 · 📘 국어사전</strong> 아이콘이 붙어서, 복습하다 궁금한 단어를 바로 찾아볼 수 있어요.</div>
+        <!-- 📝 언어·필드만 초기화 (꾸미기는 그대로) — 오른쪽 칸 맨 위 🎨 꾸미기 초기화와 같은 높이 -->
+        <div class="panel-reset-row">
+          <button type="button" id="resetContentBtn" class="btn-group-reset" data-i18n="editor.resetContent" data-i18n-attr="title:editor.resetContentTitle" title="학습 언어와 필드(이름·예시·앞면/뒷면·사전 아이콘·읽어주기)만 초기화해요. 꾸미기는 그대로예요.">📝 언어·필드 초기화</button>
         </div>
 
-        <!-- PC 권장 안내 -->
-        <div class="pc-notice" data-i18n-html="common.pcNotice">💻 카드 서식 붙여넣기와 단어장 가져오기는 <strong>PC에서</strong> 하는 걸 추천해요. 한 번 해 두면 동기화로 폰에도 그대로 적용되고, 폰에서는 복습만 하면 됩니다.</div>
+
 
         <!-- 1. 학습 언어 (사전 주소 등 세부 설정은 아래 고급 설정) -->
         <div class="card-section">
@@ -310,16 +305,9 @@
                 <li data-i18n="editor.tts.autoPlay">카드를 열면 🔊를 켠 필드를 자동으로 읽어주고, ▶ 버튼을 누르면 다시 들을 수 있어요.</li>
                 <li data-i18n="editor.tts.stopAutoPlay">자동으로 읽는 게 싫으면 덱 옵션의 오디오 항목에서 자동 재생을 끌 수 있어요.</li>
                 <li data-i18n-html="editor.tts.noSoundHtml">소리가 안 나면 기기에 그 언어의 목소리(음성 데이터)를 설치해 주세요. <a href="ankiGuide.html#faq">자주 묻는 질문 보기</a></li>
+                <li data-i18n="editor.tts.speedWhere">읽는 속도는 아래 ⚙️ 고급 설정에서 바꾸고 미리 들어 볼 수 있어요.</li>
                 <li data-i18n="editor.tts.support">Anki PC(2.1.20 이상) · AnkiMobile · AnkiDroid(2.17 이상)에서 돼요.</li>
               </ul>
-              <div class="tts-speed-row">
-                <label for="ttsSpeed" class="sub-label" data-i18n="editor.tts.speedLabel">읽는 속도</label>
-                <select id="ttsSpeed" class="form-select small-select">
-                  <option value="1.0" selected data-i18n="editor.tts.speedNormal">보통</option>
-                  <option value="0.8" data-i18n="editor.tts.speedSlow">조금 느리게</option>
-                  <option value="0.6" data-i18n="editor.tts.speedSlower">느리게</option>
-                </select>
-              </div>
             </div>
             <p class="tts-unsupported hidden" id="ttsUnsupportedNote" data-i18n="editor.tts.unsupported">이 언어는 기기에 읽어주는 목소리가 거의 없어서 🔊 읽어주기를 쓸 수 없어요.</p>
           </div>
@@ -341,14 +329,9 @@
               ➕ 빈 필드 하나 더 만들기
             </button>
           </div>
-
-          <!-- 📝 내용(학습 언어 · 필드)만 처음으로 — 꾸미기(테마 · 글씨 모양)는 그대로 -->
-          <div class="group-reset-row">
-            <button type="button" id="resetContentBtn" class="btn-group-reset" data-i18n="editor.resetContent" data-i18n-attr="title:editor.resetContentTitle" title="학습 언어와 필드(이름·예시·앞면/뒷면·사전 아이콘·읽어주기)만 처음 상태로 되돌려요. 꾸미기는 그대로예요.">📝 언어·필드 처음으로</button>
-          </div>
         </div>
 
-        <!-- 고급 설정 (기본 접힘): 사전 아이콘 세부 설정 · 카드 모양 -->
+        <!-- 고급 설정 (기본 접힘): 사전 아이콘 세부 설정 · 읽는 속도 (카드 모양은 오른쪽 🎨 더 꾸미기 안) -->
         <details class="advanced-settings" id="editorAdvancedSettings">
           <summary><span data-i18n="common.advanced.title">⚙️ 고급 설정</span> <span class="advanced-hint" data-i18n="common.advanced.hint">기본값 그대로 써도 괜찮아요</span></summary>
           <div class="advanced-body">
@@ -406,74 +389,18 @@
               </div>
             </div>
 
-          <!-- 카드 모양 (글꼴 · 줄 간격 · 구분선 · 뒷면 문제 표시 · 정렬 · 쓰기 방향) -->
-          <h3 class="advanced-group-title" data-i18n="editor.step3.title">🎨 카드 모양</h3>
-            <!-- 카드 전반 폰트 및 줄간격 설정 -->
-            <div class="card-global-style-box">
-              <div class="grid-2-col">
-                <div class="form-group">
-                  <label for="cardBaseFont" class="form-label" data-i18n="editor.step3.baseFontLabel">카드 글꼴</label>
-                  <select id="cardBaseFont" class="form-select">
-                    <option value="gothic" selected data-i18n="editor.font.gothic">기본 고딕 (추천)</option>
-                    <option value="serif" data-i18n="editor.font.serif">명조 (바탕체 느낌)</option>
-                    <option value="mono" data-i18n="editor.font.mono">타자기체 (영문·숫자 폭이 일정)</option>
-                  </select>
-                  <!-- 글꼴 안내: 모두 기기에 들어 있는 글꼴 (인터넷 없이도 표시) -->
-                  <p class="helper-text font-help" data-i18n="editor.step3.baseFontHelp">모든 글꼴은 기기에 들어 있는 글꼴이라 PC·폰 어디서나, 인터넷 없이도 보여요. 기기마다 모양은 조금 달라요. 타자기체는 영문·숫자에만 적용되고, 한글은 고딕으로 보여요.</p>
-                </div>
-
-                <div class="form-group">
-                  <label for="cardLineHeightNum" class="form-label"><span data-i18n="editor.step3.lineHeightLabel">줄 간격</span><span class="stepper-label-val"> <span id="cardLineHeightVal">1.5</span><span data-i18n="editor.step3.lineHeightUnit">배</span></span></label>
-                  <div class="slider-with-number" style="margin-top: 0.35rem;">
-                    <input type="range" id="cardLineHeight" min="1.0" max="3.0" step="0.1" value="1.5" class="form-range">
-                    <input type="number" id="cardLineHeightNum" min="1.0" max="3.0" step="0.1" value="1.5" class="num-input">
-                  </div>
-                </div>
-              </div>
+            <!-- 읽어주기 (읽는 속도 · 미리 듣기) -->
+            <h3 class="advanced-group-title" data-i18n="editor.advanced.ttsTitle">🔊 읽어주기</h3>
+            <div class="tts-speed-row">
+              <label for="ttsSpeed" class="sub-label" data-i18n="editor.tts.speedLabel">읽는 속도</label>
+              <select id="ttsSpeed" class="form-select small-select">
+                <option value="1.0" selected data-i18n="editor.tts.speedNormal">보통</option>
+                <option value="0.8" data-i18n="editor.tts.speedSlow">조금 느리게</option>
+                <option value="0.6" data-i18n="editor.tts.speedSlower">느리게</option>
+              </select>
+              <button type="button" id="ttsSpeedPreviewBtn" class="btn-text tts-preview-btn" data-i18n="editor.tts.previewSpeed" data-i18n-attr="title:editor.tts.previewSpeedTitle" title="고른 속도로 예시 글자를 읽어 줘요 (이 브라우저의 목소리라 Anki 목소리와는 조금 달라요)">▶ 미리 듣기</button>
             </div>
-
-            <div class="checkbox-list">
-              <label class="custom-checkbox">
-                <input type="checkbox" id="showHrAnswer" checked>
-                <span data-i18n-html="editor.step3.showHrHtml">뒷면에 구분선 넣기</span>
-              </label>
-              <label class="custom-checkbox">
-                <input type="checkbox" id="keepFrontOnBack" checked>
-                <span data-i18n-html="editor.step3.keepFrontHtml">뒷면 위쪽에 문제(앞면)도 보여주기</span>
-              </label>
-
-              <!-- 뒷면 상단 앞면 내용 상세 스타일 조절 -->
-              <div id="frontOnBackSettings" class="sub-setting-card" style="margin: 0.25rem 0 0.85rem 1.6rem; padding: 0.75rem 0.9rem; background: #f1f5f9; border-radius: var(--radius-sm); border: 1px solid #cbd5e1;">
-                <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
-                  <label for="frontOnBackSizeNum" class="sub-label" style="font-size: 0.82rem; margin: 0; color: #1e293b;">
-                    <span data-i18n="editor.step3.frontOnBackSizeLabel">뒷면에 보이는 문제 글씨 크기</span><span class="stepper-label-val"> <strong id="frontOnBackSizeVal" style="color: var(--primary);">24px</strong></span>
-                  </label>
-                  <label class="custom-checkbox" style="font-size: 0.78rem; margin: 0; white-space: nowrap;">
-                    <input type="checkbox" id="syncFrontSizeWithF1" checked>
-                    <span data-i18n="editor.step3.syncFrontSize">1번째 필드 글씨 크기에 맞추기</span>
-                  </label>
-                </div>
-                <div class="slider-with-number">
-                  <input type="range" id="frontOnBackSize" min="10" max="80" value="24" class="form-range">
-                  <input type="number" id="frontOnBackSizeNum" min="10" max="80" value="24" class="num-input">
-                </div>
-                <div style="margin-top: 0.45rem;">
-                  <label class="custom-checkbox" style="font-size: 0.78rem; margin: 0;">
-                    <input type="checkbox" id="frontOnBackKeepStyle" checked>
-                    <span data-i18n="editor.step3.frontOnBackKeepStyle">1번째 필드와 같은 색·굵기로 보여주기 (끄면 연한 회색)</span>
-                  </label>
-                </div>
-              </div>
-
-              <label class="custom-checkbox">
-                <input type="checkbox" id="centerAlign" checked>
-                <span data-i18n-html="editor.step3.centerAlignHtml">가운데 정렬</span>
-              </label>
-              <label class="custom-checkbox">
-                <input type="checkbox" id="rtlForce">
-                <span data-i18n-html="editor.step3.rtlForceHtml">오른쪽에서 왼쪽으로 쓰기 (아랍어·히브리어 등)</span>
-              </label>
-            </div>
+            <p class="helper-text" data-i18n="editor.tts.speedHelp">🔊 읽어주기를 켠 필드의 예시 글자를 고른 속도로 읽어 줘요. 실제 Anki 목소리는 기기마다 조금 달라요.</p>
 
           </div>
         </details>
@@ -501,6 +428,11 @@
             ⚙️ ◀ 언어·필드 설정 다시 바꾸기
           </button>
           <a href="#pasteHelper" class="mobile-jump-link" id="btnJumpToPaste" data-i18n="editor.mobile.jumpToPaste">⬇️ ③ 카드 서식 복사로 바로 가기</a>
+        </div>
+
+        <!-- 🎨 꾸미기만 초기화 (언어·필드는 그대로) — 왼쪽 칸 맨 위 📝 언어·필드 초기화와 같은 높이 -->
+        <div class="panel-reset-row">
+          <button type="button" id="resetDesignBtn" class="btn-group-reset" data-i18n="editor.deco.reset" data-i18n-attr="title:editor.deco.resetTitle" title="테마·배경·글꼴·글씨 크기와 색만 초기화해요. 학습 언어와 필드는 그대로예요.">🎨 꾸미기 초기화</button>
         </div>
 
         <!-- Card Simulation Viewer -->
@@ -723,9 +655,73 @@
                 </div>
               </div>
 
-              <!-- 🎨 꾸미기만 처음으로 — 학습 언어 · 필드 이름 · 예시값은 그대로 -->
-              <div class="group-reset-row">
-                <button type="button" id="resetDesignBtn" class="btn-group-reset" data-i18n="editor.deco.reset" data-i18n-attr="title:editor.deco.resetTitle" title="테마·배경·글꼴·글씨 크기와 색만 처음 상태로 되돌려요. 학습 언어와 필드는 그대로예요.">🎨 꾸미기 처음으로</button>
+              <!-- 카드 모양 (글꼴 · 줄 간격 · 구분선 · 뒷면 문제 표시 · 정렬 · 쓰기 방향) -->
+              <h3 class="advanced-group-title" data-i18n="editor.step3.title">🎨 카드 모양</h3>
+              <!-- 카드 전반 폰트 및 줄간격 설정 -->
+              <div class="card-global-style-box">
+                <div class="grid-2-col">
+                  <div class="form-group">
+                    <label for="cardBaseFont" class="form-label" data-i18n="editor.step3.baseFontLabel">카드 글꼴</label>
+                    <select id="cardBaseFont" class="form-select">
+                      <option value="gothic" selected data-i18n="editor.font.gothic">기본 고딕 (추천)</option>
+                      <option value="serif" data-i18n="editor.font.serif">명조 (바탕체 느낌)</option>
+                      <option value="mono" data-i18n="editor.font.mono">타자기체 (영문·숫자 폭이 일정)</option>
+                    </select>
+                    <!-- 글꼴 안내: 모두 기기에 들어 있는 글꼴 (인터넷 없이도 표시) -->
+                    <p class="helper-text font-help" data-i18n="editor.step3.baseFontHelp">모든 글꼴은 기기에 들어 있는 글꼴이라 PC·폰 어디서나, 인터넷 없이도 보여요. 기기마다 모양은 조금 달라요. 타자기체는 영문·숫자에만 적용되고, 한글은 고딕으로 보여요.</p>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="cardLineHeightNum" class="form-label"><span data-i18n="editor.step3.lineHeightLabel">줄 간격</span><span class="stepper-label-val"> <span id="cardLineHeightVal">1.5</span><span data-i18n="editor.step3.lineHeightUnit">배</span></span></label>
+                    <div class="slider-with-number" style="margin-top: 0.35rem;">
+                      <input type="range" id="cardLineHeight" min="1.0" max="3.0" step="0.1" value="1.5" class="form-range">
+                      <input type="number" id="cardLineHeightNum" min="1.0" max="3.0" step="0.1" value="1.5" class="num-input">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="checkbox-list">
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="showHrAnswer" checked>
+                  <span data-i18n-html="editor.step3.showHrHtml">뒷면에 구분선 넣기</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="keepFrontOnBack" checked>
+                  <span data-i18n-html="editor.step3.keepFrontHtml">뒷면 위쪽에 문제(앞면)도 보여주기</span>
+                </label>
+
+                <!-- 뒷면 상단 앞면 내용 상세 스타일 조절 -->
+                <div id="frontOnBackSettings" class="sub-setting-card" style="margin: 0.25rem 0 0.85rem 1.6rem; padding: 0.75rem 0.9rem; background: #f1f5f9; border-radius: var(--radius-sm); border: 1px solid #cbd5e1;">
+                  <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                    <label for="frontOnBackSizeNum" class="sub-label" style="font-size: 0.82rem; margin: 0; color: #1e293b;">
+                      <span data-i18n="editor.step3.frontOnBackSizeLabel">뒷면에 보이는 문제 글씨 크기</span><span class="stepper-label-val"> <strong id="frontOnBackSizeVal" style="color: var(--primary);">24px</strong></span>
+                    </label>
+                    <label class="custom-checkbox" style="font-size: 0.78rem; margin: 0; white-space: nowrap;">
+                      <input type="checkbox" id="syncFrontSizeWithF1" checked>
+                      <span data-i18n="editor.step3.syncFrontSize">1번째 필드 글씨 크기에 맞추기</span>
+                    </label>
+                  </div>
+                  <div class="slider-with-number">
+                    <input type="range" id="frontOnBackSize" min="10" max="80" value="24" class="form-range">
+                    <input type="number" id="frontOnBackSizeNum" min="10" max="80" value="24" class="num-input">
+                  </div>
+                  <div style="margin-top: 0.45rem;">
+                    <label class="custom-checkbox" style="font-size: 0.78rem; margin: 0;">
+                      <input type="checkbox" id="frontOnBackKeepStyle" checked>
+                      <span data-i18n="editor.step3.frontOnBackKeepStyle">1번째 필드와 같은 색·굵기로 보여주기 (끄면 연한 회색)</span>
+                    </label>
+                  </div>
+                </div>
+
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="centerAlign" checked>
+                  <span data-i18n-html="editor.step3.centerAlignHtml">가운데 정렬</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="rtlForce">
+                  <span data-i18n-html="editor.step3.rtlForceHtml">오른쪽에서 왼쪽으로 쓰기 (아랍어·히브리어 등)</span>
+                </label>
               </div>
             </div>
           </details>

@@ -26,7 +26,6 @@ i18nRegister('zh', {
 
   // 설정 패널 공통
   'prompt.editor.panelLabel': '提示词设置面板',
-  'prompt.hero.html': '<strong>让 AI 成为你专属的单词表助手：</strong><br>\n            只需选择学习语言、难度（例如去掉 HSK 3 级及以下的单词）和单词表中要放的项目，就能生成发给 ChatGPT·Gemini·Claude 的请求（提示词）。把 AI 的回答粘贴回来，就能变成可直接导入 Anki 的文件。',
   'prompt.common.optional': '（可选）',
 
   // 1단계: 학습 언어 및 추출 방식

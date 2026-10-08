@@ -9,6 +9,7 @@ i18nRegister('en', {
   'common.navEditorTitle': 'Go to the Anki Card Template Editor',
   'common.navPrompt': '🤖 AI Prompt Generator',
   'common.navPromptTitle': 'Go to the Anki AI Prompt Generator',
+  'common.navMenu': 'Menu',
   'common.autoSaved': '✓ Auto-saved',
   'common.autoSavedTitle': 'Your settings are saved automatically in this browser',
   'common.resetAll': '🔄 Reset settings',

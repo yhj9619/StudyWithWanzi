@@ -9,6 +9,7 @@ i18nRegister('ko', {
   'common.navEditorTitle': 'Anki 카드 서식 에디터로 이동',
   'common.navPrompt': '🤖 AI 프롬프트 생성기',
   'common.navPromptTitle': 'Anki AI 프롬프트 생성기로 이동',
+  'common.navMenu': '메뉴',
   'common.autoSaved': '✓ 자동 저장됨',
   'common.autoSavedTitle': '설정은 이 브라우저에 자동으로 저장돼요',
   'common.resetAll': '🔄 설정 초기화',

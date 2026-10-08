@@ -26,7 +26,6 @@ i18nRegister('en', {
 
   // 설정 패널 공통
   'prompt.editor.panelLabel': 'Prompt settings panel',
-  'prompt.hero.html': '<strong>Turn AI into your personal word-list assistant:</strong><br>\n            Just pick the language you\'re learning, the level (e.g. leave out words up to HSK level 3) and what goes on each card, and you get a request (prompt) to send to ChatGPT · Gemini · Claude. Paste the AI\'s answer back here and it becomes a file you can import straight into Anki.',
   'prompt.common.optional': '(optional)',
 
   // 1단계: 학습 언어 및 추출 방식

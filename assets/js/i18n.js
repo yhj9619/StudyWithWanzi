@@ -111,6 +111,78 @@
     });
   }
 
+  // 모든 페이지 맨 위 공통 메뉴줄 (<nav data-site-nav="editor"></nav> 자리에 그림, 값 = 지금 페이지)
+  // PC: 홈 · 페이지 링크 · 화면 언어를 한 줄에 / 휴대폰: 홈 + ☰ 버튼, 누르면 링크 · 화면 언어가 펼쳐짐
+  const SITE_PAGES = [
+    { id: 'guide', href: 'ankiGuide.html', key: 'common.navGuide', titleKey: 'common.navGuideTitle' },
+    { id: 'editor', href: 'ankiEditor.html', key: 'common.navEditor', titleKey: 'common.navEditorTitle' },
+    { id: 'prompt', href: 'ankiPrompt.html', key: 'common.navPrompt', titleKey: 'common.navPromptTitle' },
+  ];
+
+  function renderSiteNavs() {
+    document.querySelectorAll('[data-site-nav]').forEach(nav => {
+      const current = nav.getAttribute('data-site-nav');
+      nav.classList.add('site-nav');
+      nav.setAttribute('aria-label', t('common.navMenu'));
+      nav.innerHTML = '';
+
+      const inner = document.createElement('div');
+      inner.className = 'site-nav-inner';
+
+      const home = document.createElement('a');
+      home.className = 'site-nav-home';
+      home.href = 'index.html';
+      home.title = t('common.backToHubTitle');
+      home.textContent = '⚡ Study with Wanzi';
+      if (current === 'home') home.setAttribute('aria-current', 'page');
+
+      const menuId = 'siteNavMenu';
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'site-nav-toggle';
+      toggle.setAttribute('aria-controls', menuId);
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', t('common.navMenu'));
+      toggle.textContent = '☰';
+
+      const menu = document.createElement('div');
+      menu.className = 'site-nav-menu';
+      menu.id = menuId;
+      SITE_PAGES.forEach(page => {
+        const a = document.createElement('a');
+        a.className = 'site-nav-link' + (page.id === current ? ' current' : '');
+        a.href = page.href;
+        a.title = t(page.titleKey);
+        a.textContent = t(page.key);
+        if (page.id === current) a.setAttribute('aria-current', 'page');
+        menu.appendChild(a);
+      });
+      const switcher = document.createElement('div');
+      switcher.setAttribute('data-i18n-switcher', '');
+      menu.appendChild(switcher);
+
+      const setOpen = open => {
+        nav.classList.toggle('open', open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        toggle.textContent = open ? '✕' : '☰';
+      };
+      toggle.addEventListener('click', () => setOpen(!nav.classList.contains('open')));
+      // 메뉴 밖을 누르거나 Esc를 누르면 닫기
+      document.addEventListener('click', e => {
+        if (nav.classList.contains('open') && !nav.contains(e.target)) setOpen(false);
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && nav.classList.contains('open')) {
+          setOpen(false);
+          toggle.focus();
+        }
+      });
+
+      inner.append(home, toggle, menu);
+      nav.appendChild(inner);
+    });
+  }
+
   // 처음부터 끝까지 4단계 경로 표시줄 (<nav data-journey="2"></nav> 자리에 그림, 숫자 = 현재 단계)
   const JOURNEY_STEPS = [
     { key: 'common.journey.step1', href: 'ankiGuide.html#fields' },
@@ -166,6 +238,7 @@
     const info = LOCALES.find(l => l.id === currentLocale);
     if (info) document.documentElement.lang = info.htmlLang;
     apply(document);
+    renderSiteNavs(); // 메뉴 안에 언어 전환 자리를 만들므로 언어 버튼보다 먼저
     renderSwitchers();
     renderJourneys();
   });

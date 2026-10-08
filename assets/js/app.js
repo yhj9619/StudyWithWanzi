@@ -1845,6 +1845,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 🔊 읽는 속도
     if (ttsSpeedSelect) ttsSpeedSelect.addEventListener('change', () => updateAll());
+    // ▶ 미리 듣기: 고른 속도로 읽어주기를 켠 첫 필드의 예시 글자 읽기 (켠 필드가 없으면 2번째 필드 = 외국어)
+    const ttsSpeedPreviewBtn = document.getElementById('ttsSpeedPreviewBtn');
+    if (ttsSpeedPreviewBtn) {
+      ttsSpeedPreviewBtn.addEventListener('click', () => {
+        const ttsIdx = fields.findIndex(f => f.hasTts);
+        speakPreview(ttsIdx >= 0 ? ttsIdx : Math.min(1, fields.length - 1));
+      });
+    }
     // 아이콘 위치 (글자 옆 / 글자 아래)
     if (iconPositionSelect) iconPositionSelect.addEventListener('change', () => updateAll());
 
@@ -3296,7 +3304,7 @@ ${indentDecls(deco.divider === 'obang' ? [getDividerDecls(night.dividerColor, de
   }
 
   // 9. 로컬 스토리지 (localStorage) 자동 저장 및 복원 기능
-  // 설정을 두 묶음으로 나눠 저장 (묶음별로 따로 처음으로 되돌릴 수 있게)
+  // 설정을 두 묶음으로 나눠 저장 (묶음별로 따로 초기화할 수 있게)
   // - 📝 내용: 학습 언어, 필드 목록(이름 · 예시값 · 앞면/뒷면 · 🌐/📘 사전 아이콘 · 🔊 읽어주기), 사전 주소 · 보조 사전 · 새 창 · 검색어 정리
   // - 🎨 꾸미기: 테마 · 배경 · 상자 · 테두리 · 구분선, 카드 글꼴 · 줄 간격 · 정렬 · 오른쪽→왼쪽, 뒷면 구분선 · 뒷면 위쪽 문제 표시, 읽는 속도,
   //             아이콘 위치, 필드별 글씨 크기 · 굵기 · 글꼴 · 색 (필드 자리(순서) 기준, fieldStyles[i] = i번째 필드)
@@ -3812,7 +3820,7 @@ ${indentDecls(deco.divider === 'obang' ? [getDividerDecls(night.dividerColor, de
     showToast(t(toastKey));
   }
 
-  // 📝 언어·필드 처음으로 (꾸미기는 그대로)
+  // 📝 언어·필드 초기화 (꾸미기는 그대로)
   function resetContentSettings() {
     if (!confirm(t('editor.confirm.resetContent'))) {
       return;
@@ -3821,7 +3829,7 @@ ${indentDecls(deco.divider === 'obang' ? [getDividerDecls(night.dividerColor, de
     finishReset('editor.toast.resetContentDone');
   }
 
-  // 🎨 꾸미기 처음으로 (언어·필드 내용은 그대로)
+  // 🎨 꾸미기 초기화 (언어·필드 내용은 그대로)
   function resetDesignSettings() {
     if (!confirm(t('editor.confirm.resetDesign'))) {
       return;

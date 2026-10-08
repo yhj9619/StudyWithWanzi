@@ -25,7 +25,6 @@ i18nRegister('ko', {
 
   // 설정 패널 공통
   'prompt.editor.panelLabel': '프롬프트 설정 패널',
-  'prompt.hero.html': '<strong>AI를 나만의 단어장 비서로 만드세요:</strong><br>\n            공부할 언어, 난이도(예: HSK 3급 이하 단어는 빼기), 단어장에 넣을 항목만 고르면 ChatGPT·Gemini·Claude에게 보낼 요청문(프롬프트)이 완성됩니다. AI 답변을 붙여넣으면 Anki로 바로 가져올 수 있는 파일로 만들어 드려요.',
   'prompt.common.optional': '(선택)',
 
   // 1단계: 학습 언어 및 추출 방식

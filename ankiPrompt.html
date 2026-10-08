@@ -17,26 +17,19 @@
 </head>
 <body>
   <!-- Header -->
+  <!-- 모든 페이지 공통 메뉴줄 (i18n.js가 그림): PC는 한 줄, 휴대폰은 ☰ 버튼으로 여닫기 -->
+  <nav data-site-nav="prompt"></nav>
+
   <header class="app-header">
     <div class="header-container">
       <div class="logo-group">
-        <a href="index.html" class="nav-back-link" title="Study with Wanzi 메인 메뉴로 이동" data-i18n="common.backToHub" data-i18n-attr="title:prompt.header.backToHubTitle">
-          ◀ Study with Wanzi
-        </a>
         <span class="logo-icon">🤖</span>
         <div>
           <h1 class="logo-title" data-i18n="prompt.header.title">Anki AI 프롬프트 생성기</h1>
           <p class="logo-subtitle" data-i18n="prompt.header.subtitle">AI에게 보낼 단어장 요청문을 만들고, AI 답변을 Anki용 파일로 바꿔 줍니다</p>
         </div>
       </div>
-      <div class="header-actions">
-        <div data-i18n-switcher></div>
-        <a href="ankiGuide.html" class="nav-link-btn" title="Anki 완벽 사용 가이드로 이동" data-i18n="common.navGuide" data-i18n-attr="title:common.navGuideTitle">
-          📖 사용 가이드
-        </a>
-        <a href="ankiEditor.html" class="nav-link-btn" title="Anki 카드 서식 에디터로 이동" data-i18n="prompt.header.navEditor" data-i18n-attr="title:common.navEditorTitle">
-          ⚡ 카드 서식 에디터
-        </a>
+      <div class="header-actions">
         <span id="saveStatusIndicator" class="save-status-badge" title="설정은 이 브라우저에 자동으로 저장돼요" data-i18n="common.autoSaved" data-i18n-attr="title:prompt.header.autoSavedTitle">✓ 자동 저장됨</span>
         <button type="button" id="resetPromptSettingsBtn" class="btn-outline-danger" title="모든 설정을 기본값으로 되돌립니다" data-i18n="common.resetAll" data-i18n-attr="title:prompt.header.resetAllTitle">
           🔄 설정 초기화
@@ -50,6 +43,9 @@
     <!-- 처음부터 끝까지 4단계 경로 (i18n.js가 그림 · 지금 3단계) -->
     <nav data-journey="3"></nav>
 
+    <!-- PC 권장 안내 (좌우 칸 위 전체 폭: 왼쪽 · 오른쪽 칸이 같은 높이에서 시작하게) -->
+    <div class="pc-notice" data-i18n-html="common.pcNotice">💻 카드 서식 붙여넣기와 단어장 가져오기는 <strong>PC에서</strong> 하는 걸 추천해요. 한 번 해 두면 동기화로 폰에도 그대로 적용되고, 폰에서는 복습만 하면 됩니다.</div>
+
     <!-- Mobile Screen View Switcher -->
     <nav class="mobile-view-nav" id="mobileViewNav" aria-label="모바일 화면 전환 탭" data-i18n-attr="aria-label:prompt.mobile.navLabel">
       <button type="button" class="mobile-nav-btn active" id="btnMobileEditTab" data-i18n="prompt.mobile.editTab">
@@ -62,16 +58,6 @@
 
       <!-- LEFT: Prompt Settings Form -->
       <section class="editor-panel" aria-label="프롬프트 설정 패널" data-i18n-attr="aria-label:prompt.editor.panelLabel">
-
-        <div class="prompt-hero-box">
-          <span class="prompt-hero-icon">💡</span>
-          <div data-i18n-html="prompt.hero.html">
-            <strong>AI를 나만의 단어장 비서로 만드세요:</strong><br>
-            공부할 언어, 난이도(예: HSK 3급 이하 단어는 빼기), 단어장에 넣을 항목만 고르면 ChatGPT·Gemini·Claude에게 보낼 요청문(프롬프트)이 완성됩니다. AI 답변을 붙여넣으면 Anki로 바로 가져올 수 있는 파일로 만들어 드려요.
-          </div>
-        </div>
-
-        <div class="pc-notice" data-i18n-html="common.pcNotice">💻 카드 서식 붙여넣기와 단어장 가져오기는 <strong>PC에서</strong> 하는 걸 추천해요. 한 번 해 두면 동기화로 폰에도 그대로 적용되고, 폰에서는 복습만 하면 됩니다.</div>
 
         <!-- 1. 공부할 언어와 단어를 뽑을 재료 -->
         <div class="card-section">
