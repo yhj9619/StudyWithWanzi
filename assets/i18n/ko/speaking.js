@@ -100,6 +100,9 @@
   'speaking.result.stopMyVoice': '정지',
   'speaking.result.downloadMyVoice': '다운로드',
   'speaking.result.noRecording': '녹음 없음',
+  'speaking.result.timeSpentBadge': '⏱️ 소요: {time}',
+  'speaking.result.timeMinSec': '{min}분 {sec}초',
+  'speaking.result.timeSecOnly': '{sec}초',
   'speaking.result.retry': '🔄 같은 설정으로 다시 풀기',
   'speaking.result.backToSetup': '⚙️ 문제 및 설정 변경하기',
 });

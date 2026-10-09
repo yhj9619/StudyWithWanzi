@@ -100,6 +100,9 @@
   'speaking.result.stopMyVoice': 'Stop',
   'speaking.result.downloadMyVoice': 'Download',
   'speaking.result.noRecording': 'No Recording',
+  'speaking.result.timeSpentBadge': '⏱️ Time: {time}',
+  'speaking.result.timeMinSec': '{min}m {sec}s',
+  'speaking.result.timeSecOnly': '{sec}s',
   'speaking.result.retry': '🔄 Retake with same settings',
   'speaking.result.backToSetup': '⚙️ Change questions & settings',
 });

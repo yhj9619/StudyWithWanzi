@@ -100,6 +100,9 @@
   'speaking.result.stopMyVoice': '停止',
   'speaking.result.downloadMyVoice': '下载',
   'speaking.result.noRecording': '无录音',
+  'speaking.result.timeSpentBadge': '⏱️ 用时: {time}',
+  'speaking.result.timeMinSec': '{min}分 {sec}秒',
+  'speaking.result.timeSecOnly': '{sec}秒',
   'speaking.result.retry': '🔄 使用相同设置再练一次',
   'speaking.result.backToSetup': '⚙️ 修改题目与设置',
 });

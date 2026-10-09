@@ -32,7 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
     'speaking.result.listenMyVoice': '내 답변 듣기',
     'speaking.result.stopMyVoice': '정지',
     'speaking.result.downloadMyVoice': '다운로드',
-    'speaking.result.noRecording': '녹음 없음'
+    'speaking.result.noRecording': '녹음 없음',
+    'speaking.result.timeSpentBadge': '⏱️ 소요: {time}',
+    'speaking.result.timeMinSec': '{min}분 {sec}초',
+    'speaking.result.timeSecOnly': '{sec}초'
   };
 
   const t = (key, params) => {
@@ -1196,7 +1199,9 @@ document.addEventListener('DOMContentLoaded', () => {
     currentRecorderIndex: -1,
     recordings: {},
     isRecordingActive: false,
-    _recorderResolve: null
+    _recorderResolve: null,
+    questionSpentMs: {},
+    speakingStartTime: null
   };
 
   // =========================================================================
@@ -1750,6 +1755,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // 문제별 답변 소요 시간 추적 및 포맷
+  function recordSpeakingTime(qIndex) {
+    if (state.phase === 'SPEAKING' && state.speakingStartTime) {
+      const elapsed = Date.now() - state.speakingStartTime;
+      state.questionSpentMs[qIndex] = (state.questionSpentMs[qIndex] || 0) + elapsed;
+      state.speakingStartTime = null;
+    }
+  }
+
+  function formatQuestionDuration(ms) {
+    const totalSec = Math.max(0, Math.round((ms || 0) / 1000));
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    let timeStr;
+    if (mins > 0) {
+      timeStr = t('speaking.result.timeMinSec', { min: mins, sec: secs });
+    } else {
+      timeStr = t('speaking.result.timeSecOnly', { sec: secs });
+    }
+    return t('speaking.result.timeSpentBadge', { time: `<strong>${escapeHtml(timeStr)}</strong>` });
+  }
+
   // =========================================================================
   // 11. 시뮬레이터 실행 로직 (Engine)
   // =========================================================================
@@ -1800,6 +1827,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
     state.recordings = {};
+    state.questionSpentMs = {};
+    state.speakingStartTime = null;
 
     // 마이크 권한 요청 (녹음 옵션 켜져 있을 때)
     if (recordMyVoiceCheck && recordMyVoiceCheck.checked) {
@@ -1851,6 +1880,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function returnToSetupView(skipHistory = false) {
     stopSpeaking();
+    recordSpeakingTime(state.currentIndex);
     stopQuestionRecording();
     releaseMicrophone();
     stopUserVoicePlayback();
@@ -1903,6 +1933,7 @@ document.addEventListener('DOMContentLoaded', () => {
     simPhaseBadge.className = 'sim-phase-badge ' + newPhase.toLowerCase();
 
     if (newPhase === 'LISTENING') {
+      recordSpeakingTime(state.currentIndex);
       stopQuestionRecording();
       simPhaseBadge.textContent = t('speaking.sim.statusListening');
       timerPhaseCaption.textContent = 'LISTENING';
@@ -1923,6 +1954,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     } else if (newPhase === 'SPEAKING') {
+      state.speakingStartTime = Date.now();
       simPhaseBadge.textContent = t('speaking.sim.statusSpeaking');
       timerPhaseCaption.textContent = 'SPEAKING';
       btnSkipBreak.classList.add('hidden');
@@ -1932,11 +1964,13 @@ document.addEventListener('DOMContentLoaded', () => {
         startQuestionRecording(state.currentIndex);
       }
     } else if (newPhase === 'BREAK') {
+      recordSpeakingTime(state.currentIndex);
       stopQuestionRecording();
       simPhaseBadge.textContent = t('speaking.sim.statusBreak');
       timerPhaseCaption.textContent = 'BREAK';
       btnSkipBreak.classList.remove('hidden');
     } else if (newPhase === 'PAUSED') {
+      recordSpeakingTime(state.currentIndex);
       pauseQuestionRecording();
       simPhaseBadge.textContent = t('speaking.sim.statusPaused');
       timerPhaseCaption.textContent = 'PAUSED';
@@ -1952,10 +1986,11 @@ document.addEventListener('DOMContentLoaded', () => {
     state.lastTickTime = Date.now();
     runTimerCountdown(async () => {
       playSound('finish'); // "삐-빅!" 알림음
+      recordSpeakingTime(state.currentIndex);
       await stopQuestionRecording();
       state.history.push({
         question: state.queue[state.currentIndex],
-        timeSpentMs: state.totalDurationMs
+        timeSpentMs: state.questionSpentMs[state.currentIndex] || state.totalDurationMs
       });
 
       const breakSec = parseInt(breakTimeInput.value, 10) || 0;
@@ -2024,6 +2059,7 @@ document.addEventListener('DOMContentLoaded', () => {
       runTimerCountdown(async () => {
         if (resumeTo === 'SPEAKING') {
           playSound('finish');
+          recordSpeakingTime(state.currentIndex);
           await stopQuestionRecording();
           const breakSec = parseInt(breakTimeInput.value, 10) || 0;
           if (breakSec > 0 && state.currentIndex < state.queue.length - 1) {
@@ -2039,6 +2075,7 @@ document.addEventListener('DOMContentLoaded', () => {
       stopSpeaking();
       clearInterval(state.timerInterval);
       state.previousPhase = state.phase;
+      recordSpeakingTime(state.currentIndex);
       setPhase('PAUSED');
       btnPauseResume.textContent = t('speaking.sim.resume');
     }
@@ -2046,6 +2083,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function finishExam() {
     stopSpeaking();
+    recordSpeakingTime(state.currentIndex);
     await stopQuestionRecording();
     releaseMicrophone();
     stopUserVoicePlayback();
@@ -2079,9 +2117,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
       mainDiv.append(num, text);
 
-      // 하단 액션 버튼 그룹 (문제 다시 듣기, 내 답변 듣기, 다운로드)
+      // 하단 액션 버튼 그룹 (소요 시간 배지, 문제 다시 듣기, 내 답변 듣기, 다운로드)
       const actionsDiv = document.createElement('div');
       actionsDiv.className = 'result-q-actions';
+
+      // 0) 이 문제 답변 소요 시간 배지
+      const spentMs = (state.questionSpentMs && state.questionSpentMs[idx] !== undefined)
+        ? state.questionSpentMs[idx]
+        : (state.recordings && state.recordings[idx] ? state.recordings[idx].durationMs : 0);
+
+      const timeBadge = document.createElement('span');
+      timeBadge.className = 'result-q-time-badge';
+      timeBadge.title = '이 문제 답변 소요 시간';
+      timeBadge.innerHTML = formatQuestionDuration(spentMs);
+      actionsDiv.appendChild(timeBadge);
 
       // 1) 문제 낭독 다시 듣기
       const replayQBtn = document.createElement('button');
@@ -2172,12 +2221,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   btnNextQuestion.addEventListener('click', async () => {
     stopSpeaking();
+    recordSpeakingTime(state.currentIndex);
     await stopQuestionRecording();
     clearInterval(state.timerInterval);
     loadQuestion(state.currentIndex + 1);
   });
   btnPrevQuestion.addEventListener('click', async () => {
     stopSpeaking();
+    recordSpeakingTime(state.currentIndex);
     await stopQuestionRecording();
     clearInterval(state.timerInterval);
     loadQuestion(Math.max(0, state.currentIndex - 1));
