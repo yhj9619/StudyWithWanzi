@@ -2928,17 +2928,23 @@ ${sel('::after')} {
     return `<button type="button" class="preview-tts-btn" data-tts-field="${idx}" title="${title}" aria-label="${title}" style="${LINK_BTN_DECLS.join(' ')}">🔊</button>`;
   }
 
-  // 링크 검색어 정리: [품사]·(괄호) 내용 제거, 뜻이 여러 개면 첫 번째 뜻만 사용
+  // 링크 검색어 정리: [품사]·(괄호)·【품사】·［품사］ 등 모든 종류의 괄호 내용 제거, 뜻이 여러 개면 첫 번째 뜻만 사용
   // (미리보기와 Anki 카드 스크립트가 같은 규칙을 쓰도록 정규식을 공유)
-  const LINK_QUERY_STRIP_RE = String.raw`\[[^\]]*\]|\([^)]*\)|（[^）]*）`;
-  const LINK_QUERY_SPLIT_RE = String.raw`[,;，、；]`;
+  const LINK_QUERY_STRIP_RE = String.raw`\[[^\]]*\]|［[^］]*］|【[^】]*】|〔[^〕]*〕|\([^)]*\)|（[^）]*）|<[^>]*>|〈[^〉]*〉|《[^》]*》`;
+  const LINK_QUERY_SPLIT_RE = String.raw`[,;，、；/]`;
 
   function cleanLinkQuery(text) {
-    const cleaned = String(text || '')
+    let cleaned = String(text || '')
       .replace(new RegExp(LINK_QUERY_STRIP_RE, 'g'), '')
       .split(new RegExp(LINK_QUERY_SPLIT_RE))[0]
+      .replace(/^[:\-~·/\s]+/, '')
       .trim();
-    return cleaned || String(text || '').trim();
+    // 괄호를 지운 뒤 남은 글자가 없을 때(예: 사용자가 '[명사]'만 적었을 때)는 괄호 안의 글자만 추출해 검색
+    if (!cleaned) {
+      const m = String(text || '').match(/[\[［【〔(（<〈《]([^\]］】〕)）>〉》]+)[\]］】〕)）>〉》]/);
+      cleaned = m ? m[1].trim() : String(text || '').trim();
+    }
+    return cleaned;
   }
 
   // Anki 카드에서 실행되는 링크 주소 생성 스크립트
@@ -2953,7 +2959,15 @@ ${sel('::after')} {
     each(copy.querySelectorAll('.replay-button, audio, script, style'), function (el) { el.parentNode.removeChild(el); });
     each(copy.querySelectorAll('br, div, p, li'), function (el) { el.parentNode.insertBefore(document.createTextNode(' '), el); });
     var raw = copy.textContent.replace(/\\s+/g, ' ').trim();
-    var q = clean ? (raw.replace(/${LINK_QUERY_STRIP_RE}/g, '').split(/${LINK_QUERY_SPLIT_RE}/)[0].trim() || raw) : raw;
+    var q = raw;
+    if (clean) {
+      var stripped = raw.replace(/${LINK_QUERY_STRIP_RE}/g, '').split(/${LINK_QUERY_SPLIT_RE}/)[0].replace(/^[:\\-~·/\\s]+/, '').trim();
+      if (!stripped) {
+        var m = raw.match(/[\[［【〔(（<〈《]([^\]］】〕)）>〉》]+)[\]］】〕)）>〉》]/);
+        stripped = m ? m[1].trim() : raw;
+      }
+      q = stripped || raw;
+    }
     each(src.parentNode.querySelectorAll('.link-btn[data-base]'), function (a) {
       a.setAttribute('href', a.getAttribute('data-base') + encodeURIComponent(q));
     });
