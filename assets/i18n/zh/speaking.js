@@ -18,6 +18,7 @@
   'speaking.step1.parsedCountEmpty': '请输入题目或点击上方示例按钮',
   'speaking.step1.previewTitle': '已识别题目预览 ({count})',
   'speaking.step1.cleanNumbering': '自动清理题目前缀编号（如 1.、Q1: 等）',
+  'speaking.step1.resizeHint': '上下拖动调整高度（双击恢复默认高度）',
   'speaking.step1.noQuestionsWarn': '请至少输入 1 道题目。',
 
   // 第 2 步：计时与出题设置

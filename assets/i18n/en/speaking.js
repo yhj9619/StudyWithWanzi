@@ -18,6 +18,7 @@
   'speaking.step1.parsedCountEmpty': 'Enter questions or click a sample button',
   'speaking.step1.previewTitle': 'Parsed Question List ({count})',
   'speaking.step1.cleanNumbering': 'Auto-strip leading numbers (1., Q1:, etc.)',
+  'speaking.step1.resizeHint': 'Drag up or down to adjust height (Double-click to reset)',
   'speaking.step1.noQuestionsWarn': 'Please enter at least 1 question.',
 
   // Step 2: Timer & test setup

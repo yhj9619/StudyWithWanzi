@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css?v=20261010a">
-  <link rel="stylesheet" href="../assets/css/speaking.css?v=20261010d">
+  <link rel="stylesheet" href="../assets/css/speaking.css?v=20261010f">
 </head>
 <body>
   <!-- 공통 상단 메뉴줄 (i18n.js) -->
@@ -53,7 +53,12 @@
           </div>
           <p class="speaking-card-desc" data-i18n="speaking.step1.desc">엑셀(Excel)에서 문제 열을 복사해 아래에 붙여넣으세요. 여러 줄의 문제도 셀 단위로 깔끔하게 분리됩니다.</p>
 
-          <textarea id="questionInput" class="question-textarea" rows="6" placeholder="엑셀에서 문제를 복사해 여기에 붙여넣으세요.&#10;&#10;(예시)&#10;Tell me about yourself.&#10;What are your strengths and weaknesses?&#10;Describe a memorable trip you took." data-i18n-attr="placeholder:speaking.step1.placeholder"></textarea>
+          <div class="textarea-wrapper" id="questionInputWrapper">
+            <textarea id="questionInput" class="question-textarea" rows="6" placeholder="엑셀에서 문제를 복사해 여기에 붙여넣으세요.&#10;&#10;(예시)&#10;Tell me about yourself.&#10;What are your strengths and weaknesses?&#10;Describe a memorable trip you took." data-i18n-attr="placeholder:speaking.step1.placeholder"></textarea>
+            <div id="textareaResizeHandle" class="textarea-resize-handle" title="상하로 드래그하여 높이 조절 (더블클릭 시 기본 크기)" data-i18n-attr="title:speaking.step1.resizeHint">
+              <span class="resize-grip-line"></span>
+            </div>
+          </div>
 
           <div class="action-chips-row">
             <label class="speaking-checkbox">
@@ -331,14 +336,14 @@
     <p data-i18n="common.footer">Study with Wanzi &copy; 2026. Made with care for language learners.</p>
   </footer>
 
-  <script src="../assets/js/i18n.js?v=20261010d"></script>
-  <script src="../assets/i18n/ko/common.js?v=20261010d"></script>
-  <script src="../assets/i18n/ko/speaking.js?v=20261010d"></script>
-  <script src="../assets/i18n/en/common.js?v=20261010d"></script>
-  <script src="../assets/i18n/en/speaking.js?v=20261010d"></script>
-  <script src="../assets/i18n/zh/common.js?v=20261010d"></script>
-  <script src="../assets/i18n/zh/speaking.js?v=20261010d"></script>
-  <script src="../assets/js/speakingApp.js?v=20261010d"></script>
+  <script src="../assets/js/i18n.js?v=20261010f"></script>
+  <script src="../assets/i18n/ko/common.js?v=20261010f"></script>
+  <script src="../assets/i18n/ko/speaking.js?v=20261010f"></script>
+  <script src="../assets/i18n/en/common.js?v=20261010f"></script>
+  <script src="../assets/i18n/en/speaking.js?v=20261010f"></script>
+  <script src="../assets/i18n/zh/common.js?v=20261010f"></script>
+  <script src="../assets/i18n/zh/speaking.js?v=20261010f"></script>
+  <script src="../assets/js/speakingApp.js?v=20261010f"></script>
 </body>
 </html>
 

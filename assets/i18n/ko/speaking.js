@@ -18,6 +18,7 @@
   'speaking.step1.parsedCountEmpty': '문제를 입력하거나 샘플 버튼을 눌러보세요',
   'speaking.step1.previewTitle': '인식된 문제 목록 ({count}개)',
   'speaking.step1.cleanNumbering': '문제 앞 번호(1., Q1: 등) 자동 정리',
+  'speaking.step1.resizeHint': '상하로 드래그하여 높이 조절 (더블클릭 시 기본 크기)',
   'speaking.step1.noQuestionsWarn': '문제를 최소 1개 이상 입력해주세요.',
 
   // 2단계: 타이머 및 출제 설정

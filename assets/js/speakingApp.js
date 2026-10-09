@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
     'speaking.step2.voiceAuto': '🌐 언어 자동 감지 (한국어·영어·중국어 등 혼합 낭독)',
     'speaking.step2.testPhrase': '안녕하세요! Hello! 언어 자동 감지 음성 테스트입니다.',
     'speaking.step2.recordVoice': '🎙️ 내 답변 음성 녹음 (최종 화면에서 다시 듣기 · 다운로드)',
+    'speaking.step1.cleanNumbering': '문제 앞 번호(1., Q1: 등) 자동 정리',
+    'speaking.step1.resizeHint': '상하로 드래그하여 높이 조절 (더블클릭 시 기본 크기)',
     'speaking.step1.noQuestionsWarn': '문제를 최소 1개 이상 입력해주세요.',
     'speaking.sim.micDenied': '마이크 권한이 허용되지 않았거나 마이크가 없어 음성 녹음 없이 시험을 시작합니다.',
     'speaking.result.listenQuestion': '문제 듣기',
@@ -55,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1. 모든 DOM 요소 참조 (TDZ 에러 방지를 위해 최상단에서 일괄 선언)
   // =========================================================================
   const questionInput = document.getElementById('questionInput');
+  const textareaResizeHandle = document.getElementById('textareaResizeHandle');
   const sampleTourBtn = document.getElementById('sampleTourBtn');
   const sampleOpicBtn = document.getElementById('sampleOpicBtn');
   const sampleToeicBtn = document.getElementById('sampleToeicBtn');
@@ -1440,6 +1443,75 @@ document.addEventListener('DOMContentLoaded', () => {
     updateParsedStatus();
     saveSettings();
   });
+
+  // 커스텀 textarea 상하 드래그 리사이즈 핸들
+  if (textareaResizeHandle && questionInput) {
+    const TEXTAREA_H_KEY = 'wanzi_speaking_textarea_h';
+    const DEFAULT_H = 150;
+
+    // 저장된 높이 복원
+    const savedH = parseInt(localStorage.getItem(TEXTAREA_H_KEY), 10);
+    if (savedH && savedH >= 120 && savedH <= 900) {
+      questionInput.style.height = `${savedH}px`;
+    }
+
+    let isResizing = false;
+    let startY = 0;
+    let startH = 0;
+
+    const onPointerMove = (e) => {
+      if (!isResizing) return;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const delta = clientY - startY;
+      const newHeight = Math.max(120, Math.min(850, startH + delta));
+      questionInput.style.height = `${newHeight}px`;
+    };
+
+    const onPointerUp = () => {
+      if (!isResizing) return;
+      isResizing = false;
+      textareaResizeHandle.classList.remove('is-dragging');
+      document.body.style.cursor = '';
+      window.removeEventListener('mousemove', onPointerMove);
+      window.removeEventListener('mouseup', onPointerUp);
+      window.removeEventListener('touchmove', onPointerMove);
+      window.removeEventListener('touchend', onPointerUp);
+
+      // 최종 높이 저장
+      const finalH = questionInput.offsetHeight;
+      if (finalH) {
+        try {
+          localStorage.setItem(TEXTAREA_H_KEY, String(finalH));
+        } catch (err) {}
+      }
+    };
+
+    const onPointerDown = (e) => {
+      isResizing = true;
+      startY = e.touches ? e.touches[0].clientY : e.clientY;
+      startH = questionInput.offsetHeight;
+      textareaResizeHandle.classList.add('is-dragging');
+      document.body.style.cursor = 'row-resize';
+
+      window.addEventListener('mousemove', onPointerMove, { passive: false });
+      window.addEventListener('mouseup', onPointerUp);
+      window.addEventListener('touchmove', onPointerMove, { passive: false });
+      window.addEventListener('touchend', onPointerUp);
+
+      e.preventDefault();
+    };
+
+    textareaResizeHandle.addEventListener('mousedown', onPointerDown);
+    textareaResizeHandle.addEventListener('touchstart', onPointerDown, { passive: false });
+
+    // 더블클릭 시 기본 높이로 초기화
+    textareaResizeHandle.addEventListener('dblclick', () => {
+      questionInput.style.height = `${DEFAULT_H}px`;
+      try {
+        localStorage.removeItem(TEXTAREA_H_KEY);
+      } catch (err) {}
+    });
+  }
 
   [ttsWaitCheck, recordMyVoiceCheck, hideTextCheck, soundToggle, soundTypeSelect, soundDurationSelect].forEach(el => {
     if (el) el.addEventListener('change', () => {
