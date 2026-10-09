@@ -25,7 +25,14 @@ document.addEventListener('DOMContentLoaded', () => {
     'speaking.step2.setAll': '전체 선택 ({count}개)',
     'speaking.step2.voiceAuto': '🌐 언어 자동 감지 (한국어·영어·중국어 등 혼합 낭독)',
     'speaking.step2.testPhrase': '안녕하세요! Hello! 언어 자동 감지 음성 테스트입니다.',
-    'speaking.step1.noQuestionsWarn': '문제를 최소 1개 이상 입력해주세요.'
+    'speaking.step2.recordVoice': '🎙️ 내 답변 음성 녹음 (최종 화면에서 다시 듣기 · 다운로드)',
+    'speaking.step1.noQuestionsWarn': '문제를 최소 1개 이상 입력해주세요.',
+    'speaking.sim.micDenied': '마이크 권한이 허용되지 않았거나 마이크가 없어 음성 녹음 없이 시험을 시작합니다.',
+    'speaking.result.listenQuestion': '문제 듣기',
+    'speaking.result.listenMyVoice': '내 답변 듣기',
+    'speaking.result.stopMyVoice': '정지',
+    'speaking.result.downloadMyVoice': '다운로드',
+    'speaking.result.noRecording': '녹음 없음'
   };
 
   const t = (key, params) => {
@@ -74,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const ttsRateVal = document.getElementById('ttsRateVal');
   const testVoiceBtn = document.getElementById('testVoiceBtn');
   const ttsWaitCheck = document.getElementById('ttsWaitCheck');
+  const recordMyVoiceCheck = document.getElementById('recordMyVoiceCheck');
   const hideTextCheck = document.getElementById('hideTextCheck');
   const soundToggle = document.getElementById('soundToggle');
   const soundTypeSelect = document.getElementById('soundTypeSelect');
@@ -89,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 시뮬레이터 뷰 요소
   const simPhaseBadge = document.getElementById('simPhaseBadge');
+  const simRecIndicator = document.getElementById('simRecIndicator');
   const simProgressText = document.getElementById('simProgressText');
   const simProgressFill = document.getElementById('simProgressFill');
   const timerCircleProgress = document.getElementById('timerCircleProgress');
@@ -1181,7 +1190,13 @@ document.addEventListener('DOMContentLoaded', () => {
     examStartTime: 0,
     fontSize: 1.35,
     isTextHidden: false,
-    history: []
+    history: [],
+    micStream: null,
+    activeRecorder: null,
+    currentRecorderIndex: -1,
+    recordings: {},
+    isRecordingActive: false,
+    _recorderResolve: null
   };
 
   // =========================================================================
@@ -1212,6 +1227,7 @@ document.addEventListener('DOMContentLoaded', () => {
       voice: voiceSelect ? voiceSelect.value : '',
       rate: ttsRateSlider ? ttsRateSlider.value : '1.0',
       ttsWait: ttsWaitCheck.checked,
+      recordVoice: recordMyVoiceCheck ? recordMyVoiceCheck.checked : true,
       hideText: hideTextCheck.checked,
       sound: soundToggle.checked,
       soundType: soundTypeSelect ? soundTypeSelect.value : 'triple',
@@ -1249,6 +1265,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ttsRateVal) ttsRateVal.textContent = `${parseFloat(data.rate).toFixed(1)}x`;
       }
       if (data.ttsWait !== undefined) ttsWaitCheck.checked = data.ttsWait;
+      if (data.recordVoice !== undefined && recordMyVoiceCheck) {
+        recordMyVoiceCheck.checked = data.recordVoice;
+      }
       if (data.hideText !== undefined) hideTextCheck.checked = data.hideText;
       if (data.sound !== undefined) soundToggle.checked = data.sound;
       if (data.soundType && soundTypeSelect) soundTypeSelect.value = data.soundType;
@@ -1417,7 +1436,7 @@ document.addEventListener('DOMContentLoaded', () => {
     saveSettings();
   });
 
-  [ttsWaitCheck, hideTextCheck, soundToggle, soundTypeSelect, soundDurationSelect].forEach(el => {
+  [ttsWaitCheck, recordMyVoiceCheck, hideTextCheck, soundToggle, soundTypeSelect, soundDurationSelect].forEach(el => {
     if (el) el.addEventListener('change', () => {
       if (soundToggle && soundDetailPanel) {
         soundDetailPanel.style.opacity = soundToggle.checked ? '1' : '0.4';
@@ -1558,6 +1577,180 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================================================
+  // 10-B. 실시간 답변 음성 녹음 (MediaRecorder) & 결과 재생 관리자
+  // =========================================================================
+  function getSupportedAudioMimeType() {
+    if (typeof MediaRecorder === 'undefined') return { mimeType: '', ext: 'webm' };
+    const candidates = [
+      { type: 'audio/webm;codecs=opus', ext: 'webm' },
+      { type: 'audio/webm', ext: 'webm' },
+      { type: 'audio/mp4;codecs=mp4a.40.2', ext: 'm4a' },
+      { type: 'audio/mp4', ext: 'm4a' },
+      { type: 'audio/aac', ext: 'aac' },
+      { type: 'audio/ogg;codecs=opus', ext: 'ogg' }
+    ];
+    for (const c of candidates) {
+      if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(c.type)) {
+        return c;
+      }
+    }
+    return { mimeType: '', ext: 'webm' };
+  }
+
+  function startQuestionRecording(qIndex) {
+    if (!state.micStream || !recordMyVoiceCheck || !recordMyVoiceCheck.checked) return;
+    if (typeof MediaRecorder === 'undefined') return;
+
+    stopQuestionRecording();
+
+    try {
+      const { mimeType, ext } = getSupportedAudioMimeType();
+      const options = mimeType ? { mimeType } : undefined;
+      const recorder = new MediaRecorder(state.micStream, options);
+      const chunks = [];
+      const startTime = Date.now();
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          chunks.push(e.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        if (chunks.length > 0) {
+          const finalType = mimeType || recorder.mimeType || 'audio/webm';
+          const blob = new Blob(chunks, { type: finalType });
+          const url = URL.createObjectURL(blob);
+          const durationMs = Date.now() - startTime;
+          if (state.recordings[qIndex] && state.recordings[qIndex].url) {
+            try { URL.revokeObjectURL(state.recordings[qIndex].url); } catch (e) {}
+          }
+          state.recordings[qIndex] = { blob, url, ext, durationMs };
+        }
+        if (state._recorderResolve) {
+          state._recorderResolve();
+          state._recorderResolve = null;
+        }
+      };
+
+      recorder.start(250);
+      state.activeRecorder = recorder;
+      state.currentRecorderIndex = qIndex;
+      state.isRecordingActive = true;
+      if (simRecIndicator) {
+        simRecIndicator.classList.remove('hidden');
+      }
+    } catch (err) {
+      console.warn('MediaRecorder start error:', err);
+      state.isRecordingActive = false;
+      if (simRecIndicator) {
+        simRecIndicator.classList.add('hidden');
+      }
+    }
+  }
+
+  function stopQuestionRecording() {
+    return new Promise(resolve => {
+      const rec = state.activeRecorder;
+      if (rec && rec.state !== 'inactive') {
+        state._recorderResolve = resolve;
+        try {
+          rec.stop();
+        } catch (e) {
+          resolve();
+        }
+        setTimeout(resolve, 300); // 300ms fallback timeout
+      } else {
+        resolve();
+      }
+      state.activeRecorder = null;
+      state.isRecordingActive = false;
+      if (simRecIndicator) {
+        simRecIndicator.classList.add('hidden');
+      }
+    });
+  }
+
+  function pauseQuestionRecording() {
+    if (state.activeRecorder && state.activeRecorder.state === 'recording') {
+      try {
+        state.activeRecorder.pause();
+        if (simRecIndicator) simRecIndicator.classList.add('hidden');
+      } catch (e) {}
+    }
+  }
+
+  function resumeQuestionRecording() {
+    if (state.activeRecorder && state.activeRecorder.state === 'paused') {
+      try {
+        state.activeRecorder.resume();
+        if (simRecIndicator) simRecIndicator.classList.remove('hidden');
+      } catch (e) {}
+    }
+  }
+
+  function releaseMicrophone() {
+    stopQuestionRecording();
+    if (state.micStream) {
+      try {
+        state.micStream.getTracks().forEach(t => t.stop());
+      } catch (e) {}
+      state.micStream = null;
+    }
+  }
+
+  let userAudioPlayer = null;
+  let activeVoiceBtn = null;
+
+  function stopUserVoicePlayback() {
+    if (userAudioPlayer) {
+      try {
+        userAudioPlayer.pause();
+        userAudioPlayer.currentTime = 0;
+      } catch (e) {}
+    }
+    if (activeVoiceBtn) {
+      activeVoiceBtn.innerHTML = `▶️ <span>${escapeHtml(t('speaking.result.listenMyVoice'))}</span>`;
+      activeVoiceBtn.classList.remove('is-playing');
+      activeVoiceBtn = null;
+    }
+  }
+
+  function toggleUserVoicePlayback(url, btn) {
+    if (!url) return;
+
+    if (activeVoiceBtn === btn) {
+      stopUserVoicePlayback();
+      return;
+    }
+
+    stopUserVoicePlayback();
+
+    if (!userAudioPlayer) {
+      userAudioPlayer = new Audio();
+    }
+
+    userAudioPlayer.src = url;
+    activeVoiceBtn = btn;
+    btn.innerHTML = `⏹️ <span>${escapeHtml(t('speaking.result.stopMyVoice'))}</span>`;
+    btn.classList.add('is-playing');
+
+    userAudioPlayer.onended = () => {
+      stopUserVoicePlayback();
+    };
+
+    userAudioPlayer.onerror = (e) => {
+      console.warn('Audio playback error:', e);
+      stopUserVoicePlayback();
+    };
+
+    userAudioPlayer.play().catch(err => {
+      console.warn('Audio play error:', err);
+      stopUserVoicePlayback();
+    });
+  }
+
+  // =========================================================================
   // 11. 시뮬레이터 실행 로직 (Engine)
   // =========================================================================
   function formatSeconds(ms) {
@@ -1586,13 +1779,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function startExam() {
+  async function startExam() {
     getAudioContext();
     updateParsedStatus();
     if (state.pool.length === 0) {
       alert(t('speaking.step1.noQuestionsWarn'));
       questionInput.focus();
       return;
+    }
+
+    stopUserVoicePlayback();
+    releaseMicrophone();
+
+    // 이전 시험 녹음 메모리 해제
+    if (state.recordings) {
+      Object.values(state.recordings).forEach(rec => {
+        if (rec && rec.url) {
+          try { URL.revokeObjectURL(rec.url); } catch (e) {}
+        }
+      });
+    }
+    state.recordings = {};
+
+    // 마이크 권한 요청 (녹음 옵션 켜져 있을 때)
+    if (recordMyVoiceCheck && recordMyVoiceCheck.checked) {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          state.micStream = stream;
+        } catch (err) {
+          console.warn('Microphone permission denied or error:', err);
+          state.micStream = null;
+          alert(t('speaking.sim.micDenied'));
+        }
+      } else {
+        alert(t('speaking.sim.micDenied'));
+      }
     }
 
     const answerSec = Math.max(5, parseInt(answerTimeInput.value, 10) || 90);
@@ -1629,6 +1851,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function returnToSetupView(skipHistory = false) {
     stopSpeaking();
+    stopQuestionRecording();
+    releaseMicrophone();
+    stopUserVoicePlayback();
     clearInterval(state.timerInterval);
     state.phase = 'SETUP';
     simulatorView.classList.add('hidden');
@@ -1643,9 +1868,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function loadQuestion(index) {
+  async function loadQuestion(index) {
     if (index >= state.queue.length) {
-      finishExam();
+      await finishExam();
       return;
     }
     state.currentIndex = index;
@@ -1678,6 +1903,7 @@ document.addEventListener('DOMContentLoaded', () => {
     simPhaseBadge.className = 'sim-phase-badge ' + newPhase.toLowerCase();
 
     if (newPhase === 'LISTENING') {
+      stopQuestionRecording();
       simPhaseBadge.textContent = t('speaking.sim.statusListening');
       timerPhaseCaption.textContent = 'LISTENING';
       timerClock.textContent = '--:--';
@@ -1700,11 +1926,18 @@ document.addEventListener('DOMContentLoaded', () => {
       simPhaseBadge.textContent = t('speaking.sim.statusSpeaking');
       timerPhaseCaption.textContent = 'SPEAKING';
       btnSkipBreak.classList.add('hidden');
+      if (state.activeRecorder && state.activeRecorder.state === 'paused') {
+        resumeQuestionRecording();
+      } else {
+        startQuestionRecording(state.currentIndex);
+      }
     } else if (newPhase === 'BREAK') {
+      stopQuestionRecording();
       simPhaseBadge.textContent = t('speaking.sim.statusBreak');
       timerPhaseCaption.textContent = 'BREAK';
       btnSkipBreak.classList.remove('hidden');
     } else if (newPhase === 'PAUSED') {
+      pauseQuestionRecording();
       simPhaseBadge.textContent = t('speaking.sim.statusPaused');
       timerPhaseCaption.textContent = 'PAUSED';
     }
@@ -1717,8 +1950,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setPhase('SPEAKING');
 
     state.lastTickTime = Date.now();
-    runTimerCountdown(() => {
+    runTimerCountdown(async () => {
       playSound('finish'); // "삐-빅!" 알림음
+      await stopQuestionRecording();
       state.history.push({
         question: state.queue[state.currentIndex],
         timeSpentMs: state.totalDurationMs
@@ -1787,9 +2021,10 @@ document.addEventListener('DOMContentLoaded', () => {
       btnPauseResume.textContent = t('speaking.sim.pause');
       setPhase(resumeTo);
       state.lastTickTime = Date.now();
-      runTimerCountdown(() => {
+      runTimerCountdown(async () => {
         if (resumeTo === 'SPEAKING') {
           playSound('finish');
+          await stopQuestionRecording();
           const breakSec = parseInt(breakTimeInput.value, 10) || 0;
           if (breakSec > 0 && state.currentIndex < state.queue.length - 1) {
             startBreakTimer(breakSec);
@@ -1809,8 +2044,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function finishExam() {
+  async function finishExam() {
     stopSpeaking();
+    await stopQuestionRecording();
+    releaseMicrophone();
+    stopUserVoicePlayback();
     clearInterval(state.timerInterval);
     state.phase = 'FINISHED';
 
@@ -1828,6 +2066,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const item = document.createElement('div');
       item.className = 'result-q-item';
 
+      const mainDiv = document.createElement('div');
+      mainDiv.className = 'result-q-main';
+
       const num = document.createElement('span');
       num.className = 'result-q-num';
       num.textContent = `Q${idx + 1}.`;
@@ -1836,16 +2077,53 @@ document.addEventListener('DOMContentLoaded', () => {
       text.className = 'result-q-text';
       text.textContent = q;
 
-      const replayBtn = document.createElement('button');
-      replayBtn.type = 'button';
-      replayBtn.className = 'btn-replay-mini';
-      replayBtn.innerHTML = '🔊';
-      replayBtn.title = '이 문제 다시 듣기';
-      replayBtn.addEventListener('click', () => {
+      mainDiv.append(num, text);
+
+      // 하단 액션 버튼 그룹 (문제 다시 듣기, 내 답변 듣기, 다운로드)
+      const actionsDiv = document.createElement('div');
+      actionsDiv.className = 'result-q-actions';
+
+      // 1) 문제 낭독 다시 듣기
+      const replayQBtn = document.createElement('button');
+      replayQBtn.type = 'button';
+      replayQBtn.className = 'btn-review-action btn-replay-q';
+      replayQBtn.innerHTML = `🔊 <span>${escapeHtml(t('speaking.result.listenQuestion'))}</span>`;
+      replayQBtn.title = t('speaking.result.listenQuestion');
+      replayQBtn.addEventListener('click', () => {
+        stopUserVoicePlayback();
         speakText(q);
       });
+      actionsDiv.appendChild(replayQBtn);
 
-      item.append(num, text, replayBtn);
+      // 2) 내 답변 녹음 듣기 및 다운로드 (녹음 데이터가 있는 경우)
+      const rec = state.recordings ? state.recordings[idx] : null;
+      if (rec && rec.url) {
+        const playVoiceBtn = document.createElement('button');
+        playVoiceBtn.type = 'button';
+        playVoiceBtn.className = 'btn-review-action btn-play-my-voice';
+        playVoiceBtn.innerHTML = `▶️ <span>${escapeHtml(t('speaking.result.listenMyVoice'))}</span>`;
+        playVoiceBtn.title = t('speaking.result.listenMyVoice');
+        playVoiceBtn.addEventListener('click', () => {
+          stopSpeaking();
+          toggleUserVoicePlayback(rec.url, playVoiceBtn);
+        });
+        actionsDiv.appendChild(playVoiceBtn);
+
+        const downloadLink = document.createElement('a');
+        downloadLink.className = 'btn-review-action btn-download-my-voice';
+        downloadLink.href = rec.url;
+        downloadLink.download = `Speaking_Q${idx + 1}_Answer.${rec.ext || 'webm'}`;
+        downloadLink.innerHTML = `💾 <span>${escapeHtml(t('speaking.result.downloadMyVoice'))}</span>`;
+        downloadLink.title = `${t('speaking.result.downloadMyVoice')} (${rec.ext || 'webm'})`;
+        actionsDiv.appendChild(downloadLink);
+      } else {
+        const noRec = document.createElement('span');
+        noRec.className = 'no-rec-label';
+        noRec.textContent = t('speaking.result.noRecording');
+        actionsDiv.appendChild(noRec);
+      }
+
+      item.append(mainDiv, actionsDiv);
       resQuestionList.appendChild(item);
     });
   }
@@ -1892,13 +2170,15 @@ document.addEventListener('DOMContentLoaded', () => {
     clearInterval(state.timerInterval);
     loadQuestion(state.currentIndex + 1);
   });
-  btnNextQuestion.addEventListener('click', () => {
+  btnNextQuestion.addEventListener('click', async () => {
     stopSpeaking();
+    await stopQuestionRecording();
     clearInterval(state.timerInterval);
     loadQuestion(state.currentIndex + 1);
   });
-  btnPrevQuestion.addEventListener('click', () => {
+  btnPrevQuestion.addEventListener('click', async () => {
     stopSpeaking();
+    await stopQuestionRecording();
     clearInterval(state.timerInterval);
     loadQuestion(Math.max(0, state.currentIndex - 1));
   });

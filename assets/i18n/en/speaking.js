@@ -62,12 +62,14 @@
   'speaking.step2.soundDurationShort': 'Short (~0.5s)',
   'speaking.step2.soundTest': '🔔 Test Sound',
   'speaking.step2.advancedOptions': 'Advanced Practice Options',
+  'speaking.step2.recordVoice': '🎙️ Record my answers (Replay & download on result screen)',
 
   // Action
   'speaking.action.start': '🚀 Start Speaking Test',
   'speaking.action.startDesc': 'Start mock exam with configured settings',
 
   // Simulator screen
+  'speaking.sim.micDenied': 'Microphone access was denied or unavailable. Starting test without recording.',
   'speaking.sim.statusListening': '🗣️ Reading question...',
   'speaking.sim.statusSpeaking': '⏱️ Speaking Time',
   'speaking.sim.statusBreak': '☕ Break & Preparing next question',
@@ -93,6 +95,11 @@
   'speaking.result.totalTime': 'Total Time: {time}',
   'speaking.result.completedCount': 'Questions answered: {count}',
   'speaking.result.reviewTitle': 'Questions Practiced Today',
+  'speaking.result.listenQuestion': 'Listen Q',
+  'speaking.result.listenMyVoice': 'My Answer',
+  'speaking.result.stopMyVoice': 'Stop',
+  'speaking.result.downloadMyVoice': 'Download',
+  'speaking.result.noRecording': 'No Recording',
   'speaking.result.retry': '🔄 Retake with same settings',
   'speaking.result.backToSetup': '⚙️ Change questions & settings',
 });

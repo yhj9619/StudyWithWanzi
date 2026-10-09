@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css?v=20261010a">
-  <link rel="stylesheet" href="../assets/css/speaking.css?v=20261010a">
+  <link rel="stylesheet" href="../assets/css/speaking.css?v=20261010c">
 </head>
 <body>
   <!-- 공통 상단 메뉴줄 (i18n.js) -->
@@ -186,6 +186,10 @@
                   <span data-i18n="speaking.step2.ttsWait">문제 낭독이 끝난 뒤 답변 타이머 시작 (추천)</span>
                 </label>
                 <label class="speaking-checkbox">
+                  <input type="checkbox" id="recordMyVoiceCheck" checked>
+                  <span data-i18n="speaking.step2.recordVoice">🎙️ 내 답변 음성 녹음 (최종 화면에서 다시 듣기 · 다운로드)</span>
+                </label>
+                <label class="speaking-checkbox">
                   <input type="checkbox" id="hideTextCheck">
                   <span data-i18n="speaking.step2.hideText">문제 텍스트 숨기기 (실전 듣기 시험처럼 연습)</span>
                 </label>
@@ -245,6 +249,9 @@
         <!-- 상단 바 -->
         <div class="sim-top-bar">
           <div id="simPhaseBadge" class="sim-phase-badge listening">🗣️ 문제 낭독 중...</div>
+          <div id="simRecIndicator" class="sim-rec-indicator hidden" title="내 답변 녹음 중">
+            <span class="rec-dot"></span>REC
+          </div>
           <div id="simProgressText" class="sim-progress-text">문제 1 / 5</div>
         </div>
 
@@ -324,14 +331,14 @@
     <p data-i18n="common.footer">Study with Wanzi &copy; 2026. Made with care for language learners.</p>
   </footer>
 
-  <script src="../assets/js/i18n.js?v=20261010b"></script>
-  <script src="../assets/i18n/ko/common.js?v=20261010b"></script>
-  <script src="../assets/i18n/ko/speaking.js?v=20261010b"></script>
-  <script src="../assets/i18n/en/common.js?v=20261010b"></script>
-  <script src="../assets/i18n/en/speaking.js?v=20261010b"></script>
-  <script src="../assets/i18n/zh/common.js?v=20261010b"></script>
-  <script src="../assets/i18n/zh/speaking.js?v=20261010b"></script>
-  <script src="../assets/js/speakingApp.js?v=20261010b"></script>
+  <script src="../assets/js/i18n.js?v=20261010c"></script>
+  <script src="../assets/i18n/ko/common.js?v=20261010c"></script>
+  <script src="../assets/i18n/ko/speaking.js?v=20261010c"></script>
+  <script src="../assets/i18n/en/common.js?v=20261010c"></script>
+  <script src="../assets/i18n/en/speaking.js?v=20261010c"></script>
+  <script src="../assets/i18n/zh/common.js?v=20261010c"></script>
+  <script src="../assets/i18n/zh/speaking.js?v=20261010c"></script>
+  <script src="../assets/js/speakingApp.js?v=20261010c"></script>
 </body>
 </html>
 

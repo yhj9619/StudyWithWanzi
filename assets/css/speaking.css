@@ -573,6 +573,34 @@
   100% { box-shadow: 0 0 0 0 rgba(29, 78, 216, 0); }
 }
 
+.sim-rec-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.75rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  transition: opacity 0.2s ease;
+}
+
+.rec-dot {
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  animation: rec-blink 1s ease-in-out infinite;
+}
+
+@keyframes rec-blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.85); }
+}
+
 .sim-progress-text {
   font-size: 0.95rem;
   font-weight: 800;
@@ -913,8 +941,8 @@
 .result-review-list {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
-  max-height: 280px;
+  gap: 0.75rem;
+  max-height: 380px;
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 0.35rem;
@@ -926,18 +954,32 @@
 
 .result-q-item {
   display: flex;
-  align-items: flex-start;
-  gap: 0.65rem;
-  padding: 0.65rem 0.8rem;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.8rem 0.95rem;
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 0.9rem;
+  border-radius: 10px;
+  font-size: 0.92rem;
   color: #334155;
   line-height: 1.5;
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
+  min-width: 0;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.result-q-item:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.result-q-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  width: 100%;
   min-width: 0;
 }
 
@@ -957,6 +999,81 @@
   overflow-wrap: anywhere;
   word-wrap: break-word;
   white-space: pre-wrap;
+}
+
+.result-q-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  padding-left: 1.85rem;
+  border-top: 1px dashed #f1f5f9;
+  padding-top: 0.5rem;
+}
+
+.btn-review-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  line-height: 1.2;
+}
+
+.btn-review-action:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.btn-review-action.btn-replay-q:hover {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.btn-review-action.btn-play-my-voice {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.btn-review-action.btn-play-my-voice:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+.btn-review-action.btn-play-my-voice.is-playing {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+
+.btn-review-action.btn-download-my-voice {
+  border-color: #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+}
+
+.btn-review-action.btn-download-my-voice:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.no-rec-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-style: italic;
+  padding: 0.2rem 0.3rem;
 }
 
 .btn-replay-mini {
@@ -1088,8 +1205,13 @@
 
   .result-q-item {
     gap: 0.5rem;
-    padding: 0.55rem 0.65rem;
+    padding: 0.65rem 0.75rem;
     font-size: 0.86rem;
+  }
+
+  .result-q-actions {
+    padding-left: 0;
+    gap: 0.35rem;
   }
 }
 

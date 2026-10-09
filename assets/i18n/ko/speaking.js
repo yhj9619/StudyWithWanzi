@@ -62,12 +62,14 @@
   'speaking.step2.soundDurationShort': '짧게 (약 0.5초)',
   'speaking.step2.soundTest': '🔔 소리 들어보기',
   'speaking.step2.advancedOptions': '고급 연습 옵션',
+  'speaking.step2.recordVoice': '🎙️ 내 답변 음성 녹음 (최종 화면에서 다시 듣기 · 다운로드)',
 
   // 액션 버튼
   'speaking.action.start': '🚀 말하기 시험 시작',
   'speaking.action.startDesc': '설정한 조건으로 실전 모의 연습을 시작합니다',
 
   // 시뮬레이터 화면
+  'speaking.sim.micDenied': '마이크 권한이 허용되지 않았거나 마이크가 없어 음성 녹음 없이 시험을 시작합니다.',
   'speaking.sim.statusListening': '🗣️ 문제 낭독 중...',
   'speaking.sim.statusSpeaking': '⏱️ 답변 시간 (Speaking)',
   'speaking.sim.statusBreak': '☕ 휴식 & 다음 문제 준비 중',
@@ -93,6 +95,11 @@
   'speaking.result.totalTime': '총 소요 시간: {time}',
   'speaking.result.completedCount': '완료한 문제 수: {count}개',
   'speaking.result.reviewTitle': '오늘 연습한 문제 목록',
+  'speaking.result.listenQuestion': '문제 듣기',
+  'speaking.result.listenMyVoice': '내 답변 듣기',
+  'speaking.result.stopMyVoice': '정지',
+  'speaking.result.downloadMyVoice': '다운로드',
+  'speaking.result.noRecording': '녹음 없음',
   'speaking.result.retry': '🔄 같은 설정으로 다시 풀기',
   'speaking.result.backToSetup': '⚙️ 문제 및 설정 변경하기',
 });

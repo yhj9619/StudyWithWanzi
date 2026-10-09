@@ -62,12 +62,14 @@
   'speaking.step2.soundDurationShort': '短促（约 0.5 秒）',
   'speaking.step2.soundTest': '🔔 试听提示音',
   'speaking.step2.advancedOptions': '高级练习选项',
+  'speaking.step2.recordVoice': '🎙️ 录制我的回答（在最终页面重听与下载）',
 
   // 动作
   'speaking.action.start': '🚀 开始口语模拟考试',
   'speaking.action.startDesc': '按照所设条件开始实战模拟练习',
 
   // 模考画面
+  'speaking.sim.micDenied': '麦克风权限未开启或未检测到麦克风，将不录音直接开始考试。',
   'speaking.sim.statusListening': '🗣️ 题目朗读中...',
   'speaking.sim.statusSpeaking': '⏱️ 作答时间 (Speaking)',
   'speaking.sim.statusBreak': '☕ 休息 & 准备下一题',
@@ -93,6 +95,11 @@
   'speaking.result.totalTime': '总用时：{time}',
   'speaking.result.completedCount': '完成题目数：{count} 题',
   'speaking.result.reviewTitle': '今日练习题目回顾',
+  'speaking.result.listenQuestion': '听题目',
+  'speaking.result.listenMyVoice': '我的回答',
+  'speaking.result.stopMyVoice': '停止',
+  'speaking.result.downloadMyVoice': '下载',
+  'speaking.result.noRecording': '无录音',
   'speaking.result.retry': '🔄 使用相同设置再练一次',
   'speaking.result.backToSetup': '⚙️ 修改题目与设置',
 });
