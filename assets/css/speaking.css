@@ -291,6 +291,9 @@
 /* 음성 및 토글 스위치 설정 */
 .select-input {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 0.55rem 0.75rem;
   font-size: 0.88rem;
   border: 1.5px solid var(--border-color, #cbd5e1);
@@ -319,6 +322,81 @@
 
 .btn-voice-test:hover {
   background: #e2e8f0;
+}
+
+.voice-status-box {
+  margin-top: 0.55rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-md, 8px);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.82rem;
+  color: #166534;
+  line-height: 1.45;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.voice-status-box.single-mode {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+
+.compat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+  color: #15803d;
+  flex-wrap: wrap;
+}
+
+.compat-chips-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.compat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.22rem 0.55rem;
+  background: #ffffff;
+  border: 1px solid #86efac;
+  border-radius: 6px;
+  font-size: 0.77rem;
+  color: #166534;
+  font-weight: 600;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.compat-chip .chip-voice-name {
+  font-weight: 400;
+  color: #4b5563;
+  font-size: 0.73rem;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compat-chip.missing {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.compat-desc {
+  font-size: 0.75rem;
+  color: #15803d;
+  margin-top: 0.35rem;
+  line-height: 1.4;
 }
 
 .speed-slider-row {
@@ -352,16 +430,31 @@
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px dashed #e2e8f0;
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.sound-detail-panel .settings-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .sound-duration-row {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .sound-duration-row .select-input {
   flex: 1;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .speaking-checkbox {
@@ -424,7 +517,8 @@
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
   position: relative;
-  overflow: hidden;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 /* 상단 진행 바 & 배지 */
@@ -593,15 +687,22 @@
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: var(--radius-lg, 12px);
-  padding: 1.5rem 1.75rem;
-  margin-bottom: 2rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.75rem;
   text-align: center;
   position: relative;
   min-height: 110px;
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  -webkit-overflow-scrolling: touch;
 }
 
 .sim-question-text {
@@ -610,7 +711,13 @@
   line-height: 1.6;
   color: #0f172a;
   word-break: keep-all;
-  margin: 0;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: auto 0;
   transition: font-size 0.2s ease;
 }
 
@@ -861,8 +968,18 @@
   .simulator-view {
     padding: 1.5rem 1rem 1.75rem;
   }
+  .sim-question-card {
+    padding: 1rem 0.85rem;
+    margin-bottom: 1.25rem;
+    min-height: 90px;
+    max-height: 280px;
+  }
   .sim-question-text {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
+    line-height: 1.55;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    word-wrap: break-word;
   }
   .timer-circle-wrap {
     width: 150px;
@@ -882,5 +999,76 @@
     padding: 0.6rem 1rem;
     font-size: 0.86rem;
   }
+
+  /* 모바일에서 설정 그리드 및 고급설정 select box 넘침 완벽 방지 */
+  .settings-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .sound-detail-panel .settings-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .sound-duration-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .sound-duration-row .select-input {
+    width: 100%;
+    flex: none;
+  }
+
+  .sound-duration-row .btn-voice-test {
+    width: 100%;
+    text-align: center;
+    padding: 0.55rem 0.75rem;
+  }
+
+  .voice-control-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .voice-control-row .searchable-combobox {
+    width: 100% !important;
+  }
+
+  .voice-control-row .btn-voice-test {
+    width: 100%;
+    text-align: center;
+  }
+
+  .advanced-settings {
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .advanced-settings > .advanced-body {
+    padding: 0.75rem 0.65rem 0.85rem;
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .compat-chip .chip-voice-name {
+    max-width: 110px;
+  }
 }
+
+@media (max-width: 420px) {
+  .sim-question-card {
+    padding: 0.85rem 0.65rem;
+    max-height: 250px;
+  }
+  .sim-question-text {
+    font-size: 1.02rem;
+  }
+}
+
 

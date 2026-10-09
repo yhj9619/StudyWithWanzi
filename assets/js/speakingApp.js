@@ -63,6 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const maxQuestionsHint = document.getElementById('maxQuestionsHint');
 
   const voiceSelect = document.getElementById('voiceSelect');
+  const voiceSelectContainer = document.getElementById('voiceSelectContainer');
+  const voiceSearchInput = document.getElementById('voiceSearchInput');
+  const voiceClearBtn = document.getElementById('voiceClearBtn');
+  const voiceToggleBtn = document.getElementById('voiceToggleBtn');
+  const voiceDropdownWrapper = document.getElementById('voiceDropdownWrapper');
+  const filteredVoiceCount = document.getElementById('filteredVoiceCount');
+  const voiceDropdownList = document.getElementById('voiceDropdownList');
   const ttsRateSlider = document.getElementById('ttsRateSlider');
   const ttsRateVal = document.getElementById('ttsRateVal');
   const testVoiceBtn = document.getElementById('testVoiceBtn');
@@ -473,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 6. 음성 합성 (Web Speech API - TTS)
   // =========================================================================
   let availableVoices = [];
-  let savedVoicePreference = '';
+  let savedVoicePreference = 'auto';
 
   const LANG_LABELS = {
     'en': '🇺🇸/🇬🇧 영어',
@@ -504,10 +511,345 @@ document.addEventListener('DOMContentLoaded', () => {
     return LANG_LABELS[prefix] || lang;
   }
 
+  function getVoiceDisplayName(id) {
+    if (!id || id === 'auto') {
+      return t('speaking.step2.voiceAuto');
+    }
+    const v = availableVoices.find(voice => voice.name === id);
+    if (v) {
+      const label = getLangLabel(v.lang);
+      return `${label} - ${v.name}${v.default ? ' ★' : ''}`;
+    }
+    return id;
+  }
+
+  function getSortedVoiceList() {
+    const priorityPrefixes = ['ko', 'en', 'zh', 'ja', 'es', 'fr', 'de'];
+    return availableVoices.slice().sort((a, b) => {
+      const aLang = (a.lang || '').slice(0, 2).toLowerCase();
+      const bLang = (b.lang || '').slice(0, 2).toLowerCase();
+      const aP = priorityPrefixes.indexOf(aLang);
+      const bP = priorityPrefixes.indexOf(bLang);
+      if (aP !== -1 && bP !== -1 && aP !== bP) return aP - bP;
+      if (aP !== -1 && bP === -1) return -1;
+      if (bP !== -1 && aP === -1) return 1;
+      const langCmp = (a.lang || '').localeCompare(b.lang || '');
+      if (langCmp !== 0) return langCmp;
+      return a.name.localeCompare(b.name);
+    });
+  }
+
+  const CHOSUNG_LIST = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+
+  function getChosungChar(ch) {
+    const code = ch.charCodeAt(0);
+    if (code >= 0xAC00 && code <= 0xD7A3) {
+      return CHOSUNG_LIST[Math.floor((code - 0xAC00) / (21 * 28))];
+    }
+    return ch;
+  }
+
+  function isChosung(ch) {
+    return CHOSUNG_LIST.includes(ch);
+  }
+
+  function findMatchIndex(target, query) {
+    if (!target || !query) return -1;
+    const t = target.toLowerCase();
+    const q = query.toLowerCase();
+    for (let start = 0; start + q.length <= t.length; start++) {
+      let ok = true;
+      for (let i = 0; i < q.length; i++) {
+        const qc = q[i];
+        const tc = t[start + i];
+        if (isChosung(qc) ? getChosungChar(tc) !== qc : tc !== qc) {
+          ok = false;
+          break;
+        }
+      }
+      if (ok) return start;
+    }
+    return -1;
+  }
+
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function highlight(text, index, length) {
+    if (index < 0 || length <= 0) return escapeHtml(text);
+    return escapeHtml(text.slice(0, index))
+      + '<mark>' + escapeHtml(text.slice(index, index + length)) + '</mark>'
+      + escapeHtml(text.slice(index + length));
+  }
+
+  let voiceFocusIndex = -1;
+
+  function renderVoiceDropdownList(query) {
+    if (!voiceDropdownList) return;
+    voiceDropdownList.innerHTML = '';
+    voiceFocusIndex = -1;
+
+    const q = (query || '').trim().toLowerCase();
+    const sorted = getSortedVoiceList();
+
+    // 1) auto 옵션 정의
+    const autoItem = {
+      id: 'auto',
+      displayName: t('speaking.step2.voiceAuto'),
+      tag: 'AUTO',
+      lang: 'auto',
+      isAuto: true,
+      keywords: ['자동', 'auto', '감지', '한국어', '중국어', '영어', 'korean', 'chinese', 'english', '혼합', '스마트']
+    };
+
+    if (!q) {
+      // 검색어 없을 때
+      const totalCount = 1 + sorted.length;
+      if (filteredVoiceCount) {
+        filteredVoiceCount.textContent = t('speaking.step2.voiceCount', { count: totalCount });
+      }
+
+      // 그룹 1: 스마트 다국어 합성
+      addVoiceGroupLabel(t('speaking.step2.voiceGroupAuto'));
+      voiceDropdownList.appendChild(buildVoiceDropdownItem(autoItem, '', -1));
+
+      if (sorted.length > 0) {
+        const majorLangs = ['ko', 'en', 'zh', 'ja'];
+        const majors = sorted.filter(v => majorLangs.includes((v.lang || '').slice(0, 2).toLowerCase()));
+        const others = sorted.filter(v => !majorLangs.includes((v.lang || '').slice(0, 2).toLowerCase()));
+
+        if (majors.length > 0) {
+          addVoiceGroupLabel(t('speaking.step2.voiceGroupMajor'));
+          majors.forEach(v => {
+            const label = getLangLabel(v.lang);
+            const item = {
+              id: v.name,
+              displayName: `${label} - ${v.name}${v.default ? ' ★' : ''}`,
+              tag: (v.lang || '').toUpperCase(),
+              lang: v.lang,
+              isAuto: false
+            };
+            voiceDropdownList.appendChild(buildVoiceDropdownItem(item, '', -1));
+          });
+        }
+
+        if (others.length > 0) {
+          addVoiceGroupLabel(t('speaking.step2.voiceGroupOthers'));
+          others.forEach(v => {
+            const label = getLangLabel(v.lang);
+            const item = {
+              id: v.name,
+              displayName: `${label} - ${v.name}${v.default ? ' ★' : ''}`,
+              tag: (v.lang || '').toUpperCase(),
+              lang: v.lang,
+              isAuto: false
+            };
+            voiceDropdownList.appendChild(buildVoiceDropdownItem(item, '', -1));
+          });
+        }
+      }
+    } else {
+      // 검색어 있을 때
+      const matched = [];
+
+      // auto 옵션 검사
+      const autoMatchIdx = findMatchIndex(autoItem.displayName, q);
+      const autoKeywordMatch = autoItem.keywords.some(k => findMatchIndex(k, q) >= 0);
+      if (autoMatchIdx >= 0 || autoKeywordMatch) {
+        matched.push({
+          item: autoItem,
+          matchIdx: autoMatchIdx,
+          score: autoMatchIdx === 0 ? 0 : (autoMatchIdx > 0 ? 1 : 2)
+        });
+      }
+
+      // 각 개별 음성 검사
+      sorted.forEach(v => {
+        const label = getLangLabel(v.lang);
+        const dispName = `${label} - ${v.name}${v.default ? ' ★' : ''}`;
+        const nameIdx = findMatchIndex(dispName, q);
+        const langIdx = findMatchIndex(v.lang || '', q);
+        const rawNameIdx = findMatchIndex(v.name || '', q);
+
+        if (nameIdx >= 0 || langIdx >= 0 || rawNameIdx >= 0) {
+          let score = 3;
+          let idx = nameIdx;
+          if (nameIdx === 0) score = 0;
+          else if (nameIdx > 0) score = 1;
+          else if (langIdx >= 0 || rawNameIdx >= 0) {
+            score = 2;
+            idx = -1;
+          }
+          matched.push({
+            item: {
+              id: v.name,
+              displayName: dispName,
+              tag: (v.lang || '').toUpperCase(),
+              lang: v.lang,
+              isAuto: false
+            },
+            matchIdx: idx,
+            score
+          });
+        }
+      });
+
+      matched.sort((a, b) => a.score - b.score);
+
+      if (filteredVoiceCount) {
+        filteredVoiceCount.textContent = t('speaking.step2.voiceCount', { count: matched.length });
+      }
+
+      if (matched.length === 0) {
+        const empty = document.createElement('li');
+        empty.className = 'dropdown-empty';
+        empty.textContent = t('speaking.step2.voiceEmpty', { query });
+        voiceDropdownList.appendChild(empty);
+      } else {
+        matched.forEach((m, idx) => {
+          const el = buildVoiceDropdownItem(m.item, q, m.matchIdx);
+          if (idx === 0) {
+            voiceFocusIndex = 0;
+            el.classList.add('focused');
+          }
+          voiceDropdownList.appendChild(el);
+        });
+      }
+    }
+  }
+
+  function addVoiceGroupLabel(text) {
+    if (!voiceDropdownList) return;
+    const li = document.createElement('li');
+    li.className = 'dropdown-group-label';
+    li.setAttribute('role', 'presentation');
+    li.textContent = text;
+    voiceDropdownList.appendChild(li);
+  }
+
+  function buildVoiceDropdownItem(item, query, matchIdx) {
+    const li = document.createElement('li');
+    li.className = 'dropdown-item';
+    li.setAttribute('role', 'option');
+    li.id = `voice-opt-${item.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+    li.dataset.id = item.id;
+    const isSelected = item.id === (voiceSelect ? voiceSelect.value : 'auto');
+    if (isSelected) li.classList.add('selected');
+    li.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+
+    const nameHtml = (query && matchIdx >= 0)
+      ? highlight(item.displayName, matchIdx, query.length)
+      : escapeHtml(item.displayName);
+
+    const tagHtml = item.tag ? `<span class="lang-tag">${escapeHtml(item.tag)}</span>` : '';
+    const subHtml = item.isAuto
+      ? `<div class="lang-alias" style="margin-top: 3px; font-size: 0.74rem; color: #15803d; font-weight: 500;">호환: 🇰🇷 한국어 · 🇨🇳 중국어 · 🇺🇸 영어 · 🇯🇵 일본어</div>`
+      : '';
+
+    li.innerHTML = `
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <span class="lang-name">
+          <span>${nameHtml}</span>
+          ${tagHtml}
+        </span>
+        ${subHtml}
+      </div>
+      ${isSelected ? '<span class="check-icon">✓</span>' : ''}
+    `;
+
+    li.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      chooseVoice(item.id);
+    });
+
+    return li;
+  }
+
+  function chooseVoice(id) {
+    if (voiceSelect) {
+      voiceSelect.value = id;
+    }
+    savedVoicePreference = id;
+    if (voiceSearchInput) {
+      voiceSearchInput.value = getVoiceDisplayName(id);
+    }
+    updateVoiceStatusBadge();
+    saveSettings();
+    closeVoiceDropdown();
+  }
+
+  function isVoiceDropdownOpen() {
+    return voiceDropdownWrapper && !voiceDropdownWrapper.classList.contains('hidden');
+  }
+
+  function openVoiceDropdown(filterText) {
+    if (!voiceDropdownWrapper) return;
+    voiceDropdownWrapper.classList.remove('hidden');
+    if (voiceToggleBtn) voiceToggleBtn.classList.add('open');
+    if (voiceSearchInput) voiceSearchInput.setAttribute('aria-expanded', 'true');
+    renderVoiceDropdownList(filterText);
+    updateVoiceClearBtn();
+    if (!filterText && voiceDropdownList) {
+      const selected = voiceDropdownList.querySelector('.dropdown-item.selected');
+      if (selected) selected.scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function closeVoiceDropdown() {
+    if (!voiceDropdownWrapper) return;
+    voiceDropdownWrapper.classList.add('hidden');
+    if (voiceToggleBtn) voiceToggleBtn.classList.remove('open');
+    if (voiceSearchInput) {
+      voiceSearchInput.setAttribute('aria-expanded', 'false');
+      voiceSearchInput.value = getVoiceDisplayName(voiceSelect ? voiceSelect.value : 'auto');
+    }
+    updateVoiceClearBtn();
+    voiceFocusIndex = -1;
+    if (voiceDropdownList) voiceDropdownList.innerHTML = '';
+  }
+
+  function updateVoiceClearBtn() {
+    if (!voiceClearBtn || !voiceSearchInput) return;
+    const isShowing = isVoiceDropdownOpen() && voiceSearchInput.value.trim().length > 0;
+    voiceClearBtn.classList.toggle('hidden', !isShowing);
+  }
+
+  function getVoiceDropdownItems() {
+    if (!voiceDropdownList) return [];
+    return Array.from(voiceDropdownList.querySelectorAll('.dropdown-item'));
+  }
+
+  function updateVoiceFocus() {
+    const items = getVoiceDropdownItems();
+    items.forEach((item, idx) => {
+      const isFocused = idx === voiceFocusIndex;
+      item.classList.toggle('focused', isFocused);
+      if (isFocused) {
+        item.scrollIntoView({ block: 'nearest' });
+        if (voiceSearchInput) {
+          voiceSearchInput.setAttribute('aria-activedescendant', item.id);
+        }
+      }
+    });
+    if (voiceFocusIndex < 0 && voiceSearchInput) {
+      voiceSearchInput.removeAttribute('aria-activedescendant');
+    }
+  }
+
   function loadVoices() {
     if (!('speechSynthesis' in window)) {
       if (voiceSelect) {
         voiceSelect.innerHTML = '<option value="">(이 브라우저는 음성 합성을 지원하지 않습니다)</option>';
+      }
+      if (voiceSearchInput) {
+        voiceSearchInput.value = '(음성 합성 미지원 브라우저)';
+        voiceSearchInput.disabled = true;
       }
       return;
     }
@@ -516,7 +858,11 @@ document.addEventListener('DOMContentLoaded', () => {
       availableVoices = voices;
       renderVoiceOptions();
     } else if (voiceSelect && voiceSelect.options.length === 0) {
-      voiceSelect.innerHTML = '<option value="" disabled selected>음성 목록을 불러오는 중입니다...</option>';
+      voiceSelect.innerHTML = '<option value="auto">🌐 언어 자동 감지</option>';
+      if (voiceSearchInput) {
+        voiceSearchInput.value = t('speaking.step2.voiceAuto');
+      }
+      updateVoiceStatusBadge();
     }
   }
 
@@ -531,26 +877,7 @@ document.addEventListener('DOMContentLoaded', () => {
     autoOpt.textContent = t('speaking.step2.voiceAuto');
     voiceSelect.appendChild(autoOpt);
 
-    if (availableVoices.length === 0) {
-      voiceSelect.value = 'auto';
-      updateVoiceStatusBadge();
-      return;
-    }
-
-    // 2) 개별 음성 목록 (주요 언어 우선 순위 정렬)
-    const priorityPrefixes = ['en', 'ko', 'zh', 'ja', 'es', 'fr', 'de'];
-    const sorted = availableVoices.slice().sort((a, b) => {
-      const aLang = (a.lang || '').slice(0, 2).toLowerCase();
-      const bLang = (b.lang || '').slice(0, 2).toLowerCase();
-      const aP = priorityPrefixes.indexOf(aLang);
-      const bP = priorityPrefixes.indexOf(bLang);
-      if (aP !== -1 && bP !== -1 && aP !== bP) return aP - bP;
-      if (aP !== -1 && bP === -1) return -1;
-      if (bP !== -1 && aP === -1) return 1;
-      const langCmp = (a.lang || '').localeCompare(b.lang || '');
-      if (langCmp !== 0) return langCmp;
-      return a.name.localeCompare(b.name);
-    });
+    const sorted = getSortedVoiceList();
 
     sorted.forEach((voice) => {
       const opt = document.createElement('option');
@@ -567,26 +894,66 @@ document.addEventListener('DOMContentLoaded', () => {
       voiceSelect.value = 'auto';
     }
 
+    if (voiceSearchInput) {
+      voiceSearchInput.value = getVoiceDisplayName(voiceSelect.value);
+    }
+
     updateVoiceStatusBadge();
+
+    if (isVoiceDropdownOpen()) {
+      renderVoiceDropdownList(voiceSearchInput ? voiceSearchInput.value : '');
+    }
   }
 
   function updateVoiceStatusBadge() {
     if (!voiceStatusBadge) return;
     const selected = voiceSelect ? voiceSelect.value : 'auto';
     if (selected === 'auto') {
-      const zhVoice = getBestVoiceForLang('zh');
       const koVoice = getBestVoiceForLang('ko');
+      const zhVoice = getBestVoiceForLang('zh');
       const enVoice = getBestVoiceForLang('en');
-      const list = [];
-      if (koVoice) list.push(`한국어(${koVoice.name})`);
-      if (zhVoice) list.push(`중국어(${zhVoice.name})`);
-      if (enVoice) list.push(`영어(${enVoice.name})`);
-      voiceStatusBadge.textContent = list.length > 0 
-        ? `자동 감지 활성: ${list.join(' · ')}` 
-        : '🌐 브라우저 기본 다국어 합성 엔진 준비됨';
+      const jaVoice = getBestVoiceForLang('ja');
+
+      const supported = [
+        { code: 'ko', flag: '🇰🇷', name: t('speaking.step2.compatLangKo') || '한국어', voice: koVoice },
+        { code: 'zh', flag: '🇨🇳', name: t('speaking.step2.compatLangZh') || '중국어', voice: zhVoice },
+        { code: 'en', flag: '🇺🇸', name: t('speaking.step2.compatLangEn') || '영어', voice: enVoice },
+        { code: 'ja', flag: '🇯🇵', name: t('speaking.step2.compatLangJa') || '일본어', voice: jaVoice }
+      ];
+
+      const chipsHtml = supported.map(lang => {
+        const voiceLabel = lang.voice ? escapeHtml(lang.voice.name) : '기본 엔진';
+        const isMatched = Boolean(lang.voice);
+        return `<span class="compat-chip ${isMatched ? '' : 'missing'}" title="${lang.name}: ${voiceLabel}">
+          <span>${lang.flag} ${escapeHtml(lang.name)}</span>
+          <span class="chip-voice-name">${voiceLabel}</span>
+        </span>`;
+      }).join('');
+
+      voiceStatusBadge.className = 'voice-status-box';
+      voiceStatusBadge.innerHTML = `
+        <div class="compat-header">
+          <span>🌐 ${t('speaking.step2.compatTitle') || '언어 자동 감지 지원 (호환 언어)'}</span>
+          <span style="font-size: 0.72rem; font-weight: normal; color: #15803d;">실시간 혼합 분리</span>
+        </div>
+        <div class="compat-chips-grid">
+          ${chipsHtml}
+        </div>
+        <div class="compat-desc">${t('speaking.step2.compatSubtitle') || '한국어·중국어·영어·일본어가 섞인 문제도 각 언어별 전용 음성으로 순차 전환하여 낭독합니다.'}</div>
+      `;
     } else {
       const v = availableVoices.find(item => item.name === selected);
-      voiceStatusBadge.textContent = v ? `선택 음성: ${v.name} (${v.lang})` : '';
+      voiceStatusBadge.className = 'voice-status-box single-mode';
+      const langCode = v ? v.lang : '';
+      voiceStatusBadge.innerHTML = `
+        <div style="font-weight: 600; color: #1e293b;">
+          🎙️ ${t('speaking.step2.fixedVoice') || '단일 고정 음성'}: <strong>${escapeHtml(selected)}</strong>
+          <span class="lang-tag" style="margin-left: 0.4rem;">${escapeHtml(langCode)}</span>
+        </div>
+        <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.2rem;">
+          ${t('speaking.step2.fixedVoiceDesc') || '모든 문제를 선택한 단일 음성으로만 낭독합니다. 다국어 혼합 낭독을 원하시면 "🌐 언어 자동 감지"를 선택하세요.'}
+        </div>
+      `;
     }
   }
 
@@ -623,6 +990,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const n = (v.name || '').toLowerCase();
         return n.includes('english') || n.includes('united states') || n.includes('david') ||
                n.includes('zira') || n.includes('mark') || n.includes('jenny');
+      });
+      if (byName) return byName;
+    } else if (prefix === 'ja') {
+      const byName = availableVoices.find(v => {
+        const n = (v.name || '').toLowerCase();
+        return n.includes('japanese') || n.includes('japan') || n.includes('haruka') ||
+               n.includes('ayumi') || n.includes('ichiro') || n.includes('sayaka') ||
+               n.includes('nanami') || n.includes('keita') || n.includes('kyoko') ||
+               n.includes('otoya');
       });
       if (byName) return byName;
     }
@@ -879,10 +1255,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if (data.soundDuration && soundDurationSelect) soundDurationSelect.value = data.soundDuration;
       if (data.voice) {
         savedVoicePreference = data.voice;
-        if (voiceSelect && availableVoices.some(v => v.name === data.voice)) {
+        if (voiceSelect && (data.voice === 'auto' || availableVoices.some(v => v.name === data.voice))) {
           voiceSelect.value = data.voice;
         }
+      } else {
+        savedVoicePreference = 'auto';
+        if (voiceSelect) voiceSelect.value = 'auto';
       }
+      if (voiceSearchInput && voiceSelect) {
+        voiceSearchInput.value = getVoiceDisplayName(voiceSelect.value);
+      }
+      updateVoiceStatusBadge();
 
       updatePresetPillsActive('answerTimeInput');
       updatePresetPillsActive('breakTimeInput');
@@ -1049,9 +1432,101 @@ document.addEventListener('DOMContentLoaded', () => {
     soundDetailPanel.style.pointerEvents = soundToggle.checked ? 'auto' : 'none';
   }
 
+  if (voiceSearchInput) {
+    voiceSearchInput.addEventListener('focus', () => {
+      const current = getVoiceDisplayName(voiceSelect ? voiceSelect.value : 'auto');
+      const query = voiceSearchInput.value.trim() === current ? '' : voiceSearchInput.value;
+      openVoiceDropdown(query);
+      voiceSearchInput.select();
+    });
+
+    voiceSearchInput.addEventListener('click', () => {
+      if (!isVoiceDropdownOpen()) {
+        const current = getVoiceDisplayName(voiceSelect ? voiceSelect.value : 'auto');
+        const query = voiceSearchInput.value.trim() === current ? '' : voiceSearchInput.value;
+        openVoiceDropdown(query);
+      }
+    });
+
+    voiceSearchInput.addEventListener('input', () => {
+      openVoiceDropdown(voiceSearchInput.value);
+    });
+
+    voiceSearchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeVoiceDropdown();
+        return;
+      }
+      if (e.key === 'Tab') {
+        if (isVoiceDropdownOpen()) closeVoiceDropdown();
+        return;
+      }
+      if (!isVoiceDropdownOpen() && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+        e.preventDefault();
+        const current = getVoiceDisplayName(voiceSelect ? voiceSelect.value : 'auto');
+        const query = voiceSearchInput.value.trim() === current ? '' : voiceSearchInput.value;
+        openVoiceDropdown(query);
+        return;
+      }
+      if (e.isComposing || e.keyCode === 229) return;
+      if (!isVoiceDropdownOpen()) return;
+      const all = getVoiceDropdownItems();
+      if (all.length === 0) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        voiceFocusIndex = (voiceFocusIndex + 1) % all.length;
+        updateVoiceFocus();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        voiceFocusIndex = (voiceFocusIndex - 1 + all.length) % all.length;
+        updateVoiceFocus();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const target = voiceFocusIndex >= 0 ? all[voiceFocusIndex] : all[0];
+        if (target) chooseVoice(target.dataset.id);
+        else closeVoiceDropdown();
+      }
+    });
+  }
+
+  if (voiceToggleBtn) {
+    voiceToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (isVoiceDropdownOpen()) {
+        closeVoiceDropdown();
+      } else if (document.activeElement === voiceSearchInput) {
+        const current = getVoiceDisplayName(voiceSelect ? voiceSelect.value : 'auto');
+        const query = voiceSearchInput.value.trim() === current ? '' : voiceSearchInput.value;
+        openVoiceDropdown(query);
+      } else if (voiceSearchInput) {
+        voiceSearchInput.focus();
+      }
+    });
+  }
+
+  if (voiceClearBtn) {
+    voiceClearBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (voiceSearchInput) {
+        voiceSearchInput.value = '';
+        voiceSearchInput.focus();
+      }
+      openVoiceDropdown('');
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (voiceSelectContainer && !voiceSelectContainer.contains(e.target) && isVoiceDropdownOpen()) {
+      closeVoiceDropdown();
+    }
+  });
+
   if (voiceSelect) {
     voiceSelect.addEventListener('change', () => {
       savedVoicePreference = voiceSelect.value;
+      if (voiceSearchInput) {
+        voiceSearchInput.value = getVoiceDisplayName(voiceSelect.value);
+      }
       updateVoiceStatusBadge();
       saveSettings();
     });
@@ -1130,6 +1605,10 @@ document.addEventListener('DOMContentLoaded', () => {
     state.history = [];
     state.examStartTime = Date.now();
     state.isTextHidden = hideTextCheck.checked;
+    state.fontSize = window.innerWidth <= 640 ? 1.1 : 1.35;
+    if (simQuestionText) {
+      simQuestionText.style.fontSize = `${state.fontSize}rem`;
+    }
 
     // 화면 전환 (브라우저 뒤로가기 지원)
     showSimulatorView();
@@ -1181,6 +1660,10 @@ document.addEventListener('DOMContentLoaded', () => {
     simProgressFill.style.width = `${overallRatio * 100}%`;
 
     simQuestionText.textContent = currentQ;
+    const simQuestionCard = document.querySelector('.sim-question-card');
+    if (simQuestionCard) {
+      simQuestionCard.scrollTop = 0;
+    }
     btnSkipBreak.classList.add('hidden');
     btnPauseResume.textContent = t('speaking.sim.pause');
 
@@ -1384,12 +1867,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   btnFontSmaller.addEventListener('click', () => {
-    state.fontSize = Math.max(1.0, state.fontSize - 0.15);
+    state.fontSize = Math.max(0.85, parseFloat((state.fontSize - 0.15).toFixed(2)));
     simQuestionText.style.fontSize = `${state.fontSize}rem`;
   });
 
   btnFontBigger.addEventListener('click', () => {
-    state.fontSize = Math.min(2.2, state.fontSize + 0.15);
+    state.fontSize = Math.min(2.2, parseFloat((state.fontSize + 0.15).toFixed(2)));
     simQuestionText.style.fontSize = `${state.fontSize}rem`;
   });
 
