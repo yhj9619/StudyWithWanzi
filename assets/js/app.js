@@ -30,12 +30,17 @@ document.addEventListener('DOMContentLoaded', () => {
     ? window.i18n.getLocale()
     : 'ko';
 
-  // 위키백과 기본 URL (UI 언어에 맞춰 분기: ko 한국어, en 영어, zh 중국어)
+  // 위키백과 기본 검색 URL (UI 언어에 맞춰 분기: ko 한국어, en 영어, zh 중국어)
   const WIKI_URL_BY_LANG = {
-    ko: 'https://ko.wikipedia.org/wiki/',
-    en: 'https://en.wikipedia.org/wiki/',
-    zh: 'https://zh.wikipedia.org/wiki/',
+    ko: 'https://ko.wikipedia.org/w/index.php?search=',
+    en: 'https://en.wikipedia.org/w/index.php?search=',
+    zh: 'https://zh.wikipedia.org/w/index.php?search=',
   };
+  const LEGACY_WIKI_URLS = [
+    'https://ko.wikipedia.org/wiki/',
+    'https://en.wikipedia.org/wiki/',
+    'https://zh.wikipedia.org/wiki/',
+  ];
   const DEFAULT_WIKI_URL = WIKI_URL_BY_LANG[currentUiLang] || WIKI_URL_BY_LANG.ko;
 
   // 보조 사전 기본 URL (UI 언어에 맞춰 분기: ko 국어사전, zh 중한사전, en 영한사전)
@@ -119,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function isDefaultWikiUrl(url) {
     if (!url) return true;
     const trimmed = String(url).trim();
-    return Object.values(WIKI_URL_BY_LANG).includes(trimmed);
+    return Object.values(WIKI_URL_BY_LANG).includes(trimmed) || LEGACY_WIKI_URLS.includes(trimmed);
   }
 
   if (subDictUrlInput) {
@@ -2953,25 +2958,42 @@ ${sel('::after')} {
     return `<script>
 (function () {
   var clean = ${shouldClean ? 'true' : 'false'};
+  var stripRe = /\\[[^\\]]*\\]|［[^］]*］|【[^】]*】|〔[^〕]*〕|\\([^)]*\\)|（[^）]*）|<[^>]*>|〈[^〉]*〉|《[^》]*》/g;
+  var splitRe = /[,;，、；/]/;
+  var punctRe = /^[:\\-~·/\\s]+/;
+  var fallbackRe = /[\\[［【〔(（<〈《]([^\\]］】〕)）>〉》]+)[\\]］】〕)）>〉》]/;
   var each = function (list, fn) { Array.prototype.forEach.call(list, fn); };
-  each(document.querySelectorAll('.link-src'), function (src) {
-    var copy = src.cloneNode(true);
-    each(copy.querySelectorAll('.replay-button, audio, script, style'), function (el) { el.parentNode.removeChild(el); });
-    each(copy.querySelectorAll('br, div, p, li'), function (el) { el.parentNode.insertBefore(document.createTextNode(' '), el); });
-    var raw = copy.textContent.replace(/\\s+/g, ' ').trim();
-    var q = raw;
-    if (clean) {
-      var stripped = raw.replace(/${LINK_QUERY_STRIP_RE}/g, '').split(/${LINK_QUERY_SPLIT_RE}/)[0].replace(/^[:\\-~·/\\s]+/, '').trim();
-      if (!stripped) {
-        var m = raw.match(/[\[［【〔(（<〈《]([^\]］】〕)）>〉》]+)[\]］】〕)）>〉》]/);
-        stripped = m ? m[1].trim() : raw;
+  function updateLinks() {
+    each(document.querySelectorAll('.link-src'), function (src) {
+      var copy = src.cloneNode(true);
+      each(copy.querySelectorAll('.replay-button, audio, script, style'), function (el) { el.parentNode.removeChild(el); });
+      each(copy.querySelectorAll('br, div, p, li'), function (el) { el.parentNode.insertBefore(document.createTextNode(' '), el); });
+      var raw = copy.textContent.replace(/\\s+/g, ' ').trim();
+      var q = raw;
+      if (clean) {
+        var stripped = raw.replace(stripRe, '').split(splitRe)[0].replace(punctRe, '').trim();
+        if (!stripped) {
+          var m = raw.match(fallbackRe);
+          stripped = m ? m[1].trim() : raw;
+        }
+        q = stripped || raw;
       }
-      q = stripped || raw;
-    }
-    each(src.parentNode.querySelectorAll('.link-btn[data-base]'), function (a) {
-      a.setAttribute('href', a.getAttribute('data-base') + encodeURIComponent(q));
+      var parent = src.parentNode;
+      if (parent) {
+        each(parent.querySelectorAll('.link-btn[data-base]'), function (a) {
+          a.setAttribute('href', a.getAttribute('data-base') + encodeURIComponent(q));
+        });
+      }
     });
-  });
+  }
+  updateLinks();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateLinks);
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('.link-btn[data-base]') : null;
+    if (a) { updateLinks(); }
+  }, true);
 })();
 </script>`;
   }
@@ -3005,14 +3027,15 @@ ${sel('::after')} {
 
     const targetAttr = linkNewTab.checked ? ' target="_blank"' : '';
     const shouldClean = Boolean(linkCleanQuery && linkCleanQuery.checked);
-    const query = shouldClean ? cleanLinkQuery(sampleValue) : sampleValue;
+    const cleaned = shouldClean ? cleanLinkQuery(sampleValue) : sampleValue;
+    const query = (cleaned || String(sampleValue || '')).trim();
     return linkTargets.map(target =>
       `<a class="link-btn ${target.cls}" href="${escapeHtml(target.url + encodeURIComponent(query))}"${targetAttr} title="${escapeHtml(target.title)}" style="${LINK_BTN_DECLS.join(' ')}">${target.icon}</a>`
     ).join('');
   }
 
   // Anki 서식용 필드 내용: 링크가 있으면 필드 값을 .link-src로 감싸고, 아이콘은 필드가 비어 있지 않을 때만 표시
-  // (href에는 사전 주소만 넣고, 검색어는 카드 스크립트가 .link-src 텍스트로 채움 → & # " 등이 들어 있어도 안전)
+  // (href에는 사전 주소 + {{text:필드명}}을 기본으로 넣고, 검색어 정리를 켜면 카드 스크립트가 괄호·품사 등을 뺀 깔끔한 단어로 href를 교체)
   // 🔊 읽어주기는 사전 아이콘 뒤에 붙이고, 필드가 비어 있으면 표시하지 않음
   // 아이콘은 같은 필드 블록 안의 <span class="field-icons">로 묶음 → 위치(글자 옆 / 글자 아래)는 CSS만 바꾸고,
   // 카드 스크립트는 그대로 같은 필드 블록에서 .link-src 와 아이콘을 찾음
@@ -3026,7 +3049,7 @@ ${sel('::after')} {
     const targetAttr = linkNewTab.checked ? ' target="_blank"' : '';
     const buttons = linkTargets.map(target => {
       const base = escapeHtml(target.url);
-      return `<a class="link-btn ${target.cls}" href="${base}" data-base="${base}"${targetAttr} title="${escapeHtml(target.title)}">${target.icon}</a>`;
+      return `<a class="link-btn ${target.cls}" href="${base}{{text:${name}}}" data-base="${base}"${targetAttr} title="${escapeHtml(target.title)}">${target.icon}</a>`;
     }).join('');
     return `<span class="link-src">{{${name}}}</span>{{#${name}}}<span class="field-icons">${buttons}${tts}</span>{{/${name}}}`;
   }
