@@ -206,3 +206,8 @@
   flex-shrink: 0;
 }
 
+.portal-notice-box {
+  max-width: 920px;
+}
+
+
