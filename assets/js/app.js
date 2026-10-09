@@ -3746,20 +3746,22 @@ ${indentDecls(deco.divider === 'obang' ? [getDividerDecls(night.dividerColor, de
         });
       }
 
-      // 보조 사전 URL 복원
+      // 보조 사전 URL 복원 (이전 버전에서 위키백과 주소가 저장되어 있던 경우 보조 사전 기본값 유지)
       if (subDictUrlInput) {
         const savedSubUrl = data.subDictUrl || (data.subDict === 'ko' ? data.wikiUrl : undefined);
-        if (savedSubUrl && !isDefaultSubDictUrl(savedSubUrl)) {
+        const isWikiUrl = isDefaultWikiUrl(savedSubUrl) || (typeof savedSubUrl === 'string' && savedSubUrl.includes('wikipedia.org'));
+        if (savedSubUrl && !isDefaultSubDictUrl(savedSubUrl) && !isWikiUrl) {
           subDictUrlInput.value = savedSubUrl;
         } else {
           subDictUrlInput.value = DEFAULT_SUB_DICT_URL;
         }
       }
 
-      // 위키백과 URL 복원
+      // 위키백과 URL 복원 (이전 버전 단일 입력창 시절 국어사전 주소가 저장되어 있던 경우 위키 기본값 복원)
       if (wikiUrlInput) {
         const savedWikiUrl = data.wikiUrl;
-        if (savedWikiUrl && !isDefaultWikiUrl(savedWikiUrl)) {
+        const isNaverOrSubDict = isDefaultSubDictUrl(savedWikiUrl) || (typeof savedWikiUrl === 'string' && savedWikiUrl.includes('dict.naver.com'));
+        if (savedWikiUrl && !isDefaultWikiUrl(savedWikiUrl) && !isNaverOrSubDict) {
           wikiUrlInput.value = savedWikiUrl;
         } else {
           wikiUrlInput.value = DEFAULT_WIKI_URL;
