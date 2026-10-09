@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="editor.pageTitle">Anki 카드 서식 에디터</title>
+  <meta name="description" data-i18n-attr="content:editor.metaDescription" content="복사해서 붙여넣기만 하면 되는 다국어 Anki 카드 서식 &amp; 사전 아이콘 만들기">
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg?v=2">
+  <link rel="alternate icon" href="../favicon.ico?v=2">
+  <!-- Google Fonts: 화면 글꼴(Noto Sans KR)과 언어 예시용 문자만 (카드 글꼴 미리보기는 기기에 들어 있는 글꼴로 표시) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+Arabic:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
+  <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
+  <link rel="stylesheet" href="../assets/css/style.css?v=20261008a">
+  <link rel="stylesheet" href="../assets/css/editor.css?v=20261008a">
+</head>
+<body>
+  <!-- 모든 페이지 공통 메뉴줄 (i18n.js가 그림): PC는 한 줄, 휴대폰은 ☰ 버튼으로 여닫기 -->
+  <nav data-site-nav="editor"></nav>
+
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-group">
+        <span class="logo-icon">🌄</span>
+        <div>
+          <h1 class="logo-title" data-i18n="editor.pageTitle">Anki 카드 서식 에디터</h1>
+          <p class="logo-subtitle" data-i18n="editor.header.subtitle">복사해서 붙여넣기만 하면 되는 다국어 카드 서식 & 사전 아이콘 만들기</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span id="saveStatusIndicator" class="save-status-badge" data-i18n="common.autoSaved" data-i18n-attr="title:common.autoSavedTitle" title="설정은 이 브라우저에 자동으로 저장돼요">✓ 자동 저장됨</span>
+        <button type="button" id="resetAllSettingsBtn" class="btn-outline-danger" data-i18n="common.resetAll" data-i18n-attr="title:common.resetAllTitle" title="모든 설정을 초기화해요">
+          🔄 설정 초기화
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <!-- 처음부터 끝까지 4단계 경로 표시줄 (i18n.js가 그림, 현재 2단계) -->
+    <nav data-journey="2"></nav>
+
+    <!-- PC 권장 안내 (좌우 칸 위 전체 폭: 왼쪽 · 오른쪽 칸이 같은 높이에서 시작하게) -->
+    <div class="pc-notice" data-i18n-html="common.pcNotice">💻 카드 서식 붙여넣기와 단어장 가져오기는 <strong>PC에서</strong> 하는 걸 추천해요. 한 번 해 두면 동기화로 폰에도 그대로 적용되고, 폰에서는 복습만 하면 됩니다.</div>
+
+    <!-- Mobile Screen View Switcher (모바일 전용 화면 전환 탭) -->
+    <nav class="mobile-view-nav" id="mobileViewNav" data-i18n-attr="aria-label:editor.mobile.navAriaLabel" aria-label="모바일 화면 전환 탭">
+      <button type="button" class="mobile-nav-btn active" id="btnMobileEditTab" data-i18n="editor.mobile.editTab">⚙️ 1. 설정하기</button>
+      <button type="button" class="mobile-nav-btn" id="btnMobilePreviewTab" data-i18n="editor.mobile.previewTab">📱 2. 미리보기·복사</button>
+    </nav>
+
+    <div class="main-layout">
+
+      <!-- LEFT: Editor Settings Form -->
+      <section class="editor-panel" data-i18n-attr="aria-label:editor.panel.ariaLabel" aria-label="카드 서식 설정 패널">
+
+        <!-- 📝 언어·필드만 초기화 (꾸미기는 그대로) — 오른쪽 칸 맨 위 🎨 꾸미기 초기화와 같은 높이 -->
+        <div class="panel-reset-row">
+          <button type="button" id="resetContentBtn" class="btn-group-reset" data-i18n="editor.resetContent" data-i18n-attr="title:editor.resetContentTitle" title="학습 언어와 필드(이름·예시·앞면/뒷면·사전 아이콘·읽어주기)만 초기화해요. 꾸미기는 그대로예요.">📝 언어·필드 초기화</button>
+        </div>
+
+
+
+        <!-- 1. 학습 언어 (사전 주소 등 세부 설정은 아래 고급 설정) -->
+        <div class="card-section">
+          <div class="section-title">
+            <span class="step-num">1</span>
+            <h2 data-i18n="editor.step1.title">배우는 언어 고르기</h2>
+          </div>
+          <p class="section-desc" data-i18n="editor.step1.desc">배우는 언어를 고르면 그 언어에 맞는 사전이 자동으로 연결돼요.</p>
+
+          <div class="form-group">
+            <label for="langSearchInput" class="form-label" data-i18n="editor.step1.langLabel">학습 언어</label>
+            <div class="searchable-combobox" id="langSelectContainer">
+              <!-- 숨겨진 네이티브 셀렉트 (호환성 유지) -->
+              <select id="languageSelect" class="visually-hidden" tabindex="-1" aria-hidden="true"></select>
+              
+              <!-- 검색 및 선택 인풋창 -->
+              <div class="combobox-input-wrapper">
+                <span class="combobox-search-icon">🔍</span>
+                <input 
+                  type="text" 
+                  id="langSearchInput" 
+                  class="form-input combobox-input" 
+                  data-i18n-attr="placeholder:combobox.placeholder"
+                  placeholder="언어 검색 (예: 스페인어, ㅅㅍㅇ, spanish, es...)"
+                  autocomplete="off"
+                  role="combobox"
+                  aria-expanded="false"
+                  aria-controls="langDropdownList"
+                  aria-autocomplete="list"
+                >
+                <button type="button" id="langClearBtn" class="combobox-clear-btn hidden" data-i18n-attr="title:combobox.clearTitle" title="검색어 지우기">&times;</button>
+                <button type="button" id="langToggleBtn" class="combobox-toggle-btn" data-i18n-attr="title:combobox.toggleTitle" title="언어 목록 펼치기/접기">▼</button>
+              </div>
+
+              <!-- 검색 결과 드롭다운 목록 -->
+              <div id="langDropdownWrapper" class="combobox-dropdown hidden">
+                <div class="dropdown-header-info"><span id="filteredLangCount"></span></div>
+                <ul id="langDropdownList" class="dropdown-list" role="listbox"></ul>
+              </div>
+            </div>
+            <p class="dict-linked-info"><span data-i18n="editor.step1.dictLinkedLabel">🌐 연결된 외국어사전:</span> <span id="dictNameTag" class="dict-name-tag">네이버 영어사전</span></p>
+            <span id="rtlNotice" class="notice-badge hidden" data-i18n="editor.step1.rtlNotice">오른쪽에서 왼쪽으로 쓰는 언어라서, 카드도 오른쪽에서 왼쪽으로 쓰도록 자동으로 맞췄어요.</span>
+          </div>
+        </div>
+
+        <!-- 2. 카드에 들어갈 칸(필드) -->
+        <div class="card-section">
+          <div class="section-title">
+            <span class="step-num">2</span>
+            <h2 data-i18n="editor.step2.title">카드에 들어갈 칸(필드) 정하기</h2>
+          </div>
+          <p class="section-desc" data-i18n="editor.step2.desc">필드는 카드에 들어가는 칸이에요 (예: 뜻, 단어, 예문). 필드 이름을 Anki 노트의 필드 이름과 똑같이 적고, 앞면·뒷면 중 어디에 보일지 고르세요. 글씨 크기·색은 미리보기에서 글자를 눌러 바꿀 수 있어요.</p>
+
+          <!-- Field 1 Settings -->
+          <div class="field-setting-box" id="boxField1">
+            <div class="field-setting-header">
+              <div class="field-badge" id="f1_badge">1번째 필드 (앞면 / Front)</div>
+              <div class="field-visibility-toggles">
+                <div class="toggle-row">
+                <label class="mini-toggle" data-i18n-attr="title:editor.field.showFrontTitle" title="이 필드를 카드 앞면(문제)에 보여주기">
+                  <input type="checkbox" id="f1_show_front" checked>
+                  <span data-i18n="editor.field.showFront">앞면 표시</span>
+                </label>
+                <label class="mini-toggle" data-i18n-attr="title:editor.field.showBackTitle" title="이 필드를 카드 뒷면(정답)에 보여주기">
+                  <input type="checkbox" id="f1_show_back">
+                  <span data-i18n="editor.field.showBack">뒷면 표시</span>
+                </label>
+                </div>
+                <div class="toggle-row">
+                <label class="mini-toggle mini-toggle-link" data-i18n-attr="title:editor.field.dictLinkTitle" title="이 필드 글자 옆에 외국어사전 아이콘 붙이기">
+                  <input type="checkbox" id="f1_dict_link">
+                  <span data-i18n="editor.field.dictLink">🌐 외국어사전</span>
+                </label>
+                <label class="mini-toggle mini-toggle-link" data-i18n-attr="title:editor.field.subDictLinkTitle" title="이 필드 글자 옆에 보조 사전 아이콘 붙이기">
+                  <input type="checkbox" id="f1_subdict_link">
+                  <span class="sub-dict-label" data-i18n="editor.field.subDictLink">📘 국어사전</span>
+                </label>
+                <label class="mini-toggle mini-toggle-link" data-i18n-attr="title:editor.field.wikiLinkTitle" title="이 필드 글자 옆에 위키백과 아이콘 붙이기">
+                  <input type="checkbox" id="f1_wiki_link">
+                  <span class="wiki-dict-label" data-i18n="editor.field.wikiLink">📖 위키백과</span>
+                </label>
+                <label class="mini-toggle mini-toggle-tts" data-i18n-attr="title:editor.field.ttsTitle" title="카드를 열면 이 필드의 글자를 기기 목소리로 읽어줘요">
+                  <input type="checkbox" id="f1_tts">
+                  <span data-i18n="editor.field.tts">🔊 읽어주기</span>
+                </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid-2-col">
+              <div class="form-group">
+                <label for="f1_name" class="form-label" data-i18n="editor.field.nameLabel">필드 이름 (Anki 노트의 필드 이름과 똑같이)</label>
+                <input type="text" id="f1_name" class="form-input" value="Front" data-i18n-attr="placeholder:editor.field.namePlaceholder1" placeholder="예: Front, 뜻, 의미">
+                <span id="f1_name_warn" class="notice-badge field-name-warning hidden" role="alert"></span>
+              </div>
+              <div class="form-group">
+                <label for="f1_sample" class="form-label" data-i18n="editor.field.sampleLabel">미리보기에 보일 예시</label>
+                <input type="text" id="f1_sample" class="form-input" value="사과">
+              </div>
+            </div>
+
+            <div class="style-controls-row">
+              <div class="control-item">
+                <label for="f1_size_num" class="sub-label"><span data-i18n="editor.style.sizeLabel">글씨 크기</span><span class="stepper-label-val"> <span id="f1_size_val">26</span>px</span></label>
+                <div class="slider-with-number">
+                  <input type="range" id="f1_size" min="10" max="80" value="26" class="form-range">
+                  <input type="number" id="f1_size_num" min="10" max="80" value="26" class="num-input">
+                </div>
+              </div>
+
+              <div class="control-item">
+                <label for="f1_weight" class="sub-label" data-i18n="editor.style.weightLabel">글씨 굵기</label>
+                <select id="f1_weight" class="form-select small-select">
+                  <option value="normal" data-i18n="editor.style.weightNormal">보통</option>
+                  <option value="bold" selected data-i18n="editor.style.weightBold">굵게</option>
+                  <option value="600" data-i18n="editor.style.weight600">조금 굵게</option>
+                </select>
+              </div>
+
+              <div class="control-item">
+                <label for="f1_font" class="sub-label" data-i18n="editor.style.fontLabel">글꼴</label>
+                <select id="f1_font" class="form-select small-select">
+                  <option value="inherit" selected data-i18n="editor.font.inherit">(카드 글꼴 그대로)</option>
+                  <option value="gothic" data-i18n="editor.font.gothic">기본 고딕 (추천)</option>
+                  <option value="serif" data-i18n="editor.font.serif">명조 (바탕체 느낌)</option>
+                  <option value="mono" data-i18n="editor.font.mono">타자기체 (영문·숫자 폭이 일정)</option>
+                </select>
+              </div>
+
+              <div class="control-item">
+                <label for="f1_color" class="sub-label" data-i18n="editor.style.colorLabel">색상</label>
+                <div class="color-picker-group">
+                  <input type="color" id="f1_color" value="#202124" class="form-color">
+                  <input type="text" id="f1_color_text" value="#202124" class="color-hex-input" maxlength="7">
+                </div>
+              </div>
+            </div>
+            <div class="preset-colors">
+              <span class="preset-label" data-i18n="editor.style.presetLabel">추천 색상:</span>
+              <button type="button" class="preset-dot" data-target="1" data-color="#202124" style="background:#202124;" data-i18n-attr="title:editor.color.darkGray" title="진한 회색"></button>
+              <button type="button" class="preset-dot" data-target="1" data-color="#1a73e8" style="background:#1a73e8;" data-i18n-attr="title:editor.color.googleBlue" title="파랑"></button>
+              <button type="button" class="preset-dot" data-target="1" data-color="#0d904f" style="background:#0d904f;" data-i18n-attr="title:editor.color.emerald" title="초록"></button>
+              <button type="button" class="preset-dot" data-target="1" data-color="#d93025" style="background:#d93025;" data-i18n-attr="title:editor.color.red" title="빨강"></button>
+              <button type="button" class="preset-dot" data-target="1" data-color="#9334e6" style="background:#9334e6;" data-i18n-attr="title:editor.color.purple" title="보라"></button>
+            </div>
+          </div>
+
+          <!-- Field 2 Settings -->
+          <div class="field-setting-box" id="boxField2">
+            <div class="field-setting-header">
+              <div class="field-badge field-badge-primary" id="f2_badge">2번째 필드 (뒷면 / Back) · 🌐 외국어사전</div>
+              <div class="field-visibility-toggles">
+                <div class="toggle-row">
+                <label class="mini-toggle" data-i18n-attr="title:editor.field.showFrontTitle" title="이 필드를 카드 앞면(문제)에 보여주기">
+                  <input type="checkbox" id="f2_show_front">
+                  <span data-i18n="editor.field.showFront">앞면 표시</span>
+                </label>
+                <label class="mini-toggle" data-i18n-attr="title:editor.field.showBackTitle" title="이 필드를 카드 뒷면(정답)에 보여주기">
+                  <input type="checkbox" id="f2_show_back" checked>
+                  <span data-i18n="editor.field.showBack">뒷면 표시</span>
+                </label>
+                </div>
+                <div class="toggle-row">
+                <label class="mini-toggle mini-toggle-link" data-i18n-attr="title:editor.field.dictLinkTitle" title="이 필드 글자 옆에 외국어사전 아이콘 붙이기">
+                  <input type="checkbox" id="f2_dict_link" checked>
+                  <span data-i18n="editor.field.dictLink">🌐 외국어사전</span>
+                </label>
+                <label class="mini-toggle mini-toggle-link" data-i18n-attr="title:editor.field.subDictLinkTitle" title="이 필드 글자 옆에 보조 사전 아이콘 붙이기">
+                  <input type="checkbox" id="f2_subdict_link">
+                  <span class="sub-dict-label" data-i18n="editor.field.subDictLink">📘 국어사전</span>
+                </label>
+                <label class="mini-toggle mini-toggle-link" data-i18n-attr="title:editor.field.wikiLinkTitle" title="이 필드 글자 옆에 위키백과 아이콘 붙이기">
+                  <input type="checkbox" id="f2_wiki_link">
+                  <span class="wiki-dict-label" data-i18n="editor.field.wikiLink">📖 위키백과</span>
+                </label>
+                <label class="mini-toggle mini-toggle-tts" data-i18n-attr="title:editor.field.ttsTitle" title="카드를 열면 이 필드의 글자를 기기 목소리로 읽어줘요">
+                  <input type="checkbox" id="f2_tts" checked>
+                  <span data-i18n="editor.field.tts">🔊 읽어주기</span>
+                </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid-2-col">
+              <div class="form-group">
+                <label for="f2_name" class="form-label" data-i18n="editor.field.nameLabel">필드 이름 (Anki 노트의 필드 이름과 똑같이)</label>
+                <input type="text" id="f2_name" class="form-input" value="Back" data-i18n-attr="placeholder:editor.field.namePlaceholder2" placeholder="예: Back, 단어, 표현">
+                <span id="f2_name_warn" class="notice-badge field-name-warning hidden" role="alert"></span>
+              </div>
+              <div class="form-group">
+                <label for="f2_sample" class="form-label" data-i18n="editor.field.sampleLabel">미리보기에 보일 예시</label>
+                <input type="text" id="f2_sample" class="form-input" value="Apple">
+              </div>
+            </div>
+
+            <div class="style-controls-row">
+              <div class="control-item">
+                <label for="f2_size_num" class="sub-label"><span data-i18n="editor.style.sizeLabel">글씨 크기</span><span class="stepper-label-val"> <span id="f2_size_val">26</span>px</span></label>
+                <div class="slider-with-number">
+                  <input type="range" id="f2_size" min="10" max="80" value="26" class="form-range">
+                  <input type="number" id="f2_size_num" min="10" max="80" value="26" class="num-input">
+                </div>
+              </div>
+
+              <div class="control-item">
+                <label for="f2_weight" class="sub-label" data-i18n="editor.style.weightLabel">글씨 굵기</label>
+                <select id="f2_weight" class="form-select small-select">
+                  <option value="normal" data-i18n="editor.style.weightNormal">보통</option>
+                  <option value="bold" selected data-i18n="editor.style.weightBold">굵게</option>
+                  <option value="600" data-i18n="editor.style.weight600">조금 굵게</option>
+                </select>
+              </div>
+
+              <div class="control-item">
+                <label for="f2_font" class="sub-label" data-i18n="editor.style.fontLabel">글꼴</label>
+                <select id="f2_font" class="form-select small-select">
+                  <option value="inherit" selected data-i18n="editor.font.inherit">(카드 글꼴 그대로)</option>
+                  <option value="gothic" data-i18n="editor.font.gothic">기본 고딕 (추천)</option>
+                  <option value="serif" data-i18n="editor.font.serif">명조 (바탕체 느낌)</option>
+                  <option value="mono" data-i18n="editor.font.mono">타자기체 (영문·숫자 폭이 일정)</option>
+                </select>
+              </div>
+
+              <div class="control-item">
+                <label for="f2_color" class="sub-label" data-i18n="editor.style.colorLabel">색상</label>
+                <div class="color-picker-group">
+                  <input type="color" id="f2_color" value="#1a73e8" class="form-color">
+                  <input type="text" id="f2_color_text" value="#1a73e8" class="color-hex-input" maxlength="7">
+                </div>
+              </div>
+            </div>
+            <div class="preset-colors">
+              <span class="preset-label" data-i18n="editor.style.presetLabel">추천 색상:</span>
+              <button type="button" class="preset-dot" data-target="2" data-color="#1a73e8" style="background:#1a73e8;" data-i18n-attr="title:editor.color.googleBlue" title="파랑"></button>
+              <button type="button" class="preset-dot" data-target="2" data-color="#202124" style="background:#202124;" data-i18n-attr="title:editor.color.darkGray" title="진한 회색"></button>
+              <button type="button" class="preset-dot" data-target="2" data-color="#0d904f" style="background:#0d904f;" data-i18n-attr="title:editor.color.emerald" title="초록"></button>
+              <button type="button" data-target="2" data-color="#d93025" style="background:#d93025;" data-i18n-attr="title:editor.color.red" title="빨강" class="preset-dot"></button>
+              <button type="button" class="preset-dot" data-target="2" data-color="#9334e6" style="background:#9334e6;" data-i18n-attr="title:editor.color.purple" title="보라"></button>
+            </div>
+          </div>
+
+          <!-- 3번째 이상 선택 필드 컨테이너 -->
+          <div id="optionalFieldsContainer"></div>
+
+          <!-- 🔊 읽어주기 한 줄 안내 (읽어주기를 켠 필드가 있거나, 읽어주기를 쓸 수 없는 언어일 때만 보임)
+               자세한 설명(자동 재생 끄기 · 소리가 안 날 때 · 읽는 속도)은 사용 설명서(manual.html#tts)로 -->
+          <div class="tts-info-box hidden" id="ttsInfoBox">
+            <p class="tts-info-line" id="ttsInfoBody" data-i18n-html="editor.tts.shortHtml">🔊 읽어주기를 켰어요. 자동 재생 끄기 · 소리가 안 날 때 · 읽는 속도 → <a href="manual.html#tts">사용 설명서</a></p>
+            <p class="tts-unsupported hidden" id="ttsUnsupportedNote" data-i18n="editor.tts.unsupported">이 언어는 기기에 읽어주는 목소리가 거의 없어서 🔊 읽어주기를 쓸 수 없어요.</p>
+          </div>
+
+          <!-- 언어별 추천 필드 빠른 추가 칩 -->
+          <div class="quick-chips-wrapper" style="margin-top: 1.25rem; margin-bottom: 0.75rem;">
+            <div class="quick-chips-title">
+              <span data-i18n="editor.chips.title">✨ 이 언어에 자주 쓰는 필드 (누르면 바로 추가돼요):</span>
+              <span id="editorQuickChipsLangBadge" style="font-size: 0.75rem; color: var(--primary); font-weight: 700;">(영어 추천)</span>
+            </div>
+            <div class="quick-chips-list" id="editorQuickChipsList">
+              <!-- JS에서 선택된 언어에 맞춰 동적으로 생성 -->
+            </div>
+          </div>
+
+          <!-- 필드 추가 버튼 -->
+          <div class="add-field-action-row">
+            <button type="button" id="addFieldBtn" class="btn-add-field" data-i18n="editor.addField" data-i18n-attr="title:editor.addFieldTitle" title="이름을 직접 정할 새 필드를 추가해요">
+              ➕ 빈 필드 하나 더 만들기
+            </button>
+          </div>
+        </div>
+
+        <!-- 고급 설정 (기본 접힘): 사전 아이콘 세부 설정 · 읽는 속도 (카드 모양은 오른쪽 🎨 더 꾸미기 안) -->
+        <details class="advanced-settings" id="editorAdvancedSettings">
+          <summary><span data-i18n="common.advanced.title">⚙️ 고급 설정</span> <span class="advanced-hint" data-i18n="common.advanced.hint">기본값 그대로 써도 괜찮아요</span></summary>
+          <div class="advanced-body">
+
+            <!-- 사전 아이콘 (사전 주소 · 보조 사전 · 새 창 · 검색어 정리 · 필드별 적용) -->
+            <h3 class="advanced-group-title" data-i18n="editor.advanced.dictTitle">🔗 사전 아이콘</h3>
+            <div class="form-group">
+              <div class="label-with-action">
+                <label for="dictUrlInput" class="form-label" data-i18n="editor.step1.dictUrlLabel">사전 주소 (보통은 바꿀 필요 없어요)</label>
+                <button type="button" id="resetDictUrlBtn" class="btn-text" data-i18n="editor.step1.resetDefault" data-i18n-attr="title:editor.step1.resetDictUrlTitle" title="이 언어의 기본 사전 주소로 초기화">초기화</button>
+              </div>
+              <input type="url" id="dictUrlInput" class="form-input" placeholder="https://en.dict.naver.com/#/search?query=">
+              <span id="dictUrlWarn" class="notice-badge hidden" role="alert"></span>
+            </div>
+
+            <!-- 보조 사전 (국어 / 중한 / 영한) -->
+            <div class="form-group">
+              <div class="label-with-action">
+                <label for="subDictUrlInput" class="form-label" data-i18n="editor.step1.subDictLabel">보조 사전 주소 (한국어 뜻 / 단어 검색)</label>
+                <button type="button" id="resetSubDictUrlBtn" class="btn-text" data-i18n="editor.step1.resetDefault" data-i18n-attr="title:editor.step1.resetSubDictTitle" title="보조 사전의 기본 주소로 초기화">초기화</button>
+              </div>
+              <input type="url" id="subDictUrlInput" class="form-input" placeholder="https://ko.dict.naver.com/#/search?query=" value="https://ko.dict.naver.com/#/search?query=">
+              <span id="subDictUrlWarn" class="notice-badge hidden" role="alert"></span>
+            </div>
+
+            <!-- 위키백과 -->
+            <div class="form-group">
+              <div class="label-with-action">
+                <label for="wikiUrlInput" class="form-label" data-i18n="editor.step1.wikiUrlLabel">위키백과 주소</label>
+                <button type="button" id="resetWikiUrlBtn" class="btn-text" data-i18n="editor.step1.resetDefault" data-i18n-attr="title:editor.step1.resetWikiUrlTitle" title="위키백과의 기본 주소로 초기화">초기화</button>
+              </div>
+              <input type="url" id="wikiUrlInput" class="form-input" placeholder="https://ko.wikipedia.org/w/index.php?search=" value="https://ko.wikipedia.org/w/index.php?search=">
+              <span id="wikiUrlWarn" class="notice-badge hidden" role="alert"></span>
+            </div>
+
+            <div class="form-group inline-checkbox">
+              <label class="custom-checkbox">
+                <input type="checkbox" id="linkNewTab" checked>
+                <span data-i18n-html="editor.step1.newTabHtml">사전을 새 창으로 열기</span>
+              </label>
+            </div>
+
+            <div class="form-group inline-checkbox">
+              <label class="custom-checkbox">
+                <input type="checkbox" id="linkCleanQuery" checked>
+                <span data-i18n-html="editor.step1.cleanQueryHtml">검색어 깔끔하게: [ ]·( ) 안의 내용은 빼고, 뜻이 여러 개면 첫 번째 뜻만 검색 (예: [명사] 사과, 사과나무 ➔ 사과)</span>
+              </label>
+            </div>
+
+            <!-- 3번에서 각 필드별 네이버 사전 링크 여부 선택 (단어·예문 다중 선택 가능) -->
+            <div class="dict-link-selection-box">
+              <div class="dict-link-box-header">
+                <span class="dict-link-box-title" data-i18n="editor.dictList.title">🔗 사전 아이콘을 붙일 필드 (여러 개 골라도 돼요)</span>
+                <span class="helper-badge" data-i18n="editor.dictList.badge">두 사전 함께 써도 돼요</span>
+              </div>
+              <p class="helper-text" data-i18n="editor.dictList.helper">
+                체크한 필드의 글자 옆에 사전 아이콘이 생기고, 누르면 사전 검색 결과가 바로 열려요. ② 필드 상자의 🌐·📘 버튼과 같은 설정이에요. 💡 외국어사전은 한국어로 검색해도 결과가 나오므로, 한국어 뜻 필드(Front)에 🌐를 붙이면 "이 뜻을 외국어로 뭐라고 하지?"를 바로 찾아볼 수 있어요.
+              </p>
+              <div id="dictFieldChecklist" class="checkbox-list">
+                <!-- JS에서 각 필드별 체크박스가 동적으로 렌더링됨 -->
+              </div>
+            </div>
+
+            <!-- 읽어주기 (읽는 속도 · 미리 듣기) -->
+            <h3 class="advanced-group-title" data-i18n="editor.advanced.ttsTitle">🔊 읽어주기</h3>
+            <div class="tts-speed-row">
+              <label for="ttsSpeed" class="sub-label" data-i18n="editor.tts.speedLabel">읽는 속도</label>
+              <select id="ttsSpeed" class="form-select small-select">
+                <option value="1.0" selected data-i18n="editor.tts.speedNormal">보통</option>
+                <option value="0.8" data-i18n="editor.tts.speedSlow">조금 느리게</option>
+                <option value="0.6" data-i18n="editor.tts.speedSlower">느리게</option>
+              </select>
+              <button type="button" id="ttsSpeedPreviewBtn" class="btn-text tts-preview-btn" data-i18n="editor.tts.previewSpeed" data-i18n-attr="title:editor.tts.previewSpeedTitle" title="고른 속도로 예시 글자를 읽어 줘요 (이 브라우저의 목소리라 Anki 목소리와는 조금 달라요)">▶ 미리 듣기</button>
+            </div>
+            <p class="helper-text" data-i18n="editor.tts.speedHelp">🔊 읽어주기를 켠 필드의 예시 글자를 고른 속도로 읽어 줘요. 실제 Anki 목소리는 기기마다 조금 달라요.</p>
+
+          </div>
+        </details>
+
+        <!-- Mobile Bottom Quick Action -->
+        <div class="mobile-quick-action">
+          <button type="button" class="btn-primary-mobile" id="btnGoPreviewMobile" data-i18n="editor.mobile.goPreview">
+            📱 미리보기 보고 카드 서식 복사하러 가기 ➔
+          </button>
+        </div>
+
+        <!-- Mobile Floating Switch to Preview (입력란 우측 버튼) -->
+        <button type="button" class="mobile-float-switch-btn right" id="btnFloatToPreview" data-i18n="editor.mobile.floatToPreview" data-i18n-attr="title:editor.mobile.floatToPreviewTitle" title="미리보기 &amp; 카드 서식 복사 화면으로 이동">
+          📱 미리보기 ➔
+        </button>
+
+      </section>
+
+      <!-- RIGHT: Live Preview & Generated Code -->
+      <section class="preview-panel" data-i18n-attr="aria-label:editor.preview.panelAriaLabel" aria-label="미리보기 및 카드 서식 복사 패널">
+
+        <!-- Mobile Back to Edit button -->
+        <div class="mobile-back-action">
+          <button type="button" class="btn-secondary-mobile" id="btnGoEditMobile" data-i18n="editor.mobile.goEdit">
+            ⚙️ ◀ 언어·필드 설정 다시 바꾸기
+          </button>
+          <a href="#pasteHelper" class="mobile-jump-link" id="btnJumpToPaste" data-i18n="editor.mobile.jumpToPaste">⬇️ ③ 카드 서식 복사로 바로 가기</a>
+        </div>
+
+        <!-- 🎨 꾸미기만 초기화 (언어·필드는 그대로) — 왼쪽 칸 맨 위 📝 언어·필드 초기화와 같은 높이 -->
+        <div class="panel-reset-row">
+          <button type="button" id="resetDesignBtn" class="btn-group-reset" data-i18n="editor.deco.reset" data-i18n-attr="title:editor.deco.resetTitle" title="테마·배경·글꼴·글씨 크기와 색만 초기화해요. 학습 언어와 필드는 그대로예요.">🎨 꾸미기 초기화</button>
+        </div>
+
+        <!-- Card Simulation Viewer -->
+        <div class="preview-container">
+          <div class="preview-header">
+            <div class="preview-mode-tabs">
+              <button type="button" class="mode-tab active" id="tabFrontPreview" data-i18n="editor.preview.tabFront">앞면 미리보기</button>
+              <button type="button" class="mode-tab" id="tabBackPreview" data-i18n="editor.preview.tabBack">뒷면 미리보기</button>
+            </div>
+            <div class="preview-actions">
+              <button type="button" id="flipCardBtn" class="btn-secondary btn-sm" data-i18n-attr="title:editor.preview.flipTitle" title="카드 뒤집기">
+                <span class="flip-icon">🔄</span>
+                <span class="flip-text" data-i18n="editor.preview.flip">뒤집기</span>
+              </button>
+              <button type="button" id="toggleDarkModeBtn" class="btn-icon" data-i18n-attr="title:editor.preview.darkModeToggleTitle" title="어두운 화면으로 미리보기">
+                🌙
+              </button>
+            </div>
+          </div>
+
+          <!-- Virtual Anki Card Window -->
+          <div class="anki-card-wrapper" id="ankiCardWrapper">
+            <div class="card-status-bar">
+              <span class="card-tag" data-i18n="editor.preview.cardTag">카드 미리보기</span>
+              <span id="currentCardSideBadge" class="side-badge" data-i18n="editor.preview.sideFront">앞면</span>
+            </div>
+            <div class="anki-card-content" id="liveCardRender">
+              <!-- Dynamically injected card markup -->
+            </div>
+          </div>
+          <p class="preview-hint" data-i18n="editor.preview.hint">💡 미리보기 카드의 글자를 누르면 아래에서 그 필드의 글씨 크기·색을 바꿀 수 있어요. 🌐·📘 아이콘을 누르면 실제 사전이 열려요.</p>
+          <p class="preview-hint hidden" id="previewTtsNote" data-i18n="editor.tts.deviceNote">🔊를 누르면 이 브라우저 목소리로 들어볼 수 있어요. 실제 Anki 목소리는 기기마다 달라요.</p>
+
+          <!-- 선택한 필드 스타일 편집 패널 (모든 필드 공용) -->
+          <div class="field-style-inspector" id="fieldStyleInspector">
+            <div class="inspector-header">
+              <span class="inspector-title"><span data-i18n="editor.inspector.title">🎨 글씨 꾸미기:</span> <strong id="inspectorFieldName">Front</strong></span>
+              <span id="inspectorHiddenNotice" class="inspector-notice hidden" data-i18n="editor.inspector.hiddenNotice">지금 보고 있는 면에는 안 보이는 필드예요</span>
+            </div>
+            <div class="inspector-field-chips" id="inspectorFieldChips" role="tablist" data-i18n-attr="aria-label:editor.inspector.chipsAriaLabel" aria-label="꾸밀 필드 고르기">
+              <!-- JS에서 필드 목록에 맞춰 동적으로 생성 -->
+            </div>
+
+            <div class="style-controls-row">
+              <div class="control-item">
+                <label for="inspectorSizeNum" class="sub-label"><span data-i18n="editor.style.sizeLabel">글씨 크기</span><span class="stepper-label-val"> <span id="inspectorSizeVal">26</span>px</span></label>
+                <div class="slider-with-number">
+                  <input type="range" id="inspectorSize" min="10" max="80" value="26" class="form-range">
+                  <input type="number" id="inspectorSizeNum" min="10" max="80" value="26" class="num-input">
+                </div>
+              </div>
+
+              <div class="control-item">
+                <label for="inspectorWeight" class="sub-label" data-i18n="editor.style.weightLabel">글씨 굵기</label>
+                <select id="inspectorWeight" class="form-select small-select">
+                  <option value="normal" data-i18n="editor.style.weightNormal">보통</option>
+                  <option value="bold" data-i18n="editor.style.weightBold">굵게</option>
+                  <option value="600" data-i18n="editor.style.weight600">조금 굵게</option>
+                </select>
+              </div>
+
+              <div class="control-item">
+                <label for="inspectorFont" class="sub-label" data-i18n="editor.style.fontLabel">글꼴</label>
+                <select id="inspectorFont" class="form-select small-select">
+                  <option value="inherit" data-i18n="editor.font.inherit">(카드 글꼴 그대로)</option>
+                  <option value="gothic" data-i18n="editor.font.gothic">기본 고딕 (추천)</option>
+                  <option value="serif" data-i18n="editor.font.serif">명조 (바탕체 느낌)</option>
+                  <option value="mono" data-i18n="editor.font.mono">타자기체 (영문·숫자 폭이 일정)</option>
+                </select>
+              </div>
+
+              <div class="control-item">
+                <label for="inspectorColor" class="sub-label" data-i18n="editor.style.colorLabel">색상</label>
+                <div class="color-picker-group">
+                  <input type="color" id="inspectorColor" value="#202124" class="form-color">
+                  <input type="text" id="inspectorColorText" value="#202124" class="color-hex-input" maxlength="7">
+                </div>
+              </div>
+            </div>
+            <div class="preset-colors" id="inspectorPresets">
+              <span class="preset-label" data-i18n="editor.style.presetLabel">추천 색상:</span>
+              <button type="button" class="preset-dot" data-color="#202124" style="background:#202124;" data-i18n-attr="title:editor.color.darkGray" title="진한 회색"></button>
+              <button type="button" class="preset-dot" data-color="#5f6368" style="background:#5f6368;" data-i18n-attr="title:editor.color.muteGray" title="연한 회색"></button>
+              <button type="button" class="preset-dot" data-color="#1a73e8" style="background:#1a73e8;" data-i18n-attr="title:editor.color.googleBlue" title="파랑"></button>
+              <button type="button" class="preset-dot" data-color="#0d904f" style="background:#0d904f;" data-i18n-attr="title:editor.color.emerald" title="초록"></button>
+              <button type="button" class="preset-dot" data-color="#d93025" style="background:#d93025;" data-i18n-attr="title:editor.color.red" title="빨강"></button>
+              <button type="button" class="preset-dot" data-color="#e37400" style="background:#e37400;" data-i18n-attr="title:editor.color.orange" title="주황"></button>
+              <button type="button" class="preset-dot" data-color="#9334e6" style="background:#9334e6;" data-i18n-attr="title:editor.color.purple" title="보라"></button>
+            </div>
+          </div>
+
+          <!-- 🎨 더 꾸미기 (기본 접힘): 테마 · 배경 · 카드 상자 · 테두리 · 구분선 — 미리보기 바로 아래라서 바꾸면서 바로 확인 -->
+          <details class="advanced-settings deco-settings" id="decoSettings">
+            <summary><span data-i18n="editor.deco.title">🎨 더 꾸미기</span> <span class="advanced-hint" data-i18n="editor.deco.hint">테마 · 배경 · 카드 모양</span></summary>
+            <div class="advanced-body">
+              <p class="deco-desc" data-i18n="editor.deco.desc">테마를 누르면 배경·글자색·글꼴이 한 번에 바뀌어요. 고른 뒤에 아래에서 하나씩 더 바꿔도 돼요. 어두운 화면(🌙)에서도 잘 보이게 자동으로 맞춰요.</p>
+
+              <h3 class="advanced-group-title" data-i18n="editor.deco.themesTitle">한 번에 꾸미기 (테마)</h3>
+              <div class="theme-swatches" id="themeSwatches" role="group" data-i18n-attr="aria-label:editor.deco.themesTitle" aria-label="한 번에 꾸미기 (테마)">
+                <!-- JS에서 테마 목록에 맞춰 동적으로 생성 -->
+              </div>
+
+              <h3 class="advanced-group-title" data-i18n="editor.deco.detailTitle">하나씩 바꾸기</h3>
+              <div class="deco-grid">
+                <!-- 배경 -->
+                <div class="deco-item">
+                  <label for="decoBgType" class="form-label" data-i18n="editor.deco.bgTitle">배경</label>
+                  <select id="decoBgType" class="form-select small-select">
+                    <option value="solid" data-i18n="editor.deco.bgSolid">단색</option>
+                    <option value="gradient" data-i18n="editor.deco.bgGradient">그라데이션 (두 색이 이어짐)</option>
+                    <option value="pattern" data-i18n="editor.deco.bgPattern">은은한 무늬</option>
+                  </select>
+                  <div class="deco-sub" id="decoBgDirRow">
+                    <label for="decoBgDir" class="sub-label" data-i18n="editor.deco.dirLabel">방향</label>
+                    <select id="decoBgDir" class="form-select small-select">
+                      <option value="down" data-i18n="editor.deco.dirDown">위 → 아래</option>
+                      <option value="right" data-i18n="editor.deco.dirRight">왼쪽 → 오른쪽</option>
+                      <option value="diagonal" data-i18n="editor.deco.dirDiagonal">대각선</option>
+                    </select>
+                  </div>
+                  <div class="deco-sub" id="decoBgPatternRow">
+                    <label for="decoBgPattern" class="sub-label" data-i18n="editor.deco.patternLabel">무늬</label>
+                    <select id="decoBgPattern" class="form-select small-select">
+                      <option value="dots" data-i18n="editor.deco.patternDots">점</option>
+                      <option value="grid" data-i18n="editor.deco.patternGrid">격자 (모눈종이)</option>
+                      <option value="lines" data-i18n="editor.deco.patternLines">줄노트</option>
+                      <option value="fiber" data-i18n="editor.deco.patternFiber">한지 결</option>
+                      <option value="jogakbo" data-i18n="editor.deco.patternJogakbo">조각보</option>
+                      <option value="munsal" data-i18n="editor.deco.patternMunsal">문살 (한옥 창살)</option>
+                    </select>
+                  </div>
+                  <div class="deco-colors">
+                    <label class="deco-color">
+                      <input type="color" id="decoBgColor" value="#ffffff" class="form-color">
+                      <span data-i18n="editor.deco.bgColor">배경 색</span>
+                    </label>
+                    <label class="deco-color" id="decoBgColor2Row">
+                      <input type="color" id="decoBgColor2" value="#dbeafe" class="form-color">
+                      <span id="decoBgColor2LabelGradient" data-i18n="editor.deco.bgColor2">두 번째 색</span>
+                      <span id="decoBgColor2LabelPattern" data-i18n="editor.deco.patternColor">무늬 색</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 카드 상자 -->
+                <div class="deco-item">
+                  <label for="decoBox" class="form-label" data-i18n="editor.deco.boxTitle">카드 상자</label>
+                  <select id="decoBox" class="form-select small-select">
+                    <option value="none" data-i18n="editor.deco.boxNone">없음</option>
+                    <option value="round" data-i18n="editor.deco.boxRound">둥근 카드</option>
+                    <option value="shadow" data-i18n="editor.deco.boxShadow">둥근 카드 + 그림자</option>
+                    <option value="sheet" data-i18n="editor.deco.boxSheet">표 모양 (스프레드시트)</option>
+                  </select>
+                  <div class="deco-colors" id="decoBoxColorRow">
+                    <label class="deco-color">
+                      <input type="color" id="decoBoxColor" value="#ffffff" class="form-color">
+                      <span data-i18n="editor.deco.boxColor">상자 색</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 테두리 -->
+                <div class="deco-item">
+                  <label for="decoBorder" class="form-label" data-i18n="editor.deco.borderTitle">테두리</label>
+                  <select id="decoBorder" class="form-select small-select">
+                    <option value="none" data-i18n="editor.deco.borderNone">없음</option>
+                    <option value="thin" data-i18n="editor.deco.borderThin">얇은 선</option>
+                    <option value="thick" data-i18n="editor.deco.borderThick">두꺼운 선</option>
+                    <option value="left" data-i18n="editor.deco.borderLeft">왼쪽 강조 띠</option>
+                    <option value="obang" data-i18n="editor.deco.borderObang">오방색 띠 (위·아래)</option>
+                    <option value="dancheong" data-i18n="editor.deco.borderDancheong">단청 띠 (위·아래)</option>
+                    <option value="najeon" data-i18n="editor.deco.borderNajeon">자개 띠 (위·아래)</option>
+                    <option value="bangwi" data-i18n="editor.deco.borderBangwi">방위 오방색 (위 북·오른쪽 동)</option>
+                  </select>
+                  <div class="deco-colors" id="decoBorderColorRow">
+                    <label class="deco-color">
+                      <input type="color" id="decoBorderColor" value="#cbd5e1" class="form-color">
+                      <span data-i18n="editor.deco.borderColor">테두리 색</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 구분선 모양 (뒷면의 정답 구분선) -->
+                <div class="deco-item">
+                  <label for="decoDivider" class="form-label" data-i18n="editor.deco.dividerTitle">구분선 모양</label>
+                  <select id="decoDivider" class="form-select small-select">
+                    <option value="solid" data-i18n="editor.deco.dividerSolid">실선</option>
+                    <option value="dashed" data-i18n="editor.deco.dividerDashed">점선</option>
+                    <option value="double" data-i18n="editor.deco.dividerDouble">이중선</option>
+                    <option value="obang" data-i18n="editor.deco.dividerObang">오방색 띠</option>
+                    <option value="dancheong" data-i18n="editor.deco.dividerDancheong">단청 띠</option>
+                    <option value="najeon" data-i18n="editor.deco.dividerNajeon">자개 띠</option>
+                  </select>
+                  <div class="deco-colors" id="decoDividerColorRow">
+                    <label class="deco-color">
+                      <input type="color" id="decoDividerColor" value="#cbd5e1" class="form-color">
+                      <span data-i18n="editor.deco.dividerColor">구분선 색</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 장식 (태극 문양 + 건곤감리) -->
+                <div class="deco-item">
+                  <label for="decoOrnament" class="form-label" data-i18n="editor.deco.ornamentTitle">장식</label>
+                  <select id="decoOrnament" class="form-select small-select">
+                    <option value="none" data-i18n="editor.deco.ornamentNone">없음</option>
+                    <option value="taegeuk" data-i18n="editor.deco.ornamentTaegeuk">태극 문양 + 건곤감리</option>
+                    <option value="irworobong" data-i18n="editor.deco.ornamentIrworobong">일월오봉도 그림 (판 아래)</option>
+                  </select>
+                </div>
+
+                <!-- 아이콘 위치 (🌐 사전 · 📘 보조 사전 · 🔊 읽어주기): 글자 옆 / 글자 아래 따로 한 줄 -->
+                <div class="deco-item">
+                  <label for="iconPosition" class="form-label" data-i18n="editor.deco.iconPosTitle">아이콘 위치</label>
+                  <select id="iconPosition" class="form-select small-select">
+                    <option value="beside" data-i18n="editor.deco.iconPosBeside">글자 옆</option>
+                    <option value="below" selected data-i18n="editor.deco.iconPosBelow">글자 아래 (따로 한 줄)</option>
+                  </select>
+                  <p class="deco-note" data-i18n="editor.deco.iconPosHint">🌐 사전 · 📘 보조 사전 · 🔊 읽어주기 아이콘을 놓을 자리예요. 따로 한 줄에 두면 잘못 누를 일이 줄어요.</p>
+                </div>
+              </div>
+
+              <!-- 카드 모양 (글꼴 · 줄 간격 · 구분선 · 뒷면 문제 표시 · 정렬 · 쓰기 방향) -->
+              <h3 class="advanced-group-title" data-i18n="editor.step3.title">🎨 카드 모양</h3>
+              <!-- 카드 전반 폰트 및 줄간격 설정 -->
+              <div class="card-global-style-box">
+                <div class="grid-2-col">
+                  <div class="form-group">
+                    <label for="cardBaseFont" class="form-label" data-i18n="editor.step3.baseFontLabel">카드 글꼴</label>
+                    <select id="cardBaseFont" class="form-select">
+                      <option value="gothic" selected data-i18n="editor.font.gothic">기본 고딕 (추천)</option>
+                      <option value="serif" data-i18n="editor.font.serif">명조 (바탕체 느낌)</option>
+                      <option value="mono" data-i18n="editor.font.mono">타자기체 (영문·숫자 폭이 일정)</option>
+                    </select>
+                    <!-- 글꼴 안내: 모두 기기에 들어 있는 글꼴 (인터넷 없이도 표시) -->
+                    <p class="helper-text font-help" data-i18n="editor.step3.baseFontHelp">모든 글꼴은 기기에 들어 있는 글꼴이라 PC·폰 어디서나, 인터넷 없이도 보여요. 기기마다 모양은 조금 달라요. 타자기체는 영문·숫자에만 적용되고, 한글은 고딕으로 보여요.</p>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="cardLineHeightNum" class="form-label"><span data-i18n="editor.step3.lineHeightLabel">줄 간격</span><span class="stepper-label-val"> <span id="cardLineHeightVal">1.5</span><span data-i18n="editor.step3.lineHeightUnit">배</span></span></label>
+                    <div class="slider-with-number" style="margin-top: 0.35rem;">
+                      <input type="range" id="cardLineHeight" min="1.0" max="3.0" step="0.1" value="1.5" class="form-range">
+                      <input type="number" id="cardLineHeightNum" min="1.0" max="3.0" step="0.1" value="1.5" class="num-input">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="checkbox-list">
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="showHrAnswer" checked>
+                  <span data-i18n-html="editor.step3.showHrHtml">뒷면에 구분선 넣기</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="keepFrontOnBack" checked>
+                  <span data-i18n-html="editor.step3.keepFrontHtml">뒷면 위쪽에 문제(앞면)도 보여주기</span>
+                </label>
+
+                <!-- 뒷면 상단 앞면 내용 상세 스타일 조절 -->
+                <div id="frontOnBackSettings" class="sub-setting-card" style="margin: 0.25rem 0 0.85rem 1.6rem; padding: 0.75rem 0.9rem; background: #f1f5f9; border-radius: var(--radius-sm); border: 1px solid #cbd5e1;">
+                  <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                    <label for="frontOnBackSizeNum" class="sub-label" style="font-size: 0.82rem; margin: 0; color: #1e293b;">
+                      <span data-i18n="editor.step3.frontOnBackSizeLabel">뒷면에 보이는 문제 글씨 크기</span><span class="stepper-label-val"> <strong id="frontOnBackSizeVal" style="color: var(--primary);">24px</strong></span>
+                    </label>
+                    <label class="custom-checkbox" style="font-size: 0.78rem; margin: 0; white-space: nowrap;">
+                      <input type="checkbox" id="syncFrontSizeWithF1" checked>
+                      <span data-i18n="editor.step3.syncFrontSize">1번째 필드 글씨 크기에 맞추기</span>
+                    </label>
+                  </div>
+                  <div class="slider-with-number">
+                    <input type="range" id="frontOnBackSize" min="10" max="80" value="24" class="form-range">
+                    <input type="number" id="frontOnBackSizeNum" min="10" max="80" value="24" class="num-input">
+                  </div>
+                  <div style="margin-top: 0.45rem;">
+                    <label class="custom-checkbox" style="font-size: 0.78rem; margin: 0;">
+                      <input type="checkbox" id="frontOnBackKeepStyle" checked>
+                      <span data-i18n="editor.step3.frontOnBackKeepStyle">1번째 필드와 같은 색·굵기로 보여주기 (끄면 연한 회색)</span>
+                    </label>
+                  </div>
+                </div>
+
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="centerAlign" checked>
+                  <span data-i18n-html="editor.step3.centerAlignHtml">가운데 정렬</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="rtlForce">
+                  <span data-i18n-html="editor.step3.rtlForceHtml">오른쪽에서 왼쪽으로 쓰기 (아랍어·히브리어 등)</span>
+                </label>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- ③ 카드 서식 복사해서 Anki에 붙여넣기 (앞면 서식 → 뒷면 서식 → 스타일 순서) -->
+        <div class="card-section paste-helper" id="pasteHelper">
+          <div class="section-title">
+            <span class="step-num">3</span>
+            <h2 data-i18n="editor.paste.title">카드 서식 복사해서 Anki에 붙여넣기</h2>
+          </div>
+          <p class="section-desc" data-i18n="editor.paste.desc">Anki의 [카드 유형] 창을 열어 두고, 아래 ①②③을 차례로 복사해서 붙여넣으세요.</p>
+
+          <!-- [카드 유형] 창 여는 곳 (기기별 한 줄 안내) -->
+          <div class="paste-where">
+            <strong class="paste-where-title" data-i18n="editor.paste.whereTitle">🔎 [카드 유형] 창은 어디 있나요?</strong>
+            <ul class="paste-where-list">
+              <li data-i18n-html="editor.paste.wherePcHtml"><strong>💻 PC:</strong> [탐색] ➔ 카드 하나 선택 ➔ [카드...]</li>
+              <li data-i18n-html="editor.paste.whereDroidHtml"><strong>🤖 AnkiDroid:</strong> 카드 추가(+) 화면 맨 아래 [카드: Card 1]</li>
+              <li data-i18n-html="editor.paste.whereIosHtml"><strong>🍎 AnkiMobile:</strong> 공부 화면 [도구] ➔ Card Template</li>
+            </ul>
+            <a href="ankiGuide.html#templates" class="paste-guide-link" data-i18n="editor.paste.guideLink">📖 그림으로 자세히 보기 (Anki 가이드)</a>
+            <p class="paste-sync-tip" data-i18n-html="editor.paste.syncTipHtml">💡 <strong>PC에서 붙여넣고 동기화하면 폰에도 적용돼요.</strong></p>
+          </div>
+
+          <ol class="paste-steps">
+            <!-- ① 앞면 서식 -->
+            <li class="paste-step" id="pasteStepFront" data-step="front">
+              <div class="paste-step-head">
+                <span class="paste-step-num" aria-hidden="true">1</span>
+                <div class="paste-step-text">
+                  <strong class="paste-step-title" data-i18n="editor.paste.step1Title">앞면 서식</strong>
+                  <p class="paste-step-desc" data-i18n-html="editor.paste.step1Html">Anki [카드 유형] 창의 <strong>[앞면 서식]</strong> 칸 내용을 모두 지우고 붙여넣으세요.</p>
+                </div>
+              </div>
+              <div class="paste-step-actions">
+                <button type="button" class="btn-copy btn-copy-step" id="copyFrontBtn" data-i18n="editor.code.copyFront">📋 앞면 서식 복사</button>
+                <span class="paste-step-done" data-i18n="editor.paste.done">✓ 복사했어요</span>
+              </div>
+              <details class="paste-code">
+                <summary data-i18n="editor.paste.showCode">붙여넣을 내용 보기</summary>
+                <pre class="code-block"><code id="codeFrontText"></code></pre>
+              </details>
+            </li>
+
+            <!-- ② 뒷면 서식 -->
+            <li class="paste-step" id="pasteStepBack" data-step="back">
+              <div class="paste-step-head">
+                <span class="paste-step-num" aria-hidden="true">2</span>
+                <div class="paste-step-text">
+                  <strong class="paste-step-title" data-i18n="editor.paste.step2Title">뒷면 서식</strong>
+                  <p class="paste-step-desc" data-i18n-html="editor.paste.step2Html">Anki [카드 유형] 창의 <strong>[뒷면 서식]</strong> 칸 내용을 모두 지우고 붙여넣으세요.</p>
+                </div>
+              </div>
+              <div class="paste-step-actions">
+                <button type="button" class="btn-copy btn-copy-step" id="copyBackBtn" data-i18n="editor.code.copyBack">📋 뒷면 서식 복사</button>
+                <span class="paste-step-done" data-i18n="editor.paste.done">✓ 복사했어요</span>
+              </div>
+              <details class="paste-code">
+                <summary data-i18n="editor.paste.showCode">붙여넣을 내용 보기</summary>
+                <pre class="code-block"><code id="codeBackText"></code></pre>
+              </details>
+            </li>
+
+            <!-- ③ 스타일 -->
+            <li class="paste-step" id="pasteStepCss" data-step="css">
+              <div class="paste-step-head">
+                <span class="paste-step-num" aria-hidden="true">3</span>
+                <div class="paste-step-text">
+                  <strong class="paste-step-title" data-i18n="editor.paste.step3Title">스타일</strong>
+                  <p class="paste-step-desc" data-i18n-html="editor.paste.step3Html">Anki [카드 유형] 창의 <strong>[스타일]</strong> 칸 내용을 모두 지우고 붙여넣으세요.</p>
+                </div>
+              </div>
+              <div class="paste-step-actions">
+                <button type="button" class="btn-copy btn-copy-step" id="copyCssBtn" data-i18n="editor.code.copyCss">📋 스타일 복사</button>
+                <span class="paste-step-done" data-i18n="editor.paste.done">✓ 복사했어요</span>
+              </div>
+              <details class="paste-code">
+                <summary data-i18n="editor.paste.showCode">붙여넣을 내용 보기</summary>
+                <pre class="code-block"><code id="codeCssText"></code></pre>
+              </details>
+            </li>
+          </ol>
+
+          <p class="paste-all-done hidden" id="pasteAllDone" role="status" data-i18n="editor.paste.allDone">🎉 세 칸 모두 복사했어요! Anki에서 저장하면(PC는 창 닫기) 카드에 바로 적용돼요.</p>
+          <p class="paste-field-note" data-i18n="editor.paste.fieldNameNote">⚠️ Anki 노트의 필드 이름이 ②에서 적은 필드 이름과 똑같아야 해요 (영문 대소문자까지). 다르면 카드에 내용이 안 나와요.</p>
+        </div>
+
+        <!-- Mobile Floating Switch to Edit (서식예시 및 복사란 좌측 버튼) -->
+        <button type="button" class="mobile-float-switch-btn left" id="btnFloatToEdit" data-i18n="editor.mobile.floatToEdit" data-i18n-attr="title:editor.mobile.floatToEditTitle" title="언어·필드 설정 화면으로 돌아가기">
+          ◀ ⚙️ 설정
+        </button>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toastNotification" class="toast" role="status" aria-live="polite" data-i18n="editor.toast.copiedDefault">
+    복사되었습니다!
+  </div>
+
+  <footer class="app-footer">
+    <p data-i18n="editor.footer">Study with Wanzi © 2026. Made for language learners.</p>
+  </footer>
+
+  <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
+  <script src="../assets/js/i18n.js?v=20261008a"></script>
+  <script src="../assets/i18n/ko/common.js?v=20261008a"></script>
+  <script src="../assets/i18n/ko/editor.js?v=20261008a"></script>
+  <script src="../assets/i18n/en/common.js?v=20261008a"></script>
+  <script src="../assets/i18n/en/editor.js?v=20261008a"></script>
+  <script src="../assets/i18n/zh/common.js?v=20261008a"></script>
+  <script src="../assets/i18n/zh/editor.js?v=20261008a"></script>
+  <script src="../assets/js/languages.js?v=20261008a"></script>
+  <script src="../assets/js/langCombobox.js?v=20261008a"></script>
+  <script src="../assets/js/app.js?v=20261008a"></script>
+</body>
+</html>

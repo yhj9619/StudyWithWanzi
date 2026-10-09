@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="guide.meta.title">Anki 가이드 - Study with Wanzi</title>
+  <meta name="description" content="Anki 설치와 필드 만들기부터 카드 서식 붙여넣기, AI 단어장 가져오기, 매일 복습하는 법까지 4단계로 정리한 Anki 가이드" data-i18n-attr="content:guide.meta.description">
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg?v=2">
+  <link rel="alternate icon" href="../favicon.ico?v=2">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
+  <link rel="stylesheet" href="../assets/css/style.css?v=20261008a">
+  <link rel="stylesheet" href="../assets/css/guide.css?v=20261008a">
+</head>
+<body>
+  <!-- Header -->
+  <!-- 모든 페이지 공통 메뉴줄 (i18n.js가 그림): PC는 한 줄, 휴대폰은 ☰ 버튼으로 여닫기 -->
+  <nav data-site-nav="guide"></nav>
+
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-group">
+        <span class="logo-icon">📖</span>
+        <div>
+          <h1 class="logo-title" data-i18n="guide.header.title">Anki 가이드</h1>
+          <p class="logo-subtitle" data-i18n="guide.header.subtitle">처음 쓰는 분도 4단계로 따라 하기 — 준비 · 카드 서식 · AI 단어장 · 복습</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <div class="guide-container">
+
+      <!-- Guide Hero -->
+      <section class="guide-hero">
+        <div class="guide-hero-tag" data-i18n="guide.hero.tag">✨ Anki가 처음이라면 여기부터</div>
+        <h2 class="guide-hero-title" data-i18n="guide.hero.title">4단계만 따라 하면 시작할 수 있어요</h2>
+        <p class="guide-hero-subtitle" data-i18n-html="guide.hero.subtitle">각 단계는 핵심만 짧게 정리했어요. 더 알고 싶으면 <strong>[자세히 보기]</strong>를 펼쳐 보세요. 도구 사용법과 막혔을 때 볼 <strong>자주 묻는 질문</strong>은 <a href="manual.html">사용 설명서</a>에 있어요.</p>
+      </section>
+
+      <!-- 한눈에 보는 4단계 (단계 이름은 사이트 공통 4단계 경로와 같은 common.journey.* 사용) -->
+      <nav class="guide-quickstart" aria-label="한눈에 보는 4단계" data-i18n-attr="aria-label:guide.quick.ariaLabel">
+        <a href="#fields" class="guide-quick-card">
+          <span class="guide-quick-num">1</span>
+          <span class="guide-quick-icon">📋</span>
+          <strong data-i18n="common.journey.step1">Anki 준비</strong>
+          <span data-i18n="guide.quick.step1.desc">Anki를 설치하고 단어 정보를 담을 필드를 만들어요</span>
+        </a>
+        <a href="#templates" class="guide-quick-card">
+          <span class="guide-quick-num">2</span>
+          <span class="guide-quick-icon">🎨</span>
+          <strong data-i18n="common.journey.step2">카드 서식 꾸미기</strong>
+          <span data-i18n="guide.quick.step2.desc">에디터에서 카드를 꾸미고 Anki에 붙여넣어요</span>
+        </a>
+        <a href="#extraction" class="guide-quick-card">
+          <span class="guide-quick-num">3</span>
+          <span class="guide-quick-icon">🤖</span>
+          <strong data-i18n="common.journey.step3">AI로 단어장 만들기</strong>
+          <span data-i18n="guide.quick.step3.desc">AI에게 단어를 받아 단어장 파일로 저장해요</span>
+        </a>
+        <a href="#learning" class="guide-quick-card">
+          <span class="guide-quick-num">4</span>
+          <span class="guide-quick-icon">🔁</span>
+          <strong data-i18n="common.journey.step4">가져오기 · 복습</strong>
+          <span data-i18n="guide.quick.step4.desc">파일을 Anki로 가져오고 매일 10분 복습해요</span>
+        </a>
+      </nav>
+      <p class="guide-faq-jump"><a href="manual.html#faq" data-i18n="guide.quick.faqLink">❓ 막히면 → 사용 설명서의 자주 묻는 질문 보기</a></p>
+
+      <!-- 꼭 기억할 것 -->
+      <section class="guide-must-know" aria-label="이것만은 꼭 기억하세요" data-i18n-attr="aria-label:guide.mustKnow.ariaLabel">
+        <div class="guide-must-know-title" data-i18n="guide.mustKnow.title">⚠️ 이것만은 꼭 기억하세요</div>
+        <ol class="guide-must-know-list">
+          <li data-i18n-html="guide.mustKnow.item1"><strong>필드 순서 = 단어장 파일의 칸 순서</strong><span>다르면 뜻 자리에 예문이 들어가는 식으로 내용이 섞여요.</span></li>
+          <li data-i18n-html="guide.mustKnow.item2"><strong>붙여넣기 · 가져오기는 PC에서</strong><span>PC에서 한 번 하고 동기화하면 폰에도 그대로 들어와요. 폰에서는 복습만 하면 돼요.</span></li>
+          <li data-i18n-html="guide.mustKnow.item3"><strong>새 카드는 하루 10~20장</strong><span>너무 많이 하면 며칠 뒤 복습이 감당 못 할 만큼 쌓여요.</span></li>
+          <li data-i18n-html="guide.mustKnow.item4"><strong>복습 한도는 줄이지 않기 (9999)</strong><span>부담되면 복습 한도 대신 새 카드 수를 줄이세요.</span></li>
+        </ol>
+      </section>
+
+      <!-- SECTION 1: Anki 준비 (설치 · 노트 유형 · 필드) -->
+      <article class="guide-section-card" id="fields">
+        <header class="guide-section-header">
+          <span class="guide-section-badge" data-i18n="guide.step1.badge">Step 1</span>
+          <h3 class="guide-section-title" data-i18n="common.journey.step1">Anki 준비</h3>
+          <p class="guide-section-lead" data-i18n="guide.step1.lead">Anki를 설치하고, 단어 정보를 담을 필드를 만들어 둡니다. 필드는 뜻 · 단어 · 발음 · 예문처럼 카드에 들어갈 정보를 하나씩 담는 칸이에요.</p>
+        </header>
+
+        <div class="guide-prose">
+          <p class="guide-field-chips" data-i18n-html="guide.step1.fieldChips">추천 필드: <span class="guide-code-badge">의미</span> <span class="guide-code-badge">단어</span> <span class="guide-code-badge">발음</span> <span class="guide-code-badge">예문</span> <span class="guide-code-badge">예문해석</span></p>
+          <p data-i18n-html="guide.step1.intro">한국어 뜻을 보고 외국어 단어를 떠올리는 연습을 하려면 <strong>1번째 필드를 한국어 뜻</strong>으로 두세요. 1번째 필드가 카드 앞면(문제)이 됩니다.</p>
+
+          <ul class="step-flow-list">
+            <li class="step-flow-item">
+              <span class="step-flow-num">1</span>
+              <div class="step-flow-content">
+                <strong data-i18n="guide.step1.flow0.title">PC에 Anki 설치하고 동기화 켜기</strong>
+                <p data-i18n-html="guide.step1.flow0.desc"><b>apps.ankiweb.net</b>에서 무료로 받을 수 있어요. 무료 AnkiWeb 계정으로 로그인하고 <b>[동기화]</b>를 누르면 폰 앱(AnkiDroid 무료 · AnkiMobile 유료)과 카드가 자동으로 맞춰집니다.</p>
+              </div>
+            </li>
+            <li class="step-flow-item">
+              <span class="step-flow-num">2</span>
+              <div class="step-flow-content">
+                <strong data-i18n="guide.step1.flow1.title">[도구] ➔ [노트 유형 관리] 열기</strong>
+                <p data-i18n-html="guide.step1.flow1.desc">노트 유형은 "어떤 필드가 있고 카드가 어떻게 보일지"를 묶어 둔 카드 양식이에요. 단축키 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>N</kbd> (Mac: <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>N</kbd>)</p>
+              </div>
+            </li>
+            <li class="step-flow-item">
+              <span class="step-flow-num">3</span>
+              <div class="step-flow-content">
+                <strong data-i18n="guide.step1.flow2.title">[추가]로 새 노트 유형 만들기</strong>
+                <p data-i18n-html="guide.step1.flow2.desc">"기본"을 복제하고 <code>다국어 단어장</code>처럼 알아보기 쉬운 이름을 붙이세요.</p>
+              </div>
+            </li>
+            <li class="step-flow-item">
+              <span class="step-flow-num">4</span>
+              <div class="step-flow-content">
+                <strong data-i18n="guide.step1.flow3.title">[필드...]에서 필드 만들고 순서 맞추기</strong>
+                <p data-i18n-html="guide.step1.flow3.desc">원래 있던 필드 2개는 <b>[이름 변경]</b>로 <code>의미</code> · <code>단어</code>로 바꾸고, <b>[추가]</b>로 <code>발음</code> · <code>예문</code> · <code>예문해석</code>을 더합니다. 순서는 <b>[위치 변경]</b>으로 맞춰요.</p>
+              </div>
+            </li>
+          </ul>
+
+          <!-- 스크린샷 자리: 파일이 없으면 figure 전체가 숨겨짐 (assets/images/guide/README.md 참고) -->
+          <div class="guide-shot-row">
+            <figure class="guide-shot"><img src="../assets/images/guide/01-manage-note-types.png" alt="[노트 유형 관리] 창 — 오른쪽에 [추가] · [필드...] · [카드...] 버튼이 있어요" data-i18n-attr="alt:guide.shot.noteTypes" loading="lazy" onerror="this.closest('figure').hidden = true"><figcaption data-i18n="guide.shot.noteTypes">[노트 유형 관리] 창 — 오른쪽에 [추가] · [필드...] · [카드...] 버튼이 있어요</figcaption></figure>
+            <figure class="guide-shot"><img src="../assets/images/guide/02-fields-dialog.png" alt="[필드...] 창 — 필드 5개를 이 순서로 만들어 두세요" data-i18n-attr="alt:guide.shot.fields" loading="lazy" onerror="this.closest('figure').hidden = true"><figcaption data-i18n="guide.shot.fields">[필드...] 창 — 필드 5개를 이 순서로 만들어 두세요</figcaption></figure>
+          </div>
+
+          <details class="guide-details">
+            <summary data-i18n="guide.step1.detail.summary">자세히 보기 — 노트와 카드의 차이, 필드별 설명</summary>
+            <div class="guide-details-body">
+              <h4 data-i18n="guide.step1.detail.noteCardTitle">💡 노트와 카드는 뭐가 달라요?</h4>
+              <p data-i18n-html="guide.step1.detail.noteCardBody">Anki에서는 카드를 한 장씩 직접 그리지 않아요. 단어 하나의 정보(<strong>노트</strong>)를 필드별로 입력하면, 정해 둔 카드 서식에 맞춰 <strong>카드</strong>가 자동으로 만들어집니다. 그래서 단어 · 뜻 · 발음 · 예문을 각각 다른 필드에 나눠 넣어야 카드를 깔끔하게 꾸밀 수 있어요.</p>
+
+              <h4 data-i18n="guide.step1.detail.tableTitle">📋 추천 필드 구성</h4>
+              <div class="guide-table-wrapper">
+                <table class="guide-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 15%;" data-i18n="guide.step1.detail.thOrder">순서</th>
+                      <th style="width: 25%;" data-i18n="guide.step1.detail.thName">필드 이름</th>
+                      <th style="width: 35%;" data-i18n="guide.step1.detail.thDesc">들어갈 내용 (예시)</th>
+                      <th style="width: 25%;" data-i18n="guide.step1.detail.thPosition">카드에서 보이는 곳</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td data-i18n-html="guide.step1.detail.tableRow1Order"><strong>1번째</strong></td>
+                      <td data-i18n-html="guide.step1.detail.tableRow1Name"><span class="guide-code-badge">의미</span> (Meaning)</td>
+                      <td data-i18n-html="guide.step1.detail.tableRow1Desc">한국어 뜻 (예: <i>[명사] 사과</i>)</td>
+                      <td data-i18n="guide.step1.detail.tableRow1Position">카드 앞면 (문제)</td>
+                    </tr>
+                    <tr>
+                      <td data-i18n-html="guide.step1.detail.tableRow2Order"><strong>2번째</strong></td>
+                      <td data-i18n-html="guide.step1.detail.tableRow2Name"><span class="guide-code-badge">단어</span> (Word)</td>
+                      <td data-i18n-html="guide.step1.detail.tableRow2Desc">외울 외국어 단어 (예: <i>apple</i>, <i>リンゴ</i>, <i>苹果</i>)</td>
+                      <td data-i18n="guide.step1.detail.tableRow2Position">카드 뒷면 (정답)</td>
+                    </tr>
+                    <tr>
+                      <td data-i18n-html="guide.step1.detail.tableRow3Order"><strong>3번째</strong></td>
+                      <td data-i18n-html="guide.step1.detail.tableRow3Name"><span class="guide-code-badge">발음</span> (Pronunciation)</td>
+                      <td data-i18n-html="guide.step1.detail.tableRow3Desc">발음기호, 일본어 후리가나, 중국어 병음 등 (예: <i>píngguǒ</i>)</td>
+                      <td data-i18n="guide.step1.detail.tableRow3Position">카드 뒷면 (또는 앞면)</td>
+                    </tr>
+                    <tr>
+                      <td data-i18n-html="guide.step1.detail.tableRow4Order"><strong>4번째</strong></td>
+                      <td data-i18n-html="guide.step1.detail.tableRow4Name"><span class="guide-code-badge">예문</span> (Sentence)</td>
+                      <td data-i18n-html="guide.step1.detail.tableRow4Desc">외국어로 된 예문 (예: <i>I ate a fresh apple.</i>)</td>
+                      <td data-i18n="guide.step1.detail.tableRow4Position">카드 뒷면</td>
+                    </tr>
+                    <tr>
+                      <td data-i18n-html="guide.step1.detail.tableRow5Order"><strong>5번째</strong></td>
+                      <td data-i18n-html="guide.step1.detail.tableRow5Name"><span class="guide-code-badge">예문해석</span> (Translation)</td>
+                      <td data-i18n-html="guide.step1.detail.tableRow5Desc">예문의 한국어 번역 (예: <i>나는 신선한 사과를 먹었다.</i>)</td>
+                      <td data-i18n="guide.step1.detail.tableRow5Position">카드 뒷면</td>
+                    </tr>
+                    <tr>
+                      <td data-i18n-html="guide.step1.detail.tableRow6Order"><strong>6번째</strong> (선택)</td>
+                      <td data-i18n-html="guide.step1.detail.tableRow6Name"><span class="guide-code-badge">추가정보</span> (Extra)</td>
+                      <td data-i18n="guide.step1.detail.tableRow6Desc">품사, 비슷한 말, 반대말, 외우는 요령 등</td>
+                      <td data-i18n="guide.step1.detail.tableRow6Position">카드 뒷면</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="guide-callout warning">
+                <span class="guide-callout-icon">⚠️</span>
+                <div data-i18n-html="guide.step1.detail.orderWarning"><strong>필드 순서와 단어장 파일의 칸 순서는 꼭 같아야 해요</strong><br> 나중에 가져올 CSV 파일의 칸 순서가 필드 순서와 다르면, 발음 자리에 예문이 들어가는 식으로 내용이 뒤섞입니다.</div>
+              </div>
+            </div>
+          </details>
+        </div>
+      </article>
+
+      <!-- SECTION 2: 카드 서식 꾸미기 -->
+      <article class="guide-section-card" id="templates">
+        <header class="guide-section-header">
+          <span class="guide-section-badge" data-i18n="guide.step2.badge">Step 2</span>
+          <h3 class="guide-section-title" data-i18n="common.journey.step2">카드 서식 꾸미기</h3>
+          <p class="guide-section-lead" data-i18n="guide.step2.lead">코딩은 몰라도 돼요. 에디터에서 카드 모양을 꾸민 뒤, 번호대로 3번 복사해 Anki의 [카드 유형] 창에 붙여넣기만 하면 사전 아이콘이 달린 카드가 완성됩니다.</p>
+        </header>
+
+        <div class="guide-prose">
+          <ul class="step-flow-list">
+            <li class="step-flow-item">
+              <span class="step-flow-num">1</span>
+              <div class="step-flow-content">
+                <strong data-i18n="guide.step2.flow1.title">에디터에서 학습 언어 고르고 필드 이름 맞추기</strong>
+                <p data-i18n="guide.step2.flow1.desc">필드 이름은 Step 1에서 만든 이름(예: 의미, 단어)과 글자 하나까지 똑같이 적어 주세요.</p>
+              </div>
+            </li>
+            <li class="step-flow-item">
+              <span class="step-flow-num">2</span>
+              <div class="step-flow-content">
+                <strong data-i18n="guide.step2.flow2.title">Anki에서 [카드 유형] 창 열기</strong>
+                <div class="guide-device-grid">
+                  <div class="guide-device-card">
+                    <span class="guide-device-name" data-i18n="guide.step2.device.pc.title">💻 PC (Windows · Mac)</span>
+                    <p data-i18n-html="guide.step2.device.pc.desc"><b>[도구] ➔ [노트 유형 관리]</b>에서 내 노트 유형 선택 ➔ <b>[카드...]</b></p>
+                  </div>
+                  <div class="guide-device-card">
+                    <span class="guide-device-name" data-i18n="guide.step2.device.droid.title">🤖 AnkiDroid (안드로이드)</span>
+                    <p data-i18n-html="guide.step2.device.droid.desc">카드 추가(<b>+</b>) 화면 맨 아래 <b>[카드: Card 1]</b> 버튼 ➔ 다 붙여넣고 위쪽 <b>✓</b>로 저장</p>
+                  </div>
+                  <div class="guide-device-card">
+                    <span class="guide-device-name" data-i18n="guide.step2.device.ios.title">🍎 AnkiMobile (아이폰 · 아이패드)</span>
+                    <p data-i18n-html="guide.step2.device.ios.desc">카드 공부 화면에서 <b>도구</b> ➔ <b>Card Template</b></p>
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li class="step-flow-item">
+              <span class="step-flow-num">3</span>
+              <div class="step-flow-content">
+                <strong data-i18n="guide.step2.flow3.title">① 앞면 서식 ② 뒷면 서식 ③ 스타일을 차례로 복사 ➔ 같은 이름의 탭에 붙여넣기</strong>
+                <p data-i18n-html="guide.step2.flow3.desc">탭에 원래 있던 내용은 모두 지우고(<kbd>Ctrl</kbd> + <kbd>A</kbd> 후 붙여넣기) 바꿔 넣으세요. 3개를 다 넣었으면 아래 <b>[저장하기]</b>를 누릅니다.</p>
+              </div>
+            </li>
+          </ul>
+
+          <figure class="guide-shot"><img src="../assets/images/guide/03-card-template-window.png" alt="[카드 유형] 창 — 위쪽의 앞면 서식 · 뒷면 서식 · 스타일 탭에 하나씩 붙여넣어요" data-i18n-attr="alt:guide.shot.templateWindow" loading="lazy" onerror="this.closest('figure').hidden = true"><figcaption data-i18n="guide.shot.templateWindow">[카드 유형] 창 — 위쪽의 앞면 서식 · 뒷면 서식 · 스타일 탭에 하나씩 붙여넣어요</figcaption></figure>
+
+          <div class="guide-callout tip">
+            <span class="guide-callout-icon">💡</span>
+            <div data-i18n-html="guide.step2.syncTip"><strong>가장 편한 방법: PC에서 한 번만 붙여넣기</strong><br>카드 서식은 노트 유형에 함께 저장되어서, 동기화하면 폰에도 그대로 적용돼요. 폰에서 긴 서식을 붙여넣기 번거롭다면 PC에서 하고 동기화하세요.</div>
+          </div>
+
+          <div class="guide-cta-card">
+            <div class="guide-cta-info">
+              <h5 data-i18n="guide.step2.cta.title">🌄 Anki 카드 서식 에디터</h5>
+              <p data-i18n="guide.step2.cta.desc">학습 언어(46개 언어)와 필드 이름만 맞추면, 붙여넣을 앞면 서식 · 뒷면 서식 · 스타일이 바로 만들어져요.</p>
+            </div>
+            <a href="ankiEditor.html" class="guide-cta-btn" data-i18n="guide.step2.cta.button">카드 서식 에디터 열기 ➔</a>
+          </div>
+
+          <details class="guide-details">
+            <summary data-i18n="guide.step2.detail.summary">자세히 보기 — [카드 유형] 창의 3개 탭, 창을 여는 다른 방법</summary>
+            <div class="guide-details-body">
+              <h4 data-i18n="guide.step2.detail.partsTitle">🎨 [카드 유형] 창의 3개 탭</h4>
+              <p data-i18n="guide.step2.detail.partsIntro">Anki의 [카드 유형] 창은 탭 3개로 되어 있어요. 에디터의 ① ② ③이 각 탭에 하나씩 들어갑니다.</p>
+              <ul class="step-flow-list">
+                <li class="step-flow-item">
+                  <span class="step-flow-num">①</span>
+                  <div class="step-flow-content">
+                    <strong data-i18n="guide.step2.detail.partFrontTitle">① 앞면 서식</strong>
+                    <p data-i18n="guide.step2.detail.partFrontDesc">문제 쪽 화면이에요. 한국어 뜻을 크게 보여 주고, 외국어 단어를 떠올려 봅니다.</p>
+                  </div>
+                </li>
+                <li class="step-flow-item">
+                  <span class="step-flow-num">②</span>
+                  <div class="step-flow-content">
+                    <strong data-i18n="guide.step2.detail.partBackTitle">② 뒷면 서식</strong>
+                    <p data-i18n-html="guide.step2.detail.partBackDesc">정답 쪽 화면이에요. 뜻과 함께 단어 · 발음 · 예문, 그리고 <b>🌐 외국어사전 · 📘 국어사전 아이콘</b>이 보여요.</p>
+                  </div>
+                </li>
+                <li class="step-flow-item">
+                  <span class="step-flow-num">③</span>
+                  <div class="step-flow-content">
+                    <strong data-i18n="guide.step2.detail.partStyleTitle">③ 스타일</strong>
+                    <p data-i18n="guide.step2.detail.partStyleDesc">글꼴, 글자 크기, 색, 다크 모드일 때의 색처럼 카드의 겉모습을 정해요.</p>
+                  </div>
+                </li>
+              </ul>
+
+              <div class="guide-callout info">
+                <span class="guide-callout-icon">📌</span>
+                <div data-i18n-html="guide.step2.detail.openTip"><strong>[카드 유형] 창을 여는 다른 방법</strong><br>카드 추가 창(<kbd>A</kbd>)이나 탐색 창(<kbd>B</kbd>)에서 <b>[카드...]</b> 버튼을 눌러도 같은 창이 열려요.</div>
+              </div>
+            </div>
+          </details>
+
+          <p class="guide-manual-link" data-i18n-html="guide.step2.manualLink">📘 에디터의 화면별 자세한 사용법(테마 · 읽어주기 · 초기화 등)은 <a href="manual.html#editor">사용 설명서 → 카드 서식 에디터</a>에서 볼 수 있어요.</p>
+        </div>
+      </article>
+
+      <!-- SECTION 3: AI로 단어장 만들기 (프롬프트 → AI → 답변 붙여넣기 → CSV 파일 받기) -->
+      <article class="guide-section-card" id="extraction">
+        <header class="guide-section-header">
+          <span class="guide-section-badge" data-i18n="guide.step3.badge">Step 3</span>
+          <h3 class="guide-section-title" data-i18n="common.journey.step3">AI로 단어장 만들기</h3>
+          <p class="guide-section-lead" data-i18n="guide.step3.lead">AI에게 단어 목록을 받아 단어장 파일(CSV)로 저장해요. 파일 하나로 카드 수십~수백 장을 한 번에 넣을 수 있어요.</p>
+        </header>
+
+        <div class="guide-prose">
+          <ul class="step-flow-list">
+            <li class="step-flow-item">
+              <span class="step-flow-num">1</span>
+              <div class="step-flow-content">
+                <strong data-i18n="guide.step3.flow1.title">프롬프트 생성기에서 언어 · 난이도 고르고 [복사]</strong>
+                <p data-i18n="guide.step3.flow1.desc">프롬프트는 AI에게 보내는 부탁 글이에요. 칸 순서는 Step 1의 필드 순서와 똑같이 맞춰 주세요.</p>
+              </div>
+            </li>
+            <li class="step-flow-item">
+              <span class="step-flow-num">2</span>
+              <div class="step-flow-content">
+                <strong data-i18n="guide.step3.flow2.title">AI(ChatGPT · Gemini · Claude)에 붙여넣기</strong>
+                <p data-i18n="guide.step3.flow2.desc">공부할 글이 있다면 함께 붙여넣으세요.</p>
+              </div>
+            </li>
+            <li class="step-flow-item">
+              <span class="step-flow-num">3</span>
+              <div class="step-flow-content">
+                <strong data-i18n="guide.step3.flow3.title">AI 답변 전체 복사 ➔ 프롬프트 생성기의 [AI 답변 붙여넣기] 칸에 붙여넣기</strong>
+                <p data-i18n="guide.step3.flow3.desc">AI 화면의 복사 버튼을 눌러도 되고, 답변을 통째로 드래그해 복사해도 돼요.</p>
+              </div>
+            </li>
+            <li class="step-flow-item">
+              <span class="step-flow-num">4</span>
+              <div class="step-flow-content">
+                <strong data-i18n="guide.step3.flow4.title">[CSV 파일 받기] 누르기</strong>
+                <p data-i18n="guide.step3.flow4.desc">단어장 파일(.csv)이 내려받기 폴더에 저장돼요. 한글 · 한자 · 성조가 깨지지 않게 저장되니 메모장을 쓸 필요가 없어요.</p>
+              </div>
+            </li>
+          </ul>
+
+          <div class="guide-cta-card">
+            <div class="guide-cta-info">
+              <h5 data-i18n="guide.step3.cta.title">🤖 Anki AI 프롬프트 생성기</h5>
+              <p data-i18n="guide.step3.cta.desc">언어 · 난이도 · 품사 · 칸 순서를 고르고 프롬프트를 복사하세요. AI 답변을 붙여넣으면 단어장 파일로 바로 받을 수 있어요.</p>
+            </div>
+            <a href="ankiPrompt.html" class="guide-cta-btn" data-i18n="guide.step3.cta.button">프롬프트 생성기 열기 ➔</a>
+          </div>
+
+          <details class="guide-details">
+            <summary data-i18n="guide.step3.detail.summary">자세히 보기 — 그냥 AI에게 부탁하면 생기는 문제, 메모장으로 직접 만드는 법</summary>
+            <div class="guide-details-body">
+              <h4 data-i18n="guide.step3.detail.failTitle">🤖 AI에게 그냥 부탁하면 생기는 문제</h4>
+              <p data-i18n="guide.step3.detail.failIntro">"이 글에서 모르는 단어 뽑아줘"라고만 하면:</p>
+              <ul class="guide-problem-list">
+                <li data-i18n="guide.step3.detail.fail1">the, is, I처럼 이미 아는 쉬운 단어까지 마구 섞여 나와요.</li>
+                <li data-i18n="guide.step3.detail.fail2">표 모양이 깨지거나 쉼표(,)가 뒤섞여서 Anki로 가져올 때 오류가 나요.</li>
+                <li data-i18n="guide.step3.detail.fail3">칸 순서가 내 필드 순서와 달라서 하나하나 손으로 고쳐야 해요.</li>
+              </ul>
+
+              <h4 data-i18n="guide.step3.detail.fallbackTitle">📝 메모장으로 직접 만들고 싶다면</h4>
+              <p data-i18n-html="guide.step3.detail.fallbackBody">AI 답변에서 단어 줄만 복사해 메모장에 붙여넣고, <b>[파일] ➔ [다른 이름으로 저장]</b>에서 파일 이름을 <code>words.csv</code>로 적은 뒤 아래쪽 <b>인코딩을 [UTF-8]</b>로 골라 저장하세요. UTF-8이 아니면 한글 · 한자 · 성조가 깨져요.</p>
+            </div>
+          </details>
+
+          <p class="guide-manual-link" data-i18n-html="guide.step3.manualLink">📘 프롬프트 생성기의 자세한 사용법(난이도 · 항목 순서 · CSV 파일 등)은 <a href="manual.html#prompt">사용 설명서 → AI 프롬프트 생성기</a>에서 볼 수 있어요.</p>
+        </div>
+      </article>
+
+      <!-- SECTION 4: 가져오기 · 복습 -->
+      <article class="guide-section-card" id="learning">
+        <header class="guide-section-header">
+          <span class="guide-section-badge" data-i18n="guide.step4.badge">Step 4</span>
+          <h3 class="guide-section-title" data-i18n="common.journey.step4">가져오기 · 복습</h3>
+          <p class="guide-section-lead" data-i18n="guide.step4.lead">받은 단어장 파일을 PC의 Anki로 가져온 뒤, 매일 Anki가 골라 주는 카드만 복습하면 됩니다.</p>
+        </header>
+
+        <div class="guide-prose">
+          <h4 id="import" data-i18n="guide.step4.importTitle">📥 단어장 파일 가져오기 (PC)</h4>
+          <ul class="step-flow-list">
+            <li class="step-flow-item">
+              <span class="step-flow-num">1</span>
+              <div class="step-flow-content">
+                <strong data-i18n="guide.step4.import1.title">Anki [파일] ➔ [가져오기]에서 받은 CSV 파일 고르기</strong>
+                <p data-i18n-html="guide.step4.import1.desc">단축키 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd> (Mac: <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd>)</p>
+              </div>
+            </li>
+            <li class="step-flow-item">
+              <span class="step-flow-num">2</span>
+              <div class="step-flow-content">
+                <strong data-i18n="guide.step4.import2.title">노트 유형과 덱 고르기</strong>
+                <p data-i18n-html="guide.step4.import2.desc">노트 유형은 Step 1에서 만든 것(예: <code>다국어 단어장</code>)을, 덱은 카드를 넣을 곳을 고르세요. 덱은 카드를 모아 두는 폴더 같은 거예요.</p>
+              </div>
+            </li>
+            <li class="step-flow-item">
+              <span class="step-flow-num">3</span>
+              <div class="step-flow-content">
+                <strong data-i18n="guide.step4.import3.title">[필드 배정]에서 칸 ↔ 필드 짝 확인하고 [가져오기]</strong>
+                <p data-i18n-html="guide.step4.import3.desc">아래쪽 <b>[필드 배정]</b>에서 의미 ← 1번째 칸, 단어 ← 2번째 칸처럼 짝이 맞는지 보고, 오른쪽 위 <b>[가져오기]</b>를 누르면 카드가 한 번에 들어와요.</p>
+              </div>
+            </li>
+          </ul>
+
+          <figure class="guide-shot"><img src="../assets/images/guide/04-import-dialog.png" alt="가져오기 창 — 노트 유형 · 덱을 고르고, 아래 [필드 배정]에서 칸과 필드의 짝을 확인해요" data-i18n-attr="alt:guide.shot.import" loading="lazy" onerror="this.closest('figure').hidden = true"><figcaption data-i18n="guide.shot.import">가져오기 창 — 노트 유형 · 덱을 고르고, 아래 [필드 배정]에서 칸과 필드의 짝을 확인해요</figcaption></figure>
+
+          <div class="guide-callout tip">
+            <span class="guide-callout-icon">🔄</span>
+            <div data-i18n-html="guide.step4.syncTip"><strong>가져온 다음엔 [동기화]</strong><br>Anki 위쪽의 <b>[동기화]</b>를 누르면 폰 앱에도 새 카드가 들어와서 어디서든 복습할 수 있어요.</div>
+          </div>
+
+          <h4 id="review" class="guide-subsection-title" data-i18n="guide.step4.reviewTitle">🔁 매일 복습하기</h4>
+          <p data-i18n="guide.step4.reviewIntro">Anki는 잊어버리기 직전의 카드만 골라서 보여 줘요. 매일 열어서 오늘 나온 카드만 끝내면 됩니다.</p>
+
+          <h4 data-i18n="guide.step4.optionsTitle">⚙️ 덱 옵션에서 이 2가지만 바꾸세요</h4>
+          <p data-i18n-html="guide.step4.optionsIntro">덱 이름 옆 톱니바퀴 ⚙️ ➔ <b>[옵션]</b>에서 바꿀 수 있어요.</p>
+          <div class="guide-key-grid">
+            <div class="guide-key-card">
+              <span class="guide-key-label" data-i18n="guide.step4.newCardsLabel">새 카드/일</span>
+              <span class="guide-key-value" data-i18n="guide.step4.newCardsValue">10~20장</span>
+              <span class="guide-key-desc" data-i18n="guide.step4.newCardsDesc">많이 하면 1~2주 뒤 복습이 폭발해요</span>
+            </div>
+            <div class="guide-key-card">
+              <span class="guide-key-label" data-i18n="guide.step4.maxReviewsLabel">최대 복습량/일</span>
+              <span class="guide-key-value">9999</span>
+              <span class="guide-key-desc" data-i18n="guide.step4.maxReviewsDesc">줄이면 밀린 카드를 잊어버려요</span>
+            </div>
+          </div>
+
+          <figure class="guide-shot"><img src="../assets/images/guide/05-deck-options.png" alt="덱 옵션 — [새 카드/일]과 [최대 복습량/일] 두 칸만 바꾸면 돼요" data-i18n-attr="alt:guide.shot.deckOptions" loading="lazy" onerror="this.closest('figure').hidden = true"><figcaption data-i18n="guide.shot.deckOptions">덱 옵션 — [새 카드/일]과 [최대 복습량/일] 두 칸만 바꾸면 돼요</figcaption></figure>
+
+          <h4 data-i18n="guide.step4.buttonsTitle">🎯 답을 본 뒤 누르는 4가지 버튼</h4>
+          <div class="button-rating-grid">
+            <div class="button-rating-card again">
+              <span class="rating-badge" data-i18n-html="guide.step4.againBadge">다시 <kbd>1</kbd></span>
+              <div class="rating-desc" data-i18n-html="guide.step4.againDesc"><strong>기억 안 남 / 틀림</strong><br>망설이지 말고 누르세요</div>
+            </div>
+            <div class="button-rating-card hard">
+              <span class="rating-badge" data-i18n-html="guide.step4.hardBadge">어려움 <kbd>2</kbd></span>
+              <div class="rating-desc" data-i18n-html="guide.step4.hardDesc"><strong>한참 걸려 겨우 떠올림</strong><br>자주 누르면 복습 간격이 잘 안 늘어요</div>
+            </div>
+            <div class="button-rating-card good">
+              <span class="rating-badge" data-i18n-html="guide.step4.goodBadge">알맞음 <kbd>3</kbd></span>
+              <div class="rating-desc" data-i18n-html="guide.step4.goodDesc"><strong>2~3초 안에 기억남</strong><br>가장 많이 누르는 기본 버튼</div>
+            </div>
+            <div class="button-rating-card easy">
+              <span class="rating-badge" data-i18n-html="guide.step4.easyBadge">쉬움 <kbd>4</kbd></span>
+              <div class="rating-desc" data-i18n-html="guide.step4.easyDesc"><strong>보자마자 바로 앎</strong><br>헷갈리면 누르지 마세요</div>
+            </div>
+          </div>
+
+          <figure class="guide-shot"><img src="../assets/images/guide/06-answer-buttons.png" alt="복습 화면 — 정답을 확인한 뒤 아래 4개 버튼 중 하나를 눌러요" data-i18n-attr="alt:guide.shot.answerButtons" loading="lazy" onerror="this.closest('figure').hidden = true"><figcaption data-i18n="guide.shot.answerButtons">복습 화면 — 정답을 확인한 뒤 아래 4개 버튼 중 하나를 눌러요</figcaption></figure>
+
+          <details class="guide-details">
+            <summary data-i18n="guide.step4.detail.summary">자세히 보기 — 복습 날짜가 정해지는 원리, 버튼별 설명, 같은 단어 처리, FSRS, 공부 요령</summary>
+            <div class="guide-details-body">
+              <h4 data-i18n="guide.step4.detail.srsTitle">🧠 잊어버릴 때쯤 다시 보여 주는 원리 (간격 반복)</h4>
+              <p data-i18n-html="guide.step4.detail.srsBody">사람은 새로 외운 것을 하루만 지나도 대부분 잊어버려요. 그런데 <strong>잊어버리기 직전에 한 번 더 보면</strong> 기억이 훨씬 오래갑니다. Anki는 이 원리로 카드마다 다음 복습 날짜를 계산해서, <strong>오늘 꼭 봐야 할 카드만 골라 보여 줍니다.</strong></p>
+
+              <h4 data-i18n="guide.step4.detail.optionsTitle">⚙️ 덱 옵션을 이렇게 하는 이유</h4>
+              <div class="guide-callout info">
+                <span class="guide-callout-icon">📌</span>
+                <div data-i18n-html="guide.step4.detail.newCardsCallout"><strong>새 카드/일: 하루 10~20장 추천</strong><br> 처음에 의욕이 넘쳐 하루 50~100장씩 새 카드를 보면, 1~2주 뒤에는 매일 복습할 카드가 300~500장씩 쌓여 지쳐서 그만두게 돼요. 하루 15장만 꾸준히 해도 1년이면 5,000단어가 넘습니다.</div>
+              </div>
+              <div class="guide-callout warning">
+                <span class="guide-callout-icon">⚠️</span>
+                <div data-i18n-html="guide.step4.detail.maxReviewsCallout"><strong>최대 복습량/일: 9999(제한 없음) 추천</strong><br> "오늘 복습이 많으니 50장만 하자"며 복습 한도를 줄이는 게 가장 큰 실수예요. 못 본 카드는 뒤로 밀리다 결국 잊어버리고, 복습 날짜 계산도 엉망이 됩니다. 복습 한도는 늘 9999로 두고, 부담되면 새 카드를 0~5장으로 줄이세요.</div>
+              </div>
+
+              <h4 data-i18n="guide.step4.detail.buttonsTitle">🎯 4가지 버튼, 조금 더 자세히</h4>
+              <ul>
+                <li data-i18n-html="guide.step4.detail.buttonAgain"><strong>다시</strong>: 잠시 뒤 같은 카드가 다시 나와요. 틀렸다면 망설이지 말고 누르세요.</li>
+                <li data-i18n-html="guide.step4.detail.buttonHard"><strong>어려움</strong>: 5초 넘게 애써서 겨우 떠올렸을 때. 다음 복습이 아주 조금만 미뤄져서, 너무 자주 누르면 같은 카드가 계속 자주 나와요.</li>
+                <li data-i18n-html="guide.step4.detail.buttonGood"><strong>알맞음</strong>: <kbd>Space</kbd>로도 누를 수 있는 기본 버튼이에요. 복습할 때 4번 중 3번 정도가 알맞음이면 딱 좋아요.</li>
+                <li data-i18n-html="guide.step4.detail.buttonEasy"><strong>쉬움</strong>: 다음 복습이 크게 미뤄져요. 조금이라도 헷갈린 단어에는 누르지 마세요.</li>
+              </ul>
+
+              <div class="guide-callout tip">
+                <span class="guide-callout-icon">💡</span>
+                <div data-i18n-html="guide.step4.detail.duplicateTip"><strong>같은 단어를 또 가져오면?</strong><br> Anki는 1번째 필드(한국어 뜻)가 같은 카드를 "이미 있는 카드"로 보고 새로 만들지 않아요. 그래서 여러 글에서 단어를 모아도 같은 단어가 두 번 들어가지 않습니다.<br> 다만 <b>뜻이 같은 다른 단어</b>(예: 看 · 见 → 둘 다 "보다")는 하나가 빠질 수 있어요. <b>보다(눈으로)</b> · <b>보다(만나다)</b>처럼 뜻을 조금씩 다르게 적어 두면 안전해요. 프롬프트 생성기의 <b>"[품사]한국어"</b> 형식과 <b>"뜻이 같은 단어 구분"</b> 규칙이 이걸 도와줍니다.</div>
+              </div>
+
+              <h4 data-i18n="guide.step4.detail.fsrsTitle">🚀 (선택) 복습 날짜를 더 똑똑하게 정하는 FSRS 켜기</h4>
+              <p data-i18n-html="guide.step4.detail.fsrsBody">FSRS는 Anki가 "이 카드를 언제 다시 보여 줄지" 정하는 새 계산 방식이에요. Anki 23.10 이상이라면 덱 옵션 아래쪽에서 <strong>FSRS</strong>를 켜 보세요. 예전 방식보다 <strong>복습은 덜 하면서 기억은 비슷하게</strong> 유지해 줘요. 처음엔 몰라도 괜찮고, 익숙해진 뒤에 켜도 됩니다.</p>
+
+              <h4 data-i18n="guide.step4.detail.rulesTitle">🏆 오래 가는 공부를 위한 3가지 요령</h4>
+              <div class="golden-rules-grid">
+                <div class="golden-rule-card">
+                  <div class="rule-number">01</div>
+                  <h5 data-i18n="guide.step4.detail.rule1Title">매일 10분, 오늘 복습 0장 만들기</h5>
+                  <p data-i18n="guide.step4.detail.rule1Body">주말에 몰아서 2시간 하는 것보다, 매일 출근길 10분 동안 오늘의 복습 카드를 0장으로 만드는 게 훨씬 효과가 좋아요.</p>
+                </div>
+                <div class="golden-rule-card">
+                  <div class="rule-number">02</div>
+                  <h5 data-i18n="guide.step4.detail.rule2Title">카드 한 장에는 하나만</h5>
+                  <p data-i18n="guide.step4.detail.rule2Body">한 카드에 어려운 문법과 뜻 5개를 몽땅 넣지 마세요. 카드 한 장에 단어 하나, 뜻 하나만 담아야 머리가 덜 지쳐요.</p>
+                </div>
+                <div class="golden-rule-card">
+                  <div class="rule-number">03</div>
+                  <h5 data-i18n="guide.step4.detail.rule3Title">소리 내어 읽고, 예문으로 익히기</h5>
+                  <p data-i18n="guide.step4.detail.rule3Body">눈으로만 넘기지 말고 소리 내어 발음해 보세요. 예문 속에서 단어가 어떻게 쓰이는지 함께 읽으면 말할 때 바로 튀어나와요.</p>
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+      </article>
+
+      <!-- 자주 묻는 질문은 사용 설명서(manual.html#faq)로 옮김 — 예전 링크 ankiGuide.html#faq 가 여기로 오도록 id 유지 -->
+      <div class="guide-callout info guide-faq-moved" id="faq">
+        <span class="guide-callout-icon">❓</span>
+        <div data-i18n-html="guide.faqMoved"><strong>자주 묻는 질문은 사용 설명서로 옮겼어요</strong><br>막혔을 때 볼 질문과 답, 그리고 에디터 · 프롬프트 생성기 사용법을 한곳에 모았어요. <a href="manual.html#faq">자주 묻는 질문 보기 ➔</a></div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <p data-i18n="common.footer">Study with Wanzi &copy; 2026. Made with care for language learners.</p>
+  </footer>
+  <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
+  <script src="../assets/js/i18n.js?v=20261008a"></script>
+  <script src="../assets/i18n/ko/common.js?v=20261008a"></script>
+  <script src="../assets/i18n/ko/guide.js?v=20261008a"></script>
+  <script src="../assets/i18n/en/common.js?v=20261008a"></script>
+  <script src="../assets/i18n/en/guide.js?v=20261008a"></script>
+  <script src="../assets/i18n/zh/common.js?v=20261008a"></script>
+  <script src="../assets/i18n/zh/guide.js?v=20261008a"></script>
+</body>
+</html>

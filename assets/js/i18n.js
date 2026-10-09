@@ -19,6 +19,15 @@
     messages[locale] = Object.assign(messages[locale] || {}, dict);
   }
 
+  // 조기 로드된 번역 큐 처리 및 전역 등록 함수 즉시 노출
+  window.i18nRegister = register;
+  if (window.__i18n_queue && Array.isArray(window.__i18n_queue)) {
+    window.__i18n_queue.forEach(item => {
+      if (Array.isArray(item)) register(item[0], item[1]);
+    });
+    window.__i18n_queue = [];
+  }
+
   // 우선순위: 주소의 ?lang=zh (공유 링크용, 선택값으로 저장) → 저장된 선택 → 한국어
   function getLocale() {
     try {
@@ -121,14 +130,36 @@
 
   // 모든 페이지 맨 위 공통 메뉴줄 (<nav data-site-nav="editor"></nav> 자리에 그림, 값 = 지금 페이지)
   // PC: 홈 · 페이지 링크 · 화면 언어를 한 줄에 / 휴대폰: 홈 + ☰ 버튼, 누르면 링크 · 화면 언어가 펼쳐짐
-  const SITE_PAGES = [
-    { id: 'guide', href: 'ankiGuide.html', key: 'common.navGuide', titleKey: 'common.navGuideTitle' },
-    { id: 'editor', href: 'ankiEditor.html', key: 'common.navEditor', titleKey: 'common.navEditorTitle' },
-    { id: 'prompt', href: 'ankiPrompt.html', key: 'common.navPrompt', titleKey: 'common.navPromptTitle' },
-    { id: 'manual', href: 'manual.html', key: 'common.navManual', titleKey: 'common.navManualTitle' },
-  ];
+  function getResolvedPaths() {
+    const isSub = Boolean(document.querySelector('link[href*="../assets"], script[src*="../assets"]'));
+    const inAnki = isSub && (location.pathname.includes('/anki/') || document.querySelector('[data-site-nav="editor"], [data-site-nav="guide"], [data-site-nav="prompt"], [data-site-nav="manual"], [data-site-nav="anki-home"], [data-journey]'));
+    const inSpeaking = isSub && (location.pathname.includes('/speaking/') || document.querySelector('[data-site-nav="speaking"]'));
+
+    const rootHref = isSub ? '../index.html' : 'index.html';
+    const ankiPrefix = inAnki ? '' : (isSub ? '../anki/' : 'anki/');
+    const speakingPrefix = inSpeaking ? '' : (isSub ? '../speaking/' : 'speaking/');
+
+    return {
+      homeHref: rootHref,
+      pages: [
+        { id: 'anki-home', href: ankiPrefix + 'index.html', key: 'common.navAnkiHome', titleKey: 'common.navAnkiHomeTitle' },
+        { id: 'editor', href: ankiPrefix + 'ankiEditor.html', key: 'common.navEditor', titleKey: 'common.navEditorTitle' },
+        { id: 'prompt', href: ankiPrefix + 'ankiPrompt.html', key: 'common.navPrompt', titleKey: 'common.navPromptTitle' },
+        { id: 'guide', href: ankiPrefix + 'ankiGuide.html', key: 'common.navGuide', titleKey: 'common.navGuideTitle' },
+        { id: 'manual', href: ankiPrefix + 'manual.html', key: 'common.navManual', titleKey: 'common.navManualTitle' },
+        { id: 'speaking', href: speakingPrefix + 'index.html', key: 'common.navSpeaking', titleKey: 'common.navSpeakingTitle' },
+      ],
+      journeySteps: [
+        { key: 'common.journey.step1', href: ankiPrefix + 'ankiGuide.html#fields' },
+        { key: 'common.journey.step2', href: ankiPrefix + 'ankiEditor.html' },
+        { key: 'common.journey.step3', href: ankiPrefix + 'ankiPrompt.html' },
+        { key: 'common.journey.step4', href: ankiPrefix + 'ankiGuide.html#learning' },
+      ]
+    };
+  }
 
   function renderSiteNavs() {
+    const navPaths = getResolvedPaths();
     document.querySelectorAll('[data-site-nav]').forEach(nav => {
       const current = nav.getAttribute('data-site-nav');
       nav.classList.add('site-nav');
@@ -140,7 +171,7 @@
 
       const home = document.createElement('a');
       home.className = 'site-nav-home';
-      home.href = 'index.html';
+      home.href = navPaths.homeHref;
       home.title = t('common.backToHubTitle');
       home.textContent = '🌄 Study with Wanzi';
       if (current === 'home') home.setAttribute('aria-current', 'page');
@@ -157,7 +188,7 @@
       const menu = document.createElement('div');
       menu.className = 'site-nav-menu';
       menu.id = menuId;
-      SITE_PAGES.forEach(page => {
+      navPaths.pages.forEach(page => {
         const a = document.createElement('a');
         a.className = 'site-nav-link' + (page.id === current ? ' current' : '');
         a.href = page.href;
@@ -192,15 +223,8 @@
     });
   }
 
-  // 처음부터 끝까지 4단계 경로 표시줄 (<nav data-journey="2"></nav> 자리에 그림, 숫자 = 현재 단계)
-  const JOURNEY_STEPS = [
-    { key: 'common.journey.step1', href: 'ankiGuide.html#fields' },
-    { key: 'common.journey.step2', href: 'ankiEditor.html' },
-    { key: 'common.journey.step3', href: 'ankiPrompt.html' },
-    { key: 'common.journey.step4', href: 'ankiGuide.html#learning' },
-  ];
-
   function renderJourneys() {
+    const navPaths = getResolvedPaths();
     document.querySelectorAll('[data-journey]').forEach(nav => {
       const current = parseInt(nav.getAttribute('data-journey'), 10) || 0;
       nav.classList.add('journey-bar');
@@ -209,7 +233,7 @@
 
       const ol = document.createElement('ol');
       ol.className = 'journey-steps';
-      JOURNEY_STEPS.forEach((step, idx) => {
+      navPaths.journeySteps.forEach((step, idx) => {
         const num = idx + 1;
         const li = document.createElement('li');
         li.className = 'journey-step' + (num < current ? ' done' : '') + (num === current ? ' current' : '');
@@ -228,7 +252,7 @@
       });
       nav.appendChild(ol);
 
-      const next = JOURNEY_STEPS[current];
+      const next = navPaths.journeySteps[current];
       if (current >= 1 && next) {
         const a = document.createElement('a');
         a.className = 'journey-next';

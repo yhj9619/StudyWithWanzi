@@ -1,8 +1,10 @@
 // 공용 문구 (한국어 · 기본 언어)
-i18nRegister('ko', {
+(window.i18nRegister || function (l, d) { (window.__i18n_queue = window.__i18n_queue || []).push([l, d]); })('ko', {
   'common.uiLanguage': '화면 언어',
   'common.backToHub': '◀ Study with Wanzi',
   'common.backToHubTitle': 'Study with Wanzi 메인 메뉴로 돌아가기',
+  'common.navAnkiHome': '🃏 Anki 도구',
+  'common.navAnkiHomeTitle': 'Anki 단어 학습 도구 모음으로 이동',
   'common.navGuide': '📖 Anki 가이드',
   'common.navGuideTitle': 'Anki 가이드로 이동 (설치부터 복습까지 4단계)',
   'common.navEditor': '🌄 카드 서식 에디터',
@@ -11,6 +13,8 @@ i18nRegister('ko', {
   'common.navPromptTitle': 'Anki AI 프롬프트 생성기로 이동',
   'common.navManual': '❓ 사용 설명서',
   'common.navManualTitle': '사용 설명서로 이동 (도구 사용법 · 자주 묻는 질문)',
+  'common.navSpeaking': '🎙️ 말하기 시험 연습',
+  'common.navSpeakingTitle': '말하기 시험 실전 연습 타이머로 이동',
   'common.navMenu': '메뉴',
   'common.autoSaved': '✓ 자동 저장됨',
   'common.autoSavedTitle': '설정은 이 브라우저에 자동으로 저장돼요',

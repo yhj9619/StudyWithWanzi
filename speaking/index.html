@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="speaking.meta.title">Study with Wanzi - 말하기 시험 실전 연습 (스피킹 타이머)</title>
+  <meta name="description" content="OPIc, 토익스피킹, HSKK, TSC, 외국어 면접 등 실전 대비! 엑셀 문제 붙여넣기, 음성(TTS) 낭독, 답변 타이머 & 알림음 시뮬레이터" data-i18n-attr="content:speaking.meta.description">
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg?v=2">
+  <link rel="alternate icon" href="../favicon.ico?v=2">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css?v=20261010a">
+  <link rel="stylesheet" href="../assets/css/speaking.css?v=20261010a">
+</head>
+<body>
+  <!-- 공통 상단 메뉴줄 (i18n.js) -->
+  <nav data-site-nav="speaking"></nav>
+
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-group">
+        <span class="logo-icon">🎙️</span>
+        <div>
+          <h1 class="logo-title" data-i18n="speaking.header.title">말하기 시험 연습</h1>
+          <p class="logo-subtitle" data-i18n="speaking.header.subtitle">엑셀 문제 붙여넣기 · 음성(TTS) 낭독 · 실전 타이머 · 종료 알림음</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <div class="speaking-container">
+
+      <!-- ===================================================================
+           1. 설정 섹션 (Setup Section)
+           =================================================================== -->
+      <section id="setupSection">
+
+        <!-- 카드 1: 문제 목록 입력 -->
+        <article class="speaking-card">
+          <div class="speaking-card-header">
+            <h2 class="speaking-card-title" data-i18n="speaking.step1.title">1. 문제 목록 입력</h2>
+            <div class="sample-btn-group">
+              <button type="button" id="sampleTourBtn" class="chip-btn" data-i18n="speaking.step1.sampleTour">관광통역안내사 샘플</button>
+              <button type="button" id="sampleOpicBtn" class="chip-btn" data-i18n="speaking.step1.sampleOpic">OPIc 영어</button>
+              <button type="button" id="sampleToeicBtn" class="chip-btn" data-i18n="speaking.step1.sampleToeic">토익스피킹</button>
+              <button type="button" id="sampleHskkBtn" class="chip-btn" data-i18n="speaking.step1.sampleHskk">HSKK 중국어</button>
+              <button type="button" id="clearQuestionsBtn" class="chip-btn" data-i18n="speaking.step1.clear">지우기</button>
+            </div>
+          </div>
+          <p class="speaking-card-desc" data-i18n="speaking.step1.desc">엑셀(Excel)에서 문제 열을 복사해 아래에 붙여넣으세요. 여러 줄의 문제도 셀 단위로 깔끔하게 분리됩니다.</p>
+
+          <textarea id="questionInput" class="question-textarea" rows="6" placeholder="엑셀에서 문제를 복사해 여기에 붙여넣으세요.&#10;&#10;(예시)&#10;Tell me about yourself.&#10;What are your strengths and weaknesses?&#10;Describe a memorable trip you took." data-i18n-attr="placeholder:speaking.step1.placeholder"></textarea>
+
+          <div class="action-chips-row">
+            <label class="speaking-checkbox">
+              <input type="checkbox" id="cleanNumberingCheck" checked>
+              <span data-i18n="speaking.step1.cleanNumbering">문제 앞 번호(1., Q1: 등) 자동 정리</span>
+            </label>
+          </div>
+
+          <!-- 인식된 문제 상태 배지 & 미리보기 토글 -->
+          <div id="parsedStatusBox" class="parsed-status-box empty">
+            <span id="parsedCountBadge" class="parsed-count-badge" data-i18n="speaking.step1.parsedCountEmpty">문제를 입력하거나 샘플 버튼을 눌러보세요</span>
+            <button type="button" id="togglePreviewBtn" class="preview-toggle-btn hidden">▼ 목록 보기</button>
+          </div>
+
+          <!-- 접을 수 있는 문제 목록 미리보기 -->
+          <div id="parsedPreviewList" class="parsed-preview-list hidden"></div>
+        </article>
+
+        <!-- 카드 2: 시험 및 타이머 설정 -->
+        <article class="speaking-card">
+          <div class="speaking-card-header">
+            <h2 class="speaking-card-title" data-i18n="speaking.step2.title">2. 시험 및 타이머 설정</h2>
+          </div>
+
+          <div class="settings-grid">
+            <!-- 한 문제당 답변 제한시간 -->
+            <div class="setting-item">
+              <label for="answerTimeInput" class="setting-label">
+                <span data-i18n="speaking.step2.answerTime">한 문제당 제한시간 (답변 시간)</span>
+              </label>
+              <div class="input-with-presets">
+                <div class="number-input-row">
+                  <input type="number" id="answerTimeInput" class="num-input" min="5" max="600" step="5" value="90">
+                  <span class="unit-label">초</span>
+                </div>
+                <div class="preset-pills">
+                  <button type="button" class="preset-pill" data-for="answerTimeInput" data-val="30">30초</button>
+                  <button type="button" class="preset-pill" data-for="answerTimeInput" data-val="45">45초</button>
+                  <button type="button" class="preset-pill" data-for="answerTimeInput" data-val="60">60초</button>
+                  <button type="button" class="preset-pill active" data-for="answerTimeInput" data-val="90">90초</button>
+                  <button type="button" class="preset-pill" data-for="answerTimeInput" data-val="120">2분</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 문제 간 휴식시간 -->
+            <div class="setting-item">
+              <label for="breakTimeInput" class="setting-label">
+                <span data-i18n="speaking.step2.breakTime">문제 간 휴식시간 (준비 시간)</span>
+              </label>
+              <div class="input-with-presets">
+                <div class="number-input-row">
+                  <input type="number" id="breakTimeInput" class="num-input" min="0" max="180" step="1" value="10">
+                  <span class="unit-label">초</span>
+                </div>
+                <div class="preset-pills">
+                  <button type="button" class="preset-pill" data-for="breakTimeInput" data-val="0">0초 (바로)</button>
+                  <button type="button" class="preset-pill" data-for="breakTimeInput" data-val="5">5초</button>
+                  <button type="button" class="preset-pill active" data-for="breakTimeInput" data-val="10">10초</button>
+                  <button type="button" class="preset-pill" data-for="breakTimeInput" data-val="15">15초</button>
+                  <button type="button" class="preset-pill" data-for="breakTimeInput" data-val="30">30초</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 최대 출제 문제 수 -->
+            <div class="setting-item">
+              <label for="maxQuestionsInput" class="setting-label">
+                <span data-i18n="speaking.step2.maxQuestions">출제 문제 수</span>
+              </label>
+              <div class="input-with-presets">
+                <div class="number-input-row">
+                  <input type="number" id="maxQuestionsInput" class="num-input" min="1" max="100" step="1" value="5">
+                  <span class="unit-label">개</span>
+                  <button type="button" id="setAllQuestionsBtn" class="preset-pill">전체 선택</button>
+                </div>
+                <span id="maxQuestionsHint" class="setting-hint"></span>
+              </div>
+            </div>
+
+            <!-- 음성 (TTS) 설정 -->
+            <div class="setting-item">
+              <label for="voiceSelect" class="setting-label">
+                <span data-i18n="speaking.step2.ttsVoice">낭독 음성 (TTS 언어)</span>
+              </label>
+              <div class="voice-control-row">
+                <select id="voiceSelect" class="select-input"></select>
+                <button type="button" id="testVoiceBtn" class="btn-voice-test" data-i18n="speaking.step2.ttsTest">음성 테스트</button>
+              </div>
+              <div class="speed-slider-row">
+                <span class="setting-hint" data-i18n="speaking.step2.ttsRate">낭독 속도</span>
+                <input type="range" id="ttsRateSlider" class="speed-slider" min="0.7" max="1.3" step="0.1" value="1.0">
+                <span id="ttsRateVal" class="speed-val-badge">1.0x</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 고급 연습 옵션 (접기/펼치기) -->
+          <details class="advanced-settings" id="speakingAdvancedSettings">
+            <summary>
+              <span data-i18n="speaking.step2.advancedOptions">⚙️ 고급 연습 옵션</span>
+              <span class="advanced-hint" data-i18n="common.advanced.hint">기본값 그대로 써도 괜찮아요</span>
+            </summary>
+            <div class="advanced-body">
+              <!-- 체크박스 옵션 -->
+              <div class="options-checkbox-group">
+                <label class="speaking-checkbox">
+                  <input type="checkbox" id="ttsWaitCheck" checked>
+                  <span data-i18n="speaking.step2.ttsWait">문제 낭독이 끝난 뒤 답변 타이머 시작 (추천)</span>
+                </label>
+                <label class="speaking-checkbox">
+                  <input type="checkbox" id="hideTextCheck">
+                  <span data-i18n="speaking.step2.hideText">문제 텍스트 숨기기 (실전 듣기 시험처럼 연습)</span>
+                </label>
+                <label class="speaking-checkbox">
+                  <input type="checkbox" id="soundToggle" checked>
+                  <span data-i18n="speaking.step2.sound">비프 알림음 효과 (시작음 / 마지막 5초 틱 / 종료음)</span>
+                </label>
+              </div>
+
+              <!-- 비프음 상세 설정 (종류 · 지속시간 · 테스트) -->
+              <div class="sound-detail-panel" id="soundDetailPanel">
+                <div class="settings-grid" style="margin-top: 1rem;">
+                  <div class="setting-item">
+                    <label for="soundTypeSelect" class="setting-label">
+                      <span data-i18n="speaking.step2.soundType">종료 알림음 종류</span>
+                    </label>
+                    <select id="soundTypeSelect" class="select-input">
+                      <option value="triple" selected data-i18n="speaking.step2.soundTypeTriple">삐비빅 3연타 (시험장 알림 · 추천)</option>
+                      <option value="double" data-i18n="speaking.step2.soundTypeDouble">삐-빅 2단 비프 (경쾌함)</option>
+                      <option value="chime" data-i18n="speaking.step2.soundTypeChime">실로폰 차임벨 (부드러운 완료음)</option>
+                      <option value="single" data-i18n="speaking.step2.soundTypeSingle">단발 삐- (단순 알림)</option>
+                      <option value="siren" data-i18n="speaking.step2.soundTypeSiren">스타카토 사이렌 (긴박감)</option>
+                    </select>
+                  </div>
+
+                  <div class="setting-item">
+                    <label for="soundDurationSelect" class="setting-label">
+                      <span data-i18n="speaking.step2.soundDuration">알림음 지속 길이</span>
+                    </label>
+                    <div class="sound-duration-row">
+                      <select id="soundDurationSelect" class="select-input">
+                        <option value="short" data-i18n="speaking.step2.soundDurationShort">짧게 (약 0.5초)</option>
+                        <option value="normal" selected data-i18n="speaking.step2.soundDurationNormal">보통 (약 1.0초)</option>
+                        <option value="long" data-i18n="speaking.step2.soundDurationLong">길게 (약 1.6초)</option>
+                      </select>
+                      <button type="button" id="testSoundBtn" class="btn-voice-test" data-i18n="speaking.step2.soundTest">🔔 소리 들어보기</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </details>
+        </article>
+
+        <!-- 시작 CTA 버튼 -->
+        <div class="start-cta-wrap">
+          <button type="button" id="startExamBtn" class="btn-start-exam">
+            <span data-i18n="speaking.action.start">🚀 말하기 시험 시작</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           2. 실전 시뮬레이터 화면 (Simulator View)
+           =================================================================== -->
+      <section id="simulatorView" class="simulator-view hidden" aria-live="polite">
+        <!-- 상단 바 -->
+        <div class="sim-top-bar">
+          <div id="simPhaseBadge" class="sim-phase-badge listening">🗣️ 문제 낭독 중...</div>
+          <div id="simProgressText" class="sim-progress-text">문제 1 / 5</div>
+        </div>
+
+        <div class="sim-overall-progress">
+          <div id="simProgressFill" class="sim-progress-fill"></div>
+        </div>
+
+        <!-- 중앙 대형 원형 타이머 -->
+        <div class="timer-container">
+          <div class="timer-circle-wrap">
+            <svg class="timer-svg" viewBox="0 0 180 180">
+              <circle class="timer-circle-bg" cx="90" cy="90" r="78"></circle>
+              <circle id="timerCircleProgress" class="timer-circle-progress listening" cx="90" cy="90" r="78"></circle>
+            </svg>
+            <div class="timer-display-inner">
+              <div id="timerClock" class="timer-clock">--:--</div>
+              <div id="timerPhaseCaption" class="timer-phase-caption">LISTENING</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 문제 표시 카드 -->
+        <div class="sim-question-card">
+          <div class="question-toolbar">
+            <button type="button" id="btnFontSmaller" class="btn-tool-mini" title="글자 작게">A-</button>
+            <button type="button" id="btnFontBigger" class="btn-tool-mini" title="글자 크게">A+</button>
+            <button type="button" id="btnToggleHide" class="btn-tool-mini" data-i18n="speaking.sim.hideQuestion">문제 숨기기</button>
+          </div>
+          <p id="simQuestionText" class="sim-question-text"></p>
+        </div>
+
+        <!-- 하단 조작 바 -->
+        <div class="sim-controls-bar">
+          <button type="button" id="btnPauseResume" class="sim-btn sim-btn-primary" data-i18n="speaking.sim.pause">일시정지</button>
+          <button type="button" id="btnReplayVoice" class="sim-btn sim-btn-secondary" data-i18n="speaking.sim.replay">🔊 다시 듣기</button>
+          <button type="button" id="btnSkipBreak" class="sim-btn sim-btn-skip-break hidden" data-i18n="speaking.sim.skipBreak">휴식 건너뛰기 ➔</button>
+          <button type="button" id="btnPrevQuestion" class="sim-btn sim-btn-secondary" data-i18n="speaking.sim.prev">◀ 이전</button>
+          <button type="button" id="btnNextQuestion" class="sim-btn sim-btn-secondary" data-i18n="speaking.sim.next">다음 ➔</button>
+          <button type="button" id="btnStopExam" class="sim-btn sim-btn-danger" data-i18n="speaking.sim.stop">시험 중단</button>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           3. 결과 화면 (Result View)
+           =================================================================== -->
+      <section id="resultCard" class="speaking-card result-card hidden">
+        <div class="result-emoji">🎉</div>
+        <h2 class="result-title" data-i18n="speaking.result.title">말하기 시험 완료!</h2>
+        <p class="result-subtitle" data-i18n="speaking.result.subtitle">모든 문제를 성공적으로 마쳤습니다. 수고하셨습니다!</p>
+
+        <div class="result-stats-row">
+          <div class="stat-box">
+            <div id="resTotalTime" class="stat-val">0분 0초</div>
+            <div class="stat-label">총 소요 시간</div>
+          </div>
+          <div class="stat-box">
+            <div id="resCompletedCount" class="stat-val">0개</div>
+            <div class="stat-label">완료한 문제 수</div>
+          </div>
+        </div>
+
+        <div class="result-review-box">
+          <h3 class="result-review-title" data-i18n="speaking.result.reviewTitle">오늘 연습한 문제 목록</h3>
+          <div id="resQuestionList" class="result-review-list"></div>
+        </div>
+
+        <div class="result-actions-row">
+          <button type="button" id="btnRetryExam" class="btn-start-exam" data-i18n="speaking.result.retry">🔄 같은 설정으로 다시 풀기</button>
+          <button type="button" id="btnBackToSetup" class="chip-btn" style="padding: 0.8rem 1.5rem; font-size: 0.95rem;" data-i18n="speaking.result.backToSetup">⚙️ 문제 및 설정 변경하기</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="../assets/js/i18n.js?v=20261010b"></script>
+  <script src="../assets/i18n/ko/common.js?v=20261010b"></script>
+  <script src="../assets/i18n/ko/speaking.js?v=20261010b"></script>
+  <script src="../assets/i18n/en/common.js?v=20261010b"></script>
+  <script src="../assets/i18n/en/speaking.js?v=20261010b"></script>
+  <script src="../assets/i18n/zh/common.js?v=20261010b"></script>
+  <script src="../assets/i18n/zh/speaking.js?v=20261010b"></script>
+  <script src="../assets/js/speakingApp.js?v=20261010b"></script>
+</body>
+</html>
+

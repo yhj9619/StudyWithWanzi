@@ -1,8 +1,10 @@
 // 공용 문구 (중국어 · 간체)
-i18nRegister('zh', {
+(window.i18nRegister || function (l, d) { (window.__i18n_queue = window.__i18n_queue || []).push([l, d]); })('zh', {
   'common.uiLanguage': '界面语言',
   'common.backToHub': '◀ Study with Wanzi',
   'common.backToHubTitle': '返回 Study with Wanzi 主菜单',
+  'common.navAnkiHome': '🃏 Anki 工具',
+  'common.navAnkiHomeTitle': '前往 Anki 单词学习工具集',
   'common.navGuide': '📖 Anki 指南',
   'common.navGuideTitle': '前往 Anki 指南（从安装到复习的 4 个步骤）',
   'common.navEditor': '🌄 卡片模板编辑器',
@@ -11,6 +13,8 @@ i18nRegister('zh', {
   'common.navPromptTitle': '前往 Anki AI 提示词生成器',
   'common.navManual': '❓ 使用说明',
   'common.navManualTitle': '前往使用说明（工具用法 · 常见问题）',
+  'common.navSpeaking': '🎙️ 口语考试练习',
+  'common.navSpeakingTitle': '前往口语模考计时器',
   'common.navMenu': '菜单',
   'common.autoSaved': '✓ 已自动保存',
   'common.autoSavedTitle': '设置会自动保存在这个浏览器里',

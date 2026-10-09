@@ -1,8 +1,10 @@
 // 공용 문구 (영어)
-i18nRegister('en', {
+(window.i18nRegister || function (l, d) { (window.__i18n_queue = window.__i18n_queue || []).push([l, d]); })('en', {
   'common.uiLanguage': 'Language',
   'common.backToHub': '◀ Study with Wanzi',
   'common.backToHubTitle': 'Back to the Study with Wanzi main menu',
+  'common.navAnkiHome': '🃏 Anki Tools',
+  'common.navAnkiHomeTitle': 'Go to the Anki Study Tools Hub',
   'common.navGuide': '📖 Anki Guide',
   'common.navGuideTitle': 'Go to the Anki Guide (4 steps from install to review)',
   'common.navEditor': '🌄 Card Template Editor',
@@ -11,6 +13,8 @@ i18nRegister('en', {
   'common.navPromptTitle': 'Go to the Anki AI Prompt Generator',
   'common.navManual': '❓ User Manual',
   'common.navManualTitle': 'Go to the User Manual (how to use the tools · FAQ)',
+  'common.navSpeaking': '🎙️ Speaking Practice',
+  'common.navSpeakingTitle': 'Go to the Speaking Mock Test Timer',
   'common.navMenu': 'Menu',
   'common.autoSaved': '✓ Auto-saved',
   'common.autoSavedTitle': 'Your settings are saved automatically in this browser',

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="manual.meta.title">사용 설명서 - Study with Wanzi</title>
+  <meta name="description" content="카드 서식 에디터와 AI 프롬프트 생성기를 화면별로 설명하고, 막혔을 때 볼 자주 묻는 질문을 모은 Study with Wanzi 사용 설명서" data-i18n-attr="content:manual.meta.description">
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg?v=2">
+  <link rel="alternate icon" href="../favicon.ico?v=2">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
+  <link rel="stylesheet" href="../assets/css/style.css?v=20261008a">
+  <link rel="stylesheet" href="../assets/css/guide.css?v=20261008a">
+</head>
+<body>
+  <!-- 모든 페이지 공통 메뉴줄 (i18n.js가 그림): PC는 한 줄, 휴대폰은 ☰ 버튼으로 여닫기 -->
+  <nav data-site-nav="manual"></nav>
+
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-group">
+        <span class="logo-icon">❓</span>
+        <div>
+          <h1 class="logo-title" data-i18n="manual.header.title">사용 설명서</h1>
+          <p class="logo-subtitle" data-i18n="manual.header.subtitle">도구를 화면별로 설명하고, 막혔을 때 볼 자주 묻는 질문을 모았어요</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <div class="guide-container">
+
+      <section class="guide-hero">
+        <div class="guide-hero-tag" data-i18n="manual.hero.tag">❓ 도구 사용법 · 자주 묻는 질문</div>
+        <h2 class="guide-hero-title" data-i18n="manual.hero.title">도구가 헷갈릴 때 여기서 찾아보세요</h2>
+        <p class="guide-hero-subtitle" data-i18n-html="manual.hero.subtitle">Anki를 처음 준비하는 순서는 <a href="ankiGuide.html">📖 Anki 가이드</a>에 있어요. 여기서는 이 사이트의 도구를 화면에 보이는 순서대로 설명해요. 긴 설명은 접어 두었으니 필요한 것만 펼쳐 보세요.</p>
+      </section>
+
+      <!-- 차례 -->
+      <nav class="guide-quickstart manual-toc" aria-label="사용 설명서 차례" data-i18n-attr="aria-label:manual.toc.ariaLabel">
+        <a href="#editor" class="guide-quick-card">
+          <span class="guide-quick-icon">🌄</span>
+          <strong data-i18n="manual.toc.editor.title">카드 서식 에디터</strong>
+          <span data-i18n="manual.toc.editor.desc">화면 구성 · 필드 · 🔊 읽어주기 · 꾸미기 · 초기화 · 복사</span>
+        </a>
+        <a href="#prompt" class="guide-quick-card">
+          <span class="guide-quick-icon">🤖</span>
+          <strong data-i18n="manual.toc.prompt.title">AI 프롬프트 생성기</strong>
+          <span data-i18n="manual.toc.prompt.desc">언어와 재료 · 난이도 · 항목 순서 · CSV 파일 받기</span>
+        </a>
+        <a href="#faq" class="guide-quick-card">
+          <span class="guide-quick-icon">❓</span>
+          <strong data-i18n="manual.toc.faq.title">자주 묻는 질문</strong>
+          <span data-i18n="manual.toc.faq.desc">막혔을 때 먼저 확인할 12가지</span>
+        </a>
+      </nav>
+
+      <!-- 도구 1: 카드 서식 에디터 (ankiEditor.html) -->
+      <article class="guide-section-card" id="editor">
+        <header class="guide-section-header">
+          <span class="guide-section-badge" data-i18n="manual.editor.badge">도구 1</span>
+          <h3 class="guide-section-title" data-i18n="manual.editor.title">🌄 카드 서식 에디터</h3>
+          <p class="guide-section-lead" data-i18n="manual.editor.lead">배우는 언어와 필드를 정하고 카드를 꾸민 뒤, ① 앞면 서식 ② 뒷면 서식 ③ 스타일을 복사해 Anki에 붙여넣는 도구예요.</p>
+        </header>
+
+        <div class="guide-prose">
+          <h4 data-i18n="manual.editor.layoutTitle">🖥️ 화면 구성</h4>
+          <ul class="guide-feature-list">
+            <li data-i18n-html="manual.editor.layout1"><strong>왼쪽 = 설정</strong>: ① 배우는 언어 → ② 필드 → ⚙️ 고급 설정 순서로 있어요.</li>
+            <li data-i18n-html="manual.editor.layout2"><strong>오른쪽 = 결과</strong>: 카드 미리보기 → 🎨 더 꾸미기 → ③ 카드 서식 복사 순서로 있어요.</li>
+            <li data-i18n-html="manual.editor.layout3"><strong>휴대폰</strong>에서는 화면이 좁아서 위쪽 탭 <b>[⚙️ 1. 설정하기]</b> · <b>[📱 2. 미리보기·복사]</b>로 두 화면을 오가요.</li>
+            <li data-i18n-html="manual.editor.layout4">설정은 이 브라우저에 <b>자동으로 저장</b>돼요. 맨 위에 <b>✓ 자동 저장됨</b>이 보이면 저장된 거예요.</li>
+          </ul>
+
+          <h4 class="guide-subsection-title" data-i18n="manual.editor.langTitle">① 배우는 언어 고르기</h4>
+          <p data-i18n-html="manual.editor.langBody">검색 칸에 언어 이름을 적어 찾을 수 있어요 (예: 스페인어, 초성 ㅅㅍㅇ, spanish, es). 언어를 고르면 그 언어에 맞는 🌐 외국어사전이 <b>자동으로 연결</b>되고, 아랍어처럼 오른쪽에서 왼쪽으로 쓰는 언어는 카드의 쓰기 방향도 자동으로 맞춰요.</p>
+
+          <h4 class="guide-subsection-title" data-i18n="manual.editor.fieldsTitle">② 카드에 들어갈 칸(필드) 정하기</h4>
+          <ul class="guide-feature-list">
+            <li data-i18n-html="manual.editor.fields1"><strong>필드 이름</strong>은 Anki 노트의 필드 이름과 <b>글자 · 띄어쓰기 · 영문 대소문자까지 똑같이</b> 적어 주세요. 다르면 카드에 내용이 안 나와요. (Anki에서 확인하는 곳: <b>[도구] ➔ [노트 유형 관리] ➔ [필드...]</b>)</li>
+            <li data-i18n-html="manual.editor.fields2"><strong>앞면 표시 · 뒷면 표시</strong>: 그 필드를 카드 앞면(문제)과 뒷면(정답) 중 어디에 보여 줄지 골라요. 둘 다 켜도 돼요.</li>
+            <li data-i18n-html="manual.editor.fields3"><strong>🌐 외국어사전 · 📘 보조 사전</strong>: 켜면 카드의 그 글자 옆에 사전 아이콘이 생기고, 누르면 바로 검색 결과가 열려요. 📘는 한국어 뜻을 찾아볼 때 쓰는 사전이에요 (기본은 네이버 국어사전).</li>
+            <li data-i18n-html="manual.editor.fields4"><strong>🔊 읽어주기</strong>: 켜면 Anki가 그 필드의 글자를 소리 내어 읽어 줘요. 자세한 내용은 <a href="#tts">아래 🔊 읽어주기</a>를 보세요.</li>
+            <li data-i18n-html="manual.editor.fields5"><strong>✨ 이 언어에 자주 쓰는 필드</strong>: 병음 · 후리가나 · 예문처럼 고른 언어에 많이 쓰는 필드를 누르면 바로 추가돼요. 이름을 직접 정하려면 <b>[➕ 빈 필드 하나 더 만들기]</b>를 누르세요. 필요 없는 필드는 <b>[🗑️ 삭제]</b>로 지워요.</li>
+            <li data-i18n-html="manual.editor.fields6"><strong>글씨 크기 · 색 바꾸기</strong>: 오른쪽 미리보기 카드에서 글자를 누르면 바로 아래 <b>🎨 글씨 꾸미기</b>에서 크기 · 굵기 · 글꼴 · 색을 바꿀 수 있어요. 바꾼 모습이 바로 보여요.</li>
+            <li data-i18n-html="manual.editor.fields7"><strong>미리보기에 보일 예시</strong>: 미리보기 카드에만 쓰는 예시 글자예요. Anki에 들어가는 카드 내용과는 상관없어요.</li>
+          </ul>
+
+          <!-- 🔊 읽어주기 (에디터 화면에는 한 줄 안내만 남기고 자세한 설명은 여기로: ankiEditor.html → manual.html#tts) -->
+          <h4 id="tts" class="guide-subsection-title" data-i18n="manual.tts.title">🔊 읽어주기</h4>
+          <p data-i18n-html="manual.tts.intro">Anki가 기기에 들어 있는 목소리로 카드 글자를 소리 내어 읽어 주는 기능이에요. ② 필드 상자에서 읽어 줄 필드의 <b>🔊 읽어주기</b>를 켜세요.</p>
+          <ul class="guide-feature-list">
+            <li data-i18n="manual.tts.item1">카드를 열면 🔊를 켠 필드를 자동으로 읽어주고, ▶ 버튼을 누르면 다시 들을 수 있어요.</li>
+            <li data-i18n-html="manual.tts.item2">자동으로 읽는 게 싫으면 덱 이름 옆 톱니바퀴 ⚙️ ➔ [옵션]의 <b>오디오</b> 항목에서 자동 재생을 끌 수 있어요. (<a href="#faq-tts-autoplay">자주 묻는 질문 보기</a>)</li>
+            <li data-i18n-html="manual.tts.item3">소리가 안 나면 기기에 그 언어의 목소리(음성 데이터)를 설치해 주세요. 기기별 설치 방법은 <a href="#faq-tts-sound">자주 묻는 질문</a>에 있어요.</li>
+            <li data-i18n-html="manual.tts.item4">읽는 속도는 왼쪽 아래 <b>⚙️ 고급 설정 ➔ 🔊 읽어주기</b>에서 바꾸고, <b>[▶ 미리 듣기]</b>로 들어 볼 수 있어요. 미리 듣기는 이 브라우저의 목소리라서 Anki 목소리와는 조금 달라요.</li>
+            <li data-i18n="manual.tts.item5">Anki PC(2.1.20 이상) · AnkiMobile · AnkiDroid(2.17 이상)에서 돼요.</li>
+            <li data-i18n="manual.tts.item6">일부 언어는 기기에 읽어주는 목소리가 거의 없어서 🔊 읽어주기를 쓸 수 없어요. 그런 언어를 고르면 🔊 버튼이 꺼지고 안내 문구가 보여요.</li>
+          </ul>
+
+          <details class="guide-details">
+            <summary data-i18n="manual.editor.advSummary">⚙️ 고급 설정 — 사전 주소 · 보조 사전 · 사전 아이콘 · 읽는 속도</summary>
+            <div class="guide-details-body">
+              <p data-i18n="manual.editor.advIntro">왼쪽 맨 아래에 접혀 있어요. 기본값 그대로 써도 괜찮아요.</p>
+              <ul class="guide-feature-list">
+                <li data-i18n-html="manual.editor.adv1"><strong>사전 주소</strong>: 🌐 아이콘을 누르면 열릴 사전의 주소예요. 언어를 고르면 자동으로 채워지니 보통은 바꿀 필요 없어요. <b>[초기화]</b>를 누르면 그 언어의 기본 주소로 돌아가요.</li>
+                <li data-i18n-html="manual.editor.adv2"><strong>보조 사전</strong>: 📘 아이콘으로 열 사전을 <b>네이버 국어사전 · 한국어 위키백과 · 직접 입력</b> 중에서 골라요. 직접 입력을 고르면 원하는 사전 주소를 적을 수 있어요.</li>
+                <li data-i18n-html="manual.editor.adv3"><strong>사전을 새 창으로 열기</strong>: 켜 두면 사전이 새 창으로 열려서 카드 화면이 그대로 남아요.</li>
+                <li data-i18n-html="manual.editor.adv4"><strong>검색어 깔끔하게</strong>: [ ] · ( ) 안의 내용은 빼고, 뜻이 여러 개면 첫 번째 뜻만 검색해요. (예: [명사] 사과, 사과나무 ➔ 사과)</li>
+                <li data-i18n-html="manual.editor.adv5"><strong>사전 아이콘을 붙일 필드</strong>: 필드마다 🌐 · 📘 아이콘을 붙일지 한눈에 고르는 목록이에요. ② 필드 상자의 🌐 · 📘 버튼과 같은 설정이에요. 💡 한국어 뜻 필드에 🌐를 붙이면 "이 뜻을 외국어로 뭐라고 하지?"를 바로 찾아볼 수 있어요.</li>
+                <li data-i18n-html="manual.editor.adv6"><strong>읽는 속도</strong>: 보통 · 조금 느리게 · 느리게 중에서 고르고 <b>[▶ 미리 듣기]</b>로 들어 봐요.</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="guide-details" id="deco">
+            <summary data-i18n="manual.deco.summary">🎨 더 꾸미기 — 테마 · 하나씩 바꾸기 · 카드 모양</summary>
+            <div class="guide-details-body">
+              <p data-i18n="manual.deco.intro">오른쪽 미리보기 바로 아래에 접혀 있어요. 바꾸는 대로 미리보기에 바로 보이고, 어두운 화면(🌙)에서도 잘 보이게 자동으로 맞춰요.</p>
+              <h4 data-i18n="manual.deco.themesTitle">한 번에 꾸미기 (테마)</h4>
+              <p data-i18n="manual.deco.themesBody">테마를 누르면 배경 · 글자색 · 글꼴이 한 번에 바뀌어요. 고른 뒤에 아래에서 하나씩 더 바꿔도 돼요.</p>
+              <ul class="guide-feature-list">
+                <li data-i18n-html="manual.deco.themesBasic"><strong>기본 테마</strong>: 기본 · 링 단어장 · 스티키 메모 · 포레스트 · 종이 노트 · 파스텔 · 고급 다크 · 칠판 · 바다 · 스프레드시트</li>
+                <li data-i18n-html="manual.deco.themesTrad"><strong>전통 테마</strong>: 한지 · 오방색 · 방위 오방색 · 일월오봉도 · 단청 · 태극 · 조각보 · 청자 · 자개 · 문살 · 민화</li>
+              </ul>
+              <div class="guide-callout info">
+                <span class="guide-callout-icon">📱</span>
+                <div data-i18n-html="manual.deco.irworobong">🌄 <strong>일월오봉도</strong>는 휴대폰처럼 세로로 긴 화면에서는 그림이 화면 전체에 깔리고, PC처럼 가로로 넓은 화면에서는 카드 아래에 그림 띠로 보여요.</div>
+              </div>
+              <h4 data-i18n="manual.deco.detailTitle">하나씩 바꾸기</h4>
+              <p data-i18n-html="manual.deco.detailBody"><b>배경</b>(단색 · 그라데이션 · 은은한 무늬) · <b>카드 상자</b>(둥근 카드 · 그림자 · 표 모양) · <b>테두리</b>(얇은 선 · 두꺼운 선 · 오방색 · 단청 · 자개 띠 등) · <b>구분선 모양</b> · <b>장식</b>(태극 문양 + 건곤감리, 일월오봉도 그림) · <b>아이콘 위치</b>(글자 옆 / 글자 아래 따로 한 줄)를 하나씩 고를 수 있어요. 색도 따로 바꿀 수 있어요.</p>
+              <h4 data-i18n="manual.deco.shapeTitle">🎨 카드 모양</h4>
+              <ul class="guide-feature-list">
+                <li data-i18n-html="manual.deco.shape1"><strong>카드 글꼴</strong>: 기본 고딕 · 명조 · 타자기체 3가지예요. 모두 기기에 들어 있는 글꼴이라 PC · 폰 어디서나, 인터넷 없이도 보여요. 기기마다 모양은 조금 달라요.</li>
+                <li data-i18n-html="manual.deco.shape2"><strong>줄 간격</strong>: 글줄 사이를 넓히거나 좁혀요.</li>
+                <li data-i18n-html="manual.deco.shape3"><strong>뒷면에 구분선 넣기</strong>: 뒷면에서 문제와 정답 사이에 선을 그어요.</li>
+                <li data-i18n-html="manual.deco.shape4"><strong>뒷면 위쪽에 문제(앞면)도 보여주기</strong>: 정답을 볼 때 문제도 함께 보여요. 그 문제의 글씨 크기와 색도 따로 정할 수 있어요.</li>
+                <li data-i18n-html="manual.deco.shape5"><strong>가운데 정렬 · 오른쪽에서 왼쪽으로 쓰기</strong>: 글자 정렬과 쓰기 방향이에요. 아랍어 · 히브리어 등은 쓰기 방향이 자동으로 켜져요.</li>
+              </ul>
+            </div>
+          </details>
+
+          <h4 id="reset" class="guide-subsection-title" data-i18n="manual.reset.title">🔄 초기화 버튼 3가지</h4>
+          <p data-i18n="manual.reset.intro">바꾼 설정을 처음 상태로 돌리고 싶을 때 써요. 누르면 한 번 더 물어봐요.</p>
+          <div class="guide-table-wrapper">
+            <table class="guide-table manual-reset-table">
+              <thead>
+                <tr>
+                  <th data-i18n="manual.reset.thButton">버튼</th>
+                  <th data-i18n="manual.reset.thWhere">위치</th>
+                  <th data-i18n="manual.reset.thResets">초기화되는 것</th>
+                  <th data-i18n="manual.reset.thKeeps">그대로 남는 것</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong data-i18n="manual.reset.contentButton">📝 언어·필드 초기화</strong></td>
+                  <td data-label="위치" data-i18n="manual.reset.contentWhere" data-i18n-attr="data-label:manual.reset.thWhere">왼쪽 칸 맨 위</td>
+                  <td data-label="초기화되는 것" data-i18n="manual.reset.contentResets" data-i18n-attr="data-label:manual.reset.thResets">학습 언어(영어로), 필드 이름 · 예시 · 앞면/뒷면 · 사전 아이콘 · 🔊 읽어주기, 사전 주소 설정</td>
+                  <td data-label="그대로 남는 것" data-i18n="manual.reset.contentKeeps" data-i18n-attr="data-label:manual.reset.thKeeps">테마 · 배경 · 글꼴 · 글씨 크기와 색 같은 꾸미기</td>
+                </tr>
+                <tr>
+                  <td><strong data-i18n="manual.reset.designButton">🎨 꾸미기 초기화</strong></td>
+                  <td data-label="위치" data-i18n="manual.reset.designWhere" data-i18n-attr="data-label:manual.reset.thWhere">오른쪽 칸 맨 위</td>
+                  <td data-label="초기화되는 것" data-i18n="manual.reset.designResets" data-i18n-attr="data-label:manual.reset.thResets">테마 · 배경 · 카드 모양(글꼴 · 줄 간격 등) · 읽는 속도 · 아이콘 위치, 필드별 글씨 크기 · 색 · 굵기</td>
+                  <td data-label="그대로 남는 것" data-i18n="manual.reset.designKeeps" data-i18n-attr="data-label:manual.reset.thKeeps">학습 언어, 필드 이름 · 예시</td>
+                </tr>
+                <tr>
+                  <td><strong data-i18n="manual.reset.allButton">🔄 설정 초기화</strong></td>
+                  <td data-label="위치" data-i18n="manual.reset.allWhere" data-i18n-attr="data-label:manual.reset.thWhere">화면 맨 위 (제목 오른쪽)</td>
+                  <td data-label="초기화되는 것" data-i18n="manual.reset.allResets" data-i18n-attr="data-label:manual.reset.thResets">위 두 가지 전부 (에디터의 모든 설정)</td>
+                  <td data-label="그대로 남는 것" data-i18n="manual.reset.allKeeps" data-i18n-attr="data-label:manual.reset.thKeeps">AI 프롬프트 생성기 등 다른 도구의 설정</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4 id="copy" class="guide-subsection-title" data-i18n="manual.copy.title">③ 카드 서식 복사해서 Anki에 붙여넣기</h4>
+          <ul class="guide-feature-list">
+            <li data-i18n-html="manual.copy.item1">Anki의 <b>[카드 유형]</b> 창을 열어 두고, <b>① 앞면 서식 · ② 뒷면 서식 · ③ 스타일</b>을 차례로 복사해서 같은 이름의 칸에 붙여넣으세요. 칸에 원래 있던 내용은 <b>모두 지우고 통째로 바꿔</b> 넣어야 해요.</li>
+            <li data-i18n-html="manual.copy.item2">복사하면 버튼 옆에 <b>✓ 복사했어요</b>가 보이고, 세 칸을 모두 복사하면 🎉 안내가 나와요. 붙여넣을 내용은 <b>[붙여넣을 내용 보기]</b>를 눌러 확인할 수 있어요.</li>
+            <li data-i18n-html="manual.copy.item3">테마나 필드를 바꿨다면 <b>세 개 모두 다시</b> 복사해서 붙여넣으세요. 하나만 바꿔 넣으면 카드 모양이 어긋날 수 있어요.</li>
+            <li data-i18n-html="manual.copy.item4">[카드 유형] 창을 여는 곳(PC · AnkiDroid · AnkiMobile)은 <a href="ankiGuide.html#templates">Anki 가이드 Step 2</a>에 그림과 함께 있어요.</li>
+          </ul>
+
+          <div class="guide-cta-card">
+            <div class="guide-cta-info">
+              <h5 data-i18n="manual.editor.cta.title">🌄 Anki 카드 서식 에디터</h5>
+              <p data-i18n="manual.editor.cta.desc">설명을 읽었다면 바로 카드를 꾸며 보세요. 설정은 자동으로 저장돼요.</p>
+            </div>
+            <a href="ankiEditor.html" class="guide-cta-btn" data-i18n="manual.editor.cta.button">카드 서식 에디터 열기 ➔</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 도구 2: AI 프롬프트 생성기 (ankiPrompt.html) -->
+      <article class="guide-section-card" id="prompt">
+        <header class="guide-section-header">
+          <span class="guide-section-badge" data-i18n="manual.prompt.badge">도구 2</span>
+          <h3 class="guide-section-title" data-i18n="manual.prompt.title">🤖 AI 프롬프트 생성기</h3>
+          <p class="guide-section-lead" data-i18n="manual.prompt.lead">AI(ChatGPT · Gemini · Claude)에게 보낼 단어장 부탁 글(프롬프트)을 만들고, AI 답변을 Anki로 바로 가져올 수 있는 CSV 파일로 바꿔 주는 도구예요.</p>
+        </header>
+
+        <div class="guide-prose">
+          <h4 data-i18n="manual.prompt.layoutTitle">🖥️ 화면 구성</h4>
+          <ul class="guide-feature-list">
+            <li data-i18n-html="manual.prompt.layout1"><strong>왼쪽 = 설정</strong>: ① 언어와 재료 → ② 난이도 → ③ 단어 종류와 개수 → ④ 항목과 순서 → ⚙️ 고급 설정</li>
+            <li data-i18n-html="manual.prompt.layout2"><strong>오른쪽 = 결과</strong>: 완성된 프롬프트 → AI 바로 열기 버튼 → AI 답변 붙여넣기 → CSV 파일 받기</li>
+            <li data-i18n-html="manual.prompt.layout3"><strong>휴대폰</strong>에서는 위쪽 탭 <b>[⚙️ 1. 설정하기]</b> · <b>[📋 2. AI·파일 받기]</b>로 두 화면을 오가요. 설정은 이 브라우저에 자동으로 저장돼요.</li>
+          </ul>
+
+          <h4 class="guide-subsection-title" data-i18n="manual.prompt.sourceTitle">① 공부할 언어와 단어를 뽑을 재료</h4>
+          <ul class="guide-feature-list">
+            <li data-i18n-html="manual.prompt.source1"><strong>📄 내가 가진 글에서 뽑기</strong>: 기사 · 대본 · 시험 지문 같은 글을 붙여넣으면 그 글에 나온 단어를 뽑아요. 한국어 글을 넣으면 그 내용을 외국어로 말할 때 필요한 단어를 뽑아요. 글의 언어는 자동으로 알아보고, 직접 고를 수도 있어요. 글을 비워 두면 프롬프트에 글을 붙여넣을 자리만 남으니, AI 창에 글을 함께 붙여넣으면 돼요.</li>
+            <li data-i18n-html="manual.prompt.source2"><strong>💡 주제만 정하고 AI가 골라 주기</strong>: "공항에서 쓰는 회화"처럼 주제나 상황만 적으면 AI가 알맞은 단어를 골라요. 비워 두면 일상 회화 및 여행 주제로 만들어요.</li>
+          </ul>
+
+          <h4 class="guide-subsection-title" data-i18n="manual.prompt.levelTitle">② 난이도 (어학 시험 급수)</h4>
+          <p data-i18n-html="manual.prompt.level1">준비하는 시험과 목표 급수를 고르면 너무 쉬운 단어를 빼거나 그 수준의 단어만 고를 수 있어요. 일본어 JLPT(N1~N5), 중국어 HSK(1~6급), 유럽 언어 CEFR(A1~C2), 프랑스어 DELF, 독일어 괴테처럼 <b>그 언어에 실제로 있는 시험 급수</b>가 나와요. 급수 버튼을 누르면 바로 입력되고, 직접 적어도 돼요. 안 정해도 괜찮아요.</p>
+          <p data-i18n-html="manual.prompt.level2"><b>어떤 단어를 고를까요?</b>에서 너무 쉬운 단어는 빼기(추천) · 이 수준 이상만 · 이 수준만 · 수준 상관없이 전부 중에서 골라요.</p>
+
+          <h4 class="guide-subsection-title" data-i18n="manual.prompt.countTitle">③ 단어 종류와 개수</h4>
+          <p data-i18n="manual.prompt.countBody">명사 · 동사 · 형용사 · 부사 · 숙어 중에서 담을 단어 종류를 고르고, 최대 몇 개까지 뽑을지 정해요.</p>
+
+          <h4 class="guide-subsection-title" data-i18n="manual.prompt.columnsTitle">④ 단어장에 넣을 항목과 순서</h4>
+          <ul class="guide-feature-list">
+            <li data-i18n-html="manual.prompt.columns1">위에서부터 차례로 단어장 파일의 1번 칸, 2번 칸…이 돼요. <b>Anki 필드 순서와 똑같이</b> 맞춰 주세요. 다르면 가져올 때 뜻 자리에 예문이 들어가는 식으로 섞여요.</li>
+            <li data-i18n-html="manual.prompt.columns2"><b>✨ 눌러서 항목 추가</b>의 버튼(병음 · 예문 등)이나 <b>[➕ 항목 직접 추가하기]</b>로 항목을 더하고, 위 · 아래 버튼으로 순서를 바꾸거나 지울 수 있어요.</li>
+            <li data-i18n-html="manual.prompt.columns3"><b>⚙️ 고급 설정 ➔ [📥 카드 서식 에디터의 필드 불러오기]</b>를 누르면 에디터에서 정한 필드 순서를 그대로 가져와요. <b>[🔄 기본 항목으로 초기화]</b>는 지금 고른 언어의 기본 항목으로 되돌려요.</li>
+            <li data-i18n-html="manual.prompt.columns4"><b>📌 단어 한 줄은 이렇게 만들어져요</b>에서 한 줄의 모양을 미리 볼 수 있어요. 1번째 칸의 <b>"[품사]한국어"</b> 형식은 뜻이 같은 다른 단어를 구분하는 데 도움이 돼요.</li>
+          </ul>
+
+          <details class="guide-details">
+            <summary data-i18n="manual.prompt.advSummary">⚙️ 고급 설정 — 칸 나누는 기호 · AI에게 함께 보낼 세부 부탁</summary>
+            <div class="guide-details-body">
+              <ul class="guide-feature-list">
+                <li data-i18n-html="manual.prompt.adv1"><strong>항목 불러오기 · 초기화</strong>: 위 ④에서 설명한 두 버튼이 여기 있어요.</li>
+                <li data-i18n-html="manual.prompt.adv2"><strong>칸 나누는 기호</strong>: 기본은 쉼표( , )예요. 잘 모르겠으면 그대로 두세요. 예문에 쉼표가 많으면 탭을 골라도 돼요. [CSV 파일 받기]도 이 기호에 맞춰 파일을 만들어요.</li>
+                <li data-i18n-html="manual.prompt.adv3"><strong>AI에게 함께 보낼 세부 부탁</strong>: 설명 없이 단어만 달라고 하기, 제목 줄 빼기, 쉼표가 든 내용은 큰따옴표로 감싸기, 기본형으로 쓰기, 같은 단어는 한 번만, 뜻이 같은 단어 구분하기 같은 부탁이에요. 모두 켜 두는 걸 추천해요.</li>
+              </ul>
+            </div>
+          </details>
+
+          <h4 class="guide-subsection-title" data-i18n="manual.prompt.sendTitle">✨ 프롬프트 복사 → AI에 붙여넣기</h4>
+          <ul class="guide-feature-list">
+            <li data-i18n-html="manual.prompt.send1">오른쪽 <b>✨ 완성된 AI 프롬프트</b>에서 <b>[📋 프롬프트 복사하기]</b>를 누르세요.</li>
+            <li data-i18n-html="manual.prompt.send2"><b>[ChatGPT 열기] · [Google Gemini 열기] · [Claude 열기]</b> 버튼을 누르면 프롬프트가 자동으로 복사되고 AI가 새 창으로 열려요. 붙여넣기(<kbd>Ctrl</kbd>+<kbd>V</kbd>)만 하면 돼요.</li>
+          </ul>
+
+          <h4 id="csv" class="guide-subsection-title" data-i18n="manual.prompt.csvTitle">📥 AI 답변 붙여넣기 → CSV 파일 받기</h4>
+          <ul class="guide-feature-list">
+            <li data-i18n-html="manual.prompt.csv1">AI 답변을 통째로 복사해 <b>[AI 답변]</b> 칸에 붙여넣으세요. 앞뒤 인사말 · 설명 · 상자 표시(```) · 표 모양은 알아서 정리하고, 칸 수가 맞지 않는 줄이 있으면 몇 번째 줄인지 알려 줘요.</li>
+            <li data-i18n-html="manual.prompt.csv2"><b>[⬇️ CSV 파일 받기]</b>를 누르면 단어장 파일이 내려받기 폴더에 저장돼요. 문제 있는 줄이 남아 있으면 그 줄은 빼고 만들어요.</li>
+            <li data-i18n-html="manual.prompt.csv3">파일 맨 위의 <code>#separator:Comma</code> · <code>#html:true</code> 두 줄은 Anki가 읽는 설정 줄이에요 (카드로 들어가지 않아요). <strong>지우지 말고 그대로 두세요.</strong></li>
+            <li data-i18n-html="manual.prompt.csv4">엑셀에서 열어도 한글 · 한자 · 성조가 깨지지 않게 저장돼요. 다만 단어를 고칠 때는 엑셀보다 [AI 답변] 칸에서 고친 뒤 다시 받는 게 안전해요.</li>
+            <li data-i18n-html="manual.prompt.csv5">받은 파일을 Anki로 가져오는 방법은 <a href="ankiGuide.html#import">Anki 가이드 Step 4 — 단어장 파일 가져오기</a>에 있어요.</li>
+          </ul>
+
+          <div class="guide-cta-card">
+            <div class="guide-cta-info">
+              <h5 data-i18n="manual.prompt.cta.title">🤖 Anki AI 프롬프트 생성기</h5>
+              <p data-i18n="manual.prompt.cta.desc">언어와 난이도만 골라도 바로 쓸 수 있는 프롬프트가 만들어져요.</p>
+            </div>
+            <a href="ankiPrompt.html" class="guide-cta-btn" data-i18n="manual.prompt.cta.button">프롬프트 생성기 열기 ➔</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 자주 묻는 질문 (Anki 가이드에서 옮겨 옴 · 예전 링크 ankiGuide.html#faq 는 가이드의 안내 상자로 감) -->
+      <article class="guide-section-card" id="faq">
+        <header class="guide-section-header">
+          <span class="guide-section-badge" data-i18n="manual.faq.badge">FAQ</span>
+          <h3 class="guide-section-title" data-i18n="manual.faq.title">❓ 자주 묻는 질문</h3>
+          <p class="guide-section-lead" data-i18n="manual.faq.lead">막혔을 때 여기부터 확인해 보세요. 질문을 누르면 답이 펼쳐져요.</p>
+        </header>
+
+        <div class="guide-faq-list">
+          <details class="guide-faq-item" id="faq-field-name">
+            <summary data-i18n="manual.faq.q1">카드에 {{Front}} 같은 글자가 그대로 보이거나, "필드를 찾을 수 없음" 오류가 나요</summary>
+            <div class="guide-faq-answer" data-i18n-html="manual.faq.a1">에디터에 적은 필드 이름과 Anki의 필드 이름이 달라서 생겨요. 글자 · 띄어쓰기 · 대소문자까지 똑같아야 합니다. Anki의 <b>[도구] ➔ [노트 유형 관리] ➔ [필드...]</b>에서 이름을 확인하고, 에디터의 필드 이름을 똑같이 고친 뒤 ① ② ③을 다시 붙여넣으세요.</div>
+          </details>
+          <details class="guide-faq-item" id="faq-column-order">
+            <summary data-i18n="manual.faq.q2">가져오기 했더니 뜻 자리에 예문이 들어갔어요</summary>
+            <div class="guide-faq-answer" data-i18n-html="manual.faq.a2">단어장 파일의 칸 순서와 Anki의 필드 순서가 달라서 생겨요. 잘못 들어간 카드는 <b>[탐색]</b>에서 골라 지우고, 가져오기 창의 <b>[필드 배정]</b>에서 칸 ↔ 필드 짝을 바로잡아 다시 가져오세요. 다음부터는 프롬프트 생성기의 칸 순서를 <a href="ankiGuide.html#fields">Anki 가이드 Step 1</a>의 필드 순서와 똑같이 맞춰 두면 됩니다.</div>
+          </details>
+          <details class="guide-faq-item" id="faq-broken-text">
+            <summary data-i18n="manual.faq.q3">한글 · 한자 · 성조가 깨져서 보여요</summary>
+            <div class="guide-faq-answer" data-i18n-html="manual.faq.a3">프롬프트 생성기의 <b>[CSV 파일 받기]</b>로 받은 파일을 쓰면 깨지지 않아요. 메모장으로 직접 만들었다면 저장할 때 아래쪽 인코딩을 <b>UTF-8</b>로 골라 다시 저장하세요.</div>
+          </details>
+          <details class="guide-faq-item" id="faq-dict-icons">
+            <summary data-i18n="manual.faq.q4">사전 아이콘(🌐 📘)이 안 보여요</summary>
+            <div class="guide-faq-answer" data-i18n-html="manual.faq.a4">세 가지를 확인하세요.<br> ① 앞면 서식 · 뒷면 서식 · 스타일 3곳 중 빠뜨린 곳이 없는지<br> ② 그 카드의 해당 필드가 비어 있지 않은지 (비어 있으면 아이콘도 숨겨져요)<br> ③ 에디터에서 그 필드의 사전 아이콘이 켜져 있는지</div>
+          </details>
+          <details class="guide-faq-item" id="faq-dark-mode">
+            <summary data-i18n="manual.faq.q5">다크 모드에서 글씨가 안 보여요</summary>
+            <div class="guide-faq-answer" data-i18n-html="manual.faq.a5">다크 모드일 때의 색은 <b>③ 스타일</b>에 들어 있어요. [카드 유형] 창의 <b>스타일</b> 탭에 ③을 붙여넣고 <b>[저장하기]</b>를 눌렀는지 확인하세요.</div>
+          </details>
+          <details class="guide-faq-item" id="faq-phone-paste">
+            <summary data-i18n="manual.faq.q6">폰에서 카드 서식을 붙여넣기가 어려워요</summary>
+            <div class="guide-faq-answer" data-i18n-html="manual.faq.a6">PC에서 한 번만 붙여넣고 동기화하세요. 카드 서식은 노트 유형과 함께 동기화되어 폰에도 그대로 적용돼요. 필드를 추가하거나 지운 뒤 동기화하면 "어느 쪽에 맞출지" 묻는 창이 뜰 수 있는데, 방금 고친 <b>PC 쪽(AnkiWeb에 올리기)</b>을 고르면 됩니다.</div>
+          </details>
+          <details class="guide-faq-item" id="faq-ai-answer">
+            <summary data-i18n="manual.faq.q7">AI가 표나 설명을 섞어서 답해요</summary>
+            <div class="guide-faq-answer" data-i18n-html="manual.faq.a7">괜찮아요. 답변 전체를 그대로 <b>[AI 답변 붙여넣기]</b> 칸에 붙여넣으면 단어 줄만 골라 정리해 줘요. 그래도 결과가 이상하면 AI에게 "설명 없이 CSV만 다시 보내 줘"라고 다시 요청하세요.</div>
+          </details>
+          <details class="guide-faq-item" id="faq-duplicates">
+            <summary data-i18n="manual.faq.q8">같은 단어가 두 번 들어가요 / 뜻이 같은 단어가 빠졌어요</summary>
+            <div class="guide-faq-answer" data-i18n-html="manual.faq.a8">Anki는 <b>1번째 필드(한국어 뜻)</b>가 같으면 같은 카드로 봐요. 같은 단어가 두 번 들어갔다면 1번째 칸의 뜻이 조금 달랐던 거라서, <b>[탐색]</b>에서 하나를 지우면 됩니다. 뜻이 같은 다른 단어가 빠졌다면 <b>보다(눈으로)</b> · <b>보다(만나다)</b>처럼 뜻을 조금씩 다르게 적어 다시 가져오세요.</div>
+          </details>
+          <details class="guide-faq-item" id="faq-new-cards">
+            <summary data-i18n="manual.faq.q9">새 카드는 하루 몇 장이 좋아요? 복습이 너무 많아요</summary>
+            <div class="guide-faq-answer" data-i18n-html="manual.faq.a9">처음엔 하루 <b>10~20장</b>을 추천해요. 복습이 너무 많다면 복습 한도(9999)는 그대로 두고, 며칠 동안 새 카드를 <b>0~5장</b>으로 줄이세요. 밀린 복습이 줄어들면 다시 늘리면 됩니다.</div>
+          </details>
+          <details class="guide-faq-item" id="faq-settings-lost">
+            <summary data-i18n="manual.faq.q10">에디터 · 프롬프트 생성기의 설정이 사라졌어요</summary>
+            <div class="guide-faq-answer" data-i18n-html="manual.faq.a10">설정은 지금 쓰는 <b>브라우저 안에</b> 자동으로 저장돼요. 다른 기기 · 다른 브라우저 · 시크릿 창에서는 따로 저장되고, 브라우저의 방문 기록(사이트 데이터)을 지우면 사라집니다. 늘 같은 PC, 같은 브라우저에서 작업하는 게 가장 편해요.</div>
+          </details>
+          <details class="guide-faq-item" id="faq-tts-sound">
+            <summary data-i18n="manual.faq.q11">🔊 읽어주기 소리가 안 나요</summary>
+            <div class="guide-faq-answer" data-i18n-html="manual.faq.a11">읽어주기는 <b>기기에 들어 있는 음성</b>으로 읽기 때문에, 그 언어 음성이 없으면 소리가 나지 않아요.<br> • <b>PC(Windows)</b>: [설정] ➔ [시간 및 언어] ➔ [음성]에서 해당 언어 음성을 추가하세요. (Mac은 [시스템 설정] ➔ [손쉬운 사용] ➔ [읽기 및 말하기])<br> • <b>아이폰(AnkiMobile)</b>: [설정] ➔ [손쉬운 사용] ➔ [읽기 및 말하기] ➔ [음성]에서 해당 언어 음성을 받으세요.<br> • <b>안드로이드(AnkiDroid)</b>: 앱을 <b>최신 버전(2.17 이상)</b>으로 업데이트하고, 폰 설정의 [텍스트 음성 변환(TTS)]에서 해당 언어 음성 데이터를 받으세요.<br>그래도 안 되면 폰이 무음 모드인지, 음량이 켜져 있는지도 확인해 보세요.</div>
+          </details>
+          <details class="guide-faq-item" id="faq-tts-autoplay">
+            <summary data-i18n="manual.faq.q12">카드를 열 때마다 자동으로 읽어주는 게 싫어요</summary>
+            <div class="guide-faq-answer" data-i18n-html="manual.faq.a12">Anki는 카드가 열리면 소리를 자동으로 재생해요. 덱 이름 옆 톱니바퀴 ⚙️ ➔ [옵션]의 <b>오디오</b> 항목에서 자동 재생을 끌 수 있어요. 자동 재생을 꺼도 단어 옆 <b>▶ 버튼</b>을 누르면 언제든 다시 들을 수 있습니다.</div>
+          </details>
+        </div>
+      </article>
+
+      <!-- 함께 보기 -->
+      <h3 class="manual-more-title" data-i18n="manual.more.title">🔗 함께 보기</h3>
+      <nav class="guide-quickstart manual-toc" aria-label="함께 볼 페이지" data-i18n-attr="aria-label:manual.more.ariaLabel">
+        <a href="ankiGuide.html" class="guide-quick-card">
+          <span class="guide-quick-icon">📖</span>
+          <strong data-i18n="manual.more.guide.title">Anki 가이드</strong>
+          <span data-i18n="manual.more.guide.desc">설치부터 가져오기 · 복습까지 4단계</span>
+        </a>
+        <a href="ankiEditor.html" class="guide-quick-card">
+          <span class="guide-quick-icon">🌄</span>
+          <strong data-i18n="manual.more.editor.title">카드 서식 에디터</strong>
+          <span data-i18n="manual.more.editor.desc">카드를 꾸미고 붙여넣을 서식 만들기</span>
+        </a>
+        <a href="ankiPrompt.html" class="guide-quick-card">
+          <span class="guide-quick-icon">🤖</span>
+          <strong data-i18n="manual.more.prompt.title">AI 프롬프트 생성기</strong>
+          <span data-i18n="manual.more.prompt.desc">AI로 단어장 파일(CSV) 만들기</span>
+        </a>
+      </nav>
+
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <p data-i18n="common.footer">Study with Wanzi &copy; 2026. Made with care for language learners.</p>
+  </footer>
+  <!-- 주소 끝 #faq-tts-sound 처럼 접힌 질문으로 바로 오면 그 질문을 펼쳐 줌 -->
+  <script>
+    (function () {
+      function openTarget() {
+        var id = decodeURIComponent(location.hash.slice(1));
+        var el = id && document.getElementById(id);
+        if (el && el.tagName === 'DETAILS') el.open = true;
+      }
+      window.addEventListener('hashchange', openTarget);
+      document.addEventListener('DOMContentLoaded', openTarget);
+    })();
+  </script>
+  <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
+  <script src="../assets/js/i18n.js?v=20261008a"></script>
+  <script src="../assets/i18n/ko/common.js?v=20261008a"></script>
+  <script src="../assets/i18n/ko/manual.js?v=20261008a"></script>
+  <script src="../assets/i18n/en/common.js?v=20261008a"></script>
+  <script src="../assets/i18n/en/manual.js?v=20261008a"></script>
+  <script src="../assets/i18n/zh/common.js?v=20261008a"></script>
+  <script src="../assets/i18n/zh/manual.js?v=20261008a"></script>
+</body>
+</html>

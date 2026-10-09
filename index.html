@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title data-i18n="index.meta.title">Study with Wanzi - 언어 학습 도구 모음</title>
-  <meta name="description" content="Anki 카드 꾸미기부터 AI 단어장 만들기, 매일 복습하는 법까지 — Anki 단어 공부를 쉽게 만들어 주는 무료 도구 모음" data-i18n-attr="content:index.meta.description">
+  <title data-i18n="portal.meta.title">Study with Wanzi - 다국어 학습 도구 모음</title>
+  <meta name="description" content="Anki 단어 학습 시스템부터 말하기 시험 실전 모의고사까지 — 비개발자도 바로 쓰는 무료 어학 학습 도구" data-i18n-attr="content:portal.meta.description">
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg?v=2">
   <link rel="alternate icon" href="favicon.ico?v=2">
@@ -12,12 +12,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
-  <link rel="stylesheet" href="assets/css/style.css?v=20261008a">
-  <link rel="stylesheet" href="assets/css/index.css?v=20261008a">
+  <link rel="stylesheet" href="assets/css/style.css?v=20261010a">
+  <link rel="stylesheet" href="assets/css/index.css?v=20261010a">
 </head>
 <body>
-  <!-- 모든 페이지 공통 메뉴줄 (i18n.js가 그림): PC는 한 줄, 휴대폰은 ☰ 버튼으로 여닫기 -->
+  <!-- 모든 페이지 공통 메뉴줄 (i18n.js가 그림) -->
   <nav data-site-nav="home"></nav>
 
   <header class="app-header">
@@ -26,7 +25,7 @@
         <span class="logo-icon">🌄</span>
         <div>
           <h1 class="logo-title">Study with Wanzi</h1>
-          <p class="logo-subtitle" data-i18n="index.header.subtitle">Anki 단어 공부를 쉽게 만들어 주는 무료 도구 모음</p>
+          <p class="logo-subtitle" data-i18n="portal.header.subtitle">나만의 맞춤형 언어 학습 올인원 툴킷</p>
         </div>
       </div>
     </div>
@@ -34,152 +33,64 @@
 
   <main class="app-main">
     <section class="portal-hero">
-      <div class="portal-tag" data-i18n="index.hero.tag">✨ Study with Wanzi</div>
-      <h2 class="portal-title" data-i18n="index.hero.title">어려운 Anki 사용을 도와드립니다</h2>
-      <p class="portal-subtitle" data-i18n="index.hero.subtitle">설치나 회원가입 없이 브라우저에서 바로 쓸 수 있는 무료 도구입니다. 처음 사용하신다면 아래 4단계를 순서대로 따라 해 보세요.</p>
+      <div class="portal-tag" data-i18n="portal.hero.tag">✨ Study with Wanzi Hub</div>
+      <h2 class="portal-title" data-i18n="portal.hero.title">원하는 언어 학습 도구를 선택하세요</h2>
+      <p class="portal-subtitle" data-i18n="portal.hero.subtitle">설치나 회원가입 없이 브라우저에서 바로 사용하는 무료 도구입니다. 단어 암기 시스템부터 말하기 시험 실전 대비까지 지원합니다.</p>
     </section>
 
-    <!-- 처음 시작하는 4단계 경로 (단계 이름은 사이트 공통 common.journey.* 사용) -->
-    <section class="start-path" aria-labelledby="startPathTitle">
-      <h3 class="start-path-title" id="startPathTitle" data-i18n="index.path.title">처음이세요? 이 순서대로 하세요</h3>
-      <p class="start-path-subtitle" data-i18n="index.path.subtitle">단계를 누르면 해당 페이지로 이동해요.</p>
-      <ol class="start-path-list">
-        <li>
-          <a href="ankiGuide.html#fields" class="start-path-step">
-            <span class="start-path-num">1</span>
-            <span class="start-path-body">
-              <strong class="start-path-name"><span class="start-path-icon" aria-hidden="true">📋</span> <span data-i18n="common.journey.step1">Anki 준비</span></strong>
-              <span class="start-path-desc" data-i18n="index.path.step1.desc">Anki를 설치하고, 뜻 · 단어 · 발음 · 예문을 담을 칸(필드)을 만들어요.</span>
-              <span class="start-path-where" data-i18n="index.path.step1.where">📖 Anki 가이드 Step 1</span>
-            </span>
-          </a>
-        </li>
-        <li>
-          <a href="ankiEditor.html" class="start-path-step">
-            <span class="start-path-num">2</span>
-            <span class="start-path-body">
-              <strong class="start-path-name"><span class="start-path-icon" aria-hidden="true">🎨</span> <span data-i18n="common.journey.step2">카드 서식 꾸미기</span></strong>
-              <span class="start-path-desc" data-i18n="index.path.step2.desc">카드 모양을 꾸민 뒤, 번호대로 복사해 Anki에 붙여넣어요.</span>
-              <span class="start-path-where" data-i18n="index.path.step2.where">🌄 카드 서식 에디터</span>
-            </span>
-          </a>
-        </li>
-        <li>
-          <a href="ankiPrompt.html" class="start-path-step">
-            <span class="start-path-num">3</span>
-            <span class="start-path-body">
-              <strong class="start-path-name"><span class="start-path-icon" aria-hidden="true">🤖</span> <span data-i18n="common.journey.step3">AI로 단어장 만들기</span></strong>
-              <span class="start-path-desc" data-i18n="index.path.step3.desc">AI에게 단어를 뽑아 달라고 부탁하고, 답변을 단어장 파일로 받아요.</span>
-              <span class="start-path-where" data-i18n="index.path.step3.where">🤖 AI 프롬프트 생성기</span>
-            </span>
-          </a>
-        </li>
-        <li>
-          <a href="ankiGuide.html#learning" class="start-path-step">
-            <span class="start-path-num">4</span>
-            <span class="start-path-body">
-              <strong class="start-path-name"><span class="start-path-icon" aria-hidden="true">🔁</span> <span data-i18n="common.journey.step4">가져오기 · 복습</span></strong>
-              <span class="start-path-desc" data-i18n="index.path.step4.desc">단어장 파일을 Anki로 가져오고, 매일 10분씩 복습해요.</span>
-              <span class="start-path-where" data-i18n="index.path.step4.where">📖 Anki 가이드 Step 4</span>
-            </span>
-          </a>
-        </li>
-      </ol>
-    </section>
-
-    <h3 class="portal-section-title" data-i18n="index.grid.title">🧰 도구 바로가기</h3>
-    <section class="portal-grid" aria-label="언어 학습 도구 목록" data-i18n-attr="aria-label:index.grid.ariaLabel">
-
-      <!-- Tool Card 1: Anki Guide -->
-      <article class="tool-card">
+    <!-- 대분류 2대 기둥 (Anki 학습 도구 & 말하기 시험) -->
+    <section class="portal-grid pillar-grid" aria-label="언어 학습 대분류">
+      
+      <!-- 기둥 1: Anki 단어 학습 도구 모음 -->
+      <article class="tool-card pillar-card">
         <div class="tool-card-header">
-          <span class="tool-card-icon">📖</span>
-          <span class="tool-status-badge active" data-i18n="index.card.statusAvailable">● 바로 사용 가능</span>
+          <span class="tool-card-icon">🃏</span>
+          <span class="tool-status-badge active" data-i18n="portal.anki.badge">● 4개 올인원 도구</span>
         </div>
-        <h3 class="tool-card-title" data-i18n="index.card.guide.title">Anki 가이드</h3>
-        <p class="tool-card-desc" data-i18n="index.card.guide.desc">Anki 설치부터 카드 서식 붙여넣기, AI 단어장 가져오기, 매일 복습하는 요령까지 처음 쓰는 분도 따라 할 수 있게 4단계로 정리했어요.</p>
-        <div class="tool-card-tags">
-          <span class="tool-tag-pill" data-i18n="index.card.guide.tag1">처음 시작하기</span>
-          <span class="tool-tag-pill" data-i18n="index.card.guide.tag2">필드 만들기</span>
-          <span class="tool-tag-pill" data-i18n="index.card.guide.tag3">단어장 가져오기</span>
-          <span class="tool-tag-pill" data-i18n="index.card.guide.tag4">복습 요령</span>
-          <span class="tool-tag-pill" data-i18n="index.card.guide.tag5">덱 옵션</span>
+        <h3 class="tool-card-title" data-i18n="portal.anki.title">Anki 단어 학습 도구</h3>
+        <p class="tool-card-desc" data-i18n="portal.anki.desc">망각 곡선에 기반한 최강의 단어 암기 시스템! 카드 서식 꾸미기부터 AI 단어장 추출, 초보자를 위한 4단계 완벽 가이드까지 한 번에 끝내세요.</p>
+        
+        <div class="pillar-feature-list">
+          <div class="pillar-feature-item"><span class="pillar-bullet">🎨</span> <span data-i18n="portal.anki.feature1">카드 서식 에디터 (46개 언어 네이버 사전 & TTS)</span></div>
+          <div class="pillar-feature-item"><span class="pillar-bullet">🤖</span> <span data-i18n="portal.anki.feature2">AI 단어장 프롬프트 생성기 (CSV 변환)</span></div>
+          <div class="pillar-feature-item"><span class="pillar-bullet">📖</span> <span data-i18n="portal.anki.feature3">초보자 4단계 Anki 완벽 가이드 & 사용 설명서</span></div>
         </div>
-        <a href="ankiGuide.html" class="btn-tool-launch" id="btnLaunchGuide" data-i18n="index.card.guide.launch">가이드 읽어보기 ➔</a>
+
+        <a href="anki/index.html" class="btn-tool-launch" data-i18n="portal.anki.btn">Anki 도구 모음 열기 ➔</a>
       </article>
 
-      <!-- Tool Card 2: Anki Card Template Editor -->
-      <article class="tool-card">
+      <!-- 기둥 2: 말하기 시험 연습기 -->
+      <article class="tool-card pillar-card">
         <div class="tool-card-header">
-          <span class="tool-card-icon">🌄</span>
-          <span class="tool-status-badge active" data-i18n="index.card.statusAvailable">● 바로 사용 가능</span>
+          <span class="tool-card-icon">🎙️</span>
+          <span class="tool-status-badge active" data-i18n="portal.speaking.badge">✨ NEW · 실전 시뮬레이터</span>
         </div>
-        <h3 class="tool-card-title" data-i18n="index.card.editor.title">Anki 카드 서식 에디터</h3>
-        <p class="tool-card-desc" data-i18n="index.card.editor.desc">글씨 크기 · 색 · 글꼴을 고르면 카드 모양이 바로 미리 보여요. 단어 옆에는 누르면 바로 사전이 열리는 아이콘(46개 언어 네이버 사전)이 달립니다. 다 꾸몄으면 번호대로 복사해 Anki에 붙여넣기만 하세요.</p>
-        <div class="tool-card-tags">
-          <span class="tool-tag-pill" data-i18n="index.card.editor.tag1">카드 꾸미기</span>
-          <span class="tool-tag-pill" data-i18n="index.card.editor.tag2">46개 언어</span>
-          <span class="tool-tag-pill" data-i18n="index.card.editor.tag3">사전 바로가기 아이콘</span>
-          <span class="tool-tag-pill" data-i18n="index.card.editor.tag4">바로 미리보기</span>
-          <span class="tool-tag-pill" data-i18n="index.card.editor.tag5">설정 자동 저장</span>
-        </div>
-        <a href="ankiEditor.html" class="btn-tool-launch" id="btnLaunchAnki" data-i18n="index.card.editor.launch">에디터 열기 ➔</a>
-      </article>
+        <h3 class="tool-card-title" data-i18n="portal.speaking.title">말하기 시험 연습 (스피킹 타이머)</h3>
+        <p class="tool-card-desc" data-i18n="portal.speaking.desc">OPIc, 토익스피킹, HSKK, TSC, 외국어 면접 실전 대비! 엑셀 문제 붙여넣기, 음성(TTS) 자동 낭독, 답변 타이머 & 비프 알림음으로 실전처럼 연습하세요.</p>
 
-      <!-- Tool Card 3: Anki AI Prompt Generator -->
-      <article class="tool-card">
-        <div class="tool-card-header">
-          <span class="tool-card-icon">🤖</span>
-          <span class="tool-status-badge active" data-i18n="index.card.statusAvailable">● 바로 사용 가능</span>
+        <div class="pillar-feature-list">
+          <div class="pillar-feature-item"><span class="pillar-bullet">📋</span> <span data-i18n="portal.speaking.feature1">엑셀 문제 붙여넣기 & 자동 파싱</span></div>
+          <div class="pillar-feature-item"><span class="pillar-bullet">🗣️</span> <span data-i18n="portal.speaking.feature2">다국어 음성 낭독 (TTS) & 맞춤 속도 조절</span></div>
+          <div class="pillar-feature-item"><span class="pillar-bullet">⏱️</span> <span data-i18n="portal.speaking.feature3">답변 타이머, 종료 알림음(삐빅!), 휴식 시간 카운트다운</span></div>
+          <div class="pillar-feature-item"><span class="pillar-bullet">🔀</span> <span data-i18n="portal.speaking.feature4">랜덤 중복 방지 출제 (풀 소진 시 순환)</span></div>
         </div>
-        <h3 class="tool-card-title" data-i18n="index.card.prompt.title">Anki AI 프롬프트 생성기</h3>
-        <p class="tool-card-desc" data-i18n="index.card.prompt.desc">AI(ChatGPT · Gemini · Claude)에게 원하는 난이도(HSK · JLPT · CEFR 등)의 단어만 골라 달라고 부탁하는 글(프롬프트)을 만들어 줘요. AI 답변을 붙여넣으면 Anki에 바로 넣을 수 있는 단어장 파일(CSV)로 받을 수 있어요.</p>
-        <div class="tool-card-tags">
-          <span class="tool-tag-pill" data-i18n="index.card.prompt.tag1">AI로 단어 뽑기</span>
-          <span class="tool-tag-pill" data-i18n="index.card.prompt.tag2">단어장 파일(CSV) 받기</span>
-          <span class="tool-tag-pill" data-i18n="index.card.prompt.tag3">난이도 · 급수 고르기</span>
-          <span class="tool-tag-pill" data-i18n="index.card.prompt.tag4">칸 순서 맞추기</span>
-          <span class="tool-tag-pill" data-i18n="index.card.prompt.tag5">복사 한 번</span>
-        </div>
-        <a href="ankiPrompt.html" class="btn-tool-launch" id="btnLaunchPrompt" data-i18n="index.card.prompt.launch">프롬프트 생성기 열기 ➔</a>
-      </article>
 
-      <!-- Tool Card 4: 사용 설명서 (도구 화면별 설명 · 자주 묻는 질문) -->
-      <article class="tool-card">
-        <div class="tool-card-header">
-          <span class="tool-card-icon">❓</span>
-          <span class="tool-status-badge active" data-i18n="index.card.statusAvailable">● 바로 사용 가능</span>
-        </div>
-        <h3 class="tool-card-title" data-i18n="index.card.manual.title">사용 설명서</h3>
-        <p class="tool-card-desc" data-i18n="index.card.manual.desc">카드 서식 에디터와 AI 프롬프트 생성기를 화면별로 설명해요. 읽어주기 · 꾸미기 · 초기화 버튼 · CSV 파일까지 다루고, 막혔을 때 볼 자주 묻는 질문도 모아 두었어요.</p>
-        <div class="tool-card-tags">
-          <span class="tool-tag-pill" data-i18n="index.card.manual.tag1">에디터 사용법</span>
-          <span class="tool-tag-pill" data-i18n="index.card.manual.tag2">프롬프트 생성기 사용법</span>
-          <span class="tool-tag-pill" data-i18n="index.card.manual.tag3">🔊 읽어주기</span>
-          <span class="tool-tag-pill" data-i18n="index.card.manual.tag4">초기화 버튼</span>
-          <span class="tool-tag-pill" data-i18n="index.card.manual.tag5">자주 묻는 질문</span>
-        </div>
-        <a href="manual.html" class="btn-tool-launch" id="btnLaunchManual" data-i18n="index.card.manual.launch">사용 설명서 보기 ➔</a>
+        <a href="speaking/index.html" class="btn-tool-launch" data-i18n="portal.speaking.btn">말하기 시험 연습 시작 ➔</a>
       </article>
     </section>
 
-    <!-- Notice Box -->
-    <div class="portal-notice-box">
-      <span class="notice-icon">💡</span>
-      <div data-i18n-html="index.notice.body"><strong>무료 · 회원가입 없음:</strong> 모든 도구는 회원가입 없이 무료로 쓸 수 있어요. 입력한 내용은 어디에도 보내지 않고, 지금 쓰는 브라우저에만 저장됩니다.</div>
-    </div>
+    <footer class="portal-footer">
+      <p class="footer-notice" data-i18n-html="index.notice.body"><strong>무료 · 회원가입 없음:</strong> 모든 도구는 회원가입 없이 무료로 쓸 수 있어요. 입력한 내용은 어디에도 보내지 않고, 지금 쓰는 브라우저에만 저장됩니다.</p>
+      <p class="footer-copy" data-i18n="common.footer">Study with Wanzi © 2026. Made with care for language learners.</p>
+    </footer>
   </main>
 
-  <footer class="app-footer">
-    <p data-i18n="common.footer">Study with Wanzi &copy; 2026. Made with care for language learners.</p>
-  </footer>
-  <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
-  <script src="assets/js/i18n.js?v=20261008a"></script>
-  <script src="assets/i18n/ko/common.js?v=20261008a"></script>
-  <script src="assets/i18n/ko/index.js?v=20261008a"></script>
-  <script src="assets/i18n/en/common.js?v=20261008a"></script>
-  <script src="assets/i18n/en/index.js?v=20261008a"></script>
-  <script src="assets/i18n/zh/common.js?v=20261008a"></script>
-  <script src="assets/i18n/zh/index.js?v=20261008a"></script>
+  <script src="assets/js/i18n.js?v=20261010b"></script>
+  <script src="assets/i18n/ko/common.js?v=20261010b"></script>
+  <script src="assets/i18n/ko/index.js?v=20261010b"></script>
+  <script src="assets/i18n/en/common.js?v=20261010b"></script>
+  <script src="assets/i18n/en/index.js?v=20261010b"></script>
+  <script src="assets/i18n/zh/common.js?v=20261010b"></script>
+  <script src="assets/i18n/zh/index.js?v=20261010b"></script>
 </body>
 </html>
