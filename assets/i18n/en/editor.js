@@ -32,10 +32,12 @@ i18nRegister('en', {
   'editor.step1.dictUrlLabel': 'Dictionary address (usually no need to change)',
   'editor.step1.resetDefault': 'Reset',
   'editor.step1.resetDictUrlTitle': 'Reset to this language\'s default dictionary address',
-  'editor.step1.subDictLabel': 'Secondary dictionary (for Korean meanings)',
-  'editor.step1.resetSubDictTitle': 'Reset to the selected secondary dictionary\'s default address',
-  'editor.step1.subDictOptionKo': '📘 Naver Korean Dictionary',
-  'editor.step1.subDictOptionWiki': '📖 Korean Wikipedia',
+  'editor.step1.subDictLabel': 'Secondary dictionary address (meaning lookup)',
+  'editor.step1.wikiUrlLabel': 'Wikipedia address',
+  'editor.step1.resetSubDictTitle': 'Reset to default secondary dictionary address',
+  'editor.step1.resetWikiUrlTitle': 'Reset to default Wikipedia address',
+  'editor.step1.subDictOptionKo': '📘 Naver English-Korean Dict',
+  'editor.step1.subDictOptionWiki': '📖 English Wikipedia',
   'editor.step1.subDictOptionCustom': '🔎 Custom (another dictionary address)',
   'editor.step1.newTabHtml': 'Open the dictionary in a new window',
   'editor.step1.cleanQueryHtml': 'Tidy search words: leave out anything in [ ] or ( ), and search only the first meaning if there are several (e.g. [noun] apple, apple tree ➔ apple)',
@@ -43,8 +45,8 @@ i18nRegister('en', {
   'editor.step1.urlInvalidWarning': 'The dictionary address must start with http:// or https:// for the icon to be added.',
 
   // Secondary dictionary names (field toggles · badges · link titles)
-  'editor.subDict.ko': 'Korean dictionary',
-  'editor.subDict.wiki': 'Wiki',
+  'editor.subDict.ko': 'Eng-Kor dict',
+  'editor.subDict.wiki': 'Wikipedia',
   'editor.subDict.custom': 'Secondary dictionary',
 
   // Step 2: Fields
@@ -58,7 +60,10 @@ i18nRegister('en', {
   'editor.field.showBackTitle': 'Show this field on the card back (answer)',
   'editor.field.dictLink': '🌐 Foreign dictionary',
   'editor.field.dictLinkTitle': 'Add a foreign-language dictionary icon next to this field',
+  'editor.field.subDictLink': '📘 Eng-Kor dict',
   'editor.field.subDictLinkTitle': 'Add a secondary dictionary icon next to this field',
+  'editor.field.wikiLink': '📖 Wikipedia',
+  'editor.field.wikiLinkTitle': 'Add a Wikipedia icon next to this field',
   'editor.field.nameLabel': 'Field name (exactly as in your Anki note)',
   'editor.field.sampleLabel': 'Example shown in the preview',
   'editor.field.namePlaceholder1': 'e.g. Front, Meaning',
@@ -200,6 +205,7 @@ i18nRegister('en', {
   // Dictionary icon link titles in cards (also in generated Anki templates)
   'editor.link.dictTitle': 'Search foreign dictionary',
   'editor.link.subDictTitle': 'Search {name}',
+  'editor.link.wikiTitle': 'Search Wikipedia',
 
   // Comments inside the generated CSS
   'editor.cssComment.linkButtons': 'Icons (foreign-language dictionary / secondary dictionary / read aloud): large and well spaced for easy tapping',

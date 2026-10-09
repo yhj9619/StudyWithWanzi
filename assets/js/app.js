@@ -17,37 +17,116 @@ document.addEventListener('DOMContentLoaded', () => {
   const resetDictUrlBtn = document.getElementById('resetDictUrlBtn');
   const dictNameTag = document.getElementById('dictNameTag');
   const dictUrlWarn = document.getElementById('dictUrlWarn');
+  const subDictUrlInput = document.getElementById('subDictUrlInput');
+  const resetSubDictUrlBtn = document.getElementById('resetSubDictUrlBtn');
   const subDictUrlWarn = document.getElementById('subDictUrlWarn');
+  const wikiUrlInput = document.getElementById('wikiUrlInput');
+  const resetWikiUrlBtn = document.getElementById('resetWikiUrlBtn');
+  const wikiUrlWarn = document.getElementById('wikiUrlWarn');
   const rtlNotice = document.getElementById('rtlNotice');
   const linkNewTab = document.getElementById('linkNewTab');
   const linkCleanQuery = document.getElementById('linkCleanQuery');
-  const wikiUrlInput = document.getElementById('wikiUrlInput');
-  const resetWikiUrlBtn = document.getElementById('resetWikiUrlBtn');
-  const DEFAULT_WIKI_URL = 'https://ko.wikipedia.org/wiki/';
-  const subDictSelect = document.getElementById('subDictSelect');
+  const currentUiLang = (window.i18n && typeof window.i18n.getLocale === 'function')
+    ? window.i18n.getLocale()
+    : 'ko';
 
-  // 보조 사전 (한국어 뜻 찾아보기용) 프리셋 - 링크 URL은 wikiUrlInput에 보관 (기존 저장값 호환)
-  const SUB_DICT_PRESETS = {
-    ko: { name: t('editor.subDict.ko'), icon: '📘', url: 'https://ko.dict.naver.com/#/search?query=' },
-    wiki: { name: t('editor.subDict.wiki'), icon: '📖', url: DEFAULT_WIKI_URL },
-    custom: { name: t('editor.subDict.custom'), icon: '🔎', url: '' },
+  // 위키백과 기본 URL (UI 언어에 맞춰 분기: ko 한국어, en 영어, zh 중국어)
+  const WIKI_URL_BY_LANG = {
+    ko: 'https://ko.wikipedia.org/wiki/',
+    en: 'https://en.wikipedia.org/wiki/',
+    zh: 'https://zh.wikipedia.org/wiki/',
   };
-  const DEFAULT_SUB_DICT = 'ko';
+  const DEFAULT_WIKI_URL = WIKI_URL_BY_LANG[currentUiLang] || WIKI_URL_BY_LANG.ko;
 
-  function getSubDict() {
-    return SUB_DICT_PRESETS[subDictSelect ? subDictSelect.value : DEFAULT_SUB_DICT] || SUB_DICT_PRESETS[DEFAULT_SUB_DICT];
+  // 보조 사전 기본 URL (UI 언어에 맞춰 분기: ko 국어사전, zh 중한사전, en 영한사전)
+  const SUB_DICT_URL_BY_LANG = {
+    ko: 'https://ko.dict.naver.com/#/search?query=',
+    zh: 'https://korean.dict.naver.com/kozhdict/#/search?query=',
+    en: 'https://en.dict.naver.com/#/search?query=',
+  };
+  const DEFAULT_SUB_DICT_URL = SUB_DICT_URL_BY_LANG[currentUiLang] || SUB_DICT_URL_BY_LANG.ko;
+
+  function getSubDictName() {
+    return t('editor.subDict.ko');
   }
-
   function getSubDictLabel() {
-    const sub = getSubDict();
-    return `${sub.icon} ${sub.name}`;
+    return `📘 ${getSubDictName()}`;
   }
 
-  // 필드 헤더의 보조 사전 토글 이름을 선택한 사전에 맞춤
+  function getWikiDictName() {
+    return t('editor.subDict.wiki');
+  }
+  function getWikiDictLabel() {
+    return `📖 ${getWikiDictName()}`;
+  }
+
+  // 필드 헤더의 사전 토글 이름 동기화
   function updateSubDictLabels() {
     document.querySelectorAll('.sub-dict-label').forEach(el => {
       el.textContent = getSubDictLabel();
     });
+    document.querySelectorAll('.wiki-dict-label').forEach(el => {
+      el.textContent = getWikiDictLabel();
+    });
+  }
+
+  // 외국어 사전 (단어 필드 기본 연결) URL 및 사전 이름
+  // ko UI: 네이버 46개 사전 유지 (lang.dictUrl, lang.dictName)
+  // zh UI: 유도 사전(Youdao) - 중국 내 접속 원활, 모든 외국어를 중국어로 풀이
+  // en UI: 위키낱말사전(Wiktionary) / Cambridge - 글로벌 표준, 모든 언어를 영어로 풀이
+  function getLangDictUrl(lang) {
+    if (!lang) return '';
+    if (currentUiLang === 'zh') {
+      return 'https://dict.youdao.com/w/';
+    }
+    if (currentUiLang === 'en') {
+      return lang.id === 'en'
+        ? 'https://dictionary.cambridge.org/dictionary/english/'
+        : 'https://en.wiktionary.org/wiki/';
+    }
+    return lang.dictUrl;
+  }
+
+  function getLangDictName(lang) {
+    if (!lang) return '';
+    if (currentUiLang === 'zh') {
+      return '有道词典 (Youdao)';
+    }
+    if (currentUiLang === 'en') {
+      return lang.id === 'en' ? 'Cambridge Dictionary' : 'Wiktionary';
+    }
+    return lang.dictName;
+  }
+
+  // 사용자가 임의로 수정한 커스텀 사전 주소가 아니라 시스템 기본 사전 주소인지 확인
+  function isDefaultDictUrl(url, lang) {
+    if (!url) return true;
+    const trimmed = String(url).trim();
+    if (trimmed === getLangDictUrl(lang)) return true;
+    if (trimmed === 'https://dict.youdao.com/w/') return true;
+    if (trimmed === 'https://en.wiktionary.org/wiki/') return true;
+    if (trimmed === 'https://dictionary.cambridge.org/dictionary/english/') return true;
+    const list = window.LANGUAGES_DATA || LANGUAGES_DATA;
+    return list.some(l => l.dictUrl === trimmed);
+  }
+
+  function isDefaultSubDictUrl(url) {
+    if (!url) return true;
+    const trimmed = String(url).trim();
+    return Object.values(SUB_DICT_URL_BY_LANG).includes(trimmed);
+  }
+
+  function isDefaultWikiUrl(url) {
+    if (!url) return true;
+    const trimmed = String(url).trim();
+    return Object.values(WIKI_URL_BY_LANG).includes(trimmed);
+  }
+
+  if (subDictUrlInput) {
+    subDictUrlInput.placeholder = DEFAULT_SUB_DICT_URL;
+  }
+  if (wikiUrlInput) {
+    wikiUrlInput.placeholder = DEFAULT_WIKI_URL;
   }
   // 아이콘 (🌐 외국어사전 · 📘📖🔎 보조 사전 · 🔊 읽어주기): 잘못 누르지 않게 크게 · 넉넉한 간격
   // 미리보기(인라인 스타일)와 생성 CSS(.field-icons · .link-btn · .tts-btn 규칙)가 같은 값을 쓰도록 공유
@@ -243,6 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showFront: document.getElementById('f1_show_front'),
       showBack: document.getElementById('f1_show_back'),
       dictLinkCheck: document.getElementById('f1_dict_link'),
+      subDictLinkCheck: document.getElementById('f1_subdict_link'),
       wikiLinkCheck: document.getElementById('f1_wiki_link'),
       ttsCheck: document.getElementById('f1_tts'),
       sizeSlider: document.getElementById('f1_size'),
@@ -254,6 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
       colorText: document.getElementById('f1_color_text'),
       deleteBtn: null,
       hasDictLink: false,
+      hasSubDictLink: false,
       hasWikiLink: false,
       hasTts: false,
     },
@@ -266,6 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showFront: document.getElementById('f2_show_front'),
       showBack: document.getElementById('f2_show_back'),
       dictLinkCheck: document.getElementById('f2_dict_link'),
+      subDictLinkCheck: document.getElementById('f2_subdict_link'),
       wikiLinkCheck: document.getElementById('f2_wiki_link'),
       ttsCheck: document.getElementById('f2_tts'),
       sizeSlider: document.getElementById('f2_size'),
@@ -277,6 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
       colorText: document.getElementById('f2_color_text'),
       deleteBtn: null,
       hasDictLink: true,
+      hasSubDictLink: false,
       hasWikiLink: false,
       hasTts: true, // 처음 방문 시 외국어 단어 필드는 읽어주기 켬 (예전 저장본은 키가 없으면 끔)
     }
@@ -367,10 +450,14 @@ document.addEventListener('DOMContentLoaded', () => {
     najeon: ['#e9f3f1', '#bfe3e6', '#d9c9ef', '#f3d6e4', '#c9eadb', '#f6efd9', '#c4d7f2'], // 자개: 무지갯빛 조각
   };
 
-  // 태극 문양 + 건곤감리 (그림 파일 없이 CSS 그라데이션 층으로 그림 → 인터넷 없이도 보임)
-  // 태극: 위 빨강 · 아래 파랑 / 괘: 건(왼쪽 위) · 감(오른쪽 위) · 리(왼쪽 아래) · 곤(오른쪽 아래), 1 = 이어진 막대, 0 = 끊어진 막대
+  // 태극 문양 + 건곤감리 (인라인 벡터 SVG Data URI + CSS 그라데이션 층 → 인터넷 없이도 선명하게 보임)
+  // 태극: 대한민국 국기법 공식 대각선(건-곤) 규격에 맞춰 시계방향 약 33.7도(arctan 2/3) 회전
+  // 괘: 건(왼쪽 위) · 감(오른쪽 위) · 리(왼쪽 아래) · 곤(오른쪽 아래), 1 = 이어진 막대, 0 = 끊어진 막대
   const TAEGEUK_RED = '#cd2e3a';
   const TAEGEUK_BLUE = '#0047a0';
+  const TAEGEUK_ANGLE = 33.7; // 시계방향 회전 각도 (공식 태극기 대각선)
+  const TAEGEUK_SVG = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='-50 -50 100 100'><g transform='rotate(${TAEGEUK_ANGLE})'><circle r='50' fill='${TAEGEUK_BLUE}'/><path fill='${TAEGEUK_RED}' d='M-50 0A50 50 0 0 1 50 0A25 25 0 0 0 0 0A25 25 0 0 1-50 0Z'/></g></svg>`;
+  const TAEGEUK_DATA_URI = `url("data:image/svg+xml,${encodeURIComponent(TAEGEUK_SVG)}")`;
   const TRIGRAMS = [
     { bars: [1, 1, 1], x: 'left', y: 'top' },     // 건 ☰
     { bars: [0, 1, 0], x: 'right', y: 'top' },    // 감 ☵
@@ -387,10 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const top = mini ? 3 : 12;
     const at = y => (mini ? `right ${px(3 / s)} top ${px(y)}` : `center top ${px(y)}`);
     const layers = [
-      { img: `radial-gradient(circle ${px(R / 2)} at ${px(R / 2)} ${px(R)}, ${TAEGEUK_RED} ${px(R / 2 - 0.5)}, transparent ${px(R / 2)})`, pos: at(top), size: `${px(R * 2)} ${px(R * 2)}` },
-      { img: `radial-gradient(circle ${px(R / 2)} at ${px(R * 1.5)} ${px(R)}, ${TAEGEUK_BLUE} ${px(R / 2 - 0.5)}, transparent ${px(R / 2)})`, pos: at(top), size: `${px(R * 2)} ${px(R * 2)}` },
-      { img: `radial-gradient(circle ${px(R)} at 50% 100%, ${TAEGEUK_RED} ${px(R - 0.5)}, transparent ${px(R)})`, pos: at(top), size: `${px(R * 2)} ${px(R)}` },
-      { img: `radial-gradient(circle ${px(R)} at 50% 0%, ${TAEGEUK_BLUE} ${px(R - 0.5)}, transparent ${px(R)})`, pos: at(top + R), size: `${px(R * 2)} ${px(R)}` },
+      { img: TAEGEUK_DATA_URI, pos: at(top), size: `${px(R * 2)} ${px(R * 2)}` },
     ];
     if (mini) return layers;
     // 괘: 막대 폭 18 · 두께 3 · 간격 3, 끊어진 막대는 7 + 7 (가운데 4 비움)
@@ -590,8 +674,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // opts.prevLang: 다른 도구와의 언어 연동으로 바뀐 경우 이전 언어 (RTL은 사용자가 바꾸지 않았을 때만 따라감)
   function onLanguageChange(isUserManualChange = true, shouldSave = true, opts = {}) {
     const lang = getSelectedLanguage();
-    dictUrlInput.value = lang.dictUrl;
-    dictNameTag.textContent = lang.dictName;
+    dictUrlInput.value = getLangDictUrl(lang);
+    dictNameTag.textContent = getLangDictName(lang);
 
     // RTL 알림 및 자동 적용
     rtlNotice.classList.toggle('hidden', !lang.isRTL);
@@ -669,10 +753,15 @@ document.addEventListener('DOMContentLoaded', () => {
       updateAll();
     });
 
-    // 외국어사전 / 보조 사전 링크 체크박스 (헤더 미니 토글, 동시 적용 가능)
+    // 외국어사전 / 보조 사전 / 위키백과 링크 체크박스 (헤더 미니 토글, 동시 적용 가능)
     if (f.dictLinkCheck) {
       f.dictLinkCheck.addEventListener('change', () => {
         setFieldLink(f, 'dict', f.dictLinkCheck.checked);
+      });
+    }
+    if (f.subDictLinkCheck) {
+      f.subDictLinkCheck.addEventListener('change', () => {
+        setFieldLink(f, 'subdict', f.subDictLinkCheck.checked);
       });
     }
     if (f.wikiLinkCheck) {
@@ -796,9 +885,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 필드 링크 적용 여부 설정 (type: 'dict' 외국어사전 | 'wiki' 보조 사전 | 'tts' 🔊 읽어주기) - 동시 적용 가능
+  // 필드 링크 적용 여부 설정 (type: 'dict' 외국어사전 | 'subdict' 보조 사전 | 'wiki' 위키백과 | 'tts' 🔊 읽어주기) - 동시 적용 가능
   function setFieldLink(f, type, enabled) {
     if (type === 'dict') f.hasDictLink = enabled;
+    if (type === 'subdict') f.hasSubDictLink = enabled;
     if (type === 'wiki') f.hasWikiLink = enabled;
     if (type === 'tts') f.hasTts = enabled;
     updateFieldBadges();
@@ -1072,6 +1162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let font = 'inherit';
     let color = '#5f6368';
     let hasDictLink = false;
+    let hasSubDictLink = false;
     let hasWikiLink = false;
     let hasTts = false;
 
@@ -1087,6 +1178,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (fieldData.font !== undefined) font = normalizeFieldFontKey(fieldData.font);
       if (fieldData.color !== undefined) color = normalizeHexColor(fieldData.color) || color;
       if (fieldData.hasDictLink !== undefined) hasDictLink = Boolean(fieldData.hasDictLink);
+      if (fieldData.hasSubDictLink !== undefined) hasSubDictLink = Boolean(fieldData.hasSubDictLink);
       if (fieldData.hasWikiLink !== undefined) hasWikiLink = Boolean(fieldData.hasWikiLink);
       if (fieldData.hasTts !== undefined) hasTts = Boolean(fieldData.hasTts);
     } else {
@@ -1136,8 +1228,12 @@ document.addEventListener('DOMContentLoaded', () => {
               <span>${t('editor.field.dictLink')}</span>
             </label>
             <label class="mini-toggle mini-toggle-link" title="${t('editor.field.subDictLinkTitle')}">
-              <input type="checkbox" class="f-wiki-link"${hasWikiLink ? ' checked' : ''}>
+              <input type="checkbox" class="f-subdict-link"${hasSubDictLink ? ' checked' : ''}>
               <span class="sub-dict-label">${getSubDictLabel()}</span>
+            </label>
+            <label class="mini-toggle mini-toggle-link" title="${t('editor.field.wikiLinkTitle')}">
+              <input type="checkbox" class="f-wiki-link"${hasWikiLink ? ' checked' : ''}>
+              <span class="wiki-dict-label">${getWikiDictLabel()}</span>
             </label>
             <label class="mini-toggle mini-toggle-tts" title="${t('editor.field.ttsTitle')}">
               <input type="checkbox" class="f-tts"${hasTts ? ' checked' : ''}>
@@ -1221,6 +1317,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showFront: box.querySelector('.f-show-front'),
       showBack: box.querySelector('.f-show-back'),
       dictLinkCheck: box.querySelector('.f-dict-link'),
+      subDictLinkCheck: box.querySelector('.f-subdict-link'),
       wikiLinkCheck: box.querySelector('.f-wiki-link'),
       ttsCheck: box.querySelector('.f-tts'),
       sizeSlider: box.querySelector('.f-size'),
@@ -1232,6 +1329,7 @@ document.addEventListener('DOMContentLoaded', () => {
       colorText: box.querySelector('.f-color-text'),
       deleteBtn: box.querySelector('.btn-delete-field'),
       hasDictLink: hasDictLink,
+      hasSubDictLink: hasSubDictLink,
       hasWikiLink: hasWikiLink,
       hasTts: hasTts,
     };
@@ -1640,18 +1738,22 @@ document.addEventListener('DOMContentLoaded', () => {
       let badgeText = t('editor.field.badge', { num: fNum, side: sideText, name: fName });
 
       if (f.hasDictLink) badgeText += ` · ${t('editor.field.dictLink')}`;
-      if (f.hasWikiLink) badgeText += ` · ${getSubDictLabel()}`;
+      if (f.hasSubDictLink) badgeText += ` · ${getSubDictLabel()}`;
+      if (f.hasWikiLink) badgeText += ` · ${getWikiDictLabel()}`;
       if (f.hasTts && isTtsSupported()) badgeText += ` · ${t('editor.field.tts')}`;
-      if (f.hasDictLink || f.hasWikiLink) {
+      if (f.hasDictLink || f.hasSubDictLink || f.hasWikiLink) {
         f.badgeEl.className = 'field-badge field-badge-primary';
       } else {
         f.badgeEl.className = 'field-badge';
       }
       f.badgeEl.textContent = badgeText;
 
-      // 상단 헤더의 외국어사전 / 보조 사전 미니 토글 동기화
+      // 상단 헤더의 외국어사전 / 보조 사전 / 위키 미니 토글 동기화
       if (f.dictLinkCheck) {
         f.dictLinkCheck.checked = Boolean(f.hasDictLink);
+      }
+      if (f.subDictLinkCheck) {
+        f.subDictLinkCheck.checked = Boolean(f.hasSubDictLink);
       }
       if (f.wikiLinkCheck) {
         f.wikiLinkCheck.checked = Boolean(f.hasWikiLink);
@@ -1737,6 +1839,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (f.dictLinkCheck) {
         f.dictLinkCheck.checked = Boolean(f.hasDictLink);
       }
+      if (f.subDictLinkCheck) {
+        f.subDictLinkCheck.checked = Boolean(f.hasSubDictLink);
+      }
       if (f.wikiLinkCheck) {
         f.wikiLinkCheck.checked = Boolean(f.hasWikiLink);
       }
@@ -1756,7 +1861,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const ttsSupported = isTtsSupported();
       [
         { type: 'dict', text: t('editor.field.dictLink'), checked: Boolean(f.hasDictLink) },
-        { type: 'wiki', text: getSubDictLabel(), checked: Boolean(f.hasWikiLink) },
+        { type: 'subdict', text: getSubDictLabel(), checked: Boolean(f.hasSubDictLink) },
+        { type: 'wiki', text: getWikiDictLabel(), checked: Boolean(f.hasWikiLink) },
         { type: 'tts', text: t('editor.field.tts'), checked: ttsSupported && Boolean(f.hasTts), disabled: !ttsSupported },
       ].forEach(opt => {
         const label = document.createElement('label');
@@ -1794,46 +1900,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     resetDictUrlBtn.addEventListener('click', () => {
       const lang = getSelectedLanguage();
-      dictUrlInput.value = lang.dictUrl;
+      dictUrlInput.value = getLangDictUrl(lang);
+      dictNameTag.textContent = getLangDictName(lang);
       updateAll();
     });
     dictUrlInput.addEventListener('input', updateAll);
     dictUrlInput.addEventListener('change', updateAll);
 
-    // 보조 사전 선택 → URL 자동 입력 (직접 입력은 URL을 비워 사용자가 입력)
-    if (subDictSelect) {
-      subDictSelect.addEventListener('change', () => {
-        const sub = getSubDict();
-        if (subDictSelect.value === 'custom') {
-          wikiUrlInput.focus();
-        } else {
-          wikiUrlInput.value = sub.url;
-        }
+    // 보조 사전 URL 입력 & 초기화
+    if (subDictUrlInput) {
+      subDictUrlInput.addEventListener('input', updateAll);
+      subDictUrlInput.addEventListener('change', updateAll);
+    }
+    if (resetSubDictUrlBtn) {
+      resetSubDictUrlBtn.addEventListener('click', () => {
+        if (subDictUrlInput) subDictUrlInput.value = DEFAULT_SUB_DICT_URL;
         updateSubDictLabels();
         updateFieldBadges();
         updateDictFieldChecklist();
         updateAll();
       });
     }
+
+    // 위키백과 URL 입력 & 초기화
     if (wikiUrlInput) {
-      // 프리셋 URL을 직접 고치면 '직접 입력'으로 전환
-      const onSubUrlEdit = () => {
-        if (subDictSelect && subDictSelect.value !== 'custom' && wikiUrlInput.value.trim() !== getSubDict().url) {
-          subDictSelect.value = 'custom';
-          updateSubDictLabels();
-          updateFieldBadges();
-          updateDictFieldChecklist();
-        }
-        updateAll();
-      };
-      wikiUrlInput.addEventListener('input', onSubUrlEdit);
-      wikiUrlInput.addEventListener('change', onSubUrlEdit);
+      wikiUrlInput.addEventListener('input', updateAll);
+      wikiUrlInput.addEventListener('change', updateAll);
     }
     if (resetWikiUrlBtn) {
       resetWikiUrlBtn.addEventListener('click', () => {
-        // 직접 입력 상태면 기본 보조 사전(국어사전)으로 복원
-        if (subDictSelect && subDictSelect.value === 'custom') subDictSelect.value = DEFAULT_SUB_DICT;
-        wikiUrlInput.value = getSubDict().url;
+        if (wikiUrlInput) wikiUrlInput.value = DEFAULT_WIKI_URL;
         updateSubDictLabels();
         updateFieldBadges();
         updateDictFieldChecklist();
@@ -2873,15 +2969,17 @@ ${sel('::after')} {
       : template;
   }
 
-  // 필드에 붙일 외국어사전 / 보조 사전 링크 목록 (http/https 주소만, 비었거나 잘못된 주소는 제외)
+  // 필드에 붙일 외국어사전 / 보조 사전 / 위키백과 링크 목록 (http/https 주소만, 비었거나 잘못된 주소는 제외)
   function getLinkTargets(field) {
     const linkTargets = [];
     if (field.hasDictLink) {
       linkTargets.push({ cls: 'dict-btn', icon: '🌐', title: t('editor.link.dictTitle'), url: dictUrlInput.value.trim() });
     }
+    if (field.hasSubDictLink) {
+      linkTargets.push({ cls: 'subdict-btn', icon: '📘', title: t('editor.link.subDictTitle', { name: getSubDictName() }), url: subDictUrlInput ? subDictUrlInput.value.trim() : DEFAULT_SUB_DICT_URL });
+    }
     if (field.hasWikiLink) {
-      const sub = getSubDict();
-      linkTargets.push({ cls: 'subdict-btn', icon: sub.icon, title: t('editor.link.subDictTitle', { name: sub.name }), url: wikiUrlInput ? wikiUrlInput.value.trim() : sub.url });
+      linkTargets.push({ cls: 'wiki-btn', icon: '📖', title: t('editor.link.wikiTitle'), url: wikiUrlInput ? wikiUrlInput.value.trim() : DEFAULT_WIKI_URL });
     }
     return linkTargets.filter(target => isHttpUrl(target.url));
   }
@@ -2931,10 +3029,11 @@ ${sel('::after')} {
       warnEl.classList.toggle('hidden', !msg);
     };
     check(dictUrlWarn, dictUrlInput.value, fields.some(f => f.hasDictLink));
-    check(subDictUrlWarn, wikiUrlInput ? wikiUrlInput.value : '', fields.some(f => f.hasWikiLink));
+    check(subDictUrlWarn, subDictUrlInput ? subDictUrlInput.value : '', fields.some(f => f.hasSubDictLink));
+    check(wikiUrlWarn, wikiUrlInput ? wikiUrlInput.value : '', fields.some(f => f.hasWikiLink));
 
     // 사전 주소 칸은 고급 설정 안에 있으므로, 안내가 생기면 접힌 고급 설정을 펼쳐 보여줌
-    const hasWarning = [dictUrlWarn, subDictUrlWarn].some(el => el && !el.classList.contains('hidden'));
+    const hasWarning = [dictUrlWarn, subDictUrlWarn, wikiUrlWarn].some(el => el && !el.classList.contains('hidden'));
     if (hasWarning && editorAdvancedSettings && !editorAdvancedSettings.open) editorAdvancedSettings.open = true;
   }
 
@@ -3449,12 +3548,13 @@ ${indentDecls(deco.divider === 'obang' ? [getDividerDecls(night.dividerColor, de
 
       const data = {
         version: STORAGE_VERSION,
+        uiLang: currentUiLang,
         savedAt: new Date().toISOString(),
         langId: languageSelect.value,
         dictLinkTargets: fields.map(f => Boolean(f.hasDictLink)),
         dictUrl: dictUrlInput.value,
-        subDict: subDictSelect ? subDictSelect.value : DEFAULT_SUB_DICT,
-        wikiUrl: wikiUrlInput ? wikiUrlInput.value : SUB_DICT_PRESETS[DEFAULT_SUB_DICT].url,
+        subDictUrl: subDictUrlInput ? subDictUrlInput.value : DEFAULT_SUB_DICT_URL,
+        wikiUrl: wikiUrlInput ? wikiUrlInput.value : DEFAULT_WIKI_URL,
         linkNewTab: linkNewTab.checked,
         linkCleanQuery: linkCleanQuery ? linkCleanQuery.checked : true,
         showHrAnswer: showHrAnswer.checked,
@@ -3479,6 +3579,7 @@ ${indentDecls(deco.divider === 'obang' ? [getDividerDecls(night.dividerColor, de
           font: f.fontSelect ? f.fontSelect.value : 'inherit',
           color: f.colorInput.value,
           hasDictLink: Boolean(f.hasDictLink),
+          hasSubDictLink: Boolean(f.hasSubDictLink),
           hasWikiLink: Boolean(f.hasWikiLink),
           hasTts: Boolean(f.hasTts),
         })),
@@ -3515,10 +3616,16 @@ ${indentDecls(deco.divider === 'obang' ? [getDividerDecls(night.dividerColor, de
         languageSelect.value = data.langId;
         const lang = getSelectedLanguage();
         if (langSearchInput) langSearchInput.value = i18n.langName(lang);
-        if (dictNameTag) dictNameTag.textContent = lang.dictName;
+        if (dictNameTag) dictNameTag.textContent = getLangDictName(lang);
       }
 
-      if (data.dictUrl !== undefined) dictUrlInput.value = data.dictUrl;
+      const activeLang = getSelectedLanguage();
+      const isKnownDefaultDictUrl = !data.dictUrl || isDefaultDictUrl(data.dictUrl, activeLang);
+      if (isKnownDefaultDictUrl) {
+        dictUrlInput.value = getLangDictUrl(activeLang);
+      } else if (data.dictUrl !== undefined) {
+        dictUrlInput.value = data.dictUrl;
+      }
       if (data.linkNewTab !== undefined) linkNewTab.checked = Boolean(data.linkNewTab);
       if (data.linkCleanQuery !== undefined && linkCleanQuery) linkCleanQuery.checked = Boolean(data.linkCleanQuery);
 
@@ -3596,7 +3703,21 @@ ${indentDecls(deco.divider === 'obang' ? [getDividerDecls(night.dividerColor, de
             if (fData.hasDictLink !== undefined) {
               f.hasDictLink = Boolean(fData.hasDictLink);
             }
-            f.hasWikiLink = Boolean(fData.hasWikiLink);
+            if (fData.hasSubDictLink !== undefined) {
+              f.hasSubDictLink = Boolean(fData.hasSubDictLink);
+              f.hasWikiLink = Boolean(fData.hasWikiLink);
+            } else if (fData.hasWikiLink !== undefined) {
+              if (data.subDict === 'wiki') {
+                f.hasWikiLink = Boolean(fData.hasWikiLink);
+                f.hasSubDictLink = false;
+              } else {
+                f.hasSubDictLink = Boolean(fData.hasWikiLink);
+                f.hasWikiLink = false;
+              }
+            } else {
+              f.hasSubDictLink = false;
+              f.hasWikiLink = false;
+            }
             f.hasTts = Boolean(fData.hasTts);
           }
         }
@@ -3625,21 +3746,26 @@ ${indentDecls(deco.divider === 'obang' ? [getDividerDecls(night.dividerColor, de
         });
       }
 
-      // 보조 사전 복원
-      // 이전 버전(위키만 지원) 저장본: 위키 링크를 실제로 쓰던 경우에만 위키/직접 입력으로 유지하고, 아니면 새 기본값(국어사전) 적용
-      if (subDictSelect && wikiUrlInput) {
-        if (data.subDict && SUB_DICT_PRESETS[data.subDict]) {
-          subDictSelect.value = data.subDict;
-          if (data.wikiUrl !== undefined) wikiUrlInput.value = data.wikiUrl;
-        } else if (data.wikiUrl !== undefined && fields.some(f => f.hasWikiLink)) {
-          subDictSelect.value = data.wikiUrl.trim() === DEFAULT_WIKI_URL ? 'wiki' : 'custom';
-          wikiUrlInput.value = data.wikiUrl;
+      // 보조 사전 URL 복원
+      if (subDictUrlInput) {
+        const savedSubUrl = data.subDictUrl || (data.subDict === 'ko' ? data.wikiUrl : undefined);
+        if (savedSubUrl && !isDefaultSubDictUrl(savedSubUrl)) {
+          subDictUrlInput.value = savedSubUrl;
         } else {
-          subDictSelect.value = DEFAULT_SUB_DICT;
-          wikiUrlInput.value = SUB_DICT_PRESETS[DEFAULT_SUB_DICT].url;
+          subDictUrlInput.value = DEFAULT_SUB_DICT_URL;
         }
-        updateSubDictLabels();
       }
+
+      // 위키백과 URL 복원
+      if (wikiUrlInput) {
+        const savedWikiUrl = data.wikiUrl;
+        if (savedWikiUrl && !isDefaultWikiUrl(savedWikiUrl)) {
+          wikiUrlInput.value = savedWikiUrl;
+        } else {
+          wikiUrlInput.value = DEFAULT_WIKI_URL;
+        }
+      }
+      updateSubDictLabels();
 
       fields.forEach(f => updateFieldNameWarning(f));
       updateFieldBadges();
@@ -3647,6 +3773,7 @@ ${indentDecls(deco.divider === 'obang' ? [getDividerDecls(night.dividerColor, de
 
       fields.forEach(f => {
         if (f.dictLinkCheck) f.dictLinkCheck.checked = Boolean(f.hasDictLink);
+        if (f.subDictLinkCheck) f.subDictLinkCheck.checked = Boolean(f.hasSubDictLink);
         if (f.wikiLinkCheck) f.wikiLinkCheck.checked = Boolean(f.hasWikiLink);
       });
       renderEditorQuickChips(languageSelect.value);
@@ -3721,10 +3848,10 @@ ${indentDecls(deco.divider === 'obang' ? [getDividerDecls(night.dividerColor, de
     langCombobox.clearSharedLanguage();
     const lang = getSelectedLanguage();
     const sample = lang.sample || {};
-    dictUrlInput.value = lang.dictUrl;
-    dictNameTag.textContent = lang.dictName;
-    if (subDictSelect) subDictSelect.value = DEFAULT_SUB_DICT;
-    if (wikiUrlInput) wikiUrlInput.value = SUB_DICT_PRESETS[DEFAULT_SUB_DICT].url;
+    dictUrlInput.value = getLangDictUrl(lang);
+    dictNameTag.textContent = getLangDictName(lang);
+    if (subDictUrlInput) subDictUrlInput.value = DEFAULT_SUB_DICT_URL;
+    if (wikiUrlInput) wikiUrlInput.value = DEFAULT_WIKI_URL;
     updateSubDictLabels();
     linkNewTab.checked = true;
     if (linkCleanQuery) linkCleanQuery.checked = true;
@@ -3739,6 +3866,7 @@ ${indentDecls(deco.divider === 'obang' ? [getDividerDecls(night.dividerColor, de
     fields[0].showFront.checked = true;
     fields[0].showBack.checked = false;
     fields[0].hasDictLink = false;
+    fields[0].hasSubDictLink = false;
     fields[0].hasWikiLink = false;
     fields[0].hasTts = false;
 
@@ -3748,6 +3876,7 @@ ${indentDecls(deco.divider === 'obang' ? [getDividerDecls(night.dividerColor, de
     fields[1].showFront.checked = false;
     fields[1].showBack.checked = true;
     fields[1].hasDictLink = true;
+    fields[1].hasSubDictLink = false;
     fields[1].hasWikiLink = false;
     fields[1].hasTts = true; // 외국어 단어 필드는 읽어주기 켬
 
@@ -3810,6 +3939,7 @@ ${indentDecls(deco.divider === 'obang' ? [getDividerDecls(night.dividerColor, de
 
     fields.forEach(f => {
       if (f.dictLinkCheck) f.dictLinkCheck.checked = Boolean(f.hasDictLink);
+      if (f.subDictLinkCheck) f.subDictLinkCheck.checked = Boolean(f.hasSubDictLink);
       if (f.wikiLinkCheck) f.wikiLinkCheck.checked = Boolean(f.hasWikiLink);
     });
     renderEditorQuickChips(languageSelect.value);
@@ -3929,6 +4059,8 @@ ${indentDecls(deco.divider === 'obang' ? [getDividerDecls(night.dividerColor, de
     fields.splice(2);
     addOptionalField(null, false);
     onLanguageChange(true, false);
+    if (subDictUrlInput) subDictUrlInput.value = DEFAULT_SUB_DICT_URL;
+    if (wikiUrlInput) wikiUrlInput.value = DEFAULT_WIKI_URL;
     // 꾸미기 묶음만 남아 있던 경우: 필드별 글씨 모양 · 오른쪽→왼쪽 쓰기를 저장된 값으로 다시 맞춤
     if (storedDesign) {
       if (Array.isArray(storedDesign.fieldStyles)) {

@@ -32,10 +32,12 @@ i18nRegister('zh', {
   'editor.step1.dictUrlLabel': '词典地址（一般不需要修改）',
   'editor.step1.resetDefault': '重置',
   'editor.step1.resetDictUrlTitle': '重置为该语言的默认词典地址',
-  'editor.step1.subDictLabel': '辅助词典（用于查韩语释义）',
-  'editor.step1.resetSubDictTitle': '重置为所选辅助词典的默认地址',
-  'editor.step1.subDictOptionKo': '📘 Naver 韩语词典',
-  'editor.step1.subDictOptionWiki': '📖 韩语维基百科',
+  'editor.step1.subDictLabel': '辅助词典地址（用于查单词/释义）',
+  'editor.step1.wikiUrlLabel': '维基百科地址',
+  'editor.step1.resetSubDictTitle': '重置为辅助词典的默认地址',
+  'editor.step1.resetWikiUrlTitle': '重置为维基百科的默认地址',
+  'editor.step1.subDictOptionKo': '📘 Naver 中韩词典',
+  'editor.step1.subDictOptionWiki': '📖 中文维基百科',
   'editor.step1.subDictOptionCustom': '🔎 自定义（其他词典地址）',
   'editor.step1.newTabHtml': '在新窗口中打开词典',
   'editor.step1.cleanQueryHtml': '整理搜索词：去掉 [ ]、( ) 里的内容，有多个释义时只搜索第一个（例：[名词] 苹果、苹果树 ➔ 苹果）',
@@ -43,8 +45,8 @@ i18nRegister('zh', {
   'editor.step1.urlInvalidWarning': '词典地址需要以 http:// 或 https:// 开头，才能添加图标。',
 
   // 辅助词典名称（字段开关 · 徽标 · 链接标题）
-  'editor.subDict.ko': '韩语词典',
-  'editor.subDict.wiki': '维基',
+  'editor.subDict.ko': '中韩词典',
+  'editor.subDict.wiki': '中文维基',
   'editor.subDict.custom': '辅助词典',
 
   // 第 2 步：卡片栏目（字段）
@@ -58,7 +60,10 @@ i18nRegister('zh', {
   'editor.field.showBackTitle': '在卡片背面（答案）显示此字段',
   'editor.field.dictLink': '🌐 外语词典',
   'editor.field.dictLinkTitle': '在此字段文字旁添加外语词典图标',
-  'editor.field.subDictLinkTitle': '在此字段文字旁添加辅助词典图标',
+  'editor.field.subDictLink': '📘 中韩词典',
+  'editor.field.subDictLinkTitle': '在此字段文字旁添加中韩词典图标',
+  'editor.field.wikiLink': '📖 中文维基',
+  'editor.field.wikiLinkTitle': '在此字段文字旁添加维基百科图标',
   'editor.field.nameLabel': '字段名（与 Anki 笔记的字段名完全一致）',
   'editor.field.sampleLabel': '预览中显示的示例',
   'editor.field.namePlaceholder1': '例：Front、释义',
@@ -200,6 +205,7 @@ i18nRegister('zh', {
   // 卡片内词典图标链接标题（也会写入生成的 Anki 模板）
   'editor.link.dictTitle': '搜索外语词典',
   'editor.link.subDictTitle': '搜索{name}',
+  'editor.link.wikiTitle': '搜索维基百科',
 
   // 生成的 CSS 中的说明注释
   'editor.cssComment.linkButtons': '图标（外语词典 / 辅助词典 / 朗读）：放大并留出间距，方便点按',

@@ -32,8 +32,10 @@ i18nRegister('ko', {
   'editor.step1.dictUrlLabel': '사전 주소 (보통은 바꿀 필요 없어요)',
   'editor.step1.resetDefault': '초기화',
   'editor.step1.resetDictUrlTitle': '이 언어의 기본 사전 주소로 초기화',
-  'editor.step1.subDictLabel': '보조 사전 (한국어 뜻 찾아보기용)',
-  'editor.step1.resetSubDictTitle': '고른 보조 사전의 기본 주소로 초기화',
+  'editor.step1.subDictLabel': '보조 사전 주소 (한국어 뜻 / 단어 검색)',
+  'editor.step1.wikiUrlLabel': '위키백과 주소',
+  'editor.step1.resetSubDictTitle': '보조 사전의 기본 주소로 초기화',
+  'editor.step1.resetWikiUrlTitle': '위키백과의 기본 주소로 초기화',
   'editor.step1.subDictOptionKo': '📘 네이버 국어사전',
   'editor.step1.subDictOptionWiki': '📖 한국어 위키백과',
   'editor.step1.subDictOptionCustom': '🔎 직접 입력 (다른 사전 주소)',
@@ -44,7 +46,7 @@ i18nRegister('ko', {
 
   // 보조 사전 이름 (필드 토글 · 배지 · 링크 제목에 사용)
   'editor.subDict.ko': '국어사전',
-  'editor.subDict.wiki': '위키',
+  'editor.subDict.wiki': '위키백과',
   'editor.subDict.custom': '보조 사전',
 
   // 2단계: 카드에 들어갈 칸(필드)
@@ -58,7 +60,10 @@ i18nRegister('ko', {
   'editor.field.showBackTitle': '이 필드를 카드 뒷면(정답)에 보여주기',
   'editor.field.dictLink': '🌐 외국어사전',
   'editor.field.dictLinkTitle': '이 필드 글자 옆에 외국어사전 아이콘 붙이기',
+  'editor.field.subDictLink': '📘 국어사전',
   'editor.field.subDictLinkTitle': '이 필드 글자 옆에 보조 사전 아이콘 붙이기',
+  'editor.field.wikiLink': '📖 위키백과',
+  'editor.field.wikiLinkTitle': '이 필드 글자 옆에 위키백과 아이콘 붙이기',
   'editor.field.nameLabel': '필드 이름 (Anki 노트의 필드 이름과 똑같이)',
   'editor.field.sampleLabel': '미리보기에 보일 예시',
   'editor.field.namePlaceholder1': '예: Front, 뜻, 의미',
@@ -200,6 +205,7 @@ i18nRegister('ko', {
   // 카드 안 사전 아이콘 링크 제목 (생성된 Anki 서식에도 들어감)
   'editor.link.dictTitle': '외국어사전 검색',
   'editor.link.subDictTitle': '{name} 검색',
+  'editor.link.wikiTitle': '위키백과 검색',
 
   // 생성된 CSS 서식 안의 설명 주석
   'editor.cssComment.linkButtons': '아이콘 (외국어사전 / 보조 사전 / 읽어주기): 누르기 쉽게 크게, 넉넉한 간격',

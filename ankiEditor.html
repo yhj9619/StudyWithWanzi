@@ -136,8 +136,12 @@
                   <span data-i18n="editor.field.dictLink">🌐 외국어사전</span>
                 </label>
                 <label class="mini-toggle mini-toggle-link" data-i18n-attr="title:editor.field.subDictLinkTitle" title="이 필드 글자 옆에 보조 사전 아이콘 붙이기">
+                  <input type="checkbox" id="f1_subdict_link">
+                  <span class="sub-dict-label" data-i18n="editor.field.subDictLink">📘 국어사전</span>
+                </label>
+                <label class="mini-toggle mini-toggle-link" data-i18n-attr="title:editor.field.wikiLinkTitle" title="이 필드 글자 옆에 위키백과 아이콘 붙이기">
                   <input type="checkbox" id="f1_wiki_link">
-                  <span class="sub-dict-label">📘 국어사전</span>
+                  <span class="wiki-dict-label" data-i18n="editor.field.wikiLink">📖 위키백과</span>
                 </label>
                 <label class="mini-toggle mini-toggle-tts" data-i18n-attr="title:editor.field.ttsTitle" title="카드를 열면 이 필드의 글자를 기기 목소리로 읽어줘요">
                   <input type="checkbox" id="f1_tts">
@@ -226,8 +230,12 @@
                   <span data-i18n="editor.field.dictLink">🌐 외국어사전</span>
                 </label>
                 <label class="mini-toggle mini-toggle-link" data-i18n-attr="title:editor.field.subDictLinkTitle" title="이 필드 글자 옆에 보조 사전 아이콘 붙이기">
+                  <input type="checkbox" id="f2_subdict_link">
+                  <span class="sub-dict-label" data-i18n="editor.field.subDictLink">📘 국어사전</span>
+                </label>
+                <label class="mini-toggle mini-toggle-link" data-i18n-attr="title:editor.field.wikiLinkTitle" title="이 필드 글자 옆에 위키백과 아이콘 붙이기">
                   <input type="checkbox" id="f2_wiki_link">
-                  <span class="sub-dict-label">📘 국어사전</span>
+                  <span class="wiki-dict-label" data-i18n="editor.field.wikiLink">📖 위키백과</span>
                 </label>
                 <label class="mini-toggle mini-toggle-tts" data-i18n-attr="title:editor.field.ttsTitle" title="카드를 열면 이 필드의 글자를 기기 목소리로 읽어줘요">
                   <input type="checkbox" id="f2_tts" checked>
@@ -340,18 +348,24 @@
               <span id="dictUrlWarn" class="notice-badge hidden" role="alert"></span>
             </div>
 
+            <!-- 보조 사전 (국어 / 중한 / 영한) -->
             <div class="form-group">
               <div class="label-with-action">
-                <label for="subDictSelect" class="form-label" data-i18n="editor.step1.subDictLabel">보조 사전 (한국어 뜻 찾아보기용)</label>
-                <button type="button" id="resetWikiUrlBtn" class="btn-text" data-i18n="editor.step1.resetDefault" data-i18n-attr="title:editor.step1.resetSubDictTitle" title="고른 보조 사전의 기본 주소로 초기화">초기화</button>
+                <label for="subDictUrlInput" class="form-label" data-i18n="editor.step1.subDictLabel">보조 사전 주소 (한국어 뜻 / 단어 검색)</label>
+                <button type="button" id="resetSubDictUrlBtn" class="btn-text" data-i18n="editor.step1.resetDefault" data-i18n-attr="title:editor.step1.resetSubDictTitle" title="보조 사전의 기본 주소로 초기화">초기화</button>
               </div>
-              <select id="subDictSelect" class="form-select">
-                <option value="ko" selected data-i18n="editor.step1.subDictOptionKo">📘 네이버 국어사전</option>
-                <option value="wiki" data-i18n="editor.step1.subDictOptionWiki">📖 한국어 위키백과</option>
-                <option value="custom" data-i18n="editor.step1.subDictOptionCustom">🔎 직접 입력 (다른 사전 주소)</option>
-              </select>
-              <input type="url" id="wikiUrlInput" class="form-input" style="margin-top: 0.5rem;" placeholder="https://ko.dict.naver.com/#/search?query=" value="https://ko.dict.naver.com/#/search?query=">
+              <input type="url" id="subDictUrlInput" class="form-input" placeholder="https://ko.dict.naver.com/#/search?query=" value="https://ko.dict.naver.com/#/search?query=">
               <span id="subDictUrlWarn" class="notice-badge hidden" role="alert"></span>
+            </div>
+
+            <!-- 위키백과 -->
+            <div class="form-group">
+              <div class="label-with-action">
+                <label for="wikiUrlInput" class="form-label" data-i18n="editor.step1.wikiUrlLabel">위키백과 주소</label>
+                <button type="button" id="resetWikiUrlBtn" class="btn-text" data-i18n="editor.step1.resetDefault" data-i18n-attr="title:editor.step1.resetWikiUrlTitle" title="위키백과의 기본 주소로 초기화">초기화</button>
+              </div>
+              <input type="url" id="wikiUrlInput" class="form-input" placeholder="https://ko.wikipedia.org/wiki/" value="https://ko.wikipedia.org/wiki/">
+              <span id="wikiUrlWarn" class="notice-badge hidden" role="alert"></span>
             </div>
 
             <div class="form-group inline-checkbox">

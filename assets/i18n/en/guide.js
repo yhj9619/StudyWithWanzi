@@ -95,7 +95,7 @@ i18nRegister('en', {
   'guide.step2.detail.partFrontTitle': '① Front Template',
   'guide.step2.detail.partFrontDesc': 'The question side. It shows the Korean meaning in large text so you can try to recall the foreign word.',
   'guide.step2.detail.partBackTitle': '② Back Template',
-  'guide.step2.detail.partBackDesc': 'The answer side. Along with the meaning, it shows the word · pronunciation · example and the <b>🌐 foreign-language dictionary · 📘 Korean dictionary icons</b>.',
+  'guide.step2.detail.partBackDesc': 'The answer side. Along with the meaning, it shows the word · pronunciation · example and the <b>🌐 foreign-language dictionary · 📘 secondary dictionary icons</b>.',
   'guide.step2.detail.partStyleTitle': '③ Styling',
   'guide.step2.detail.partStyleDesc': 'Sets how the card looks: font, text size, colors, and the colors used in dark mode.',
   'guide.step2.detail.openTip': '<strong>Another way to open the [Card Types] window</strong><br>In the Add window (<kbd>A</kbd>) or the Browse window (<kbd>B</kbd>), the <b>[Cards...]</b> button opens the same window.',

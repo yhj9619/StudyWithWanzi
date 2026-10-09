@@ -95,7 +95,7 @@ i18nRegister('zh', {
   'guide.step2.detail.partFrontTitle': '① 正面模板',
   'guide.step2.detail.partFrontDesc': '题目这一面。用大字显示韩语释义，让你回想外语单词。',
   'guide.step2.detail.partBackTitle': '② 背面模板',
-  'guide.step2.detail.partBackDesc': '答案这一面。除了释义，还会显示单词 · 发音 · 例句，以及 <b>🌐 外语词典 · 📘 韩语词典图标</b>。',
+  'guide.step2.detail.partBackDesc': '答案这一面。除了释义，还会显示单词 · 发音 · 例句，以及 <b>🌐 外语词典 · 📘 中韩词典图标</b>。',
   'guide.step2.detail.partStyleTitle': '③ 样式',
   'guide.step2.detail.partStyleDesc': '决定卡片的外观：字体、字号、颜色，以及深色模式下的颜色。',
   'guide.step2.detail.openTip': '<strong>打开 [卡片模板] 窗口的其他方法</strong><br>在添加窗口（<kbd>A</kbd>）或浏览窗口（<kbd>B</kbd>）中点击 <b>[卡片...]</b> 按钮，也会打开同一个窗口。',
