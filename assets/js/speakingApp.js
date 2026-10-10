@@ -5,24 +5,24 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   const FALLBACK_KO = {
-    'speaking.sim.pause': '일시정지',
-    'speaking.sim.resume': '계속하기',
+    'speaking.sim.pause': '⏸ 일시정지',
+    'speaking.sim.resume': '▶ 계속하기',
     'speaking.sim.showQuestion': '문제 텍스트 보기',
     'speaking.sim.hideQuestion': '문제 텍스트 숨기기',
     'speaking.sim.statusListening': '🗣️ 문제 낭독 중...',
     'speaking.sim.statusSpeaking': '⏱️ 답변 시간 (Speaking)',
     'speaking.sim.statusBreak': '☕ 휴식 & 다음 문제 준비 중',
     'speaking.sim.statusPaused': '⏸️ 일시 정지됨',
-    'speaking.sim.next': '다음 문제 ➔',
+    'speaking.sim.next': '다음 문제 ▶',
     'speaking.sim.prev': '◀ 이전 문제',
     'speaking.sim.replay': '🔊 다시 듣기',
     'speaking.sim.resetCurrent': '🔄 문제 초기화',
     'speaking.sim.confirmResetCurrent': '현재 문제를 처음부터 다시 시작할까요? (현재 답변 녹음 및 소요 시간이 리셋됩니다)',
-    'speaking.sim.skipBreak': '휴식 건너뛰기 ➔',
-    'speaking.sim.stop': '시험 중단',
+    'speaking.sim.skipBreak': '휴식 건너뛰기 ▶',
+    'speaking.sim.stop': '⏹ 시험 중단',
     'speaking.sim.confirmStop': '진행 중인 시험을 중단하고 지금까지의 결과 화면으로 이동할까요?',
     'speaking.sim.singleRetryBadge': 'Q{num} 다시 풀기',
-    'speaking.sim.singleRetryDone': '완료 ➔',
+    'speaking.sim.singleRetryDone': '완료 ▶',
     'speaking.sim.progress': '문제 {current} / {total}',
     'speaking.step1.parsedCount': '인식된 문제: {count}개',
     'speaking.step1.parsedCountEmpty': '문제를 입력하거나 샘플 버튼을 눌러보세요',
@@ -2442,6 +2442,7 @@ document.addEventListener('DOMContentLoaded', () => {
       simQuestionCard.scrollTop = 0;
     }
     btnSkipBreak.classList.add('hidden');
+    btnPauseResume.classList.remove('is-paused');
     btnPauseResume.textContent = t('speaking.sim.pause');
 
     // 낭독 단계 시작
@@ -2581,6 +2582,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function togglePause() {
     if (state.phase === 'PAUSED') {
       const resumeTo = state.previousPhase || 'SPEAKING';
+      btnPauseResume.classList.remove('is-paused');
       btnPauseResume.textContent = t('speaking.sim.pause');
       setPhase(resumeTo);
       state.lastTickTime = Date.now();
@@ -2610,6 +2612,7 @@ document.addEventListener('DOMContentLoaded', () => {
       state.previousPhase = state.phase;
       recordSpeakingTime(state.currentIndex);
       setPhase('PAUSED');
+      btnPauseResume.classList.add('is-paused');
       btnPauseResume.textContent = t('speaking.sim.resume');
     }
   }
