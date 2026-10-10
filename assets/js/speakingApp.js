@@ -41,6 +41,18 @@ document.addEventListener('DOMContentLoaded', () => {
     'speaking.step1.confirmClearText': '현재 입력된 문제 본문을 모두 삭제할까요?',
     'speaking.step2.setAll': '전체 선택 ({count}개)',
     'speaking.step2.voiceAuto': '🌐 언어 자동 감지 (한국어·영어·중국어 등 혼합 낭독)',
+    'speaking.step2.compatTitle': '언어 자동 감지 (한국어 · 영어 · 중국어 · 일본어)',
+    'speaking.step2.compatSubtitle': '한국어·영어·중국어·일본어가 섞인 문제도 감지하여 각 언어별 선택된 전용 음성으로 순차 전환하여 낭독합니다.',
+    'speaking.step2.compatAdvancedTitle': '고급 설정: 언어별 음성 세부 지정 (직접 선택)',
+    'speaking.step2.compatLangKo': '한국어',
+    'speaking.step2.compatLangZh': '중국어 (보통화)',
+    'speaking.step2.compatLangEn': '영어 (미국 표준 우선)',
+    'speaking.step2.compatLangJa': '일본어',
+    'speaking.step2.compatAutoRecommend': '⭐ 표준 자동 추천',
+    'speaking.step2.compatNoVoice': '시스템 기본 엔진 (음성 팩 미설치)',
+    'speaking.step2.previewVoice': '미리듣기',
+    'speaking.step2.fixedVoice': '단일 고정 음성',
+    'speaking.step2.fixedVoiceDesc': '모든 문제를 선택한 단일 음성으로만 낭독합니다. 다국어 혼합 낭독을 원하시면 "🌐 언어 자동 감지"를 선택하세요.',
     'speaking.step2.testPhrase': '안녕하세요! Hello! 언어 자동 감지 음성 테스트입니다.',
     'speaking.step2.recordVoice': '🎙️ 내 답변 음성 녹음 (최종 화면에서 다시 듣기 · 다운로드)',
     'speaking.step1.cleanNumbering': '문제 앞 번호(1., Q1: 등) 자동 정리',
@@ -149,6 +161,45 @@ document.addEventListener('DOMContentLoaded', () => {
   const resQuestionList = document.getElementById('resQuestionList');
   const btnRetryExam = document.getElementById('btnRetryExam');
   const btnBackToSetup = document.getElementById('btnBackToSetup');
+
+  // =========================================================================
+  // 1-B. 상태 머신 (State Machine) 및 SVG 타이머 초기화 (TDZ 방지 최상단 배치)
+  // =========================================================================
+  const CIRCLE_RADIUS = 78;
+  const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
+  if (timerCircleProgress) {
+    timerCircleProgress.style.strokeDasharray = `${CIRCLE_CIRCUMFERENCE} ${CIRCLE_CIRCUMFERENCE}`;
+  }
+
+  let state = {
+    pool: [],
+    queue: [],
+    currentIndex: 0,
+    phase: 'SETUP', // 'SETUP' | 'LISTENING' | 'SPEAKING' | 'BREAK' | 'PAUSED' | 'FINISHED'
+    previousPhase: null,
+    totalDurationMs: 0,
+    remainingMs: 0,
+    timerInterval: null,
+    lastTickTime: 0,
+    examStartTime: 0,
+    fontSize: 1.35,
+    isTextHidden: false,
+    history: [],
+    micStream: null,
+    activeRecorder: null,
+    currentRecorderIndex: -1,
+    recordings: {},
+    isRecordingActive: false,
+    _recorderResolve: null,
+    questionSpentMs: {},
+    speakingStartTime: null,
+    isStoppedEarly: false,
+    singleRetryIndex: null,
+    activeDeckId: 'tour',
+    customDecks: [],
+    tourContent: '',
+    autoVoicePreferences: { ko: '', en: '', zh: '', ja: '' }
+  };
 
   // =========================================================================
   // 2. 프리셋 샘플 문제 목록
@@ -942,42 +993,206 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  const PREFERRED_DIALECTS = {
+    en: ['en-us', 'en-gb', 'en-ca', 'en-au', 'en'],
+    zh: ['zh-cn', 'zh-sg', 'zh-tw', 'zh-hk', 'zh'],
+    ko: ['ko-kr', 'ko'],
+    ja: ['ja-jp', 'ja']
+  };
+
+  const LANG_KEYWORDS = {
+    zh: ['chinese', 'china', 'mandarin', 'xiaoxiao', 'yunxi', 'yunjian', 'yaoyao', 'huihui', 'kangkang', 'zhiwei', 'hanhan'],
+    ko: ['korean', 'korea', 'sunhi', 'injoon', 'heami', 'yuna'],
+    en: ['united states', 'david', 'zira', 'mark', 'jenny', 'guy', 'aria', 'english'],
+    ja: ['japanese', 'japan', 'haruka', 'ayumi', 'ichiro', 'sayaka', 'nanami', 'keita', 'kyoko', 'otoya']
+  };
+
+  function getVoicesForLangPrefix(prefix) {
+    if (!availableVoices || availableVoices.length === 0) return [];
+    const p = (prefix || '').toLowerCase();
+    const dialectOrder = PREFERRED_DIALECTS[p] || [p];
+    const keywords = LANG_KEYWORDS[p] || [];
+
+    const matched = availableVoices.filter(v => {
+      const vLang = (v.lang || '').toLowerCase().replace(/_/g, '-');
+      if (vLang === p || vLang.startsWith(p + '-')) return true;
+      const vName = (v.name || '').toLowerCase();
+      if (keywords.some(k => vName.includes(k))) return true;
+      return false;
+    });
+
+    matched.sort((a, b) => {
+      const aLang = (a.lang || '').toLowerCase().replace(/_/g, '-');
+      const bLang = (b.lang || '').toLowerCase().replace(/_/g, '-');
+
+      let aIdx = dialectOrder.findIndex(d => aLang === d || aLang.startsWith(d));
+      let bIdx = dialectOrder.findIndex(d => bLang === d || bLang.startsWith(d));
+      if (aIdx === -1) aIdx = 999;
+      if (bIdx === -1) bIdx = 999;
+
+      if (aIdx !== bIdx) return aIdx - bIdx;
+      return (a.name || '').localeCompare(b.name || '');
+    });
+
+    return matched;
+  }
+
+  function formatVoiceOptionLabel(v) {
+    if (!v) return '';
+    const vLang = (v.lang || '').replace(/_/g, '-');
+    const region = getLangLabel(vLang);
+    return `${region} · ${v.name}${v.default ? ' (기본)' : ''}`;
+  }
+
+  function previewLanguageVoice(langCode) {
+    if (!('speechSynthesis' in window)) return;
+    const testPhrases = {
+      ko: '안녕하세요! 완쯔 스피킹 한국어 음성입니다.',
+      en: 'Hello! This is Wanzi Speaking in English.',
+      zh: '你好！这是丸子口语中文语音测试。',
+      ja: 'こんにちは！ワンズ(丸子)スピーキング日本語音声です。'
+    };
+    const phrase = testPhrases[langCode] || 'Hello!';
+    const voice = getBestVoiceForLang(langCode);
+    const rate = parseFloat(ttsRateSlider ? ttsRateSlider.value : '1.0') || 1.0;
+
+    stopSpeaking();
+    isSpeakingCanceled = false;
+
+    const utterance = new SpeechSynthesisUtterance(phrase);
+    if (voice) {
+      utterance.voice = voice;
+      utterance.lang = voice.lang || 'en-US';
+    } else {
+      const defaultLangs = { ko: 'ko-KR', en: 'en-US', zh: 'zh-CN', ja: 'ja-JP' };
+      utterance.lang = defaultLangs[langCode] || 'en-US';
+    }
+    utterance.rate = rate;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function getBestVoiceForLang(lang) {
+    if (!availableVoices || availableVoices.length === 0) return null;
+    const prefix = (lang || 'ko').toLowerCase();
+
+    // 0) 사용자가 언어별 세부 지정한 음성이 있는 경우 최우선
+    if (typeof state !== 'undefined' && state && state.autoVoicePreferences && state.autoVoicePreferences[prefix]) {
+      const prefVoice = availableVoices.find(v => v.name === state.autoVoicePreferences[prefix]);
+      if (prefVoice) return prefVoice;
+    }
+
+    // 1) 해당 언어의 후보군 중 우선 방언 순(en-US > en-GB > en-CA > en-AU 등) 정렬된 최우선 음성 선택
+    const list = getVoicesForLangPrefix(prefix);
+    if (list.length > 0) return list[0];
+
+    // 2) 느슨한 일치
+    const loose = availableVoices.find(v => (v.lang || '').toLowerCase().startsWith(prefix));
+    if (loose) return loose;
+
+    return null;
+  }
+
   function updateVoiceStatusBadge() {
     if (!voiceStatusBadge) return;
     const selected = voiceSelect ? voiceSelect.value : 'auto';
     if (selected === 'auto') {
-      const koVoice = getBestVoiceForLang('ko');
-      const zhVoice = getBestVoiceForLang('zh');
-      const enVoice = getBestVoiceForLang('en');
-      const jaVoice = getBestVoiceForLang('ja');
-
-      const supported = [
-        { code: 'ko', flag: '🇰🇷', name: t('speaking.step2.compatLangKo') || '한국어', voice: koVoice },
-        { code: 'zh', flag: '🇨🇳', name: t('speaking.step2.compatLangZh') || '중국어', voice: zhVoice },
-        { code: 'en', flag: '🇺🇸', name: t('speaking.step2.compatLangEn') || '영어', voice: enVoice },
-        { code: 'ja', flag: '🇯🇵', name: t('speaking.step2.compatLangJa') || '일본어', voice: jaVoice }
+      const supportedLangs = [
+        { code: 'ko', flag: '🇰🇷', name: t('speaking.step2.compatLangKo') || '한국어' },
+        { code: 'en', flag: '🇺🇸', name: t('speaking.step2.compatLangEn') || '영어 (미국 표준 우선)' },
+        { code: 'zh', flag: '🇨🇳', name: t('speaking.step2.compatLangZh') || '중국어 (보통화)' },
+        { code: 'ja', flag: '🇯🇵', name: t('speaking.step2.compatLangJa') || '일본어' }
       ];
 
-      const chipsHtml = supported.map(lang => {
-        const voiceLabel = lang.voice ? escapeHtml(lang.voice.name) : '기본 엔진';
-        const isMatched = Boolean(lang.voice);
+      // 기존 고급 설정 펼침 상태 보존
+      const wasOpen = Boolean(voiceStatusBadge.querySelector('.compat-advanced-details[open]'));
+
+      // 1) 기본 요약 칩 (한눈에 현재 매칭된 음성 표시)
+      const chipsHtml = supportedLangs.map(lang => {
+        const best = getBestVoiceForLang(lang.code);
+        const voiceLabel = best ? escapeHtml(best.name) : (t('speaking.step2.compatNoVoice') || '기본 엔진');
+        const isMatched = Boolean(best);
         return `<span class="compat-chip ${isMatched ? '' : 'missing'}" title="${lang.name}: ${voiceLabel}">
           <span>${lang.flag} ${escapeHtml(lang.name)}</span>
           <span class="chip-voice-name">${voiceLabel}</span>
         </span>`;
       }).join('');
 
+      // 2) 고급 설정 내 언어별 세부 선택 카드
+      const cardsHtml = supportedLangs.map(lang => {
+        const voices = getVoicesForLangPrefix(lang.code);
+        const currentBest = getBestVoiceForLang(lang.code);
+        const userChoice = (typeof state !== 'undefined' && state && state.autoVoicePreferences && state.autoVoicePreferences[lang.code]) || '';
+
+        let selectOptionsHtml = '';
+        if (voices.length === 0) {
+          selectOptionsHtml = `<option value="">⚠️ ${t('speaking.step2.compatNoVoice') || '시스템 기본 엔진 (음성 팩 미설치)'}</option>`;
+        } else {
+          const bestLabel = currentBest ? `(${escapeHtml(currentBest.name)})` : '';
+          selectOptionsHtml += `<option value="">${t('speaking.step2.compatAutoRecommend') || '⭐ 표준 자동 추천'} ${bestLabel}</option>`;
+          voices.forEach(v => {
+            const isSelected = (userChoice === v.name);
+            selectOptionsHtml += `<option value="${escapeHtml(v.name)}" ${isSelected ? 'selected' : ''}>${escapeHtml(formatVoiceOptionLabel(v))}</option>`;
+          });
+        }
+
+        const isMissing = (voices.length === 0);
+
+        return `
+          <div class="compat-lang-card ${isMissing ? 'missing' : ''}">
+            <div class="compat-lang-title">
+              <span>${lang.flag} ${escapeHtml(lang.name)}</span>
+              <button type="button" class="compat-preview-btn" data-lang="${lang.code}" title="${t('speaking.step2.previewVoice') || '미리듣기'}">
+                🔊 ${t('speaking.step2.previewVoice') || '미리듣기'}
+              </button>
+            </div>
+            <select class="compat-voice-select" data-lang="${lang.code}" ${isMissing ? 'disabled' : ''}>
+              ${selectOptionsHtml}
+            </select>
+          </div>
+        `;
+      }).join('');
+
       voiceStatusBadge.className = 'voice-status-box';
       voiceStatusBadge.innerHTML = `
         <div class="compat-header">
-          <span>🌐 ${t('speaking.step2.compatTitle') || '언어 자동 감지 지원 (호환 언어)'}</span>
-          <span style="font-size: 0.72rem; font-weight: normal; color: #15803d;">실시간 혼합 분리</span>
+          <span>🌐 ${t('speaking.step2.compatTitle') || '언어 자동 감지 (한국어 · 영어 · 중국어 · 일본어)'}</span>
+          <span class="compat-badge-pill">실시간 다국어 분리</span>
         </div>
         <div class="compat-chips-grid">
           ${chipsHtml}
         </div>
-        <div class="compat-desc">${t('speaking.step2.compatSubtitle') || '한국어·중국어·영어·일본어가 섞인 문제도 각 언어별 전용 음성으로 순차 전환하여 낭독합니다.'}</div>
+        <details class="compat-advanced-details" ${wasOpen ? 'open' : ''}>
+          <summary class="compat-advanced-summary">
+            <span>⚙️ ${t('speaking.step2.compatAdvancedTitle') || '고급 설정: 언어별 음성 세부 지정 (직접 선택)'}</span>
+            <span class="advanced-arrow">▼</span>
+          </summary>
+          <div class="compat-advanced-body">
+            <div class="compat-langs-grid">
+              ${cardsHtml}
+            </div>
+            <div class="compat-desc">${t('speaking.step2.compatSubtitle') || '한국어·영어·중국어·일본어가 섞인 문제도 감지하여 각 언어별 선택된 전용 음성으로 순차 전환하여 낭독합니다.'}</div>
+          </div>
+        </details>
       `;
+
+      voiceStatusBadge.querySelectorAll('.compat-voice-select').forEach(sel => {
+        sel.addEventListener('change', () => {
+          const l = sel.getAttribute('data-lang');
+          if (!state.autoVoicePreferences) state.autoVoicePreferences = {};
+          state.autoVoicePreferences[l] = sel.value;
+          saveSettings();
+          updateVoiceStatusBadge();
+          previewLanguageVoice(l);
+        });
+      });
+
+      voiceStatusBadge.querySelectorAll('.compat-preview-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const l = btn.getAttribute('data-lang');
+          previewLanguageVoice(l);
+        });
+      });
     } else {
       const v = availableVoices.find(item => item.name === selected);
       voiceStatusBadge.className = 'voice-status-box single-mode';
@@ -992,59 +1207,6 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       `;
     }
-  }
-
-  function getBestVoiceForLang(lang) {
-    if (!availableVoices || availableVoices.length === 0) return null;
-    const prefix = (lang || 'ko').toLowerCase();
-
-    // 1) lang 속성이 정확히 일치하거나 해당 접두어로 시작하는 음성 우선
-    const exact = availableVoices.find(v => {
-      const vLang = (v.lang || '').toLowerCase().replace(/_/g, '-');
-      return vLang === prefix || vLang.startsWith(prefix + '-');
-    });
-    if (exact) return exact;
-
-    // 2) 음성 이름(name)에 해당 언어 키워드가 포함된 경우 (Windows/Edge/Chrome 다국어 팩)
-    if (prefix === 'zh') {
-      const byName = availableVoices.find(v => {
-        const n = (v.name || '').toLowerCase();
-        return n.includes('chinese') || n.includes('china') || n.includes('mandarin') ||
-               n.includes('xiaoxiao') || n.includes('yunxi') || n.includes('yunjian') ||
-               n.includes('yaoyao') || n.includes('huihui') || n.includes('kangkang') ||
-               n.includes('zhiwei') || n.includes('hanhan');
-      });
-      if (byName) return byName;
-    } else if (prefix === 'ko') {
-      const byName = availableVoices.find(v => {
-        const n = (v.name || '').toLowerCase();
-        return n.includes('korean') || n.includes('korea') || n.includes('sunhi') ||
-               n.includes('injoon') || n.includes('heami') || n.includes('yuna');
-      });
-      if (byName) return byName;
-    } else if (prefix === 'en') {
-      const byName = availableVoices.find(v => {
-        const n = (v.name || '').toLowerCase();
-        return n.includes('english') || n.includes('united states') || n.includes('david') ||
-               n.includes('zira') || n.includes('mark') || n.includes('jenny');
-      });
-      if (byName) return byName;
-    } else if (prefix === 'ja') {
-      const byName = availableVoices.find(v => {
-        const n = (v.name || '').toLowerCase();
-        return n.includes('japanese') || n.includes('japan') || n.includes('haruka') ||
-               n.includes('ayumi') || n.includes('ichiro') || n.includes('sayaka') ||
-               n.includes('nanami') || n.includes('keita') || n.includes('kyoko') ||
-               n.includes('otoya');
-      });
-      if (byName) return byName;
-    }
-
-    // 3) 언어 느슨한 일치
-    const loose = availableVoices.find(v => (v.lang || '').toLowerCase().startsWith(prefix));
-    if (loose) return loose;
-
-    return null;
   }
 
   // 문장을 언어별 세그먼트로 지능적 분리 (한국어 / 영어 / 중국어 / 일본어 혼합 완벽 지원)
@@ -1195,44 +1357,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     playNextSegment();
   }
-
-  // =========================================================================
-  // 7. 상태 관리 (State Machine)
-  // =========================================================================
-  const CIRCLE_RADIUS = 78;
-  const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
-  if (timerCircleProgress) {
-    timerCircleProgress.style.strokeDasharray = `${CIRCLE_CIRCUMFERENCE} ${CIRCLE_CIRCUMFERENCE}`;
-  }
-
-  let state = {
-    pool: [],
-    queue: [],
-    currentIndex: 0,
-    phase: 'SETUP', // 'SETUP' | 'LISTENING' | 'SPEAKING' | 'BREAK' | 'PAUSED' | 'FINISHED'
-    previousPhase: null,
-    totalDurationMs: 0,
-    remainingMs: 0,
-    timerInterval: null,
-    lastTickTime: 0,
-    examStartTime: 0,
-    fontSize: 1.35,
-    isTextHidden: false,
-    history: [],
-    micStream: null,
-    activeRecorder: null,
-    currentRecorderIndex: -1,
-    recordings: {},
-    isRecordingActive: false,
-    _recorderResolve: null,
-    questionSpentMs: {},
-    speakingStartTime: null,
-    isStoppedEarly: false,
-    singleRetryIndex: null,
-    activeDeckId: 'tour',
-    customDecks: [],
-    tourContent: ''
-  };
 
   // =========================================================================
   // 8. 문제 세트 목록(덱) 탭 관리 및 전환
@@ -1416,6 +1540,7 @@ document.addEventListener('DOMContentLoaded', () => {
       activeDeckId: state.activeDeckId || 'tour',
       customDecks: state.customDecks || [],
       tourContent: state.tourContent || '',
+      autoVoicePreferences: state.autoVoicePreferences || { ko: '', en: '', zh: '', ja: '' },
       cleanNumbering: cleanNumberingCheck.checked,
       answerTime: answerTimeInput.value,
       breakTime: breakTimeInput.value,
@@ -1443,6 +1568,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.activeDeckId = 'tour';
         state.customDecks = [];
         state.tourContent = SAMPLES.tour.join('\n');
+        state.autoVoicePreferences = { ko: '', en: '', zh: '', ja: '' };
         questionInput.value = state.tourContent;
         answerTimeInput.value = '120';
         breakTimeInput.value = '10';
@@ -1456,6 +1582,11 @@ document.addEventListener('DOMContentLoaded', () => {
       state.customDecks = Array.isArray(data.customDecks) ? data.customDecks : [];
       state.tourContent = data.tourContent !== undefined ? data.tourContent : SAMPLES.tour.join('\n');
       state.activeDeckId = data.activeDeckId || 'tour';
+      if (data.autoVoicePreferences && typeof data.autoVoicePreferences === 'object') {
+        state.autoVoicePreferences = Object.assign({ ko: '', en: '', zh: '', ja: '' }, data.autoVoicePreferences);
+      } else {
+        state.autoVoicePreferences = { ko: '', en: '', zh: '', ja: '' };
+      }
 
       // 구버전 마이그레이션: data.questions에 저장된 사용자 질문이 있고 customDecks가 비어있던 경우
       if (data.questions !== undefined && state.customDecks.length === 0 && !data.activeDeckId) {
