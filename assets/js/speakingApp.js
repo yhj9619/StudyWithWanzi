@@ -1264,8 +1264,8 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) {
-        // 기본값: 디폴트 답변시간 90초, 휴식 10초, OPIc 샘플
-        answerTimeInput.value = '90';
+        // 기본값: 디폴트 답변시간 120초(2분), 휴식 10초, OPIc 샘플
+        answerTimeInput.value = '120';
         breakTimeInput.value = '10';
         questionInput.value = SAMPLES.opic.join('\n');
         updatePresetPillsActive('answerTimeInput');
@@ -1276,8 +1276,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = JSON.parse(raw);
       if (data.questions !== undefined) questionInput.value = data.questions;
       if (data.cleanNumbering !== undefined) cleanNumberingCheck.checked = data.cleanNumbering;
-      // answerTime 기본값은 90초
-      answerTimeInput.value = data.answerTime ? data.answerTime : '90';
+      // answerTime 기본값은 120초 (기존 90초 기본값 사용자의 경우 120초로 갱신)
+      if (!data.answerTime || data.answerTime === '90') {
+        answerTimeInput.value = '120';
+      } else {
+        answerTimeInput.value = data.answerTime;
+      }
       if (data.breakTime !== undefined) breakTimeInput.value = data.breakTime;
       if (data.maxQuestions !== undefined) maxQuestionsInput.value = data.maxQuestions;
       if (data.rate !== undefined && ttsRateSlider) {
@@ -1969,7 +1973,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    const answerSec = Math.max(5, parseInt(answerTimeInput.value, 10) || 90);
+    const answerSec = Math.max(5, parseInt(answerTimeInput.value, 10) || 120);
     const breakSec = Math.max(0, parseInt(breakTimeInput.value, 10) || 10);
     const maxCount = Math.max(1, parseInt(maxQuestionsInput.value, 10) || state.pool.length);
 
@@ -2136,7 +2140,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function startSpeakingTimer() {
-    const answerSec = Math.max(5, parseInt(answerTimeInput.value, 10) || 90);
+    const answerSec = Math.max(5, parseInt(answerTimeInput.value, 10) || 120);
     state.totalDurationMs = answerSec * 1000;
     state.remainingMs = state.totalDurationMs;
     setPhase('SPEAKING');
