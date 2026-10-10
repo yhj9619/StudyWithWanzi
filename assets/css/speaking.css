@@ -1144,6 +1144,30 @@
   color: #0f172a;
 }
 
+.btn-review-action.btn-retake-q {
+  border-color: #ddd6fe;
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
+.btn-review-action.btn-retake-q:hover {
+  background: #ede9fe;
+  border-color: #c4b5fd;
+  color: #5b21b6;
+}
+
+.btn-review-action.btn-reset-q {
+  border-color: #fed7aa;
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.btn-review-action.btn-reset-q:hover {
+  background: #ffedd5;
+  border-color: #fdba74;
+  color: #9a3412;
+}
+
 .no-rec-label {
   font-size: 0.75rem;
   color: #94a3b8;

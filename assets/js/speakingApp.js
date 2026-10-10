@@ -16,9 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
     'speaking.sim.next': '다음 문제 ➔',
     'speaking.sim.prev': '◀ 이전 문제',
     'speaking.sim.replay': '🔊 다시 듣기',
+    'speaking.sim.resetCurrent': '🔄 문제 초기화',
+    'speaking.sim.confirmResetCurrent': '현재 문제를 처음부터 다시 시작할까요? (현재 답변 녹음 및 소요 시간이 리셋됩니다)',
     'speaking.sim.skipBreak': '휴식 건너뛰기 ➔',
     'speaking.sim.stop': '시험 중단',
-    'speaking.sim.confirmStop': '진행 중인 시험을 중단하고 설정으로 돌아갈까요?',
+    'speaking.sim.confirmStop': '진행 중인 시험을 중단하고 지금까지의 결과 화면으로 이동할까요?',
+    'speaking.sim.singleRetryBadge': 'Q{num} 다시 풀기',
+    'speaking.sim.singleRetryDone': '완료 ➔',
     'speaking.sim.progress': '문제 {current} / {total}',
     'speaking.step1.parsedCount': '인식된 문제: {count}개',
     'speaking.step1.parsedCountEmpty': '문제를 입력하거나 샘플 버튼을 눌러보세요',
@@ -30,10 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
     'speaking.step1.resizeHint': '상하로 드래그하여 높이 조절 (더블클릭 시 기본 크기)',
     'speaking.step1.noQuestionsWarn': '문제를 최소 1개 이상 입력해주세요.',
     'speaking.sim.micDenied': '마이크 권한이 허용되지 않았거나 마이크가 없어 음성 녹음 없이 시험을 시작합니다.',
+    'speaking.result.stoppedTitle': '⏸️ 말하기 시험 중단됨',
+    'speaking.result.stoppedSubtitle': '시험이 중단되었습니다. 지금까지 진행된 문제들의 답변을 확인해보세요.',
     'speaking.result.listenQuestion': '문제 듣기',
     'speaking.result.listenMyVoice': '내 답변 듣기',
     'speaking.result.stopMyVoice': '정지',
     'speaking.result.downloadMyVoice': '다운로드',
+    'speaking.result.resetQuestion': '초기화',
+    'speaking.result.retakeQuestion': '다시 풀기',
+    'speaking.result.confirmResetQ': 'Q{num}번 문제의 답변 기록을 초기화할까요?',
     'speaking.result.noRecording': '녹음 없음',
     'speaking.result.timeSpentBadge': '⏱️ 소요: {time}',
     'speaking.result.timeMinSec': '{min}분 {sec}초',
@@ -116,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const btnPauseResume = document.getElementById('btnPauseResume');
   const btnReplayVoice = document.getElementById('btnReplayVoice');
+  const btnResetCurrentQ = document.getElementById('btnResetCurrentQ');
   const btnSkipBreak = document.getElementById('btnSkipBreak');
   const btnPrevQuestion = document.getElementById('btnPrevQuestion');
   const btnNextQuestion = document.getElementById('btnNextQuestion');
@@ -1204,7 +1214,9 @@ document.addEventListener('DOMContentLoaded', () => {
     isRecordingActive: false,
     _recorderResolve: null,
     questionSpentMs: {},
-    speakingStartTime: null
+    speakingStartTime: null,
+    isStoppedEarly: false,
+    singleRetryIndex: null
   };
 
   // =========================================================================
@@ -1836,6 +1848,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // 개별 문제 데이터 초기화 (녹음 해제 및 소요 시간 리셋)
+  function resetQuestionData(qIndex) {
+    if (state.recordings && state.recordings[qIndex]) {
+      if (state.recordings[qIndex].url) {
+        try { URL.revokeObjectURL(state.recordings[qIndex].url); } catch (e) {}
+      }
+      delete state.recordings[qIndex];
+    }
+    if (state.questionSpentMs) {
+      state.questionSpentMs[qIndex] = 0;
+    }
+  }
+
   function formatQuestionDuration(ms) {
     const totalSec = Math.max(0, Math.round((ms || 0) / 1000));
     const mins = Math.floor(totalSec / 60);
@@ -1847,6 +1872,30 @@ document.addEventListener('DOMContentLoaded', () => {
       timeStr = t('speaking.result.timeSecOnly', { sec: secs });
     }
     return t('speaking.result.timeSpentBadge', { time: `<strong>${escapeHtml(timeStr)}</strong>` });
+  }
+
+  // 음성 파일 다운로드 파일명 생성 (질문 내용 기반, OS 파일명 금지 특수문자 제거, 한글/한자 유니코드 온전 보존)
+  function buildAudioDownloadFilename(qText, idx, ext) {
+    const extension = ext || 'webm';
+    const prefix = `Q${idx + 1}`;
+
+    let clean = String(qText || '')
+      .replace(/[\r\n\t]+/g, ' ')
+      // 윈도우/맥/리눅스 파일 시스템 금지 특수문자 제거 (\ / : * ? " < > | 및 제어문자)
+      .replace(/[\\/:*?"<>|\x00-\x1f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    // 파일명 끝의 마침표나 공백 제거 (Windows 파일 시스템 특성상 오류 방지)
+    clean = clean.replace(/[. ]+$/, '');
+
+    // 파일명이 너무 길면 OS 경로 제한(255자)을 고려해 적절한 길이(최대 50자)로 안전 절삭
+    if (clean.length > 50) {
+      clean = clean.slice(0, 50).trim().replace(/[. ]+$/, '');
+    }
+
+    const baseName = clean ? `${prefix}_${clean}` : `${prefix}_Answer`;
+    return `${baseName}.${extension}`;
   }
 
   // =========================================================================
@@ -1901,6 +1950,8 @@ document.addEventListener('DOMContentLoaded', () => {
     state.recordings = {};
     state.questionSpentMs = {};
     state.speakingStartTime = null;
+    state.isStoppedEarly = false;
+    state.singleRetryIndex = null;
 
     // 마이크 권한 요청 (녹음 옵션 켜져 있을 때)
     if (recordMyVoiceCheck && recordMyVoiceCheck.checked) {
@@ -1943,6 +1994,28 @@ document.addEventListener('DOMContentLoaded', () => {
     loadQuestion(0);
   }
 
+  // 특정 문제 1개만 단독 다시 풀기
+  async function retakeSingleQuestion(idx) {
+    if (idx < 0 || idx >= state.queue.length) return;
+    stopUserVoicePlayback();
+    resetQuestionData(idx);
+
+    if (recordMyVoiceCheck && recordMyVoiceCheck.checked && !state.micStream) {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          state.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch (err) {
+          console.warn('Microphone error on retake:', err);
+          state.micStream = null;
+        }
+      }
+    }
+
+    state.singleRetryIndex = idx;
+    showSimulatorView();
+    loadQuestion(idx);
+  }
+
   function showSimulatorView() {
     setupSection.classList.add('hidden');
     resultCard.classList.add('hidden');
@@ -1958,6 +2031,8 @@ document.addEventListener('DOMContentLoaded', () => {
     stopUserVoicePlayback();
     clearInterval(state.timerInterval);
     state.phase = 'SETUP';
+    state.isStoppedEarly = false;
+    state.singleRetryIndex = null;
     simulatorView.classList.add('hidden');
     resultCard.classList.add('hidden');
     setupSection.classList.remove('hidden');
@@ -1978,13 +2053,24 @@ document.addEventListener('DOMContentLoaded', () => {
     state.currentIndex = index;
     const currentQ = state.queue[index];
 
-    // UI 표시
-    simProgressText.textContent = t('speaking.sim.progress', {
-      current: index + 1,
-      total: state.queue.length
-    });
-    const overallRatio = (index) / state.queue.length;
-    simProgressFill.style.width = `${overallRatio * 100}%`;
+    // UI 표시 (단독 다시 풀기 모드 vs 일반 모드)
+    if (state.singleRetryIndex !== null) {
+      simProgressText.textContent = t('speaking.sim.singleRetryBadge', {
+        num: index + 1
+      });
+      simProgressFill.style.width = '100%';
+      btnPrevQuestion.classList.add('hidden');
+      btnNextQuestion.textContent = t('speaking.sim.singleRetryDone');
+    } else {
+      simProgressText.textContent = t('speaking.sim.progress', {
+        current: index + 1,
+        total: state.queue.length
+      });
+      const overallRatio = (index) / state.queue.length;
+      simProgressFill.style.width = `${overallRatio * 100}%`;
+      btnPrevQuestion.classList.remove('hidden');
+      btnNextQuestion.textContent = t('speaking.sim.next');
+    }
 
     simQuestionText.textContent = currentQ;
     const simQuestionCard = document.querySelector('.sim-question-card');
@@ -2065,6 +2151,12 @@ document.addEventListener('DOMContentLoaded', () => {
         timeSpentMs: state.questionSpentMs[state.currentIndex] || state.totalDurationMs
       });
 
+      if (state.singleRetryIndex !== null) {
+        state.singleRetryIndex = null;
+        await finishExam();
+        return;
+      }
+
       const breakSec = parseInt(breakTimeInput.value, 10) || 0;
       if (breakSec > 0 && state.currentIndex < state.queue.length - 1) {
         startBreakTimer(breakSec);
@@ -2133,6 +2225,11 @@ document.addEventListener('DOMContentLoaded', () => {
           playSound('finish');
           recordSpeakingTime(state.currentIndex);
           await stopQuestionRecording();
+          if (state.singleRetryIndex !== null) {
+            state.singleRetryIndex = null;
+            await finishExam();
+            return;
+          }
           const breakSec = parseInt(breakTimeInput.value, 10) || 0;
           if (breakSec > 0 && state.currentIndex < state.queue.length - 1) {
             startBreakTimer(breakSec);
@@ -2169,7 +2266,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const mins = Math.floor(totalMs / 60000);
     const secs = Math.floor((totalMs % 60000) / 1000);
     resTotalTime.textContent = `${mins}분 ${secs}초`;
-    resCompletedCount.textContent = `${state.queue.length}개`;
+
+    const resultEmoji = document.querySelector('.result-emoji');
+    const resultTitle = document.querySelector('.result-title');
+    const resultSubtitle = document.querySelector('.result-subtitle');
+
+    if (state.isStoppedEarly) {
+      if (resultEmoji) resultEmoji.textContent = '⏸️';
+      if (resultTitle) resultTitle.textContent = t('speaking.result.stoppedTitle');
+      if (resultSubtitle) resultSubtitle.textContent = t('speaking.result.stoppedSubtitle');
+      const attemptedCount = Math.min(state.queue.length, state.currentIndex + 1);
+      resCompletedCount.textContent = `${attemptedCount} / ${state.queue.length}개`;
+    } else {
+      if (resultEmoji) resultEmoji.textContent = '🎉';
+      if (resultTitle) resultTitle.textContent = t('speaking.result.title');
+      if (resultSubtitle) resultSubtitle.textContent = t('speaking.result.subtitle');
+      resCompletedCount.textContent = `${state.queue.length}개`;
+    }
 
     resQuestionList.innerHTML = '';
     state.queue.forEach((q, idx) => {
@@ -2189,7 +2302,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       mainDiv.append(num, text);
 
-      // 하단 액션 버튼 그룹 (소요 시간 배지, 문제 다시 듣기, 내 답변 듣기, 다운로드)
+      // 하단 액션 버튼 그룹 (소요 시간 배지, 문제 다시 듣기, 내 답변 듣기, 다운로드, 다시 풀기, 초기화)
       const actionsDiv = document.createElement('div');
       actionsDiv.className = 'result-q-actions';
 
@@ -2233,9 +2346,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const downloadLink = document.createElement('a');
         downloadLink.className = 'btn-review-action btn-download-my-voice';
         downloadLink.href = rec.url;
-        downloadLink.download = `Speaking_Q${idx + 1}_Answer.${rec.ext || 'webm'}`;
+        const fileName = buildAudioDownloadFilename(q, idx, rec.ext);
+        downloadLink.download = fileName;
+        downloadLink.setAttribute('download', fileName);
         downloadLink.innerHTML = `💾 <span>${escapeHtml(t('speaking.result.downloadMyVoice'))}</span>`;
-        downloadLink.title = `${t('speaking.result.downloadMyVoice')} (${rec.ext || 'webm'})`;
+        downloadLink.title = `${t('speaking.result.downloadMyVoice')} (${fileName})`;
         actionsDiv.appendChild(downloadLink);
       } else {
         const noRec = document.createElement('span');
@@ -2244,14 +2359,41 @@ document.addEventListener('DOMContentLoaded', () => {
         actionsDiv.appendChild(noRec);
       }
 
+      // 3) 다시 풀기 (이 문제만 단독 재응시)
+      const retakeQBtn = document.createElement('button');
+      retakeQBtn.type = 'button';
+      retakeQBtn.className = 'btn-review-action btn-retake-q';
+      retakeQBtn.innerHTML = `🎯 <span>${escapeHtml(t('speaking.result.retakeQuestion'))}</span>`;
+      retakeQBtn.title = `Q${idx + 1} ${t('speaking.result.retakeQuestion')}`;
+      retakeQBtn.addEventListener('click', () => {
+        retakeSingleQuestion(idx);
+      });
+      actionsDiv.appendChild(retakeQBtn);
+
+      // 4) 문제 초기화 (기록 리셋)
+      const resetQBtn = document.createElement('button');
+      resetQBtn.type = 'button';
+      resetQBtn.className = 'btn-review-action btn-reset-q';
+      resetQBtn.innerHTML = `🔄 <span>${escapeHtml(t('speaking.result.resetQuestion'))}</span>`;
+      resetQBtn.title = `Q${idx + 1} ${t('speaking.result.resetQuestion')}`;
+      resetQBtn.addEventListener('click', () => {
+        if (confirm(t('speaking.result.confirmResetQ', { num: idx + 1 }))) {
+          resetQuestionData(idx);
+          finishExam();
+        }
+      });
+      actionsDiv.appendChild(resetQBtn);
+
       item.append(mainDiv, actionsDiv);
       resQuestionList.appendChild(item);
     });
   }
 
-  function stopExamConfirm() {
+  async function stopExamConfirm() {
     if (confirm(t('speaking.sim.confirmStop'))) {
-      returnToSetupView();
+      state.isStoppedEarly = true;
+      state.singleRetryIndex = null;
+      await finishExam();
     }
   }
 
@@ -2287,6 +2429,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentQ = state.queue[state.currentIndex];
     speakText(currentQ);
   });
+  btnResetCurrentQ.addEventListener('click', () => {
+    if (confirm(t('speaking.sim.confirmResetCurrent'))) {
+      stopSpeaking();
+      clearInterval(state.timerInterval);
+      if (state.activeRecorder) {
+        try { state.activeRecorder.stop(); } catch (e) {}
+        state.activeRecorder = null;
+      }
+      resetQuestionData(state.currentIndex);
+      state.speakingStartTime = null;
+      loadQuestion(state.currentIndex);
+    }
+  });
   btnSkipBreak.addEventListener('click', () => {
     clearInterval(state.timerInterval);
     loadQuestion(state.currentIndex + 1);
@@ -2296,6 +2451,11 @@ document.addEventListener('DOMContentLoaded', () => {
     recordSpeakingTime(state.currentIndex);
     await stopQuestionRecording();
     clearInterval(state.timerInterval);
+    if (state.singleRetryIndex !== null) {
+      state.singleRetryIndex = null;
+      await finishExam();
+      return;
+    }
     loadQuestion(state.currentIndex + 1);
   });
   btnPrevQuestion.addEventListener('click', async () => {
@@ -2303,6 +2463,11 @@ document.addEventListener('DOMContentLoaded', () => {
     recordSpeakingTime(state.currentIndex);
     await stopQuestionRecording();
     clearInterval(state.timerInterval);
+    if (state.singleRetryIndex !== null) {
+      state.singleRetryIndex = null;
+      await finishExam();
+      return;
+    }
     loadQuestion(Math.max(0, state.currentIndex - 1));
   });
   btnStopExam.addEventListener('click', stopExamConfirm);
