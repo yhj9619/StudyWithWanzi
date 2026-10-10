@@ -43,16 +43,18 @@
         <article class="speaking-card">
           <div class="speaking-card-header">
             <h2 class="speaking-card-title" data-i18n="speaking.step1.title">1. 문제 목록 입력</h2>
-            <div class="sample-btn-group">
-              <button type="button" id="sampleTourBtn" class="chip-btn" data-i18n="speaking.step1.sampleTour">관광통역안내사 샘플</button>
-              <button type="button" id="sampleOpicBtn" class="chip-btn" data-i18n="speaking.step1.sampleOpic">OPIc 영어</button>
-              <button type="button" id="sampleToeicBtn" class="chip-btn" data-i18n="speaking.step1.sampleToeic">토익스피킹</button>
-              <button type="button" id="sampleHskkBtn" class="chip-btn" data-i18n="speaking.step1.sampleHskk">HSKK 중국어</button>
-              <button type="button" id="clearQuestionsBtn" class="chip-btn" data-i18n="speaking.step1.clear">지우기</button>
-            </div>
           </div>
           <p class="speaking-card-desc" data-i18n="speaking.step1.desc">엑셀(Excel)에서 문제 열을 복사해 아래에 붙여넣으세요. 여러 줄의 문제도 셀 단위로 깔끔하게 분리됩니다.</p>
 
+          <!-- 문제 세트 목록 탭 바 (관광통역안내사 샘플 + 사용자 추가 목록들 + 새 목록 추가 버튼) -->
+          <div class="deck-tabs-container">
+            <div id="deckTabsList" class="deck-tabs-list">
+              <!-- JS 동적 렌더링: 관광통역안내사 탭 및 사용자 커스텀 목록 탭들 -->
+            </div>
+            <button type="button" id="btnAddNewDeck" class="deck-tab-add" data-i18n="speaking.step1.newList">+ 새 목록 추가</button>
+          </div>
+
+          <!-- 본문 입력 영역 -->
           <div class="textarea-wrapper" id="questionInputWrapper">
             <textarea id="questionInput" class="question-textarea" rows="6" placeholder="엑셀에서 문제를 복사해 여기에 붙여넣으세요.&#10;&#10;(예시)&#10;Tell me about yourself.&#10;What are your strengths and weaknesses?&#10;Describe a memorable trip you took." data-i18n-attr="placeholder:speaking.step1.placeholder"></textarea>
             <div id="textareaResizeHandle" class="textarea-resize-handle" title="상하로 드래그하여 높이 조절 (더블클릭 시 기본 크기)" data-i18n-attr="title:speaking.step1.resizeHint">
@@ -60,11 +62,16 @@
             </div>
           </div>
 
+          <!-- 본문 하단 툴바: 번호 자동 정리 (좌) + 본문 붙여넣기 & 본문 삭제 (우) -->
           <div class="action-chips-row">
             <label class="speaking-checkbox">
               <input type="checkbox" id="cleanNumberingCheck" checked>
               <span data-i18n="speaking.step1.cleanNumbering">문제 앞 번호(1., Q1: 등) 자동 정리</span>
             </label>
+            <div class="text-actions-group">
+              <button type="button" id="btnPasteQuestions" class="chip-btn btn-paste-text" data-i18n="speaking.step1.paste">📋 본문 붙여넣기</button>
+              <button type="button" id="btnClearQuestions" class="chip-btn btn-clear-text" data-i18n="speaking.step1.clearText">🗑️ 본문 삭제</button>
+            </div>
           </div>
 
           <!-- 인식된 문제 상태 배지 & 미리보기 토글 -->
@@ -337,14 +344,14 @@
     <p data-i18n="common.footer">Study with Wanzi &copy; 2026. Made with care for language learners.</p>
   </footer>
 
-  <script src="../assets/js/i18n.js?v=20261010i"></script>
-  <script src="../assets/i18n/ko/common.js?v=20261010i"></script>
-  <script src="../assets/i18n/ko/speaking.js?v=20261010i"></script>
-  <script src="../assets/i18n/en/common.js?v=20261010i"></script>
-  <script src="../assets/i18n/en/speaking.js?v=20261010i"></script>
-  <script src="../assets/i18n/zh/common.js?v=20261010i"></script>
-  <script src="../assets/i18n/zh/speaking.js?v=20261010i"></script>
-  <script src="../assets/js/speakingApp.js?v=20261010i"></script>
+  <script src="../assets/js/i18n.js?v=20261010k"></script>
+  <script src="../assets/i18n/ko/common.js?v=20261010k"></script>
+  <script src="../assets/i18n/ko/speaking.js?v=20261010k"></script>
+  <script src="../assets/i18n/en/common.js?v=20261010k"></script>
+  <script src="../assets/i18n/en/speaking.js?v=20261010k"></script>
+  <script src="../assets/i18n/zh/common.js?v=20261010k"></script>
+  <script src="../assets/i18n/zh/speaking.js?v=20261010k"></script>
+  <script src="../assets/js/speakingApp.js?v=20261010k"></script>
 </body>
 </html>
 

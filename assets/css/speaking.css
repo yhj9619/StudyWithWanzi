@@ -121,11 +121,174 @@
   gap: 0.5rem;
 }
 
-.sample-btn-group {
+/* 문제 목록(덱) 탭 바 */
+.deck-tabs-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.deck-tabs-list {
   display: flex;
   align-items: center;
   gap: 0.4rem;
   flex-wrap: wrap;
+}
+
+.deck-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.42rem 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.deck-tab:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.deck-tab.active {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+}
+
+.deck-tab-name {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.deck-tab-count {
+  font-size: 0.72rem;
+  padding: 0.1rem 0.38rem;
+  border-radius: 9999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.deck-tab.active .deck-tab-count {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+.deck-tab-rename {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.72rem;
+  line-height: 1;
+  margin-left: 0.15rem;
+  transition: all 0.15s ease;
+}
+
+.deck-tab-rename:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.deck-tab.active .deck-tab-rename {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.deck-tab.active .deck-tab-rename:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.deck-tab-del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.85rem;
+  line-height: 1;
+  margin-left: 0.1rem;
+  transition: all 0.15s ease;
+}
+
+.deck-tab-del:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.deck-tab.active .deck-tab-del {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.deck-tab.active .deck-tab-del:hover {
+  background: rgba(239, 68, 68, 0.9);
+  color: #ffffff;
+}
+
+.deck-tab-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.42rem 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px dashed #94a3b8;
+  background: #f8fafc;
+  color: var(--primary, #1a73e8);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.deck-tab-add:hover {
+  background: #eff6ff;
+  border-color: var(--primary, #1a73e8);
+  transform: translateY(-1px);
+}
+
+.text-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.btn-paste-text:hover {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.btn-clear-text:hover {
+  border-color: #fca5a5;
+  background: #fef2f2;
+  color: #dc2626;
 }
 
 .chip-btn {

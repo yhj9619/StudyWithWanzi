@@ -26,6 +26,19 @@ document.addEventListener('DOMContentLoaded', () => {
     'speaking.sim.progress': '문제 {current} / {total}',
     'speaking.step1.parsedCount': '인식된 문제: {count}개',
     'speaking.step1.parsedCountEmpty': '문제를 입력하거나 샘플 버튼을 눌러보세요',
+    'speaking.step1.sampleTour': '관광통역안내사 샘플',
+    'speaking.step1.newList': '+ 새 목록 추가',
+    'speaking.step1.newListPrompt': '새 문제 목록의 이름을 입력하세요:',
+    'speaking.step1.newListDefaultName': '새 문제 목록',
+    'speaking.step1.confirmDeleteList': '"{name}" 목록을 삭제할까요?\n(목록에 저장된 문제 내용이 함께 삭제됩니다)',
+    'speaking.step1.renameList': '목록 이름 수정',
+    'speaking.step1.renameListPrompt': '목록의 새 이름을 입력하세요:',
+    'speaking.step1.paste': '📋 본문 붙여넣기',
+    'speaking.step1.pasteSuccess': '클립보드 내용을 붙여넣었습니다 ({count}개 문제 인식)',
+    'speaking.step1.pasteEmpty': '클립보드에 복사된 텍스트가 없습니다.',
+    'speaking.step1.pasteError': '클립보드 접근 권한이 없거나 지원되지 않습니다. Ctrl+V(또는 Cmd+V)로 직접 붙여넣어 주세요.',
+    'speaking.step1.clearText': '🗑️ 본문 삭제',
+    'speaking.step1.confirmClearText': '현재 입력된 문제 본문을 모두 삭제할까요?',
     'speaking.step2.setAll': '전체 선택 ({count}개)',
     'speaking.step2.voiceAuto': '🌐 언어 자동 감지 (한국어·영어·중국어 등 혼합 낭독)',
     'speaking.step2.testPhrase': '안녕하세요! Hello! 언어 자동 감지 음성 테스트입니다.',
@@ -67,11 +80,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   const questionInput = document.getElementById('questionInput');
   const textareaResizeHandle = document.getElementById('textareaResizeHandle');
-  const sampleTourBtn = document.getElementById('sampleTourBtn');
-  const sampleOpicBtn = document.getElementById('sampleOpicBtn');
-  const sampleToeicBtn = document.getElementById('sampleToeicBtn');
-  const sampleHskkBtn = document.getElementById('sampleHskkBtn');
-  const clearQuestionsBtn = document.getElementById('clearQuestionsBtn');
+  const deckTabsList = document.getElementById('deckTabsList');
+  const btnAddNewDeck = document.getElementById('btnAddNewDeck');
+  const btnPasteQuestions = document.getElementById('btnPasteQuestions');
+  const btnClearQuestions = document.getElementById('btnClearQuestions');
   const parsedStatusBox = document.getElementById('parsedStatusBox');
   const parsedCountBadge = document.getElementById('parsedCountBadge');
   const togglePreviewBtn = document.getElementById('togglePreviewBtn');
@@ -1216,12 +1228,173 @@ document.addEventListener('DOMContentLoaded', () => {
     questionSpentMs: {},
     speakingStartTime: null,
     isStoppedEarly: false,
-    singleRetryIndex: null
+    singleRetryIndex: null,
+    activeDeckId: 'tour',
+    customDecks: [],
+    tourContent: ''
   };
 
   // =========================================================================
-  // 8. 프리셋 버튼 활성화 UI 동기화
+  // 8. 문제 세트 목록(덱) 탭 관리 및 전환
   // =========================================================================
+  function getActiveDeckContent() {
+    if (state.activeDeckId === 'tour') {
+      return (state.tourContent !== undefined && state.tourContent !== '')
+        ? state.tourContent
+        : SAMPLES.tour.join('\n');
+    }
+    const deck = state.customDecks.find(d => d.id === state.activeDeckId);
+    return deck ? (deck.content || '') : '';
+  }
+
+  function saveActiveDeckContent(content) {
+    if (state.activeDeckId === 'tour') {
+      state.tourContent = content;
+    } else {
+      const deck = state.customDecks.find(d => d.id === state.activeDeckId);
+      if (deck) {
+        deck.content = content;
+      }
+    }
+  }
+
+  function renderDeckTabs() {
+    if (!deckTabsList) return;
+    deckTabsList.innerHTML = '';
+
+    // 1. 관광통역안내사 샘플 탭 (고정 기본 탭)
+    const tourContent = (state.tourContent !== undefined && state.tourContent !== '')
+      ? state.tourContent
+      : SAMPLES.tour.join('\n');
+    const tourQuestions = parseExcelQuestions(tourContent, cleanNumberingCheck ? cleanNumberingCheck.checked : true);
+
+    const tourTab = document.createElement('button');
+    tourTab.type = 'button';
+    tourTab.className = `deck-tab ${state.activeDeckId === 'tour' ? 'active' : ''}`;
+    tourTab.innerHTML = `
+      <span class="deck-tab-name">${escapeHtml(t('speaking.step1.sampleTour'))}</span>
+      <span class="deck-tab-count">${tourQuestions.length}</span>
+    `;
+    tourTab.addEventListener('click', () => {
+      switchDeck('tour');
+    });
+    deckTabsList.appendChild(tourTab);
+
+    // 2. 사용자 추가 목록 탭들
+    state.customDecks.forEach(deck => {
+      const questions = parseExcelQuestions(deck.content || '', cleanNumberingCheck ? cleanNumberingCheck.checked : true);
+      const tab = document.createElement('div');
+      tab.className = `deck-tab ${state.activeDeckId === deck.id ? 'active' : ''}`;
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'deck-tab-name';
+      nameSpan.textContent = deck.name || t('speaking.step1.newListDefaultName');
+      nameSpan.title = `${deck.name || ''} (더블클릭하여 이름 수정)`;
+
+      const countSpan = document.createElement('span');
+      countSpan.className = 'deck-tab-count';
+      countSpan.textContent = questions.length;
+
+      const renameBtn = document.createElement('button');
+      renameBtn.type = 'button';
+      renameBtn.className = 'deck-tab-rename';
+      renameBtn.innerHTML = '✏️';
+      renameBtn.title = t('speaking.step1.renameList');
+      renameBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        renameDeck(deck.id);
+      });
+
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'deck-tab-del';
+      delBtn.innerHTML = '&times;';
+      delBtn.title = '목록 삭제';
+      delBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteDeck(deck.id);
+      });
+
+      tab.append(nameSpan, countSpan, renameBtn, delBtn);
+      tab.addEventListener('click', () => {
+        switchDeck(deck.id);
+      });
+      tab.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        renameDeck(deck.id);
+      });
+      deckTabsList.appendChild(tab);
+    });
+  }
+
+  function switchDeck(deckId) {
+    if (state.activeDeckId === deckId) return;
+    saveActiveDeckContent(questionInput.value);
+    state.activeDeckId = deckId;
+    questionInput.value = getActiveDeckContent();
+    updateParsedStatus();
+    saveSettings();
+    renderDeckTabs();
+  }
+
+  function createDeck() {
+    const defaultName = `${t('speaking.step1.newListDefaultName')} ${state.customDecks.length + 1}`;
+    const name = prompt(t('speaking.step1.newListPrompt'), defaultName);
+    if (!name || !name.trim()) return;
+
+    saveActiveDeckContent(questionInput.value);
+    const newId = 'deck_' + Date.now();
+    const newDeck = {
+      id: newId,
+      name: name.trim(),
+      content: ''
+    };
+    state.customDecks.push(newDeck);
+    state.activeDeckId = newId;
+    questionInput.value = '';
+    updateParsedStatus();
+    saveSettings();
+    renderDeckTabs();
+    questionInput.focus();
+  }
+
+  function renameDeck(deckId) {
+    const deck = state.customDecks.find(d => d.id === deckId);
+    if (!deck) return;
+
+    const currentName = deck.name || '';
+    const newName = prompt(t('speaking.step1.renameListPrompt'), currentName);
+    if (!newName || !newName.trim()) return;
+
+    deck.name = newName.trim();
+    saveSettings();
+    renderDeckTabs();
+  }
+
+  function deleteDeck(deckId) {
+    const deck = state.customDecks.find(d => d.id === deckId);
+    if (!deck) return;
+
+    const msg = t('speaking.step1.confirmDeleteList', { name: deck.name });
+    if (!confirm(msg)) return;
+
+    state.customDecks = state.customDecks.filter(d => d.id !== deckId);
+
+    if (state.activeDeckId === deckId) {
+      if (state.customDecks.length > 0) {
+        state.activeDeckId = state.customDecks[state.customDecks.length - 1].id;
+      } else {
+        state.activeDeckId = 'tour';
+      }
+      questionInput.value = getActiveDeckContent();
+      updateParsedStatus();
+    }
+
+    saveSettings();
+    renderDeckTabs();
+  }
+
+  // 프리셋 버튼 활성화 UI 동기화
   function updatePresetPillsActive(inputId) {
     const input = document.getElementById(inputId);
     if (!input) return;
@@ -1238,8 +1411,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY = 'wanzi_speaking_settings';
 
   function saveSettings() {
+    saveActiveDeckContent(questionInput.value);
     const data = {
-      questions: questionInput.value,
+      activeDeckId: state.activeDeckId || 'tour',
+      customDecks: state.customDecks || [],
+      tourContent: state.tourContent || '',
       cleanNumbering: cleanNumberingCheck.checked,
       answerTime: answerTimeInput.value,
       breakTime: breakTimeInput.value,
@@ -1264,19 +1440,43 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) {
-        // 기본값: 디폴트 답변시간 120초(2분), 휴식 10초, OPIc 샘플
+        state.activeDeckId = 'tour';
+        state.customDecks = [];
+        state.tourContent = SAMPLES.tour.join('\n');
+        questionInput.value = state.tourContent;
         answerTimeInput.value = '120';
         breakTimeInput.value = '10';
-        questionInput.value = SAMPLES.opic.join('\n');
         updatePresetPillsActive('answerTimeInput');
         updatePresetPillsActive('breakTimeInput');
         updateParsedStatus();
+        renderDeckTabs();
         return;
       }
       const data = JSON.parse(raw);
-      if (data.questions !== undefined) questionInput.value = data.questions;
+      state.customDecks = Array.isArray(data.customDecks) ? data.customDecks : [];
+      state.tourContent = data.tourContent !== undefined ? data.tourContent : SAMPLES.tour.join('\n');
+      state.activeDeckId = data.activeDeckId || 'tour';
+
+      // 구버전 마이그레이션: data.questions에 저장된 사용자 질문이 있고 customDecks가 비어있던 경우
+      if (data.questions !== undefined && state.customDecks.length === 0 && !data.activeDeckId) {
+        const isTourSample = (data.questions.trim() === SAMPLES.tour.join('\n').trim());
+        if (isTourSample) {
+          state.activeDeckId = 'tour';
+          state.tourContent = data.questions;
+        } else {
+          state.customDecks.push({
+            id: 'deck_1',
+            name: '내 문제 목록',
+            content: data.questions
+          });
+          state.activeDeckId = 'deck_1';
+        }
+      }
+
+      questionInput.value = getActiveDeckContent();
+      renderDeckTabs();
+
       if (data.cleanNumbering !== undefined) cleanNumberingCheck.checked = data.cleanNumbering;
-      // answerTime 기본값은 120초 (기존 90초 기본값 사용자의 경우 120초로 갱신)
       if (!data.answerTime || data.answerTime === '90') {
         answerTimeInput.value = '120';
       } else {
@@ -1409,34 +1609,57 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 샘플 버튼들
-  if (sampleTourBtn) {
-    sampleTourBtn.addEventListener('click', () => {
-      questionInput.value = SAMPLES.tour.join('\n');
-      updateParsedStatus();
-      saveSettings();
+  // 새 목록 추가 버튼
+  if (btnAddNewDeck) {
+    btnAddNewDeck.addEventListener('click', createDeck);
+  }
+
+  // 본문 붙여넣기 버튼
+  if (btnPasteQuestions) {
+    btnPasteQuestions.addEventListener('click', async () => {
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        try {
+          const clipText = await navigator.clipboard.readText();
+          if (!clipText || !clipText.trim()) {
+            alert(t('speaking.step1.pasteEmpty'));
+            return;
+          }
+          questionInput.value = clipText;
+          saveActiveDeckContent(clipText);
+          updateParsedStatus();
+          saveSettings();
+          renderDeckTabs();
+          questionInput.focus();
+        } catch (err) {
+          console.warn('Clipboard read error:', err);
+          alert(t('speaking.step1.pasteError'));
+        }
+      } else {
+        alert(t('speaking.step1.pasteError'));
+      }
     });
   }
-  sampleOpicBtn.addEventListener('click', () => {
-    questionInput.value = SAMPLES.opic.join('\n');
-    updateParsedStatus();
-    saveSettings();
-  });
-  sampleToeicBtn.addEventListener('click', () => {
-    questionInput.value = SAMPLES.toeic.join('\n');
-    updateParsedStatus();
-    saveSettings();
-  });
-  sampleHskkBtn.addEventListener('click', () => {
-    questionInput.value = SAMPLES.hskk.join('\n');
-    updateParsedStatus();
-    saveSettings();
-  });
-  clearQuestionsBtn.addEventListener('click', () => {
-    questionInput.value = '';
-    updateParsedStatus();
-    saveSettings();
-  });
+
+  // 본문 삭제 버튼
+  if (btnClearQuestions) {
+    btnClearQuestions.addEventListener('click', () => {
+      if (questionInput.value.trim().length > 0) {
+        if (confirm(t('speaking.step1.confirmClearText'))) {
+          questionInput.value = '';
+          saveActiveDeckContent('');
+          updateParsedStatus();
+          saveSettings();
+          renderDeckTabs();
+          questionInput.focus();
+        }
+      } else {
+        questionInput.value = '';
+        saveActiveDeckContent('');
+        updateParsedStatus();
+        renderDeckTabs();
+      }
+    });
+  }
 
   togglePreviewBtn.addEventListener('click', () => {
     const isHidden = parsedPreviewList.classList.toggle('hidden');
@@ -1446,6 +1669,7 @@ document.addEventListener('DOMContentLoaded', () => {
   cleanNumberingCheck.addEventListener('change', () => {
     updateParsedStatus();
     saveSettings();
+    renderDeckTabs();
   });
 
   setAllQuestionsBtn.addEventListener('click', () => {
@@ -1456,8 +1680,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   questionInput.addEventListener('input', () => {
+    saveActiveDeckContent(questionInput.value);
     updateParsedStatus();
     saveSettings();
+    if (deckTabsList) {
+      const activeCount = deckTabsList.querySelector('.deck-tab.active .deck-tab-count');
+      if (activeCount) activeCount.textContent = state.pool.length;
+    }
   });
 
   // 커스텀 textarea 상하 드래그 리사이즈 핸들
