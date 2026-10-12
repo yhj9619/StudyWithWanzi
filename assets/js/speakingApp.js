@@ -1108,49 +1108,34 @@ document.addEventListener('DOMContentLoaded', () => {
     hi: { code: 'hi', flag: '🇮🇳', name: '힌디어 (हिन्दी)', shortName: '힌디어', defaultBcp: 'hi-IN', testPhrase: 'नमस्ते! यह हिंदी आवाज परीक्षण है।' },
     tr: { code: 'tr', flag: '🇹🇷', name: '튀르키예어 (Türkçe)', shortName: '튀르키예어', defaultBcp: 'tr-TR', testPhrase: 'Merhaba! Bu Türkçe ses testidir.' },
     pl: { code: 'pl', flag: '🇵🇱', name: '폴란드어 (Polski)', shortName: '폴란드어', defaultBcp: 'pl-PL', testPhrase: 'Cześć! To jest test głosu w języku polskim.' },
-    sv: { code: 'sv', flag: '🇸🇪', name: '스웨덴어 (Svenska)', shortName: '스웨덴어', defaultBcp: 'sv-SE', testPhrase: 'Hej! Det här är ett rösttest på svenska.' }
+    sv: { code: 'sv', flag: '🇸🇪', name: '스웨덴어 (Svenska)', shortName: '스웨덴어', defaultBcp: 'sv-SE', testPhrase: 'Hej! Det här är ett rösttest på svenska.' },
+    da: { code: 'da', flag: '🇩🇰', name: '덴마크어 (Dansk)', shortName: '덴마크어', defaultBcp: 'da-DK', testPhrase: 'Hej! Dette er en stemmetest på dansk.' },
+    no: { code: 'no', flag: '🇳🇴', name: '노르웨이어 (Norsk)', shortName: '노르웨이어', defaultBcp: 'nb-NO', testPhrase: 'Hei! Dette er en stemmetest på norsk.' },
+    fi: { code: 'fi', flag: '🇫🇮', name: '핀란드어 (Suomi)', shortName: '핀란드어', defaultBcp: 'fi-FI', testPhrase: 'Hei! Tämä on äänitesti suomeksi.' },
+    cs: { code: 'cs', flag: '🇨🇿', name: '체코어 (Čeština)', shortName: '체코어', defaultBcp: 'cs-CZ', testPhrase: 'Ahoj! Toto je hlasový test v češtině.' },
+    el: { code: 'el', flag: '🇬🇷', name: '그리스어 (Ελληνικά)', shortName: '그리스어', defaultBcp: 'el-GR', testPhrase: 'Γεια σας! Αυτή είναι μια δοκιμή φωνής στα ελληνικά.' },
+    he: { code: 'he', flag: '🇮🇱', name: '히브리어 (עברית)', shortName: '히브리어', defaultBcp: 'he-IL', testPhrase: 'שלום! זוהי בדיקת קול בעברית.' },
+    hu: { code: 'hu', flag: '🇭🇺', name: '헝가리어 (Magyar)', shortName: '헝가리어', defaultBcp: 'hu-HU', testPhrase: 'Szia! Ez egy magyar nyelvű hangteszt.' },
+    ro: { code: 'ro', flag: '🇷🇴', name: '루마니아어 (Română)', shortName: '루마니아어', defaultBcp: 'ro-RO', testPhrase: 'Salut! Acesta este un test de voce în limba română.' },
+    uk: { code: 'uk', flag: '🇺🇦', name: '우크라이나어 (Українська)', shortName: '우크라이나어', defaultBcp: 'uk-UA', testPhrase: 'Привіт! Це тест голосу українською мовою.' }
   };
 
   function getLangMeta(langCode) {
     const code = (langCode || 'en').toLowerCase().slice(0, 2);
     if (TARGET_LANG_META[code]) return TARGET_LANG_META[code];
-    const label = getLangLabel(code);
-    const parts = label.split(' ');
-    const hasFlag = parts.length > 1 && !/[a-zA-Z가-힣]/.test(parts[0]);
-    const flag = hasFlag ? parts[0] : '🌐';
-    const shortName = hasFlag ? parts.slice(1).join(' ') : label;
-    return {
-      code,
-      flag,
-      name: `${shortName} (${code.toUpperCase()})`,
-      shortName,
-      defaultBcp: `${code}-${code.toUpperCase()}`,
-      testPhrase: 'Hello! 1, 2, 3.'
-    };
+    return TARGET_LANG_META.en;
   }
 
   function getAvailableTargetOptions() {
-    // 기본 핵심 외국어 목록
-    const baseCodes = ['en', 'zh', 'ja', 'fr', 'es', 'de', 'nl', 'pt', 'ru', 'it', 'vi', 'th', 'id', 'ar', 'hi', 'tr', 'pl', 'sv'];
-    const discoveredCodes = new Set(baseCodes);
+    // PC와 모바일 어디서나 동일하게 검증된 핵심 외국어 목록만 깔끔하게 제공 (모바일 OS의 cy, as, bg, bn 등 미검증 코드 유입 차단)
+    const curatedCodes = [
+      'en', 'zh', 'ja', 'fr', 'es', 'de', 'nl', 'pt', 'ru', 'it',
+      'vi', 'th', 'id', 'ar', 'hi', 'tr', 'pl', 'sv', 'da', 'no',
+      'fi', 'cs', 'el', 'he', 'hu', 'ro', 'uk'
+    ];
 
-    // 현재 선택된 외국어(안키 에디터/프롬프트 생성기에서 연동된 언어 포함)도 항상 목록에 보장
-    if (typeof state !== 'undefined' && state && state.autoTargetLang && state.autoTargetLang !== 'all' && state.autoTargetLang !== 'ko') {
-      discoveredCodes.add(state.autoTargetLang);
-    }
-
-    // 사용자 PC/브라우저에 설치된 모든 기타 외국어(예: 덴마크어, 핀란드어, 체코어 등)도 자동 스캔하여 추가!
-    if (availableVoices && availableVoices.length > 0) {
-      availableVoices.forEach(v => {
-        const prefix = (v.lang || '').slice(0, 2).toLowerCase();
-        if (prefix && prefix !== 'ko' && /^[a-z]{2}$/.test(prefix)) {
-          discoveredCodes.add(prefix);
-        }
-      });
-    }
-
-    const options = Array.from(discoveredCodes).map(code => {
-      const meta = getLangMeta(code);
+    const options = curatedCodes.map(code => {
+      const meta = TARGET_LANG_META[code];
       return { value: code, label: `${meta.flag} ${meta.name}` };
     });
 
@@ -1743,16 +1728,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY = 'wanzi_speaking_settings';
   const SHARED_LANG_KEY = 'swz_last_language';
 
-  // 안키 서식 에디터 / AI 프롬프트 생성기에서 지정한 학습 언어 가져오기
+  // 안키 서식 에디터 / AI 프롬프트 생성기에서 지정한 학습 언어 가져오기 (공식 지원 언어만 연동)
   function getSharedStudyLanguage() {
     try {
+      const isSupported = code => Boolean(code && code !== 'ko' && TARGET_LANG_META[code]);
       const shared = localStorage.getItem(SHARED_LANG_KEY);
-      if (shared && shared !== 'ko') return shared;
+      if (isSupported(shared)) return shared;
 
       const editorRaw = localStorage.getItem('anki_style_editor_content_v1');
       if (editorRaw) {
         const editorData = JSON.parse(editorRaw);
-        if (editorData && editorData.langId && editorData.langId !== 'ko') {
+        if (editorData && isSupported(editorData.langId)) {
           return editorData.langId;
         }
       }
@@ -1760,7 +1746,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const promptRaw = localStorage.getItem('wanzi_prompt_settings_v2');
       if (promptRaw) {
         const promptData = JSON.parse(promptRaw);
-        if (promptData && promptData.langId && promptData.langId !== 'ko') {
+        if (promptData && isSupported(promptData.langId)) {
           return promptData.langId;
         }
       }
@@ -2230,9 +2216,42 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const ttsBrowserTooltipWrap = document.getElementById('ttsBrowserTooltipWrap');
+  const ttsBrowserInfoBtn = document.getElementById('ttsBrowserInfoBtn');
+  const ttsBrowserPopover = document.getElementById('ttsBrowserPopover');
+  const ttsBrowserPopoverClose = document.getElementById('ttsBrowserPopoverClose');
+
+  function closeTtsBrowserPopover() {
+    if (ttsBrowserPopover) ttsBrowserPopover.classList.add('hidden');
+    if (ttsBrowserInfoBtn) ttsBrowserInfoBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  if (ttsBrowserInfoBtn && ttsBrowserPopover) {
+    ttsBrowserInfoBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = ttsBrowserPopover.classList.contains('hidden');
+      if (isHidden) {
+        ttsBrowserPopover.classList.remove('hidden');
+        ttsBrowserInfoBtn.setAttribute('aria-expanded', 'true');
+      } else {
+        closeTtsBrowserPopover();
+      }
+    });
+  }
+
+  if (ttsBrowserPopoverClose) {
+    ttsBrowserPopoverClose.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeTtsBrowserPopover();
+    });
+  }
+
   document.addEventListener('click', (e) => {
     if (voiceSelectContainer && !voiceSelectContainer.contains(e.target) && isVoiceDropdownOpen()) {
       closeVoiceDropdown();
+    }
+    if (ttsBrowserTooltipWrap && !ttsBrowserTooltipWrap.contains(e.target)) {
+      closeTtsBrowserPopover();
     }
   });
 
