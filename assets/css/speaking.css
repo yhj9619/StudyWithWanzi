@@ -418,6 +418,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .setting-label {
@@ -1742,52 +1744,197 @@
 
 /* 모바일 반응형 조절 */
 @media (max-width: 640px) {
-  .speaking-card {
-    padding: 1.25rem;
-  }
-  .simulator-view {
-    padding: 1.5rem 1rem 1.75rem;
-  }
-  .sim-question-card {
-    padding: 1rem 0.85rem;
-    margin-bottom: 1.25rem;
-    min-height: 90px;
-    max-height: 280px;
-  }
-  .sim-question-text {
-    font-size: 1.1rem;
-    line-height: 1.55;
-    word-break: keep-all;
-    overflow-wrap: anywhere;
-    word-wrap: break-word;
-  }
-  .timer-circle-wrap {
-    width: 150px;
-    height: 150px;
-  }
-  .timer-svg {
-    width: 150px;
-    height: 150px;
-  }
-  .timer-clock {
-    font-size: 2.1rem;
-  }
-  .sim-controls-bar {
-    gap: 0.5rem;
-  }
-  .sim-btn {
-    padding: 0.6rem 1rem;
-    font-size: 0.86rem;
+  .speaking-container {
+    padding: 0 0.7rem;
+    margin-bottom: 2rem;
+    overflow-x: hidden;
   }
 
-  /* 모바일에서 설정 그리드 및 고급설정 select box 넘침 완벽 방지 */
+  .speaking-card {
+    padding: 1.1rem 0.95rem;
+    margin-bottom: 1.15rem;
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .speaking-card-title {
+    font-size: 1.05rem;
+  }
+
+  .speaking-card-desc {
+    font-size: 0.82rem;
+    margin-bottom: 0.8rem;
+  }
+
+  /* 1단계: 덱 탭 및 본문 하단 툴바 모바일 정렬 */
+  .deck-tabs-container {
+    gap: 0.4rem;
+  }
+
+  .deck-tab,
+  .deck-tab-add {
+    padding: 0.38rem 0.65rem;
+    font-size: 0.78rem;
+  }
+
+  .deck-tab-name {
+    max-width: 120px;
+  }
+
+  .action-chips-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+
+  .text-actions-group {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .text-actions-group .chip-btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    padding: 0.48rem 0.5rem;
+  }
+
+  .parsed-status-box {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  /* 2단계: 모바일에서 설정 그리드 및 고급설정 select box 넘침 완벽 방지 */
   .settings-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
   }
 
+  .setting-item {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .voice-control-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .voice-control-row .searchable-combobox {
+    width: 100% !important;
+    max-width: 100%;
+  }
+
+  .voice-control-row .combobox-input {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 0.84rem;
+    text-overflow: ellipsis;
+  }
+
+  .voice-control-row .btn-voice-test {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* 언어 자동 감지 박스 모바일 최적화 */
+  .voice-status-box {
+    padding: 0.6rem 0.65rem;
+  }
+
+  .compat-header {
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  .compat-header-title {
+    font-size: 0.78rem;
+    white-space: normal;
+  }
+
+  .compat-pair-selector-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem;
+    padding: 0.45rem 0.5rem;
+  }
+
+  .pair-lang-fixed {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .pair-plus-icon {
+    display: none;
+  }
+
+  .pair-lang-target {
+    width: 100%;
+  }
+
+  .compat-chips-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.32rem;
+  }
+
+  .compat-chip .chip-voice-name {
+    max-width: 100%;
+  }
+
+  .compat-langs-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* 고급 연습 옵션 모바일 정리 */
+  .advanced-settings {
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .advanced-settings > summary {
+    flex-wrap: wrap;
+    padding: 0.65rem 0.8rem;
+    font-size: 0.84rem;
+    row-gap: 0.2rem;
+  }
+
+  .advanced-settings > summary .advanced-hint {
+    font-size: 0.72rem;
+  }
+
+  .advanced-settings > .advanced-body {
+    padding: 0.75rem 0.75rem 0.85rem;
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .speaking-checkbox {
+    align-items: flex-start;
+    font-size: 0.83rem;
+    line-height: 1.4;
+  }
+
+  .speaking-checkbox input[type="checkbox"] {
+    margin-top: 0.15rem;
+    flex-shrink: 0;
+  }
+
+  .record-privacy-notice {
+    margin-left: 0;
+    font-size: 0.73rem;
+    padding: 0.35rem 0.55rem;
+  }
+
   .sound-detail-panel .settings-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.85rem;
   }
 
@@ -1808,68 +1955,199 @@
     padding: 0.55rem 0.75rem;
   }
 
-  .voice-control-row {
+  .start-cta-wrap {
+    margin: 1.35rem 0;
+  }
+
+  .btn-start-exam {
+    width: 100%;
+    padding: 0.95rem 1.25rem;
+    font-size: 1.05rem;
+    box-sizing: border-box;
+  }
+
+  /* 시뮬레이터 화면 모바일 최적화 */
+  .simulator-view {
+    padding: 1.2rem 0.9rem 1.4rem;
+  }
+
+  .sim-top-bar {
+    margin-bottom: 1rem;
+    gap: 0.45rem;
+  }
+
+  .sim-phase-badge {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .sim-progress-text {
+    font-size: 0.85rem;
+  }
+
+  .timer-container {
+    margin: 0.75rem 0 1.25rem;
+  }
+
+  .timer-circle-wrap,
+  .timer-svg {
+    width: 144px;
+    height: 144px;
+  }
+
+  .timer-clock {
+    font-size: 2rem;
+  }
+
+  .sim-question-card {
+    padding: 0.85rem 0.75rem;
+    margin-bottom: 1.15rem;
+    min-height: 90px;
+    max-height: 260px;
+  }
+
+  .question-toolbar {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .btn-tool-replay {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.55rem;
+  }
+
+  .btn-tool-mini {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.42rem;
+  }
+
+  .sim-question-text {
+    font-size: 1.08rem;
+    line-height: 1.55;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    word-wrap: break-word;
+  }
+
+  /* 하단 시뮬레이터 버튼 모바일 그리드 정렬 */
+  .sim-controls-bar {
     flex-direction: column;
-    align-items: stretch;
     gap: 0.5rem;
   }
 
-  .voice-control-row .searchable-combobox {
-    width: 100% !important;
-  }
-
-  .voice-control-row .btn-voice-test {
+  .sim-controls-center {
+    order: 1;
     width: 100%;
-    text-align: center;
   }
 
-  .advanced-settings {
-    max-width: 100%;
+  .sim-controls-center .sim-btn {
+    flex: 1;
+  }
+
+  .sim-controls-right.sim-nav-group {
+    order: 2;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .sim-controls-left {
+    order: 3;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .sim-btn {
+    width: 100%;
+    padding: 0.62rem 0.5rem;
+    font-size: 0.84rem;
+    white-space: nowrap;
     box-sizing: border-box;
-    overflow: hidden;
   }
 
-  .advanced-settings > .advanced-body {
-    padding: 0.75rem 0.65rem 0.85rem;
-    box-sizing: border-box;
-    max-width: 100%;
-    overflow: hidden;
+  /* 결과 화면 모바일 최적화 */
+  .result-card {
+    padding: 1.5rem 0.9rem;
   }
 
-  .compat-chip .chip-voice-name {
-    max-width: 110px;
+  .result-emoji {
+    font-size: 2.8rem;
+  }
+
+  .result-title {
+    font-size: 1.35rem;
+  }
+
+  .result-stats-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-box {
+    min-width: 0;
+    padding: 0.85rem 0.5rem;
+  }
+
+  .stat-val {
+    font-size: 1.35rem;
   }
 
   .result-review-box {
-    padding: 1rem 0.75rem;
+    padding: 0.9rem 0.7rem;
     margin-bottom: 1.5rem;
   }
 
   .result-q-item {
     gap: 0.5rem;
-    padding: 0.65rem 0.75rem;
-    font-size: 0.86rem;
+    padding: 0.65rem 0.7rem;
+    font-size: 0.85rem;
   }
 
   .result-q-actions {
     padding-left: 0;
     gap: 0.35rem;
   }
+
+  .btn-review-action {
+    font-size: 0.74rem;
+    padding: 0.32rem 0.55rem;
+  }
+
+  .result-actions-row {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .result-actions-row .btn-start-exam,
+  .result-actions-row .chip-btn {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+    text-align: center;
+  }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 400px) {
+  .speaking-card {
+    padding: 0.95rem 0.75rem;
+  }
   .sim-question-card {
-    padding: 0.85rem 0.65rem;
-    max-height: 250px;
+    padding: 0.75rem 0.6rem;
+    max-height: 240px;
   }
   .sim-question-text {
-    font-size: 1.02rem;
+    font-size: 1rem;
   }
   .result-review-box {
-    padding: 0.85rem 0.55rem;
+    padding: 0.75rem 0.55rem;
   }
   .result-q-item {
-    padding: 0.5rem 0.5rem;
+    padding: 0.55rem 0.55rem;
     font-size: 0.82rem;
   }
 }
