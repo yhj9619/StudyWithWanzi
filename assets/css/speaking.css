@@ -1200,6 +1200,50 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* 실시간 STT 옵션 및 언어 선택기 */
+.stt-option-block {
+  margin-top: 0.65rem;
+  margin-left: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.stt-settings-subrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 1.7rem;
+  margin-top: 0.15rem;
+}
+
+.stt-sub-label {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.select-stt-lang {
+  padding: 0.28rem 0.65rem;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  color: #1e293b;
+  max-width: 260px;
+}
+
+.stt-unsupported-tag {
+  font-size: 0.72rem;
+  color: #b91c1c;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  margin-left: 0.35rem;
+}
+
 /* 시작 메인 버튼 */
 .start-cta-wrap {
   text-align: center;
@@ -2078,6 +2122,159 @@
   color: #0f172a;
 }
 
+/* 결과 화면 추출된 답변 텍스트 (STT) 상자 (기본 접힘 형태) */
+.result-transcript-box {
+  margin-top: 0.45rem;
+  padding: 0.5rem 0.85rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid var(--primary, #1a73e8);
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.result-transcript-box:hover {
+  border-color: #cbd5e1;
+  border-left-color: var(--primary, #1a73e8);
+}
+
+.transcript-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  user-select: none;
+}
+
+.transcript-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.15rem 0;
+  margin: 0;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+}
+
+.transcript-toggle-btn:hover .transcript-toggle-indicator {
+  color: var(--primary, #1a73e8);
+}
+
+.transcript-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--primary, #1a73e8);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.transcript-lang-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #475569;
+  background: #e2e8f0;
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+  margin-left: 0.25rem;
+  letter-spacing: 0.01em;
+}
+
+.transcript-toggle-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #64748b;
+  transition: color 0.15s ease;
+  margin-right: 0.35rem;
+  flex-shrink: 0;
+}
+
+.transcript-toggle-indicator .toggle-arrow {
+  font-size: 0.75rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.result-transcript-box:not(.is-collapsed) .transcript-toggle-indicator .toggle-arrow {
+  transform: rotate(180deg);
+}
+
+.transcript-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.btn-copy-transcript {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1.2;
+}
+
+.btn-copy-transcript:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.btn-copy-transcript:active {
+  transform: scale(0.97);
+}
+
+.transcript-body {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #e2e8f0;
+  animation: fadeInTranscript 0.18s ease;
+}
+
+.result-transcript-box.is-collapsed .transcript-body {
+  display: none;
+}
+
+@keyframes fadeInTranscript {
+  from { opacity: 0; transform: translateY(-2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.transcript-text {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #1e293b;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.transcript-text.empty {
+  color: #94a3b8;
+  font-style: italic;
+}
+
 @media (max-width: 640px) {
   .result-q-player-box {
     gap: 0.45rem;
@@ -2354,6 +2551,22 @@
 
   .mic-test-row {
     margin-left: 0;
+  }
+
+  .stt-option-block {
+    margin-left: 0;
+  }
+
+  .stt-settings-subrow {
+    margin-left: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .select-stt-lang {
+    max-width: 100%;
+    width: 100%;
   }
 
   .sound-detail-panel .settings-grid {

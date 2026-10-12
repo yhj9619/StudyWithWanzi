@@ -155,6 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const recordMyVoiceCheck = document.getElementById('recordMyVoiceCheck');
   const btnMicTest = document.getElementById('btnMicTest');
   const micTestStatus = document.getElementById('micTestStatus');
+  const sttOptionBlock = document.getElementById('sttOptionBlock');
+  const sttExtractCheck = document.getElementById('sttExtractCheck');
+  const sttLangSelect = document.getElementById('sttLangSelect');
+  const sttUnsupportedBadge = document.getElementById('sttUnsupportedBadge');
   const hideTextCheck = document.getElementById('hideTextCheck');
   const soundToggle = document.getElementById('soundToggle');
   const soundTypeSelect = document.getElementById('soundTypeSelect');
@@ -278,6 +282,10 @@ document.addEventListener('DOMContentLoaded', () => {
     recordings: {},
     isRecordingActive: false,
     _recorderResolve: null,
+    transcripts: {},
+    transcriptLangs: {},
+    speechRecognizer: null,
+    isSttActive: false,
     questionSpentMs: {},
     speakingStartTime: null,
     isStoppedEarly: false,
@@ -1985,7 +1993,9 @@ document.addEventListener('DOMContentLoaded', () => {
       hideText: hideTextCheck ? hideTextCheck.checked : (prev.hideText !== undefined ? prev.hideText : false),
       sound: soundToggle ? soundToggle.checked : (prev.sound !== undefined ? prev.sound : true),
       soundType: soundTypeSelect ? soundTypeSelect.value : (prev.soundType || 'triple'),
-      soundDuration: soundDurationSelect ? soundDurationSelect.value : (prev.soundDuration || 'normal')
+      soundDuration: soundDurationSelect ? soundDurationSelect.value : (prev.soundDuration || 'normal'),
+      sttExtract: sttExtractCheck ? sttExtractCheck.checked : (prev.sttExtract !== undefined ? prev.sttExtract : true),
+      sttLang: sttLangSelect ? sttLangSelect.value : (prev.sttLang || 'auto')
     });
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -2010,6 +2020,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (questionInput) questionInput.value = state.tourContent;
         if (answerTimeInput) answerTimeInput.value = '120';
         if (breakTimeInput) breakTimeInput.value = '10';
+        if (sttExtractCheck && !sttExtractCheck.disabled) sttExtractCheck.checked = true;
+        if (sttLangSelect) sttLangSelect.value = 'auto';
         updatePresetPillsActive('answerTimeInput');
         updatePresetPillsActive('breakTimeInput');
         updateVoiceStatusBadge();
@@ -2065,6 +2077,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (ttsWaitCheck && data.ttsWait !== undefined) ttsWaitCheck.checked = data.ttsWait;
       if (data.recordVoice !== undefined && recordMyVoiceCheck) {
         recordMyVoiceCheck.checked = data.recordVoice;
+      }
+      if (data.sttExtract !== undefined && sttExtractCheck && !sttExtractCheck.disabled) {
+        sttExtractCheck.checked = data.sttExtract;
+      }
+      if (data.sttLang && sttLangSelect) {
+        sttLangSelect.value = data.sttLang;
       }
       if (hideTextCheck && data.hideText !== undefined) hideTextCheck.checked = data.hideText;
       if (soundToggle && data.sound !== undefined) soundToggle.checked = data.sound;
@@ -2403,12 +2421,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  [ttsWaitCheck, recordMyVoiceCheck, hideTextCheck, soundToggle, soundTypeSelect, soundDurationSelect].forEach(el => {
+  [ttsWaitCheck, recordMyVoiceCheck, sttExtractCheck, sttLangSelect, hideTextCheck, soundToggle, soundTypeSelect, soundDurationSelect].forEach(el => {
     if (el) el.addEventListener('change', () => {
       if (soundToggle && soundDetailPanel) {
         soundDetailPanel.style.opacity = soundToggle.checked ? '1' : '0.4';
         soundDetailPanel.style.pointerEvents = soundToggle.checked ? 'auto' : 'none';
       }
+      updateMicOptionsUi();
       saveSettings();
     });
   });
@@ -2698,8 +2717,169 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // =========================================================================
+  // 10-B-2. 실시간 음성 텍스트 변환 (Speech-to-Text / STT) 관리자
+  // =========================================================================
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  function updateMicOptionsUi() {
+    const isMicEnabled = recordMyVoiceCheck ? recordMyVoiceCheck.checked : false;
+    if (btnMicTest) btnMicTest.disabled = !isMicEnabled;
+    if (sttOptionBlock) {
+      sttOptionBlock.style.opacity = isMicEnabled ? '1' : '0.45';
+      sttOptionBlock.style.pointerEvents = isMicEnabled ? 'auto' : 'none';
+    }
+    if (sttExtractCheck) {
+      sttExtractCheck.disabled = !isMicEnabled || !SpeechRecognition;
+    }
+    if (sttLangSelect) {
+      sttLangSelect.disabled = !isMicEnabled || !SpeechRecognition;
+    }
+  }
+
+  if (!SpeechRecognition) {
+    if (sttExtractCheck) {
+      sttExtractCheck.disabled = true;
+      sttExtractCheck.checked = false;
+    }
+    if (sttUnsupportedBadge) {
+      sttUnsupportedBadge.classList.remove('hidden');
+    }
+  }
+
+  function resolveSttLang(qIndex) {
+    const selected = sttLangSelect ? sttLangSelect.value : 'auto';
+    if (selected && selected !== 'auto') return selected;
+
+    const currentQ = (qIndex !== undefined && state.queue && state.queue[qIndex])
+      ? state.queue[qIndex]
+      : ((state.queue && state.queue[state.currentIndex]) || '');
+
+    if (!currentQ || typeof currentQ !== 'string') {
+      const target = state.autoTargetLang || 'ko';
+      const map = { ko: 'ko-KR', zh: 'zh-CN', en: 'en-US', ja: 'ja-JP', es: 'es-ES', fr: 'fr-FR', de: 'de-DE' };
+      return map[target] || 'ko-KR';
+    }
+
+    const hangulCount = (currentQ.match(/[\uAC00-\uD7A3\u1100-\u11FF\u3130-\u318F]/g) || []).length;
+    const kanaCount = (currentQ.match(/[\u3040-\u309F\u30A0-\u30FF]/g) || []).length;
+    const hanziCount = (currentQ.match(/[\u4E00-\u9FFF\u3400-\u4DBF]/g) || []).length;
+    const latinCount = (currentQ.match(/[a-zA-Z]/g) || []).length;
+
+    // 1) 일본어 가나(히라가나/가타카나)가 포함된 경우 -> 일본어(ja-JP)
+    if (kanaCount > 0) {
+      return 'ja-JP';
+    }
+
+    // 2) 한글이 포함되어 있고 한글이 한자보다 많거나 같은 경우 -> 한국어(ko-KR)
+    // (예: "십장생에 대해 설명하시오.", "Technical tourists에 대해 설명하세요" 등)
+    if (hangulCount > 0 && hangulCount >= hanziCount) {
+      return 'ko-KR';
+    }
+
+    // 3) 한글/가나 없이 한자가 포함된 경우 -> 중국어(zh-CN)
+    // (예: "请简单做个自我介绍。", "谈谈你最喜欢的一个季节")
+    if (hanziCount > 0 && hangulCount === 0) {
+      return 'zh-CN';
+    }
+
+    // 4) 한글/한자/가나 없이 라틴 알파벳만 있는 경우 -> 영어/외국어
+    // (예: "Describe the picture", "Tell me a little bit about yourself")
+    if (latinCount > 0 && hangulCount === 0 && hanziCount === 0) {
+      const target = state.autoTargetLang;
+      if (target === 'es') return 'es-ES';
+      if (target === 'fr') return 'fr-FR';
+      if (target === 'de') return 'de-DE';
+      return 'en-US';
+    }
+
+    // 5) 기타 특수기호 위주거나 판단이 모호할 때는 autoTargetLang 또는 한국어 기본
+    const target = state.autoTargetLang || 'ko';
+    const map = {
+      ko: 'ko-KR',
+      zh: 'zh-CN',
+      en: 'en-US',
+      ja: 'ja-JP',
+      es: 'es-ES',
+      fr: 'fr-FR',
+      de: 'de-DE'
+    };
+    return map[target] || 'ko-KR';
+  }
+
+  function startQuestionStt(qIndex) {
+    if (!SpeechRecognition) return;
+    if (!recordMyVoiceCheck || !recordMyVoiceCheck.checked) return;
+    if (!sttExtractCheck || !sttExtractCheck.checked) return;
+
+    stopQuestionStt();
+
+    try {
+      const recognizer = new SpeechRecognition();
+      recognizer.continuous = true;
+      recognizer.interimResults = true;
+      const lang = resolveSttLang(qIndex);
+      if (!state.transcriptLangs) state.transcriptLangs = {};
+      state.transcriptLangs[qIndex] = lang;
+      recognizer.lang = lang;
+
+      let finalTranscript = state.transcripts[qIndex] || '';
+
+      recognizer.onresult = (event) => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const res = event.results[i];
+          if (res.isFinal) {
+            const piece = res[0].transcript.trim();
+            if (piece) {
+              finalTranscript += (finalTranscript ? ' ' : '') + piece;
+            }
+          } else {
+            interim += res[0].transcript;
+          }
+        }
+        state.transcripts[qIndex] = (finalTranscript + (interim ? ' ' + interim.trim() : '')).trim();
+      };
+
+      recognizer.onerror = (e) => {
+        if (e.error === 'no-speech' || e.error === 'aborted') return;
+        console.warn('SpeechRecognition error:', e.error);
+      };
+
+      recognizer.onend = () => {
+        // 크롬 등에서 긴 침묵 시 자동 종료되는 현상 방지: SPEAKING 단계 유지 중이면 자동 재시작
+        if (state.phase === 'SPEAKING' && state.isSttActive) {
+          try {
+            recognizer.start();
+          } catch (e) {
+            startQuestionStt(qIndex);
+          }
+        }
+      };
+
+      recognizer.start();
+      state.speechRecognizer = recognizer;
+      state.isSttActive = true;
+    } catch (err) {
+      console.warn('SpeechRecognition start failed:', err);
+      state.isSttActive = false;
+    }
+  }
+
+  function stopQuestionStt() {
+    state.isSttActive = false;
+    if (state.speechRecognizer) {
+      try {
+        state.speechRecognizer.onend = null;
+        state.speechRecognizer.stop();
+      } catch (e) {}
+      state.speechRecognizer = null;
+    }
+  }
+
   function releaseMicrophone() {
     stopQuestionRecording();
+    stopQuestionStt();
     if (state.micStream) {
       try {
         state.micStream.getTracks().forEach(t => t.stop());
@@ -2710,6 +2890,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 전체 시험 녹음 메모리(Blob URL) 일괄 해제 (메모리 누수 방지)
   function revokeAllRecordings() {
+    stopQuestionStt();
     if (state.recordings) {
       Object.values(state.recordings).forEach(rec => {
         if (rec && rec.url) {
@@ -2996,6 +3177,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       delete state.recordings[qIndex];
     }
+    if (state.transcripts) {
+      delete state.transcripts[qIndex];
+    }
+    if (state.transcriptLangs) {
+      delete state.transcriptLangs[qIndex];
+    }
     if (state.questionSpentMs) {
       state.questionSpentMs[qIndex] = 0;
     }
@@ -3081,6 +3268,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 이전 시험 녹음 메모리 해제
     revokeAllRecordings();
+    state.recordings = {};
+    state.transcripts = {};
+    state.transcriptLangs = {};
     state.questionSpentMs = {};
     state.speakingStartTime = null;
     state.isStoppedEarly = false;
@@ -3240,6 +3430,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (newPhase === 'LISTENING') {
       recordSpeakingTime(state.currentIndex);
       stopQuestionRecording();
+      stopQuestionStt();
       simPhaseBadge.textContent = t('speaking.sim.statusListening');
       timerPhaseCaption.textContent = 'LISTENING';
       timerClock.textContent = '--:--';
@@ -3268,15 +3459,18 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         startQuestionRecording(state.currentIndex);
       }
+      startQuestionStt(state.currentIndex);
     } else if (newPhase === 'BREAK') {
       recordSpeakingTime(state.currentIndex);
       stopQuestionRecording();
+      stopQuestionStt();
       simPhaseBadge.textContent = t('speaking.sim.statusBreak');
       timerPhaseCaption.textContent = 'BREAK';
       btnSkipBreak.classList.remove('hidden');
     } else if (newPhase === 'PAUSED') {
       recordSpeakingTime(state.currentIndex);
       pauseQuestionRecording();
+      stopQuestionStt();
       simPhaseBadge.textContent = t('speaking.sim.statusPaused');
       timerPhaseCaption.textContent = 'PAUSED';
     }
@@ -3292,6 +3486,7 @@ document.addEventListener('DOMContentLoaded', () => {
     runTimerCountdown(async () => {
       playSound('finish'); // "삐-빅!" 알림음
       recordSpeakingTime(state.currentIndex);
+      stopQuestionStt();
       await stopQuestionRecording();
       state.history.push({
         question: state.queue[state.currentIndex],
@@ -3372,6 +3567,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (resumeTo === 'SPEAKING') {
           playSound('finish');
           recordSpeakingTime(state.currentIndex);
+          stopQuestionStt();
           await stopQuestionRecording();
           if (state.singleRetryIndex !== null) {
             state.singleRetryIndex = null;
@@ -3601,11 +3797,125 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       actionsDiv.appendChild(resetQBtn);
 
-      if (playerBox) {
-        item.append(mainDiv, playerBox, actionsDiv);
-      } else {
-        item.append(mainDiv, actionsDiv);
+      // 5) 추출된 답변 텍스트 (STT) 상자
+      let transcriptBox = null;
+      const isSttConfigured = sttExtractCheck && sttExtractCheck.checked && recordMyVoiceCheck && recordMyVoiceCheck.checked;
+      const hasTranscript = Boolean(state.transcripts && state.transcripts[idx] && state.transcripts[idx].trim());
+
+      if (isSttConfigured || hasTranscript) {
+        const text = (state.transcripts && state.transcripts[idx]) ? state.transcripts[idx].trim() : '';
+        transcriptBox = document.createElement('div');
+        transcriptBox.className = 'result-transcript-box is-collapsed';
+
+        const tHeader = document.createElement('div');
+        tHeader.className = 'transcript-header';
+
+        const toggleBtn = document.createElement('button');
+        toggleBtn.type = 'button';
+        toggleBtn.className = 'transcript-toggle-btn';
+        toggleBtn.setAttribute('aria-expanded', 'false');
+
+        const tLabel = document.createElement('span');
+        tLabel.className = 'transcript-label';
+
+        const detectedLang = (state.transcriptLangs && state.transcriptLangs[idx]) || resolveSttLang(idx);
+        const langTagMap = {
+          'ko-KR': '🇰🇷 한국어',
+          'zh-CN': '🇨🇳 중국어',
+          'en-US': '🇺🇸 영어',
+          'ja-JP': '🇯🇵 일본어',
+          'es-ES': '🇪🇸 스페인어',
+          'fr-FR': '🇫🇷 프랑스어',
+          'de-DE': '🇩🇪 독일어'
+        };
+        const langText = langTagMap[detectedLang] || '';
+        const langBadgeHtml = langText ? `<span class="transcript-lang-tag">${escapeHtml(langText)}</span>` : '';
+
+        tLabel.innerHTML = `<span>💬</span> <span>${escapeHtml(t('speaking.result.transcriptLabel'))}</span>${langBadgeHtml}`;
+
+        const toggleIndicator = document.createElement('span');
+        toggleIndicator.className = 'transcript-toggle-indicator';
+        toggleIndicator.innerHTML = `<span class="toggle-text">${escapeHtml(t('speaking.result.transcriptExpand'))}</span> <span class="toggle-arrow">▾</span>`;
+
+        toggleBtn.append(tLabel, toggleIndicator);
+        tHeader.appendChild(toggleBtn);
+
+        const actionsSpan = document.createElement('div');
+        actionsSpan.className = 'transcript-actions';
+
+        if (text) {
+          const copyBtn = document.createElement('button');
+          copyBtn.type = 'button';
+          copyBtn.className = 'btn-copy-transcript';
+          copyBtn.title = t('speaking.result.copyTranscriptTitle');
+          copyBtn.innerHTML = `📋 <span>${escapeHtml(t('speaking.result.copyTranscript'))}</span>`;
+          copyBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            let copied = false;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              try {
+                await navigator.clipboard.writeText(text);
+                copied = true;
+              } catch (err) {}
+            }
+            if (!copied) {
+              const ta = document.createElement('textarea');
+              ta.value = text;
+              ta.style.position = 'fixed';
+              ta.style.opacity = '0';
+              document.body.appendChild(ta);
+              ta.select();
+              try {
+                document.execCommand('copy');
+                copied = true;
+              } catch (err) {}
+              document.body.removeChild(ta);
+            }
+            if (copied) {
+              const originalHtml = copyBtn.innerHTML;
+              copyBtn.innerHTML = `✅ <span>${escapeHtml(t('speaking.result.copied'))}</span>`;
+              copyBtn.style.color = '#10b981';
+              copyBtn.style.borderColor = '#10b981';
+              setTimeout(() => {
+                copyBtn.innerHTML = originalHtml;
+                copyBtn.style.color = '';
+                copyBtn.style.borderColor = '';
+              }, 1800);
+            }
+          });
+          actionsSpan.appendChild(copyBtn);
+        }
+
+        tHeader.appendChild(actionsSpan);
+
+        const tBody = document.createElement('div');
+        tBody.className = 'transcript-body';
+
+        const tText = document.createElement('div');
+        tText.className = 'transcript-text' + (text ? '' : ' empty');
+        tText.textContent = text || t('speaking.result.noTranscript');
+        tBody.appendChild(tText);
+
+        // 토글 동작 연결 (기본적으로 접힌 상태)
+        toggleBtn.addEventListener('click', () => {
+          const isCollapsed = transcriptBox.classList.toggle('is-collapsed');
+          toggleBtn.setAttribute('aria-expanded', String(!isCollapsed));
+          const textEl = toggleIndicator.querySelector('.toggle-text');
+          if (textEl) {
+            textEl.textContent = isCollapsed
+              ? t('speaking.result.transcriptExpand')
+              : t('speaking.result.transcriptCollapse');
+          }
+        });
+
+        transcriptBox.append(tHeader, tBody);
       }
+
+      const itemChildren = [mainDiv];
+      if (playerBox) itemChildren.push(playerBox);
+      if (transcriptBox) itemChildren.push(transcriptBox);
+      itemChildren.push(actionsDiv);
+      item.append(...itemChildren);
       resQuestionList.appendChild(item);
     });
   }
@@ -3669,6 +3979,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (confirm(t('speaking.sim.confirmResetCurrent'))) {
         stopSpeaking();
         clearInterval(state.timerInterval);
+        stopQuestionStt();
         if (state.activeRecorder) {
           try { state.activeRecorder.stop(); } catch (e) {}
           state.activeRecorder = null;
@@ -3682,6 +3993,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnSkipBreak) {
     btnSkipBreak.addEventListener('click', () => {
       clearInterval(state.timerInterval);
+      stopQuestionStt();
       loadQuestion(state.currentIndex + 1);
     });
   }
@@ -3689,6 +4001,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnNextQuestion.addEventListener('click', async () => {
       stopSpeaking();
       recordSpeakingTime(state.currentIndex);
+      stopQuestionStt();
       await stopQuestionRecording();
       clearInterval(state.timerInterval);
       if (state.singleRetryIndex !== null) {
@@ -3703,6 +4016,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnPrevQuestion.addEventListener('click', async () => {
       stopSpeaking();
       recordSpeakingTime(state.currentIndex);
+      stopQuestionStt();
       await stopQuestionRecording();
       clearInterval(state.timerInterval);
       if (state.singleRetryIndex !== null) {
@@ -5081,5 +5395,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // 12. 초기화 실행
   // =========================================================================
   loadSettings();
+  updateMicOptionsUi();
   loadShadowSettings();
 });

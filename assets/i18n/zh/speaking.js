@@ -84,6 +84,11 @@
   'speaking.step2.micDenied': '🔒 麦克风权限被拒绝',
   'speaking.step2.micDeniedGuide': '🔒 麦克风权限已被拒绝。\n请点击浏览器地址栏左侧的挂锁 (🔒) 或网站设置图标，将【麦克风】权限改为“允许”后刷新页面。',
   'speaking.step2.micNotFound': '⚠️ 未找到可用的麦克风设备，请检查麦克风连接。',
+  'speaking.step2.sttExtract': '📝 提取作答文本 (在结果页查看 STT 文本与复制)',
+  'speaking.step2.sttExtractNotice': '⚡ 使用浏览器内置语音识别引擎，免费将回答转为文本并在结果页展示，无需 API Key。',
+  'speaking.step2.sttLangLabel': '识别语言:',
+  'speaking.step2.sttLangAuto': '🌐 自动（根据题目语言自动识别韩语·中文·英语等）',
+  'speaking.step2.sttUnsupported': '（当前浏览器暂不支持，推荐使用 Chrome/Edge/Safari）',
 
   // 动作
   'speaking.action.start': '🚀 开始口语模拟考试',
@@ -113,6 +118,8 @@
   'speaking.sim.hideQuestion': '隐藏题目文字',
   'speaking.sim.soundOn': '提示音已开启',
   'speaking.sim.soundOff': '提示音已关闭',
+  'speaking.sim.sttBadge': '📝 实时语音转文字 (STT)',
+  'speaking.sim.sttListeningPlaceholder': '开始作答后，此处将实时显示识别出的文字...',
 
   // 结果画面
   'speaking.result.title': '🎉 口语考试完成！',
@@ -140,6 +147,13 @@
   'speaking.result.playAudio': '播放',
   'speaking.result.pauseAudio': '暂停',
   'speaking.result.seekAudioAria': '调整第 {num} 题播放进度',
+  'speaking.result.transcriptLabel': '转写作答文本 (STT)',
+  'speaking.result.transcriptExpand': '查看文本',
+  'speaking.result.transcriptCollapse': '收起文本',
+  'speaking.result.copyTranscript': '复制',
+  'speaking.result.copyTranscriptTitle': '复制转写文本至剪贴板',
+  'speaking.result.copied': '已复制!',
+  'speaking.result.noTranscript': '未检测到转写文本（未检测到语音或浏览器不支持识别）。',
 
   // 补充键值：备份、使用说明链接、浏览器语音提示、Excel 复制提示
   'speaking.step1.excelTip': '💡 从 Excel 复制时，请仅复制题目列，或确保题目位于第一列（A列）。',

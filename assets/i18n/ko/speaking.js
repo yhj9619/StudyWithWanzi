@@ -84,6 +84,11 @@
   'speaking.step2.micDenied': '🔒 마이크 권한 차단됨',
   'speaking.step2.micDeniedGuide': '🔒 마이크 접근 권한이 차단되어 있습니다.\n브라우저 주소창 왼쪽의 자물쇠(🔒) 또는 사이트 설정 아이콘을 클릭한 뒤, [마이크] 권한을 "허용"으로 변경하고 페이지를 새로고침(F5)해주세요.',
   'speaking.step2.micNotFound': '⚠️ 사용 가능한 마이크 장치를 찾을 수 없습니다. 마이크 연결을 확인해주세요.',
+  'speaking.step2.sttExtract': '📝 답변 텍스트 추출 (결과 화면에서 STT 텍스트 확인 및 복사)',
+  'speaking.step2.sttExtractNotice': '⚡ 브라우저 내장 음성인식 엔진으로 별도 결제나 API 키 없이 무료로 답변을 텍스트로 변환해 결과 화면에 보여줍니다.',
+  'speaking.step2.sttLangLabel': '인식 언어:',
+  'speaking.step2.sttLangAuto': '🌐 자동 (문제 언어에 맞춰 한국어·중국어 등 자동 감지)',
+  'speaking.step2.sttUnsupported': '(현재 브라우저 미지원 · Chrome/Edge/Safari 권장)',
 
   // 액션 버튼
   'speaking.action.start': '🚀 말하기 시험 시작',
@@ -113,6 +118,8 @@
   'speaking.sim.hideQuestion': '문제 텍스트 숨기기',
   'speaking.sim.soundOn': '소리 켬',
   'speaking.sim.soundOff': '소리 끔',
+  'speaking.sim.sttBadge': '📝 STT 실시간 추출',
+  'speaking.sim.sttListeningPlaceholder': '답변을 말씀하시면 여기에 실시간으로 텍스트가 표시됩니다...',
 
   // 결과 화면
   'speaking.result.title': '🎉 말하기 시험 완료!',
@@ -140,6 +147,13 @@
   'speaking.result.playAudio': '재생',
   'speaking.result.pauseAudio': '일시정지',
   'speaking.result.seekAudioAria': 'Q{num}번 답변 재생 구간 이동',
+  'speaking.result.transcriptLabel': '추출된 답변 텍스트 (STT)',
+  'speaking.result.transcriptExpand': '텍스트 보기',
+  'speaking.result.transcriptCollapse': '텍스트 접기',
+  'speaking.result.copyTranscript': '복사',
+  'speaking.result.copyTranscriptTitle': '답변 텍스트 클립보드 복사',
+  'speaking.result.copied': '복사됨!',
+  'speaking.result.noTranscript': '인식된 텍스트가 없습니다. (음성이 감지되지 않았거나 인식이 지원되지 않음)',
 
   // 추가 키: 백업, 도움말 링크, 브라우저 툴팁, 엑셀 복사 안내
   'speaking.step1.excelTip': '💡 엑셀에서 복사할 때는 질문 열만 선택하여 복사하거나, 질문이 첫 번째 열(A열)에 오도록 해주세요.',
