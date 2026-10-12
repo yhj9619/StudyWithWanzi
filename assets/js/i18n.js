@@ -129,26 +129,45 @@
   }
 
   // 모든 페이지 맨 위 공통 메뉴줄 (<nav data-site-nav="editor"></nav> 자리에 그림, 값 = 지금 페이지)
-  // PC: 홈 · 페이지 링크 · 화면 언어를 한 줄에 / 휴대폰: 홈 + ☰ 버튼, 누르면 링크 · 화면 언어가 펼쳐짐
+  // PC/모바일 공통: 홈 | [🃏 Anki 도구 ▾] | [🎙️ 말하기 도구 ▾] 두 대분류만 두고, 누르면 상세 메뉴가 펼쳐짐
   function getResolvedPaths() {
     const isSub = Boolean(document.querySelector('link[href*="../assets"], script[src*="../assets"]'));
     const inAnki = isSub && (location.pathname.includes('/anki/') || document.querySelector('[data-site-nav="editor"], [data-site-nav="guide"], [data-site-nav="prompt"], [data-site-nav="manual"], [data-site-nav="anki-home"], [data-journey]'));
-    const inSpeaking = isSub && (location.pathname.includes('/speaking/') || document.querySelector('[data-site-nav="speaking"]'));
+    const inSpeaking = isSub && (location.pathname.includes('/speaking/') || document.querySelector('[data-site-nav^="speaking"]'));
 
     const rootHref = isSub ? '../index.html' : 'index.html';
     const ankiPrefix = inAnki ? '' : (isSub ? '../anki/' : 'anki/');
     const speakingPrefix = inSpeaking ? '' : (isSub ? '../speaking/' : 'speaking/');
 
+    const navGroups = [
+      {
+        groupId: 'anki',
+        key: 'common.navAnkiHome',
+        titleKey: 'common.navAnkiHomeTitle',
+        items: [
+          { id: 'anki-home', href: ankiPrefix + 'index.html', key: 'common.navAnkiHubItem', titleKey: 'common.navAnkiHomeTitle', isHub: true },
+          { id: 'editor', href: ankiPrefix + 'ankiEditor.html', key: 'common.navEditor', titleKey: 'common.navEditorTitle' },
+          { id: 'prompt', href: ankiPrefix + 'ankiPrompt.html', key: 'common.navPrompt', titleKey: 'common.navPromptTitle' },
+          { id: 'guide', href: ankiPrefix + 'ankiGuide.html', key: 'common.navGuide', titleKey: 'common.navGuideTitle' },
+          { id: 'manual', href: ankiPrefix + 'ankiManual.html', key: 'common.navManual', titleKey: 'common.navManualTitle' },
+        ]
+      },
+      {
+        groupId: 'speaking',
+        key: 'common.navSpeakingHome',
+        titleKey: 'common.navSpeakingHomeTitle',
+        items: [
+          { id: 'speaking', href: speakingPrefix + 'index.html', key: 'common.navSpeakingHubItem', titleKey: 'common.navSpeakingHomeTitle', isHub: true },
+          { id: 'speaking-sim', href: speakingPrefix + 'speakingSimulator.html', key: 'common.navSpeakingSim', titleKey: 'common.navSpeakingSimTitle' },
+          { id: 'speaking-shadow', href: speakingPrefix + 'speakingShadowing.html', key: 'common.navSpeakingShadow', titleKey: 'common.navSpeakingShadowTitle' },
+          { id: 'speaking-manual', href: speakingPrefix + 'speakingManual.html', key: 'common.navSpeakingManual', titleKey: 'common.navSpeakingManualTitle' },
+        ]
+      }
+    ];
+
     return {
       homeHref: rootHref,
-      pages: [
-        { id: 'anki-home', href: ankiPrefix + 'index.html', key: 'common.navAnkiHome', titleKey: 'common.navAnkiHomeTitle' },
-        { id: 'editor', href: ankiPrefix + 'ankiEditor.html', key: 'common.navEditor', titleKey: 'common.navEditorTitle' },
-        { id: 'prompt', href: ankiPrefix + 'ankiPrompt.html', key: 'common.navPrompt', titleKey: 'common.navPromptTitle' },
-        { id: 'guide', href: ankiPrefix + 'ankiGuide.html', key: 'common.navGuide', titleKey: 'common.navGuideTitle' },
-        { id: 'manual', href: ankiPrefix + 'manual.html', key: 'common.navManual', titleKey: 'common.navManualTitle' },
-        { id: 'speaking', href: speakingPrefix + 'index.html', key: 'common.navSpeaking', titleKey: 'common.navSpeakingTitle' },
-      ],
+      navGroups,
       journeySteps: [
         { key: 'common.journey.step1', href: ankiPrefix + 'ankiGuide.html#fields' },
         { key: 'common.journey.step2', href: ankiPrefix + 'ankiEditor.html' },
@@ -188,15 +207,92 @@
       const menu = document.createElement('div');
       menu.className = 'site-nav-menu';
       menu.id = menuId;
-      navPaths.pages.forEach(page => {
-        const a = document.createElement('a');
-        a.className = 'site-nav-link' + (page.id === current ? ' current' : '');
-        a.href = page.href;
-        a.title = t(page.titleKey);
-        a.textContent = t(page.key);
-        if (page.id === current) a.setAttribute('aria-current', 'page');
-        menu.appendChild(a);
+
+      const groupWrappers = [];
+      const closeAllDropdowns = (exceptWrap) => {
+        groupWrappers.forEach(w => {
+          if (w !== exceptWrap) {
+            w.classList.remove('dropdown-open');
+            const btn = w.querySelector('.site-nav-group-btn');
+            if (btn) btn.setAttribute('aria-expanded', 'false');
+          }
+        });
+      };
+
+      navPaths.navGroups.forEach(group => {
+        const activeItem = group.items.find(item => item.id === current);
+        const isGroupActive = Boolean(activeItem);
+
+        const groupWrap = document.createElement('div');
+        groupWrap.className = 'site-nav-group' + (isGroupActive ? ' active-group' : '');
+
+        const groupBtn = document.createElement('button');
+        groupBtn.type = 'button';
+        groupBtn.className = 'site-nav-group-btn' + (isGroupActive ? ' current' : '');
+        groupBtn.title = t(group.titleKey);
+        groupBtn.setAttribute('aria-expanded', 'false');
+        groupBtn.setAttribute('aria-haspopup', 'true');
+
+        const labelSpan = document.createElement('span');
+        labelSpan.className = 'site-nav-group-label';
+        labelSpan.textContent = t(group.key);
+        groupBtn.appendChild(labelSpan);
+
+        // 현재 서브 도구가 선택된 상태라면 대분류 버튼 옆에 작은 배지로 현재 위치를 표시
+        if (activeItem && !activeItem.isHub) {
+          const subBadge = document.createElement('span');
+          subBadge.className = 'site-nav-group-sublabel';
+          subBadge.textContent = t(activeItem.key);
+          groupBtn.appendChild(subBadge);
+        }
+
+        const caret = document.createElement('span');
+        caret.className = 'site-nav-group-caret';
+        caret.setAttribute('aria-hidden', 'true');
+        caret.textContent = '▾';
+        groupBtn.appendChild(caret);
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'site-nav-dropdown';
+        dropdown.setAttribute('role', 'menu');
+
+        group.items.forEach(page => {
+          const a = document.createElement('a');
+          const isCurrent = page.id === current;
+          a.className = 'site-nav-dropdown-link' + (isCurrent ? ' current' : '') + (page.isHub ? ' is-hub-link' : '');
+          a.href = page.href;
+          a.title = t(page.titleKey);
+          a.setAttribute('role', 'menuitem');
+          if (isCurrent) a.setAttribute('aria-current', 'page');
+
+          const textSpan = document.createElement('span');
+          textSpan.textContent = t(page.key);
+          a.appendChild(textSpan);
+
+          if (isCurrent) {
+            const checkSpan = document.createElement('span');
+            checkSpan.className = 'site-nav-dropdown-check';
+            checkSpan.setAttribute('aria-hidden', 'true');
+            checkSpan.textContent = '✓';
+            a.appendChild(checkSpan);
+          }
+
+          dropdown.appendChild(a);
+        });
+
+        groupBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          const willOpen = !groupWrap.classList.contains('dropdown-open');
+          closeAllDropdowns(groupWrap);
+          groupWrap.classList.toggle('dropdown-open', willOpen);
+          groupBtn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        });
+
+        groupWrap.append(groupBtn, dropdown);
+        menu.appendChild(groupWrap);
+        groupWrappers.push(groupWrap);
       });
+
       const switcher = document.createElement('div');
       switcher.setAttribute('data-i18n-switcher', '');
       menu.appendChild(switcher);
@@ -205,16 +301,33 @@
         nav.classList.toggle('open', open);
         toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
         toggle.textContent = open ? '✕' : '☰';
+        if (open) {
+          // 모바일에서 ☰를 열었을 때 현재 속한 대분류 그룹은 자동으로 펼쳐 둠
+          groupWrappers.forEach(w => {
+            const shouldOpen = w.classList.contains('active-group');
+            w.classList.toggle('dropdown-open', shouldOpen);
+            const btn = w.querySelector('.site-nav-group-btn');
+            if (btn) btn.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+          });
+        } else {
+          closeAllDropdowns(null);
+        }
       };
       toggle.addEventListener('click', () => setOpen(!nav.classList.contains('open')));
       // 메뉴 밖을 누르거나 Esc를 누르면 닫기
       document.addEventListener('click', e => {
-        if (nav.classList.contains('open') && !nav.contains(e.target)) setOpen(false);
+        if (!nav.contains(e.target)) {
+          closeAllDropdowns(null);
+          if (nav.classList.contains('open')) setOpen(false);
+        }
       });
       document.addEventListener('keydown', e => {
-        if (e.key === 'Escape' && nav.classList.contains('open')) {
-          setOpen(false);
-          toggle.focus();
+        if (e.key === 'Escape') {
+          closeAllDropdowns(null);
+          if (nav.classList.contains('open')) {
+            setOpen(false);
+            toggle.focus();
+          }
         }
       });
 

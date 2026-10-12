@@ -243,7 +243,7 @@ i18nRegister('ko', {
   'editor.field.tts': '🔊 읽어주기',
   'editor.field.ttsTitle': '카드를 열면 이 필드의 글자를 기기 목소리로 읽어줘요',
   'editor.field.ttsUnsupportedTitle': '이 언어는 읽어주기를 쓸 수 없어요',
-  'editor.tts.shortHtml': '🔊 읽어주기를 켰어요. 자동 재생 끄기 · 소리가 안 날 때 · 읽는 속도 → <a href="manual.html#tts">사용 설명서</a>',
+  'editor.tts.shortHtml': '🔊 읽어주기를 켰어요. 자동 재생 끄기 · 소리가 안 날 때 · 읽는 속도 → <a href="ankiManual.html#tts">사용 설명서</a>',
   'editor.tts.speedLabel': '읽는 속도',
   'editor.advanced.ttsTitle': '🔊 읽어주기',
   'editor.tts.previewSpeed': '▶ 미리 듣기',

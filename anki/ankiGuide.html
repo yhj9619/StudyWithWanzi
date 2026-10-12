@@ -13,8 +13,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
-  <link rel="stylesheet" href="../assets/css/style.css?v=20261008a">
-  <link rel="stylesheet" href="../assets/css/guide.css?v=20261008a">
+  <link rel="stylesheet" href="../assets/css/style.css?v=20261012k">
+  <link rel="stylesheet" href="../assets/css/guide.css?v=20261012k">
 </head>
 <body>
   <!-- Header -->
@@ -40,7 +40,7 @@
       <section class="guide-hero">
         <div class="guide-hero-tag" data-i18n="guide.hero.tag">✨ Anki가 처음이라면 여기부터</div>
         <h2 class="guide-hero-title" data-i18n="guide.hero.title">4단계만 따라 하면 시작할 수 있어요</h2>
-        <p class="guide-hero-subtitle" data-i18n-html="guide.hero.subtitle">각 단계는 핵심만 짧게 정리했어요. 더 알고 싶으면 <strong>[자세히 보기]</strong>를 펼쳐 보세요. 도구 사용법과 막혔을 때 볼 <strong>자주 묻는 질문</strong>은 <a href="manual.html">사용 설명서</a>에 있어요.</p>
+        <p class="guide-hero-subtitle" data-i18n-html="guide.hero.subtitle">각 단계는 핵심만 짧게 정리했어요. 더 알고 싶으면 <strong>[자세히 보기]</strong>를 펼쳐 보세요. 도구 사용법과 막혔을 때 볼 <strong>자주 묻는 질문</strong>은 <a href="ankiManual.html">사용 설명서</a>에 있어요.</p>
       </section>
 
       <!-- 한눈에 보는 4단계 (단계 이름은 사이트 공통 4단계 경로와 같은 common.journey.* 사용) -->
@@ -70,7 +70,7 @@
           <span data-i18n="guide.quick.step4.desc">파일을 Anki로 가져오고 매일 10분 복습해요</span>
         </a>
       </nav>
-      <p class="guide-faq-jump"><a href="manual.html#faq" data-i18n="guide.quick.faqLink">❓ 막히면 → 사용 설명서의 자주 묻는 질문 보기</a></p>
+      <p class="guide-faq-jump"><a href="ankiManual.html#faq" data-i18n="guide.quick.faqLink">❓ 막히면 → 사용 설명서의 자주 묻는 질문 보기</a></p>
 
       <!-- 꼭 기억할 것 -->
       <section class="guide-must-know" aria-label="이것만은 꼭 기억하세요" data-i18n-attr="aria-label:guide.mustKnow.ariaLabel">
@@ -296,7 +296,7 @@
             </div>
           </details>
 
-          <p class="guide-manual-link" data-i18n-html="guide.step2.manualLink">📘 에디터의 화면별 자세한 사용법(테마 · 읽어주기 · 초기화 등)은 <a href="manual.html#editor">사용 설명서 → 카드 서식 에디터</a>에서 볼 수 있어요.</p>
+          <p class="guide-manual-link" data-i18n-html="guide.step2.manualLink">📘 에디터의 화면별 자세한 사용법(테마 · 읽어주기 · 초기화 등)은 <a href="ankiManual.html#editor">사용 설명서 → 카드 서식 에디터</a>에서 볼 수 있어요.</p>
         </div>
       </article>
 
@@ -364,7 +364,7 @@
             </div>
           </details>
 
-          <p class="guide-manual-link" data-i18n-html="guide.step3.manualLink">📘 프롬프트 생성기의 자세한 사용법(난이도 · 항목 순서 · CSV 파일 등)은 <a href="manual.html#prompt">사용 설명서 → AI 프롬프트 생성기</a>에서 볼 수 있어요.</p>
+          <p class="guide-manual-link" data-i18n-html="guide.step3.manualLink">📘 프롬프트 생성기의 자세한 사용법(난이도 · 항목 순서 · CSV 파일 등)은 <a href="ankiManual.html#prompt">사용 설명서 → AI 프롬프트 생성기</a>에서 볼 수 있어요.</p>
         </div>
       </article>
 
@@ -506,10 +506,10 @@
         </div>
       </article>
 
-      <!-- 자주 묻는 질문은 사용 설명서(manual.html#faq)로 옮김 — 예전 링크 ankiGuide.html#faq 가 여기로 오도록 id 유지 -->
+      <!-- 자주 묻는 질문은 사용 설명서(ankiManual.html#faq)로 옮김 — 예전 링크 ankiGuide.html#faq 가 여기로 오도록 id 유지 -->
       <div class="guide-callout info guide-faq-moved" id="faq">
         <span class="guide-callout-icon">❓</span>
-        <div data-i18n-html="guide.faqMoved"><strong>자주 묻는 질문은 사용 설명서로 옮겼어요</strong><br>막혔을 때 볼 질문과 답, 그리고 에디터 · 프롬프트 생성기 사용법을 한곳에 모았어요. <a href="manual.html#faq">자주 묻는 질문 보기 ➔</a></div>
+        <div data-i18n-html="guide.faqMoved"><strong>자주 묻는 질문은 사용 설명서로 옮겼어요</strong><br>막혔을 때 볼 질문과 답, 그리고 에디터 · 프롬프트 생성기 사용법을 한곳에 모았어요. <a href="ankiManual.html#faq">자주 묻는 질문 보기 ➔</a></div>
       </div>
 
     </div>
@@ -519,12 +519,12 @@
     <p data-i18n="common.footer">Study with Wanzi &copy; 2026. Made with care for language learners.</p>
   </footer>
   <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
-  <script src="../assets/js/i18n.js?v=20261008a"></script>
-  <script src="../assets/i18n/ko/common.js?v=20261008a"></script>
-  <script src="../assets/i18n/ko/guide.js?v=20261008a"></script>
-  <script src="../assets/i18n/en/common.js?v=20261008a"></script>
-  <script src="../assets/i18n/en/guide.js?v=20261008a"></script>
-  <script src="../assets/i18n/zh/common.js?v=20261008a"></script>
-  <script src="../assets/i18n/zh/guide.js?v=20261008a"></script>
+  <script src="../assets/js/i18n.js?v=20261012k"></script>
+  <script src="../assets/i18n/ko/common.js?v=20261012k"></script>
+  <script src="../assets/i18n/ko/guide.js?v=20261012k"></script>
+  <script src="../assets/i18n/en/common.js?v=20261012k"></script>
+  <script src="../assets/i18n/en/guide.js?v=20261012k"></script>
+  <script src="../assets/i18n/zh/common.js?v=20261012k"></script>
+  <script src="../assets/i18n/zh/guide.js?v=20261012k"></script>
 </body>
 </html>

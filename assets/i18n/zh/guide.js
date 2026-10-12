@@ -7,7 +7,7 @@ i18nRegister('zh', {
   'guide.header.subtitle': '第一次用也能跟着做的 4 步——准备 · 卡片模板 · AI 单词表 · 复习',
   'guide.hero.tag': '✨ 第一次用 Anki？从这里开始',
   'guide.hero.title': '只需跟着 4 步就能上手',
-  'guide.hero.subtitle': '每一步只整理了核心内容。想了解更多，请展开<strong>[查看详情]</strong>。工具的用法和遇到问题时可以查看的<strong>常见问题</strong>都在<a href="manual.html">使用说明</a>里。',
+  'guide.hero.subtitle': '每一步只整理了核心内容。想了解更多，请展开<strong>[查看详情]</strong>。工具的用法和遇到问题时可以查看的<strong>常见问题</strong>都在<a href="ankiManual.html">使用说明</a>里。',
 
   'guide.quick.ariaLabel': '4 个步骤一览',
   'guide.quick.step1.desc': '安装 Anki，建好存放单词信息的字段',
@@ -99,7 +99,7 @@ i18nRegister('zh', {
   'guide.step2.detail.partStyleTitle': '③ 样式',
   'guide.step2.detail.partStyleDesc': '决定卡片的外观：字体、字号、颜色，以及深色模式下的颜色。',
   'guide.step2.detail.openTip': '<strong>打开 [卡片模板] 窗口的其他方法</strong><br>在添加窗口（<kbd>A</kbd>）或浏览窗口（<kbd>B</kbd>）中点击 <b>[卡片...]</b> 按钮，也会打开同一个窗口。',
-  'guide.step2.manualLink': '📘 编辑器各个画面的详细用法（主题 · 朗读 · 重置等）请看<a href="manual.html#editor">使用说明 → 卡片模板编辑器</a>。',
+  'guide.step2.manualLink': '📘 编辑器各个画面的详细用法（主题 · 朗读 · 重置等）请看<a href="ankiManual.html#editor">使用说明 → 卡片模板编辑器</a>。',
 
   'guide.step3.badge': 'Step 3',
   'guide.step3.lead': '让 AI 给出单词列表，保存为单词表文件（CSV）。一个文件就能一次加入几十到几百张卡片。',
@@ -122,7 +122,7 @@ i18nRegister('zh', {
   'guide.step3.detail.fail3': '列顺序和你的字段顺序对不上，只能一个个手动修改。',
   'guide.step3.detail.fallbackTitle': '📝 想自己用记事本制作？',
   'guide.step3.detail.fallbackBody': '只把 AI 回答中的单词行复制到记事本，然后在 <b>[文件] ➔ [另存为]</b> 中把文件名写成 <code>words.csv</code>，并把底部的<b>编码选为 [UTF-8]</b> 再保存。不是 UTF-8 的话，韩文 · 汉字 · 声调会变成乱码。',
-  'guide.step3.manualLink': '📘 提示词生成器的详细用法（难度 · 项目顺序 · CSV 文件等）请看<a href="manual.html#prompt">使用说明 → AI 提示词生成器</a>。',
+  'guide.step3.manualLink': '📘 提示词生成器的详细用法（难度 · 项目顺序 · CSV 文件等）请看<a href="ankiManual.html#prompt">使用说明 → AI 提示词生成器</a>。',
 
   'guide.step4.badge': 'Step 4',
   'guide.step4.lead': '把下载的单词表文件导入电脑上的 Anki，之后每天只复习 Anki 挑出来的卡片就行。',
@@ -176,5 +176,5 @@ i18nRegister('zh', {
   'guide.step4.detail.rule2Body': '不要把难懂的语法和 5 个释义一股脑塞进一张卡片。一张卡片只放一个单词、一个释义，大脑才不容易累。',
   'guide.step4.detail.rule3Title': '大声读出来，在例句中掌握',
   'guide.step4.detail.rule3Body': '不要只用眼睛翻看，要开口读出发音。再读一读单词在例句中是怎么用的，说话时才能脱口而出。',
-  'guide.faqMoved': '<strong>常见问题已移到使用说明</strong><br>遇到问题时可以查看的问答，以及编辑器 · 提示词生成器的用法，现在都集中在一处。<a href="manual.html#faq">查看常见问题 ➔</a>',
+  'guide.faqMoved': '<strong>常见问题已移到使用说明</strong><br>遇到问题时可以查看的问答，以及编辑器 · 提示词生成器的用法，现在都集中在一处。<a href="ankiManual.html#faq">查看常见问题 ➔</a>',
 });

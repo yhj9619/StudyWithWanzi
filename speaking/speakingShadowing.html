@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study with Wanzi - 스크립트 TTS &amp; 쉐도잉 스튜디오</title>
+  <meta name="description" content="말하기 시험 답변 스크립트(대본) TTS 낭독, 예상 발화 시간 계산기, 문장별 구간 반복, 따라 말하기 대기 및 암기 가림막 스튜디오">
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg?v=2">
+  <link rel="alternate icon" href="../favicon.ico?v=2">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css?v=20261012k">
+  <link rel="stylesheet" href="../assets/css/speaking.css?v=20261012k">
+</head>
+<body>
+  <!-- 공통 상단 메뉴줄 (i18n.js) -->
+  <nav data-site-nav="speaking-shadow"></nav>
+
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-group">
+        <span class="logo-icon">📜</span>
+        <div>
+          <h1 class="logo-title">스크립트 쉐도잉 스튜디오</h1>
+          <p class="logo-subtitle">대본 TTS 낭독 · 예상 발화 시간 계산 · 문장별 구간반복 · 암기 가림막</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <div class="speaking-container">
+
+      <!-- ===================================================================
+           스크립트 TTS & 쉐도잉 스튜디오 (Shadowing Studio Section)
+           =================================================================== -->
+      <section id="shadowingSection" class="shadowing-section">
+
+        <!-- 카드 1: 스크립트 대본 입력 & 예상 발화 시간 계산 -->
+        <article class="speaking-card">
+          <div class="speaking-card-header">
+            <h2 class="speaking-card-title">📜 1. 스크립트 대본 입력 &amp; 발화 시간 분석</h2>
+            <a href="speakingManual.html#shadowing" class="preview-toggle-btn" style="text-decoration:none;">❓ 사용법 보기</a>
+          </div>
+          <p class="speaking-card-desc">말하기 시험 답변 스크립트(대본)를 붙여넣으세요. 한국어 해석과 외국어 문장을 함께 적어도 자동으로 언어를 구분해 낭독합니다.</p>
+
+          <!-- 스크립트 노트 탭 바 (샘플 + 사용자 추가 스크립트 탭들) -->
+          <div class="deck-tabs-container">
+            <div id="shadowDeckTabsList" class="deck-tabs-list"></div>
+            <button type="button" id="btnAddShadowDeck" class="deck-tab-add">+ 새 스크립트 추가</button>
+          </div>
+
+          <!-- 스크립트 입력 텍스트 영역 -->
+          <div class="textarea-wrapper" id="shadowInputWrapper">
+            <textarea id="shadowScriptInput" class="question-textarea" rows="6" placeholder="외우고 싶은 말하기 시험 답변 대본을 여기에 붙여넣으세요.&#10;&#10;(예시: 한국어 뜻과 외국어 문장을 번갈아 적어도 각각 알맞은 음성으로 읽어줍니다)&#10;제가 가장 좋아하는 여행지는 제주도입니다.&#10;My favorite travel destination is Jeju Island in South Korea.&#10;작년 여름에 가족들과 함께 3박 4일로 다녀왔습니다.&#10;I went there with my family last summer for four days."></textarea>
+            <div id="shadowResizeHandle" class="textarea-resize-handle" title="상하로 드래그하여 높이 조절 (더블클릭 시 기본 크기)">
+              <span class="resize-grip-line"></span>
+            </div>
+          </div>
+
+          <!-- 본문 하단 툴바 -->
+          <div class="action-chips-row">
+            <label class="speaking-checkbox">
+              <input type="checkbox" id="shadowSplitSentenceCheck" checked>
+              <span>마침표(. ? !) 및 줄바꿈 기준으로 문장 자동 쪼개기 (해제 시 줄바꿈 단위로만 분리)</span>
+            </label>
+            <div class="text-actions-group">
+              <button type="button" id="btnPasteShadowScript" class="chip-btn btn-paste-text">📋 대본 붙여넣기</button>
+              <button type="button" id="btnClearShadowScript" class="chip-btn btn-clear-text">🗑️ 대본 삭제</button>
+            </div>
+          </div>
+
+          <!-- 실시간 분량 & 예상 낭독 시간 분석 대시보드 -->
+          <div class="shadow-stats-dashboard" id="shadowStatsDashboard">
+            <div class="shadow-stats-metrics">
+              <div class="shadow-metric-item">
+                <span class="shadow-metric-label">문장 수</span>
+                <strong id="shadowStatSentences" class="shadow-metric-val">0문장</strong>
+              </div>
+              <div class="shadow-metric-divider"></div>
+              <div class="shadow-metric-item">
+                <span class="shadow-metric-label">대본 분량</span>
+                <strong id="shadowStatWords" class="shadow-metric-val">0단어 · 0자</strong>
+              </div>
+              <div class="shadow-metric-divider"></div>
+              <div class="shadow-metric-item highlight">
+                <span class="shadow-metric-label">⏱️ 예상 발화 시간 <small id="shadowStatRateTag">(1.0x)</small></span>
+                <strong id="shadowStatDuration" class="shadow-metric-val primary">약 0초</strong>
+              </div>
+            </div>
+
+            <div class="shadow-target-gauge-row">
+              <div class="shadow-target-select-wrap">
+                <label for="shadowTargetSecSelect" class="shadow-target-label">🎯 목표 시험 답변 시간</label>
+                <select id="shadowTargetSecSelect" class="shadow-mini-select">
+                  <option value="0">제한 없음 (자유 분량)</option>
+                  <option value="30">30초 (단답형 / 파트1·2)</option>
+                  <option value="45">45초 (토스 / 중급 답변)</option>
+                  <option value="60" selected>60초 (1분 표준 답변)</option>
+                  <option value="90">90초 (1분 30초 · 오픽/면접)</option>
+                  <option value="120">120초 (2분 심층 답변)</option>
+                </select>
+              </div>
+              <div id="shadowTargetFeedback" class="shadow-target-feedback"></div>
+            </div>
+            <div id="shadowTargetProgressWrap" class="shadow-target-progress-wrap">
+              <div id="shadowTargetProgressFill" class="shadow-target-progress-fill"></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- 카드 2: TTS 음성 & 쉐도잉 훈련 설정 -->
+        <article class="speaking-card">
+          <div class="speaking-card-header">
+            <h2 class="speaking-card-title">🎚️ 2. TTS 음성 &amp; 쉐도잉 재생 설정</h2>
+          </div>
+
+          <div class="settings-grid">
+            <!-- 1) 낭독 음성 (TTS 언어) & 브라우저별 안내 툴팁 -->
+            <div class="setting-item">
+              <div class="setting-label voice-label-with-tooltip">
+                <label for="voiceSearchInput" data-i18n="speaking.step2.ttsVoice">낭독 음성 (TTS 언어)</label>
+                <div class="tts-browser-tooltip-wrap" id="ttsBrowserTooltipWrap">
+                  <button type="button" id="ttsBrowserInfoBtn" class="tts-info-badge" aria-expanded="false" aria-controls="ttsBrowserPopover">
+                    <span>ⓘ</span>
+                    <span data-i18n="speaking.step2.browserTipBtn">브라우저별 음성 안내</span>
+                  </button>
+                  <div id="ttsBrowserPopover" class="tts-browser-popover hidden" role="tooltip">
+                    <div class="tts-popover-header">
+                      <span data-i18n="speaking.step2.browserTipTitle">🌐 브라우저별 다국어 음성(TTS) 지원 안내</span>
+                      <button type="button" id="ttsBrowserPopoverClose" class="tts-popover-close" aria-label="닫기">&times;</button>
+                    </div>
+                    <ul class="tts-popover-list">
+                      <li>
+                        <strong>🥇 Edge (엣지) · 가장 추천</strong>
+                        <p>별도 설치 없이 고품질 다국어 원어민 음성(Neural)을 가장 폭넓게 기본 지원합니다.</p>
+                      </li>
+                      <li>
+                        <strong>🥈 Chrome (크롬) · 추천</strong>
+                        <p>Google 다국어 온라인 음성(영어·중국어·일본어·프랑스어·스페인어·독일어·네덜란드어 등 약 18개국)을 기본 지원합니다.</p>
+                      </li>
+                      <li>
+                        <strong>🍎 Safari (아이폰 · 아이패드 · 맥)</strong>
+                        <p>Apple / Siri 내장 다국어 음성을 기본으로 폭넓게 지원합니다.</p>
+                      </li>
+                      <li>
+                        <strong>⚠️ 네이버 웨일(Whale) · 파이어폭스 등</strong>
+                        <p>브라우저 자체 온라인 음성이 없어 <strong>PC에 설치된 기본 음성(한국어·영어)만 표시</strong>될 수 있습니다. 다른 외국어가 안 나오면 <strong>Chrome / Edge</strong>를 쓰시거나 Windows/Mac 설정에서 언어 음성 팩을 추가해 주세요.</p>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="voice-control-row">
+                <div class="searchable-combobox" id="voiceSelectContainer" style="flex: 1; min-width: 0;">
+                  <select id="voiceSelect" class="visually-hidden" tabindex="-1" aria-hidden="true"></select>
+                  <div class="combobox-input-wrapper">
+                    <span class="combobox-search-icon">🔍</span>
+                    <input type="text" id="voiceSearchInput"
+                           class="form-input combobox-input"
+                           placeholder="음성 검색 (예: 자동, 한국어, 중국어, English...)"
+                           autocomplete="off"
+                           role="combobox"
+                           aria-autocomplete="list"
+                           aria-expanded="false"
+                           aria-controls="voiceDropdownList">
+                    <button type="button" id="voiceClearBtn" class="combobox-clear-btn hidden" title="검색어 지우기">&times;</button>
+                    <button type="button" id="voiceToggleBtn" class="combobox-toggle-btn" title="음성 목록 펼치기/접기">▼</button>
+                  </div>
+                  <div id="voiceDropdownWrapper" class="combobox-dropdown hidden">
+                    <div class="dropdown-header-info"><span id="filteredVoiceCount"></span></div>
+                    <ul id="voiceDropdownList" class="dropdown-list" role="listbox" aria-label="음성 목록"></ul>
+                  </div>
+                </div>
+                <button type="button" id="shadowTestVoiceBtn" class="btn-voice-test">음성 테스트</button>
+              </div>
+              <div id="voiceStatusBadge" class="voice-status-box"></div>
+            </div>
+
+            <!-- 2) 말하기 속도 조절 & 쉬는 시간 & 반복 & 최대 시간 -->
+            <div class="setting-item" style="gap: 0.9rem;">
+              <div>
+                <div class="setting-label" style="margin-bottom: 0.35rem;">
+                  <label for="shadowRateSlider">말하기 속도 (배속 조절)</label>
+                  <span id="shadowRateVal" class="speed-val-badge">1.0x</span>
+                </div>
+                <input type="range" id="shadowRateSlider" class="speed-slider" min="0.6" max="1.5" step="0.1" value="1.0" style="width: 100%;">
+                <div class="preset-pills" id="shadowRatePills">
+                  <button type="button" class="preset-pill" data-shadow-rate="0.7">0.7x 느리게</button>
+                  <button type="button" class="preset-pill" data-shadow-rate="0.8">0.8x</button>
+                  <button type="button" class="preset-pill" data-shadow-rate="0.9">0.9x</button>
+                  <button type="button" class="preset-pill active" data-shadow-rate="1.0">1.0x 표준</button>
+                  <button type="button" class="preset-pill" data-shadow-rate="1.1">1.1x</button>
+                  <button type="button" class="preset-pill" data-shadow-rate="1.2">1.2x 빠르게</button>
+                  <button type="button" class="preset-pill" data-shadow-rate="1.4">1.4x</button>
+                </div>
+              </div>
+
+              <div>
+                <label for="shadowPauseSelect" class="setting-label" style="margin-bottom: 0.35rem;">
+                  <span>문장 간 쉬는 시간 (따라 말하기 대기)</span>
+                </label>
+                <select id="shadowPauseSelect" class="select-input">
+                  <option value="auto" selected>🎯 문장 길이만큼 자동 대기 (1:1 따라 말하기 추천)</option>
+                  <option value="0">0초 (쉬지 않고 연속 낭독)</option>
+                  <option value="1.5">1.5초 대기 (짧은 호흡)</option>
+                  <option value="3">3초 대기 (보통 호흡)</option>
+                  <option value="5">5초 대기 (여유 있게 생각하며 말하기)</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="shadowSentenceRepeatSelect" class="setting-label" style="margin-bottom: 0.35rem;">
+                  <span>문장별 반복 &amp; 전체 반복</span>
+                </label>
+                <div class="shadow-dual-select-row">
+                  <select id="shadowSentenceRepeatSelect" class="select-input" title="한 문장당 반복 횟수">
+                    <option value="1" selected>문장당 1회 읽기</option>
+                    <option value="2">문장당 2회 연속 읽기</option>
+                    <option value="3">문장당 3회 연속 읽기</option>
+                  </select>
+                  <select id="shadowLoopSelect" class="select-input" title="대본 전체 반복 설정">
+                    <option value="1" selected>전체 1회 재생</option>
+                    <option value="3">전체 3회 반복</option>
+                    <option value="0">🔁 전체 무한 반복</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <div class="setting-label" style="margin-bottom: 0.35rem;">
+                  <label for="shadowMaxTimeSelect">⏳ 최대 재생 시간 제한 (자동 종료 타이머)</label>
+                  <span id="shadowMaxTimerCountdown" class="shadow-timer-countdown hidden">00:00</span>
+                </div>
+                <select id="shadowMaxTimeSelect" class="select-input">
+                  <option value="0" selected>제한 없음 (끝까지 재생)</option>
+                  <option value="180">3분 동안만 재생</option>
+                  <option value="300">5분 동안만 재생</option>
+                  <option value="600">10분 동안만 재생</option>
+                  <option value="900">15분 동안만 재생</option>
+                  <option value="1800">30분 동안만 재생</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- 카드 3: 인터랙티브 문장 카드 & 쉐도잉 플레이어 -->
+        <article class="speaking-card shadow-player-card">
+          <div class="speaking-card-header">
+            <h2 class="speaking-card-title">🎧 3. 문장별 쉐도잉 플레이어 &amp; 실전 암기</h2>
+            <div class="shadow-memorize-pills" role="group" aria-label="암기 가림막 모드">
+              <button type="button" class="shadow-mask-pill active" data-mask="none">👁️ 전체 보기</button>
+              <button type="button" class="shadow-mask-pill" data-mask="foreign" title="한국어 해석은 남기고 외국어 문장만 가립니다 (한→외 통역 연습)">🌐 외국어만 가리기</button>
+              <button type="button" class="shadow-mask-pill" data-mask="all" title="모든 문장을 흐리게 가립니다 (클릭/터치 시 확인)">🙈 전체 블러</button>
+            </div>
+          </div>
+
+          <!-- 마스터 컨트롤 바 -->
+          <div class="shadow-master-bar">
+            <div class="shadow-master-btns">
+              <button type="button" id="btnShadowPlayAll" class="btn-shadow-main-play">▶ 전체 낭독 시작</button>
+              <button type="button" id="btnShadowPause" class="btn-shadow-ctrl hidden">⏸ 일시정지</button>
+              <button type="button" id="btnShadowStop" class="btn-shadow-ctrl btn-shadow-stop" disabled>⏹ 정지</button>
+              <div class="shadow-step-btns">
+                <button type="button" id="btnShadowPrev" class="btn-shadow-step" title="이전 문장">◀ 이전</button>
+                <button type="button" id="btnShadowNext" class="btn-shadow-step" title="다음 문장">다음 ▶</button>
+              </div>
+            </div>
+            <div class="shadow-status-banner" id="shadowStatusBanner">
+              <span id="shadowStatusText">아래 문장 카드를 클릭하거나 <strong>[▶ 전체 낭독 시작]</strong>을 눌러보세요.</span>
+              <div id="shadowWaitBarWrap" class="shadow-wait-bar-wrap hidden">
+                <div id="shadowWaitBarFill" class="shadow-wait-bar-fill"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 문장별 인터랙티브 카드 리스트 -->
+          <div id="shadowSentenceList" class="shadow-sentence-list"></div>
+
+          <!-- 내 목소리로 실전 낭독 녹음 & 시간 비교 미니 스튜디오 -->
+          <div class="shadow-record-box">
+            <div class="shadow-record-header">
+              <div class="shadow-record-title-wrap">
+                <span class="shadow-record-title">🎙️ 내 목소리로 대본 읽어보기 (시간 측정 &amp; 비교)</span>
+                <span class="shadow-record-sub">🔒 녹음 데이터는 서버로 전송되지 않고 내 기기(브라우저)에만 임시 보관됩니다.</span>
+              </div>
+              <div id="shadowRecStatsBadge" class="shadow-rec-stats-badge">TTS 예상: --초</div>
+            </div>
+            <div class="shadow-record-controls">
+              <button type="button" id="btnShadowRecToggle" class="btn-shadow-rec">🎙️ 내 낭독 녹음 시작</button>
+              <span id="shadowRecClock" class="shadow-rec-clock">00:00</span>
+              <button type="button" id="btnShadowRecPlay" class="btn-review-action btn-play-my-voice hidden">▶️ 내 녹음 듣기</button>
+              <a id="btnShadowRecDownload" class="btn-review-action btn-download-my-voice hidden" download="Shadowing_Practice.webm">💾 녹음 저장</a>
+            </div>
+          </div>
+        </article>
+
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <p data-i18n="common.footer">Study with Wanzi &copy; 2026. Made with care for language learners.</p>
+  </footer>
+
+  <script src="../assets/js/i18n.js?v=20261012k"></script>
+  <script src="../assets/i18n/ko/common.js?v=20261012k"></script>
+  <script src="../assets/i18n/ko/speaking.js?v=20261012k"></script>
+  <script src="../assets/i18n/en/common.js?v=20261012k"></script>
+  <script src="../assets/i18n/en/speaking.js?v=20261012k"></script>
+  <script src="../assets/i18n/zh/common.js?v=20261012k"></script>
+  <script src="../assets/i18n/zh/speaking.js?v=20261012k"></script>
+  <script src="../assets/js/speakingApp.js?v=20261012k"></script>
+</body>
+</html>
+

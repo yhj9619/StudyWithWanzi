@@ -243,7 +243,7 @@ i18nRegister('en', {
   'editor.field.tts': '🔊 Read aloud',
   'editor.field.ttsTitle': "When the card opens, read this field aloud in the device's voice",
   'editor.field.ttsUnsupportedTitle': "Read aloud isn't available for this language",
-  'editor.tts.shortHtml': '🔊 Read aloud is on. Turn off auto-play · No sound? · Reading speed → <a href="manual.html#tts">User Manual</a>',
+  'editor.tts.shortHtml': '🔊 Read aloud is on. Turn off auto-play · No sound? · Reading speed → <a href="ankiManual.html#tts">User Manual</a>',
   'editor.tts.speedLabel': 'Reading speed',
   'editor.advanced.ttsTitle': '🔊 Read aloud',
   'editor.tts.previewSpeed': '▶ Listen',

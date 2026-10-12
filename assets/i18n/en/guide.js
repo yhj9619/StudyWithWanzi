@@ -7,7 +7,7 @@ i18nRegister('en', {
   'guide.header.subtitle': 'Easy to follow in 4 steps, even on day one — setup · card template · AI word list · review',
   'guide.hero.tag': '✨ New to Anki? Start here',
   'guide.hero.title': 'Just follow 4 steps to get started',
-  'guide.hero.subtitle': 'Each step covers only the essentials. Want more? Open <strong>[Learn more]</strong>. How to use the tools, and the <strong>FAQ</strong> for when you get stuck, are in the <a href="manual.html">User Manual</a>.',
+  'guide.hero.subtitle': 'Each step covers only the essentials. Want more? Open <strong>[Learn more]</strong>. How to use the tools, and the <strong>FAQ</strong> for when you get stuck, are in the <a href="ankiManual.html">User Manual</a>.',
 
   'guide.quick.ariaLabel': 'The 4 steps at a glance',
   'guide.quick.step1.desc': 'Install Anki and create fields to hold your word info',
@@ -99,7 +99,7 @@ i18nRegister('en', {
   'guide.step2.detail.partStyleTitle': '③ Styling',
   'guide.step2.detail.partStyleDesc': 'Sets how the card looks: font, text size, colors, and the colors used in dark mode.',
   'guide.step2.detail.openTip': '<strong>Another way to open the [Card Types] window</strong><br>In the Add window (<kbd>A</kbd>) or the Browse window (<kbd>B</kbd>), the <b>[Cards...]</b> button opens the same window.',
-  'guide.step2.manualLink': '📘 For a screen-by-screen walkthrough of the editor (themes · read-aloud · reset, etc.), see <a href="manual.html#editor">User Manual → Card Template Editor</a>.',
+  'guide.step2.manualLink': '📘 For a screen-by-screen walkthrough of the editor (themes · read-aloud · reset, etc.), see <a href="ankiManual.html#editor">User Manual → Card Template Editor</a>.',
 
   'guide.step3.badge': 'Step 3',
   'guide.step3.lead': 'Get a word list from AI and save it as a word list file (CSV). One file can add dozens or hundreds of cards at once.',
@@ -122,7 +122,7 @@ i18nRegister('en', {
   'guide.step3.detail.fail3': 'The column order doesn\'t match your fields, so you have to fix everything by hand.',
   'guide.step3.detail.fallbackTitle': '📝 Want to make the file yourself in Notepad?',
   'guide.step3.detail.fallbackBody': 'Copy only the word lines from the AI answer into Notepad, then in <b>[File] ➔ [Save As]</b> name the file <code>words.csv</code> and set <b>Encoding to [UTF-8]</b> at the bottom before saving. Without UTF-8, Korean, Chinese characters, and tone marks get garbled.',
-  'guide.step3.manualLink': '📘 For details on the Prompt Generator (levels · column order · CSV file, etc.), see <a href="manual.html#prompt">User Manual → AI Prompt Generator</a>.',
+  'guide.step3.manualLink': '📘 For details on the Prompt Generator (levels · column order · CSV file, etc.), see <a href="ankiManual.html#prompt">User Manual → AI Prompt Generator</a>.',
 
   'guide.step4.badge': 'Step 4',
   'guide.step4.lead': 'Import the word list file into Anki on your computer, then each day just review the cards Anki picks for you.',
@@ -176,5 +176,5 @@ i18nRegister('en', {
   'guide.step4.detail.rule2Body': 'Don\'t cram tricky grammar and 5 meanings into one card. One word and one meaning per card keeps your brain from getting tired.',
   'guide.step4.detail.rule3Title': 'Say it out loud, learn it in context',
   'guide.step4.detail.rule3Body': 'Don\'t just flip with your eyes — say the word out loud. Read how it\'s used in the example sentence too, and it will come out naturally when you speak.',
-  'guide.faqMoved': '<strong>The FAQ has moved to the User Manual</strong><br>Answers for when you get stuck, plus how to use the editor and the Prompt Generator, are now in one place. <a href="manual.html#faq">See the FAQ ➔</a>',
+  'guide.faqMoved': '<strong>The FAQ has moved to the User Manual</strong><br>Answers for when you get stuck, plus how to use the editor and the Prompt Generator, are now in one place. <a href="ankiManual.html#faq">See the FAQ ➔</a>',
 });

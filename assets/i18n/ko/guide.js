@@ -7,7 +7,7 @@ i18nRegister('ko', {
   'guide.header.subtitle': '처음 쓰는 분도 4단계로 따라 하기 — 준비 · 카드 서식 · AI 단어장 · 복습',
   'guide.hero.tag': '✨ Anki가 처음이라면 여기부터',
   'guide.hero.title': '4단계만 따라 하면 시작할 수 있어요',
-  'guide.hero.subtitle': '각 단계는 핵심만 짧게 정리했어요. 더 알고 싶으면 <strong>[자세히 보기]</strong>를 펼쳐 보세요. 도구 사용법과 막혔을 때 볼 <strong>자주 묻는 질문</strong>은 <a href="manual.html">사용 설명서</a>에 있어요.',
+  'guide.hero.subtitle': '각 단계는 핵심만 짧게 정리했어요. 더 알고 싶으면 <strong>[자세히 보기]</strong>를 펼쳐 보세요. 도구 사용법과 막혔을 때 볼 <strong>자주 묻는 질문</strong>은 <a href="ankiManual.html">사용 설명서</a>에 있어요.',
 
   // 한눈에 보는 4단계 (제목은 common.journey.step1~4)
   'guide.quick.ariaLabel': '한눈에 보는 4단계',
@@ -103,7 +103,7 @@ i18nRegister('ko', {
   'guide.step2.detail.partStyleTitle': '③ 스타일',
   'guide.step2.detail.partStyleDesc': '글꼴, 글자 크기, 색, 다크 모드일 때의 색처럼 카드의 겉모습을 정해요.',
   'guide.step2.detail.openTip': '<strong>[카드 유형] 창을 여는 다른 방법</strong><br>카드 추가 창(<kbd>A</kbd>)이나 탐색 창(<kbd>B</kbd>)에서 <b>[카드...]</b> 버튼을 눌러도 같은 창이 열려요.',
-  'guide.step2.manualLink': '📘 에디터의 화면별 자세한 사용법(테마 · 읽어주기 · 초기화 등)은 <a href="manual.html#editor">사용 설명서 → 카드 서식 에디터</a>에서 볼 수 있어요.',
+  'guide.step2.manualLink': '📘 에디터의 화면별 자세한 사용법(테마 · 읽어주기 · 초기화 등)은 <a href="ankiManual.html#editor">사용 설명서 → 카드 서식 에디터</a>에서 볼 수 있어요.',
 
   // Step 3: AI로 단어장 만들기
   'guide.step3.badge': 'Step 3',
@@ -127,7 +127,7 @@ i18nRegister('ko', {
   'guide.step3.detail.fail3': '칸 순서가 내 필드 순서와 달라서 하나하나 손으로 고쳐야 해요.',
   'guide.step3.detail.fallbackTitle': '📝 메모장으로 직접 만들고 싶다면',
   'guide.step3.detail.fallbackBody': 'AI 답변에서 단어 줄만 복사해 메모장에 붙여넣고, <b>[파일] ➔ [다른 이름으로 저장]</b>에서 파일 이름을 <code>words.csv</code>로 적은 뒤 아래쪽 <b>인코딩을 [UTF-8]</b>로 골라 저장하세요. UTF-8이 아니면 한글 · 한자 · 성조가 깨져요.',
-  'guide.step3.manualLink': '📘 프롬프트 생성기의 자세한 사용법(난이도 · 항목 순서 · CSV 파일 등)은 <a href="manual.html#prompt">사용 설명서 → AI 프롬프트 생성기</a>에서 볼 수 있어요.',
+  'guide.step3.manualLink': '📘 프롬프트 생성기의 자세한 사용법(난이도 · 항목 순서 · CSV 파일 등)은 <a href="ankiManual.html#prompt">사용 설명서 → AI 프롬프트 생성기</a>에서 볼 수 있어요.',
 
   // Step 4: 가져오기 · 복습
   'guide.step4.badge': 'Step 4',
@@ -182,5 +182,5 @@ i18nRegister('ko', {
   'guide.step4.detail.rule2Body': '한 카드에 어려운 문법과 뜻 5개를 몽땅 넣지 마세요. 카드 한 장에 단어 하나, 뜻 하나만 담아야 머리가 덜 지쳐요.',
   'guide.step4.detail.rule3Title': '소리 내어 읽고, 예문으로 익히기',
   'guide.step4.detail.rule3Body': '눈으로만 넘기지 말고 소리 내어 발음해 보세요. 예문 속에서 단어가 어떻게 쓰이는지 함께 읽으면 말할 때 바로 튀어나와요.',
-  'guide.faqMoved': '<strong>자주 묻는 질문은 사용 설명서로 옮겼어요</strong><br>막혔을 때 볼 질문과 답, 그리고 에디터 · 프롬프트 생성기 사용법을 한곳에 모았어요. <a href="manual.html#faq">자주 묻는 질문 보기 ➔</a>',
+  'guide.faqMoved': '<strong>자주 묻는 질문은 사용 설명서로 옮겼어요</strong><br>막혔을 때 볼 질문과 답, 그리고 에디터 · 프롬프트 생성기 사용법을 한곳에 모았어요. <a href="ankiManual.html#faq">자주 묻는 질문 보기 ➔</a>',
 });

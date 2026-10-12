@@ -243,7 +243,7 @@ i18nRegister('zh', {
   'editor.field.tts': '🔊 朗读',
   'editor.field.ttsTitle': '打开卡片时，用设备的语音朗读这个字段的文字',
   'editor.field.ttsUnsupportedTitle': '这种语言无法使用朗读',
-  'editor.tts.shortHtml': '🔊 已开启朗读。关闭自动播放 · 没有声音时 · 朗读速度 → <a href="manual.html#tts">使用说明</a>',
+  'editor.tts.shortHtml': '🔊 已开启朗读。关闭自动播放 · 没有声音时 · 朗读速度 → <a href="ankiManual.html#tts">使用说明</a>',
   'editor.tts.speedLabel': '朗读速度',
   'editor.advanced.ttsTitle': '🔊 朗读',
   'editor.tts.previewSpeed': '▶ 试听',
