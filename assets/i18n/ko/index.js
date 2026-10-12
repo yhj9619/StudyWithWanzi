@@ -59,7 +59,7 @@ i18nRegister('ko', {
 
   // 루트 메인 포털 허브 (Study with Wanzi)
   'portal.meta.title': 'Study with Wanzi - 다국어 학습 도구 모음',
-  'portal.meta.description': 'Anki 단어 학습 시스템부터 말하기 시험 실전 모의고사까지 — 비개발자도 바로 쓰는 무료 어학 학습 도구',
+  'portal.meta.description': '비개발자도 쉽게 쓰는 Anki 단어 학습 도구부터 말하기 시험 쉐도잉·실전 모의면접까지 — 브라우저에서 바로 쓰는 무료 어학 학습 도구',
   'portal.header.subtitle': '나만의 맞춤형 언어 학습 올인원 툴킷',
   'portal.hero.tag': '✨ Study with Wanzi Hub',
   'portal.hero.title': '원하는 언어 학습 도구를 선택하세요',
