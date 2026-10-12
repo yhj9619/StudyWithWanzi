@@ -286,6 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
     transcriptLangs: {},
     speechRecognizer: null,
     isSttActive: false,
+    hasSttHardwareCollision: false,
     questionSpentMs: {},
     speakingStartTime: null,
     isStoppedEarly: false,
@@ -2726,14 +2727,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const isMicEnabled = recordMyVoiceCheck ? recordMyVoiceCheck.checked : false;
     if (btnMicTest) btnMicTest.disabled = !isMicEnabled;
     if (sttOptionBlock) {
-      sttOptionBlock.style.opacity = isMicEnabled ? '1' : '0.45';
-      sttOptionBlock.style.pointerEvents = isMicEnabled ? 'auto' : 'none';
+      sttOptionBlock.style.opacity = SpeechRecognition ? '1' : '0.45';
+      sttOptionBlock.style.pointerEvents = SpeechRecognition ? 'auto' : 'none';
     }
     if (sttExtractCheck) {
-      sttExtractCheck.disabled = !isMicEnabled || !SpeechRecognition;
+      sttExtractCheck.disabled = !SpeechRecognition;
     }
     if (sttLangSelect) {
-      sttLangSelect.disabled = !isMicEnabled || !SpeechRecognition;
+      const isSttChecked = sttExtractCheck ? sttExtractCheck.checked : false;
+      sttLangSelect.disabled = !SpeechRecognition || !isSttChecked;
     }
   }
 
@@ -2809,7 +2811,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function startQuestionStt(qIndex) {
     if (!SpeechRecognition) return;
-    if (!recordMyVoiceCheck || !recordMyVoiceCheck.checked) return;
     if (!sttExtractCheck || !sttExtractCheck.checked) return;
 
     stopQuestionStt();
@@ -2843,10 +2844,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
       recognizer.onerror = (e) => {
         if (e.error === 'no-speech' || e.error === 'aborted') return;
+        if (e.error === 'audio-capture' || e.error === 'not-allowed') {
+          state.hasSttHardwareCollision = true;
+        }
         console.warn('SpeechRecognition error:', e.error);
       };
 
       recognizer.onend = () => {
+        // 모바일 하드웨어 충돌(audio-capture)이나 마이크 권한 거부 발생 시 무한 재시작 방지
+        if (state.hasSttHardwareCollision) {
+          state.isSttActive = false;
+          return;
+        }
         // 크롬 등에서 긴 침묵 시 자동 종료되는 현상 방지: SPEAKING 단계 유지 중이면 자동 재시작
         if (state.phase === 'SPEAKING' && state.isSttActive) {
           try {
@@ -3186,6 +3195,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.questionSpentMs) {
       state.questionSpentMs[qIndex] = 0;
     }
+    state.hasSttHardwareCollision = false;
   }
 
   function formatQuestionDuration(ms) {
@@ -3271,6 +3281,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.recordings = {};
     state.transcripts = {};
     state.transcriptLangs = {};
+    state.hasSttHardwareCollision = false;
     state.questionSpentMs = {};
     state.speakingStartTime = null;
     state.isStoppedEarly = false;
@@ -3799,7 +3810,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // 5) 추출된 답변 텍스트 (STT) 상자
       let transcriptBox = null;
-      const isSttConfigured = sttExtractCheck && sttExtractCheck.checked && recordMyVoiceCheck && recordMyVoiceCheck.checked;
+      const isSttConfigured = sttExtractCheck && sttExtractCheck.checked;
       const hasTranscript = Boolean(state.transcripts && state.transcripts[idx] && state.transcripts[idx].trim());
 
       if (isSttConfigured || hasTranscript) {
@@ -3893,7 +3904,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const tText = document.createElement('div');
         tText.className = 'transcript-text' + (text ? '' : ' empty');
-        tText.textContent = text || t('speaking.result.noTranscript');
+        if (text) {
+          tText.textContent = text;
+        } else if (state.hasSttHardwareCollision) {
+          tText.textContent = t('speaking.result.micCollisionNotice');
+        } else {
+          tText.textContent = t('speaking.result.noTranscript');
+        }
         tBody.appendChild(tText);
 
         // 토글 동작 연결 (기본적으로 접힌 상태)

@@ -85,7 +85,7 @@
   'speaking.step2.micDeniedGuide': '🔒 Microphone access is blocked.\nPlease click the lock (🔒) or site settings icon on the left of your browser address bar, change [Microphone] permission to "Allow", and reload the page.',
   'speaking.step2.micNotFound': '⚠️ No available microphone device found. Please check your mic connection.',
   'speaking.step2.sttExtract': '📝 Extract Answer Text (View & Copy STT in Results)',
-  'speaking.step2.sttExtractNotice': '⚡ Uses browser built-in speech recognition for free answer transcription shown on the results page.',
+  'speaking.step2.sttExtractNotice': '⚡ On mobile devices, recording and STT may conflict over microphone access. For speech-to-text on mobile, turning off "Record My Voice" is recommended.',
   'speaking.step2.sttLangLabel': 'Recognition Language:',
   'speaking.step2.sttLangAuto': '🌐 Auto (Auto-detects Korean, Chinese, English from question)',
   'speaking.step2.sttUnsupported': '(Unsupported in this browser · Chrome/Edge/Safari recommended)',
@@ -154,6 +154,7 @@
   'speaking.result.copyTranscriptTitle': 'Copy transcript to clipboard',
   'speaking.result.copied': 'Copied!',
   'speaking.result.noTranscript': 'No transcribed text detected (no speech detected or speech recognition unsupported).',
+  'speaking.result.micCollisionNotice': 'Could not transcribe due to microphone sharing limitations. (On mobile devices, turn off "Record My Voice" in Step 2 to use STT without microphone conflicts.)',
 
   // Additional keys: Backup, help link, browser tooltip, Excel tip
   'speaking.step1.excelTip': '💡 When copying from Excel, please copy only the question column or ensure questions are in the first column (Column A).',

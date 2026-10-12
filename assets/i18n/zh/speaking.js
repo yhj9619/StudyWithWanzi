@@ -85,7 +85,7 @@
   'speaking.step2.micDeniedGuide': '🔒 麦克风权限已被拒绝。\n请点击浏览器地址栏左侧的挂锁 (🔒) 或网站设置图标，将【麦克风】权限改为“允许”后刷新页面。',
   'speaking.step2.micNotFound': '⚠️ 未找到可用的麦克风设备，请检查麦克风连接。',
   'speaking.step2.sttExtract': '📝 提取作答文本 (在结果页查看 STT 文本与复制)',
-  'speaking.step2.sttExtractNotice': '⚡ 使用浏览器内置语音识别引擎，免费将回答转为文本并在结果页展示，无需 API Key。',
+  'speaking.step2.sttExtractNotice': '⚡ 移动端设备因麦克风独占限制，同时录音与STT可能会冲突。若主要需要提取文本，建议在第2步关闭“录制我的回答”。',
   'speaking.step2.sttLangLabel': '识别语言:',
   'speaking.step2.sttLangAuto': '🌐 自动（根据题目语言自动识别韩语·中文·英语等）',
   'speaking.step2.sttUnsupported': '（当前浏览器暂不支持，推荐使用 Chrome/Edge/Safari）',
@@ -154,6 +154,7 @@
   'speaking.result.copyTranscriptTitle': '复制转写文本至剪贴板',
   'speaking.result.copied': '已复制!',
   'speaking.result.noTranscript': '未检测到转写文本（未检测到语音或浏览器不支持识别）。',
+  'speaking.result.micCollisionNotice': '因麦克风占用限制未能提取文本。（移动端设备如需使用STT，请在第2步关闭“录制我的回答”后重试。）',
 
   // 补充键值：备份、使用说明链接、浏览器语音提示、Excel 复制提示
   'speaking.step1.excelTip': '💡 从 Excel 复制时，请仅复制题目列，或确保题目位于第一列（A列）。',

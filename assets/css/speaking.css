@@ -1234,6 +1234,13 @@
   max-width: 260px;
 }
 
+.stt-notice-tip {
+  font-size: 0.76rem;
+  color: #64748b;
+  margin: 0.25rem 0 0 1.7rem;
+  line-height: 1.45;
+}
+
 .stt-unsupported-tag {
   font-size: 0.72rem;
   color: #b91c1c;
@@ -2567,6 +2574,10 @@
   .select-stt-lang {
     max-width: 100%;
     width: 100%;
+  }
+
+  .stt-notice-tip {
+    margin-left: 0;
   }
 
   .sound-detail-panel .settings-grid {
