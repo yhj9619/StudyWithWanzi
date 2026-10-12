@@ -1995,7 +1995,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sound: soundToggle ? soundToggle.checked : (prev.sound !== undefined ? prev.sound : true),
       soundType: soundTypeSelect ? soundTypeSelect.value : (prev.soundType || 'triple'),
       soundDuration: soundDurationSelect ? soundDurationSelect.value : (prev.soundDuration || 'normal'),
-      sttExtract: sttExtractCheck ? sttExtractCheck.checked : (prev.sttExtract !== undefined ? prev.sttExtract : true),
+      sttExtract: sttExtractCheck ? sttExtractCheck.checked : (prev.sttExtract !== undefined ? prev.sttExtract : false),
       sttLang: sttLangSelect ? sttLangSelect.value : (prev.sttLang || 'auto')
     });
     try {
@@ -2021,7 +2021,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (questionInput) questionInput.value = state.tourContent;
         if (answerTimeInput) answerTimeInput.value = '120';
         if (breakTimeInput) breakTimeInput.value = '10';
-        if (sttExtractCheck && !sttExtractCheck.disabled) sttExtractCheck.checked = true;
+        if (sttExtractCheck && !sttExtractCheck.disabled) sttExtractCheck.checked = false;
         if (sttLangSelect) sttLangSelect.value = 'auto';
         updatePresetPillsActive('answerTimeInput');
         updatePresetPillsActive('breakTimeInput');
