@@ -78,13 +78,19 @@
   'speaking.step2.advancedOptions': '고급 연습 옵션',
   'speaking.step2.recordVoice': '🎙️ 내 답변 음성 녹음 (최종 화면에서 다시 듣기 · 다운로드)',
   'speaking.step2.recordVoicePrivacyNotice': '🔒 음성 녹음 데이터는 서버에 전달되지 않고 내 기기(브라우저)에만 임시 보관됩니다. 음성 녹음 파일이 제작자에게 공유되지 않으니 안심하세요.',
+  'speaking.step2.micTest': '🎙️ 마이크 테스트',
+  'speaking.step2.micTesting': '마이크 확인 중...',
+  'speaking.step2.micSuccess': '✅ 마이크가 정상 작동합니다!',
+  'speaking.step2.micDenied': '🔒 마이크 권한 차단됨',
+  'speaking.step2.micDeniedGuide': '🔒 마이크 접근 권한이 차단되어 있습니다.\n브라우저 주소창 왼쪽의 자물쇠(🔒) 또는 사이트 설정 아이콘을 클릭한 뒤, [마이크] 권한을 "허용"으로 변경하고 페이지를 새로고침(F5)해주세요.',
+  'speaking.step2.micNotFound': '⚠️ 사용 가능한 마이크 장치를 찾을 수 없습니다. 마이크 연결을 확인해주세요.',
 
   // 액션 버튼
   'speaking.action.start': '🚀 말하기 시험 시작',
   'speaking.action.startDesc': '설정한 조건으로 실전 모의 연습을 시작합니다',
 
   // 시뮬레이터 화면
-  'speaking.sim.micDenied': '마이크 권한이 허용되지 않았거나 마이크가 없어 음성 녹음 없이 시험을 시작합니다.',
+  'speaking.sim.micDenied': '마이크 권한이 허용되지 않았거나 마이크가 없어 음성 녹음 없이 시험을 시작합니다.\n(주소창 🔒 아이콘에서 마이크 권한을 허용할 수 있습니다)',
   'speaking.sim.statusListening': '🗣️ 문제 낭독 중...',
   'speaking.sim.statusSpeaking': '⏱️ 답변 시간 (Speaking)',
   'speaking.sim.statusBreak': '☕ 휴식 & 다음 문제 준비 중',
@@ -135,10 +141,11 @@
   'speaking.result.pauseAudio': '일시정지',
   'speaking.result.seekAudioAria': 'Q{num}번 답변 재생 구간 이동',
 
-  // 추가 키: JSON 백업, 도움말 링크, 브라우저 툴팁
+  // 추가 키: 백업, 도움말 링크, 브라우저 툴팁, 엑셀 복사 안내
+  'speaking.step1.excelTip': '💡 엑셀에서 복사할 때는 질문 열만 선택하여 복사하거나, 질문이 첫 번째 열(A열)에 오도록 해주세요.',
   'speaking.step1.helpLink': '❓ 사용법 보기',
-  'speaking.step1.exportJson': '💾 JSON 백업',
-  'speaking.step1.importJson': '📂 불러오기',
+  'speaking.step1.exportJson': '💾 파일로 백업 (.json)',
+  'speaking.step1.importJson': '📂 백업 파일 불러오기',
   'speaking.step1.importSuccess': '백업 파일에서 목록을 성공적으로 불러왔습니다.',
   'speaking.step1.importInvalid': '유효하지 않은 백업 파일 형식입니다.',
   'speaking.step2.browserTipBtn': '브라우저별 음성 안내',

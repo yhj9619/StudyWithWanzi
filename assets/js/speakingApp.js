@@ -153,6 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const testVoiceBtn = document.getElementById('testVoiceBtn');
   const ttsWaitCheck = document.getElementById('ttsWaitCheck');
   const recordMyVoiceCheck = document.getElementById('recordMyVoiceCheck');
+  const btnMicTest = document.getElementById('btnMicTest');
+  const micTestStatus = document.getElementById('micTestStatus');
   const hideTextCheck = document.getElementById('hideTextCheck');
   const soundToggle = document.getElementById('soundToggle');
   const soundTypeSelect = document.getElementById('soundTypeSelect');
@@ -1581,11 +1583,50 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   let isSpeakingCanceled = false;
+  let activeUtterances = [];
+  let ttsHeartbeatInterval = null;
+
+  function clearTtsTimers() {
+    if (ttsHeartbeatInterval) {
+      clearInterval(ttsHeartbeatInterval);
+      ttsHeartbeatInterval = null;
+    }
+  }
+
+  function startTtsHeartbeat() {
+    if (!ttsHeartbeatInterval && 'speechSynthesis' in window) {
+      ttsHeartbeatInterval = setInterval(() => {
+        if (window.speechSynthesis && window.speechSynthesis.speaking) {
+          // Chrome 15s freeze bug workaround: pause & resume keep-alive
+          window.speechSynthesis.pause();
+          window.speechSynthesis.resume();
+        }
+      }, 10000);
+    }
+  }
 
   function stopSpeaking() {
     isSpeakingCanceled = true;
+    clearTtsTimers();
+    activeUtterances = [];
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
+    }
+  }
+
+  // iOS Safari audio pipeline & speech synthesis unlock helper
+  function unlockAudioAndTtsForIOS() {
+    getAudioContext();
+    if ('speechSynthesis' in window) {
+      try {
+        const dummy = new SpeechSynthesisUtterance('');
+        dummy.volume = 0;
+        dummy.rate = 2.0;
+        window.speechSynthesis.speak(dummy);
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+      } catch (e) {}
     }
   }
 
@@ -1611,15 +1652,36 @@ document.addEventListener('DOMContentLoaded', () => {
       utterance.rate = rate;
       utterance.pitch = 1.0;
 
+      activeUtterances.push(utterance);
+      startTtsHeartbeat();
+
       let hasEnded = false;
+      let watchdogTimer = null;
       const finish = () => {
         if (!hasEnded && !isSpeakingCanceled) {
           hasEnded = true;
+          if (watchdogTimer) {
+            clearTimeout(watchdogTimer);
+            watchdogTimer = null;
+          }
+          const uIdx = activeUtterances.indexOf(utterance);
+          if (uIdx !== -1) activeUtterances.splice(uIdx, 1);
+          if (activeUtterances.length === 0) clearTtsTimers();
           if (onEnd) onEnd();
         }
       };
       utterance.onend = finish;
       utterance.onerror = finish;
+
+      // 크롬 GC 및 15초 멈춤 버그 방지용 안전 와치독 타임아웃
+      const estSec = Math.max(12, ((text || '').length / Math.max(0.5, rate)) * 0.45 + 10);
+      watchdogTimer = setTimeout(() => {
+        if (!hasEnded && !isSpeakingCanceled) {
+          console.warn('TTS safety watchdog timeout triggered');
+          finish();
+        }
+      }, estSec * 1000);
+
       window.speechSynthesis.speak(utterance);
       return;
     }
@@ -1654,16 +1716,36 @@ document.addEventListener('DOMContentLoaded', () => {
         utterance.lang = voice.lang || utterance.lang;
       }
 
+      activeUtterances.push(utterance);
+      startTtsHeartbeat();
+
       let segEnded = false;
+      let segWatchdog = null;
       const handleDone = () => {
         if (!segEnded && !isSpeakingCanceled) {
           segEnded = true;
+          if (segWatchdog) {
+            clearTimeout(segWatchdog);
+            segWatchdog = null;
+          }
+          const uIdx = activeUtterances.indexOf(utterance);
+          if (uIdx !== -1) activeUtterances.splice(uIdx, 1);
+          if (activeUtterances.length === 0) clearTtsTimers();
           setTimeout(playNextSegment, 70);
         }
       };
 
       utterance.onend = handleDone;
       utterance.onerror = handleDone;
+
+      const segEstSec = Math.max(8, ((seg.text || '').length / Math.max(0.5, rate)) * 0.45 + 8);
+      segWatchdog = setTimeout(() => {
+        if (!segEnded && !isSpeakingCanceled) {
+          console.warn('TTS segment watchdog timeout triggered');
+          handleDone();
+        }
+      }, segEstSec * 1000);
+
       window.speechSynthesis.speak(utterance);
     }
 
@@ -1766,6 +1848,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function switchDeck(deckId) {
     if (state.activeDeckId === deckId) return;
     saveActiveDeckContent(questionInput.value);
+    revokeAllRecordings();
     state.activeDeckId = deckId;
     questionInput.value = getActiveDeckContent();
     updateParsedStatus();
@@ -2625,6 +2708,65 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // 전체 시험 녹음 메모리(Blob URL) 일괄 해제 (메모리 누수 방지)
+  function revokeAllRecordings() {
+    if (state.recordings) {
+      Object.values(state.recordings).forEach(rec => {
+        if (rec && rec.url) {
+          try { URL.revokeObjectURL(rec.url); } catch (e) {}
+        }
+      });
+      state.recordings = {};
+    }
+  }
+
+  // 마이크 연결 및 브라우저 권한 테스트
+  let micTestTimer = null;
+  async function testMicrophonePermission() {
+    if (!micTestStatus) return;
+    if (micTestTimer) {
+      clearTimeout(micTestTimer);
+      micTestTimer = null;
+    }
+
+    micTestStatus.className = 'mic-status-badge testing';
+    micTestStatus.textContent = t('speaking.step2.micTesting');
+    micTestStatus.classList.remove('hidden');
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      micTestStatus.className = 'mic-status-badge error';
+      micTestStatus.textContent = t('speaking.step2.micNotFound');
+      alert(t('speaking.step2.micNotFound'));
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // 마이크 권한 정상 획득 시 즉시 트랙 해제
+      stream.getTracks().forEach(t => t.stop());
+      micTestStatus.className = 'mic-status-badge success';
+      micTestStatus.textContent = t('speaking.step2.micSuccess');
+      micTestTimer = setTimeout(() => {
+        if (micTestStatus) micTestStatus.classList.add('hidden');
+      }, 5000);
+    } catch (err) {
+      console.warn('Microphone test error:', err);
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        micTestStatus.className = 'mic-status-badge error';
+        micTestStatus.textContent = t('speaking.step2.micDenied');
+        alert(t('speaking.step2.micDeniedGuide'));
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        micTestStatus.className = 'mic-status-badge error';
+        micTestStatus.textContent = t('speaking.step2.micNotFound');
+        alert(t('speaking.step2.micNotFound'));
+      } else {
+        micTestStatus.className = 'mic-status-badge error';
+        micTestStatus.textContent = t('speaking.step2.micDenied');
+        alert(t('speaking.sim.micDenied'));
+      }
+    }
+  }
+
   // 오디오 시간 포맷 (0:00)
   function formatAudioTime(sec) {
     if (!Number.isFinite(sec) || sec < 0) sec = 0;
@@ -2698,7 +2840,17 @@ document.addEventListener('DOMContentLoaded', () => {
         playBtn.classList.remove('is-playing');
         playBtn.title = t('speaking.result.playAudio');
       } else {
-        const seekTime = parseFloat(slider.value) || 0;
+        const dur = (Number.isFinite(userAudioPlayer.duration) && userAudioPlayer.duration > 0)
+          ? userAudioPlayer.duration
+          : (parseFloat(slider.max) || totalSec || 0);
+        let seekTime = parseFloat(slider.value) || 0;
+        // 재생 완료 지점 끝에 도달해 있었던 경우 처음부터 재시작
+        if (dur > 0 && seekTime >= dur - 0.25) {
+          seekTime = 0;
+          slider.value = 0;
+          updateSliderProgress(slider, 0);
+          curTimeEl.textContent = '0:00';
+        }
         if (Math.abs(userAudioPlayer.currentTime - seekTime) > 0.3) {
           try { userAudioPlayer.currentTime = seekTime; } catch (e) {}
         }
@@ -2721,7 +2873,15 @@ document.addEventListener('DOMContentLoaded', () => {
       userAudioPlayer = new Audio();
     }
 
-    const startSec = parseFloat(slider.value) || 0;
+    let startSec = parseFloat(slider.value) || 0;
+    const durEstimated = parseFloat(slider.max) || totalSec || 0;
+    if (durEstimated > 0 && startSec >= durEstimated - 0.25) {
+      startSec = 0;
+      slider.value = 0;
+      updateSliderProgress(slider, 0);
+      curTimeEl.textContent = '0:00';
+    }
+
     userAudioPlayer.src = url;
     activeAudioQIndex = qIdx;
     activeAudioPlayBtn = playBtn;
@@ -2759,10 +2919,12 @@ document.addEventListener('DOMContentLoaded', () => {
         playBtn.innerHTML = '▶️';
         playBtn.classList.remove('is-playing');
         playBtn.title = t('speaking.result.playAudio');
-        slider.value = 0;
-        updateSliderProgress(slider, 0);
-        curTimeEl.textContent = '0:00';
-        userAudioPlayer.currentTime = 0;
+        const maxVal = parseFloat(slider.max) || totalSec || 0;
+        if (maxVal > 0) {
+          slider.value = maxVal;
+          updateSliderProgress(slider, 100);
+          curTimeEl.textContent = totalTimeEl.textContent || formatAudioTime(maxVal);
+        }
         playerBox.classList.remove('is-active');
       }
     };
@@ -2918,14 +3080,7 @@ document.addEventListener('DOMContentLoaded', () => {
     releaseMicrophone();
 
     // 이전 시험 녹음 메모리 해제
-    if (state.recordings) {
-      Object.values(state.recordings).forEach(rec => {
-        if (rec && rec.url) {
-          try { URL.revokeObjectURL(rec.url); } catch (e) {}
-        }
-      });
-    }
-    state.recordings = {};
+    revokeAllRecordings();
     state.questionSpentMs = {};
     state.speakingStartTime = null;
     state.isStoppedEarly = false;
@@ -2940,7 +3095,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
           console.warn('Microphone permission denied or error:', err);
           state.micStream = null;
-          alert(t('speaking.sim.micDenied'));
+          if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+            alert(t('speaking.step2.micDeniedGuide'));
+          } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+            alert(t('speaking.step2.micNotFound'));
+          } else {
+            alert(t('speaking.sim.micDenied'));
+          }
         }
       } else {
         alert(t('speaking.sim.micDenied'));
@@ -2975,6 +3136,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 특정 문제 1개만 단독 다시 풀기
   async function retakeSingleQuestion(idx) {
     if (idx < 0 || idx >= state.queue.length) return;
+    unlockAudioAndTtsForIOS();
     stopUserVoicePlayback();
     resetQuestionData(idx);
 
@@ -2985,6 +3147,11 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
           console.warn('Microphone error on retake:', err);
           state.micStream = null;
+          if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+            alert(t('speaking.step2.micDeniedGuide'));
+          } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+            alert(t('speaking.step2.micNotFound'));
+          }
         }
       }
     }
@@ -3007,6 +3174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     stopQuestionRecording();
     releaseMicrophone();
     stopUserVoicePlayback();
+    revokeAllRecordings();
     clearInterval(state.timerInterval);
     state.phase = 'SETUP';
     state.isStoppedEarly = false;
@@ -3367,10 +3535,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // 슬라이더 이벤트: 사용자가 드래그하며 구간 이동
         slider.addEventListener('input', () => {
           isUserDraggingSlider = true;
-          const seekSec = parseFloat(slider.value) || 0;
-          curTimeEl.textContent = formatAudioTime(seekSec);
           const maxVal = parseFloat(slider.max) || totalSec || 1;
-          updateSliderProgress(slider, (seekSec / maxVal) * 100);
+          const rawSeek = parseFloat(slider.value) || 0;
+          // 맨 끝으로 드래그했을 때 의도치 않게 바로 끝남(ended) 처리되는 현상 방지
+          const seekSec = Math.min(rawSeek, Math.max(0, maxVal - 0.15));
+          curTimeEl.textContent = formatAudioTime(rawSeek);
+          updateSliderProgress(slider, (rawSeek / maxVal) * 100);
 
           if (activeAudioQIndex === idx && userAudioPlayer) {
             try { userAudioPlayer.currentTime = seekSec; } catch (e) {}
@@ -3379,7 +3549,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         slider.addEventListener('change', () => {
           isUserDraggingSlider = false;
-          const seekSec = parseFloat(slider.value) || 0;
+          const maxVal = parseFloat(slider.max) || totalSec || 1;
+          const rawSeek = parseFloat(slider.value) || 0;
+          const seekSec = Math.min(rawSeek, Math.max(0, maxVal - 0.15));
           if (activeAudioQIndex === idx && userAudioPlayer) {
             try { userAudioPlayer.currentTime = seekSec; } catch (e) {}
           } else {
@@ -3478,7 +3650,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 버튼 이벤트 연결
-  if (startExamBtn) startExamBtn.addEventListener('click', startExam);
+  if (btnMicTest) btnMicTest.addEventListener('click', testMicrophonePermission);
+  if (startExamBtn) {
+    startExamBtn.addEventListener('click', () => {
+      unlockAudioAndTtsForIOS();
+      startExam();
+    });
+  }
   if (btnPauseResume) btnPauseResume.addEventListener('click', togglePause);
   if (btnReplayVoice) {
     btnReplayVoice.addEventListener('click', () => {
@@ -3540,6 +3718,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnRetryExam) {
     btnRetryExam.addEventListener('click', () => {
       if (confirm(t('speaking.result.confirmRetryExam'))) {
+        unlockAudioAndTtsForIOS();
         stopUserVoicePlayback();
         startExam();
       }
@@ -4893,6 +5072,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try { stopShadowPlayback(); } catch (e) {}
     try { stopShadowVoiceRecording(); } catch (e) {}
     try { releaseMicrophone(); } catch (e) {}
+    try { revokeAllRecordings(); } catch (e) {}
   };
   window.addEventListener('pagehide', cleanupOnPageLeave);
   window.addEventListener('beforeunload', cleanupOnPageLeave);

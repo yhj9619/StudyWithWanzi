@@ -78,13 +78,19 @@
   'speaking.step2.advancedOptions': '高级练习选项',
   'speaking.step2.recordVoice': '🎙️ 录制我的回答（在最终页面重听与下载）',
   'speaking.step2.recordVoicePrivacyNotice': '🔒 录音数据绝不会上传至服务器，仅保留在您的设备浏览器中。录音文件不会共享给开发者，请放心使用。',
+  'speaking.step2.micTest': '🎙️ 测试麦克风',
+  'speaking.step2.micTesting': '正在检测麦克风...',
+  'speaking.step2.micSuccess': '✅ 麦克风工作正常！',
+  'speaking.step2.micDenied': '🔒 麦克风权限被拒绝',
+  'speaking.step2.micDeniedGuide': '🔒 麦克风权限已被拒绝。\n请点击浏览器地址栏左侧的挂锁 (🔒) 或网站设置图标，将【麦克风】权限改为“允许”后刷新页面。',
+  'speaking.step2.micNotFound': '⚠️ 未找到可用的麦克风设备，请检查麦克风连接。',
 
   // 动作
   'speaking.action.start': '🚀 开始口语模拟考试',
   'speaking.action.startDesc': '按照所设条件开始实战模拟练习',
 
   // 模考画面
-  'speaking.sim.micDenied': '麦克风权限未开启或未检测到麦克风，将不录音直接开始考试。',
+  'speaking.sim.micDenied': '麦克风权限未开启或未检测到麦克风，将不录音直接开始考试。\n（可在浏览器地址栏 🔒 图标中允许麦克风权限）',
   'speaking.sim.statusListening': '🗣️ 题目朗读中...',
   'speaking.sim.statusSpeaking': '⏱️ 作答时间 (Speaking)',
   'speaking.sim.statusBreak': '☕ 休息 & 准备下一题',
@@ -135,10 +141,11 @@
   'speaking.result.pauseAudio': '暂停',
   'speaking.result.seekAudioAria': '调整第 {num} 题播放进度',
 
-  // 补充键值：JSON 备份、使用说明链接、浏览器语音提示
+  // 补充键值：备份、使用说明链接、浏览器语音提示、Excel 复制提示
+  'speaking.step1.excelTip': '💡 从 Excel 复制时，请仅复制题目列，或确保题目位于第一列（A列）。',
   'speaking.step1.helpLink': '❓ 使用说明',
-  'speaking.step1.exportJson': '💾 备份 JSON',
-  'speaking.step1.importJson': '📂 导入备份',
+  'speaking.step1.exportJson': '💾 备份为文件 (.json)',
+  'speaking.step1.importJson': '📂 导入备份文件',
   'speaking.step1.importSuccess': '已成功从备份文件中恢复列表。',
   'speaking.step1.importInvalid': '备份文件格式无效。',
   'speaking.step2.browserTipBtn': '各浏览器语音说明',

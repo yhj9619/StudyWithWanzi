@@ -78,13 +78,19 @@
   'speaking.step2.advancedOptions': 'Advanced Practice Options',
   'speaking.step2.recordVoice': '🎙️ Record my answers (Replay & download on result screen)',
   'speaking.step2.recordVoicePrivacyNotice': '🔒 Voice recordings are never sent to any server and stay only on your device. Your audio files are never shared with the creator, so you can practice with peace of mind.',
+  'speaking.step2.micTest': '🎙️ Test Microphone',
+  'speaking.step2.micTesting': 'Checking microphone...',
+  'speaking.step2.micSuccess': '✅ Microphone is working properly!',
+  'speaking.step2.micDenied': '🔒 Microphone blocked',
+  'speaking.step2.micDeniedGuide': '🔒 Microphone access is blocked.\nPlease click the lock (🔒) or site settings icon on the left of your browser address bar, change [Microphone] permission to "Allow", and reload the page.',
+  'speaking.step2.micNotFound': '⚠️ No available microphone device found. Please check your mic connection.',
 
   // Action
   'speaking.action.start': '🚀 Start Speaking Test',
   'speaking.action.startDesc': 'Start mock exam with configured settings',
 
   // Simulator screen
-  'speaking.sim.micDenied': 'Microphone access was denied or unavailable. Starting test without recording.',
+  'speaking.sim.micDenied': 'Microphone access was denied or unavailable. Starting test without recording.\n(You can enable mic permissions from the browser 🔒 lock icon)',
   'speaking.sim.statusListening': '🗣️ Reading question...',
   'speaking.sim.statusSpeaking': '⏱️ Speaking Time',
   'speaking.sim.statusBreak': '☕ Break & Preparing next question',
@@ -135,10 +141,11 @@
   'speaking.result.pauseAudio': 'Pause',
   'speaking.result.seekAudioAria': 'Seek audio position for Question {num}',
 
-  // Additional keys: JSON backup, help link, browser tooltip
+  // Additional keys: Backup, help link, browser tooltip, Excel tip
+  'speaking.step1.excelTip': '💡 When copying from Excel, please copy only the question column or ensure questions are in the first column (Column A).',
   'speaking.step1.helpLink': '❓ How to Use',
-  'speaking.step1.exportJson': '💾 Backup JSON',
-  'speaking.step1.importJson': '📂 Import',
+  'speaking.step1.exportJson': '💾 Backup to File (.json)',
+  'speaking.step1.importJson': '📂 Restore Backup',
   'speaking.step1.importSuccess': 'Successfully restored lists from backup file.',
   'speaking.step1.importInvalid': 'Invalid backup file format.',
   'speaking.step2.browserTipBtn': 'Browser Voice Guide',
