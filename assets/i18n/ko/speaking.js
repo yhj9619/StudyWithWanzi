@@ -122,13 +122,18 @@
   'speaking.result.downloadMyVoice': '다운로드',
   'speaking.result.resetQuestion': '초기화',
   'speaking.result.retakeQuestion': '다시 풀기',
+  'speaking.result.confirmRetakeQ': 'Q{num}번 문제를 다시 푸시겠습니까? 기존 녹음과 답변 기록이 새로 시작됩니다.',
   'speaking.result.confirmResetQ': 'Q{num}번 문제의 답변 기록을 초기화할까요?',
   'speaking.result.noRecording': '녹음 없음',
   'speaking.result.timeSpentBadge': '⏱️ 소요: {time}',
   'speaking.result.timeMinSec': '{min}분 {sec}초',
   'speaking.result.timeSecOnly': '{sec}초',
   'speaking.result.retry': '🔄 같은 설정으로 다시 풀기',
+  'speaking.result.confirmRetryExam': '같은 설정으로 시험을 다시 푸시겠습니까? 현재 결과와 답변 기록이 새로 시작됩니다.',
   'speaking.result.backToSetup': '⚙️ 문제 및 설정 변경하기',
+  'speaking.result.playAudio': '재생',
+  'speaking.result.pauseAudio': '일시정지',
+  'speaking.result.seekAudioAria': 'Q{num}번 답변 재생 구간 이동',
 
   // 추가 키: JSON 백업, 도움말 링크, 브라우저 툴팁
   'speaking.step1.helpLink': '❓ 사용법 보기',

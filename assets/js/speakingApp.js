@@ -2625,8 +2625,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // 오디오 시간 포맷 (0:00)
+  function formatAudioTime(sec) {
+    if (!Number.isFinite(sec) || sec < 0) sec = 0;
+    const s = Math.floor(sec);
+    const m = Math.floor(s / 60);
+    const rem = s % 60;
+    return `${m}:${String(rem).padStart(2, '0')}`;
+  }
+
+  // 슬라이더 진행 바 배경 색상 업데이트 (진행 부분은 primary blue, 미진행 부분은 회색)
+  function updateSliderProgress(slider, pct) {
+    if (!slider) return;
+    const clamped = Math.max(0, Math.min(100, pct));
+    slider.style.background = `linear-gradient(to right, var(--primary, #1a73e8) 0%, var(--primary, #1a73e8) ${clamped}%, #cbd5e1 ${clamped}%, #cbd5e1 100%)`;
+  }
+
   let userAudioPlayer = null;
-  let activeVoiceBtn = null;
+  let activeVoiceBtn = null; // 쉐도잉 등 기존 심플 토글 버튼 호환용
+  let activeAudioQIndex = null;
+  let activeAudioPlayBtn = null;
+  let activeAudioSlider = null;
+  let activeAudioCurTimeEl = null;
+  let activeAudioPlayerBox = null;
+  let isUserDraggingSlider = false;
 
   function stopUserVoicePlayback() {
     if (userAudioPlayer) {
@@ -2635,13 +2657,132 @@ document.addEventListener('DOMContentLoaded', () => {
         userAudioPlayer.currentTime = 0;
       } catch (e) {}
     }
+    // 기존 심플 버튼 UI 리셋
     if (activeVoiceBtn) {
       activeVoiceBtn.innerHTML = `▶️ <span>${escapeHtml(t('speaking.result.listenMyVoice'))}</span>`;
       activeVoiceBtn.classList.remove('is-playing');
       activeVoiceBtn = null;
     }
+    // 결과 화면 시크 바 플레이어 UI 리셋
+    if (activeAudioPlayBtn) {
+      activeAudioPlayBtn.innerHTML = '▶️';
+      activeAudioPlayBtn.classList.remove('is-playing');
+      activeAudioPlayBtn.title = t('speaking.result.playAudio');
+    }
+    if (activeAudioSlider) {
+      activeAudioSlider.value = 0;
+      updateSliderProgress(activeAudioSlider, 0);
+    }
+    if (activeAudioCurTimeEl) {
+      activeAudioCurTimeEl.textContent = '0:00';
+    }
+    if (activeAudioPlayerBox) {
+      activeAudioPlayerBox.classList.remove('is-active');
+    }
+    activeAudioQIndex = null;
+    activeAudioPlayBtn = null;
+    activeAudioSlider = null;
+    activeAudioCurTimeEl = null;
+    activeAudioPlayerBox = null;
   }
 
+  // 결과 화면 문제별 오디오 플레이어 (구간 이동 시크 바 지원)
+  function toggleQuestionVoicePlayback(qIdx, url, playerBox, playBtn, slider, curTimeEl, totalTimeEl, totalSec) {
+    if (!url) return;
+
+    // 같은 문제에서 재생/일시정지 토글
+    if (activeAudioQIndex === qIdx && userAudioPlayer) {
+      if (!userAudioPlayer.paused) {
+        userAudioPlayer.pause();
+        playBtn.innerHTML = '▶️';
+        playBtn.classList.remove('is-playing');
+        playBtn.title = t('speaking.result.playAudio');
+      } else {
+        const seekTime = parseFloat(slider.value) || 0;
+        if (Math.abs(userAudioPlayer.currentTime - seekTime) > 0.3) {
+          try { userAudioPlayer.currentTime = seekTime; } catch (e) {}
+        }
+        userAudioPlayer.play().then(() => {
+          playBtn.innerHTML = '⏸️';
+          playBtn.classList.add('is-playing');
+          playBtn.title = t('speaking.result.pauseAudio');
+        }).catch(err => {
+          console.warn('Audio resume error:', err);
+          stopUserVoicePlayback();
+        });
+      }
+      return;
+    }
+
+    // 다른 문제이거나 첫 재생일 때
+    stopUserVoicePlayback();
+
+    if (!userAudioPlayer) {
+      userAudioPlayer = new Audio();
+    }
+
+    const startSec = parseFloat(slider.value) || 0;
+    userAudioPlayer.src = url;
+    activeAudioQIndex = qIdx;
+    activeAudioPlayBtn = playBtn;
+    activeAudioSlider = slider;
+    activeAudioCurTimeEl = curTimeEl;
+    activeAudioPlayerBox = playerBox;
+
+    playerBox.classList.add('is-active');
+    playBtn.innerHTML = '⏸️';
+    playBtn.classList.add('is-playing');
+    playBtn.title = t('speaking.result.pauseAudio');
+
+    userAudioPlayer.onloadedmetadata = () => {
+      if (Number.isFinite(userAudioPlayer.duration) && userAudioPlayer.duration > 0) {
+        const dur = userAudioPlayer.duration;
+        slider.max = dur.toFixed(2);
+        totalTimeEl.textContent = formatAudioTime(dur);
+      }
+      if (startSec > 0 && startSec < (parseFloat(slider.max) || 9999)) {
+        userAudioPlayer.currentTime = startSec;
+      }
+    };
+
+    userAudioPlayer.ontimeupdate = () => {
+      if (isUserDraggingSlider || activeAudioQIndex !== qIdx) return;
+      const cur = userAudioPlayer.currentTime;
+      slider.value = cur;
+      curTimeEl.textContent = formatAudioTime(cur);
+      const maxVal = parseFloat(slider.max) || totalSec || 1;
+      updateSliderProgress(slider, (cur / maxVal) * 100);
+    };
+
+    userAudioPlayer.onended = () => {
+      if (activeAudioQIndex === qIdx) {
+        playBtn.innerHTML = '▶️';
+        playBtn.classList.remove('is-playing');
+        playBtn.title = t('speaking.result.playAudio');
+        slider.value = 0;
+        updateSliderProgress(slider, 0);
+        curTimeEl.textContent = '0:00';
+        userAudioPlayer.currentTime = 0;
+        playerBox.classList.remove('is-active');
+      }
+    };
+
+    userAudioPlayer.onerror = (e) => {
+      console.warn('Audio playback error:', e);
+      stopUserVoicePlayback();
+    };
+
+    if (startSec > 0) {
+      try { userAudioPlayer.currentTime = startSec; } catch (e) {}
+    }
+
+    userAudioPlayer.play().catch(err => {
+      console.warn('Audio play error:', err);
+      stopUserVoicePlayback();
+    });
+  }
+
+  // 쉐도잉 스튜디오 등 기존 심플 토글 버튼 호환용
   function toggleUserVoicePlayback(url, btn) {
     if (!url) return;
 
@@ -3140,9 +3281,21 @@ document.addEventListener('DOMContentLoaded', () => {
       text.className = 'result-q-text';
       text.textContent = q;
 
-      mainDiv.append(num, text);
+      // 문제 바로 옆 낭독 스피커 아이콘 버튼
+      const speakQBtn = document.createElement('button');
+      speakQBtn.type = 'button';
+      speakQBtn.className = 'btn-q-speak-inline';
+      speakQBtn.innerHTML = '🔊';
+      speakQBtn.title = t('speaking.result.listenQuestion');
+      speakQBtn.setAttribute('aria-label', `Q${idx + 1} ${t('speaking.result.listenQuestion')}`);
+      speakQBtn.addEventListener('click', () => {
+        stopUserVoicePlayback();
+        speakText(q);
+      });
 
-      // 하단 액션 버튼 그룹 (소요 시간 배지, 문제 다시 듣기, 내 답변 듣기, 다운로드, 다시 풀기, 초기화)
+      mainDiv.append(num, text, speakQBtn);
+
+      // 하단 액션 버튼 그룹 (소요 시간 배지, 다시 풀기, 초기화)
       const actionsDiv = document.createElement('div');
       actionsDiv.className = 'result-q-actions';
 
@@ -3157,41 +3310,89 @@ document.addEventListener('DOMContentLoaded', () => {
       timeBadge.innerHTML = formatQuestionDuration(spentMs);
       actionsDiv.appendChild(timeBadge);
 
-      // 1) 문제 낭독 다시 듣기
-      const replayQBtn = document.createElement('button');
-      replayQBtn.type = 'button';
-      replayQBtn.className = 'btn-review-action btn-replay-q';
-      replayQBtn.innerHTML = `🔊 <span>${escapeHtml(t('speaking.result.listenQuestion'))}</span>`;
-      replayQBtn.title = t('speaking.result.listenQuestion');
-      replayQBtn.addEventListener('click', () => {
-        stopUserVoicePlayback();
-        speakText(q);
-      });
-      actionsDiv.appendChild(replayQBtn);
-
-      // 2) 내 답변 녹음 듣기 및 다운로드 (녹음 데이터가 있는 경우)
+      // 2) 내 답변 녹음 플레이어 (녹음 데이터가 있는 경우 구간 이동 바 제공)
       const rec = state.recordings ? state.recordings[idx] : null;
+      let playerBox = null;
       if (rec && rec.url) {
-        const playVoiceBtn = document.createElement('button');
-        playVoiceBtn.type = 'button';
-        playVoiceBtn.className = 'btn-review-action btn-play-my-voice';
-        playVoiceBtn.innerHTML = `▶️ <span>${escapeHtml(t('speaking.result.listenMyVoice'))}</span>`;
-        playVoiceBtn.title = t('speaking.result.listenMyVoice');
-        playVoiceBtn.addEventListener('click', () => {
-          stopSpeaking();
-          toggleUserVoicePlayback(rec.url, playVoiceBtn);
-        });
-        actionsDiv.appendChild(playVoiceBtn);
+        const totalSec = (rec.durationMs && rec.durationMs > 0)
+          ? Math.max(0.1, rec.durationMs / 1000)
+          : 0;
+
+        playerBox = document.createElement('div');
+        playerBox.className = 'result-q-player-box';
+        playerBox.dataset.qIndex = String(idx);
+
+        const playBtn = document.createElement('button');
+        playBtn.type = 'button';
+        playBtn.className = 'btn-audio-play-toggle';
+        playBtn.innerHTML = '▶️';
+        playBtn.title = t('speaking.result.playAudio');
+        playBtn.setAttribute('aria-label', `Q${idx + 1} ${t('speaking.result.playAudio')}`);
+
+        const curTimeEl = document.createElement('span');
+        curTimeEl.className = 'audio-time-badge current';
+        curTimeEl.textContent = '0:00';
+
+        const sliderWrap = document.createElement('div');
+        sliderWrap.className = 'audio-slider-wrap';
+
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.className = 'audio-seek-slider';
+        slider.min = '0';
+        slider.max = totalSec > 0 ? totalSec.toFixed(2) : '100';
+        slider.step = '0.05';
+        slider.value = '0';
+        slider.title = t('speaking.result.seekAudioAria', { num: idx + 1 });
+        slider.setAttribute('aria-label', t('speaking.result.seekAudioAria', { num: idx + 1 }));
+        updateSliderProgress(slider, 0);
+
+        sliderWrap.appendChild(slider);
+
+        const totalTimeEl = document.createElement('span');
+        totalTimeEl.className = 'audio-time-badge total';
+        totalTimeEl.textContent = formatAudioTime(totalSec);
 
         const downloadLink = document.createElement('a');
-        downloadLink.className = 'btn-review-action btn-download-my-voice';
+        downloadLink.className = 'btn-audio-download';
         downloadLink.href = rec.url;
         const fileName = buildAudioDownloadFilename(q, idx, rec.ext);
         downloadLink.download = fileName;
         downloadLink.setAttribute('download', fileName);
         downloadLink.innerHTML = `💾 <span>${escapeHtml(t('speaking.result.downloadMyVoice'))}</span>`;
         downloadLink.title = `${t('speaking.result.downloadMyVoice')} (${fileName})`;
-        actionsDiv.appendChild(downloadLink);
+
+        playerBox.append(playBtn, curTimeEl, sliderWrap, totalTimeEl, downloadLink);
+
+        // 슬라이더 이벤트: 사용자가 드래그하며 구간 이동
+        slider.addEventListener('input', () => {
+          isUserDraggingSlider = true;
+          const seekSec = parseFloat(slider.value) || 0;
+          curTimeEl.textContent = formatAudioTime(seekSec);
+          const maxVal = parseFloat(slider.max) || totalSec || 1;
+          updateSliderProgress(slider, (seekSec / maxVal) * 100);
+
+          if (activeAudioQIndex === idx && userAudioPlayer) {
+            try { userAudioPlayer.currentTime = seekSec; } catch (e) {}
+          }
+        });
+
+        slider.addEventListener('change', () => {
+          isUserDraggingSlider = false;
+          const seekSec = parseFloat(slider.value) || 0;
+          if (activeAudioQIndex === idx && userAudioPlayer) {
+            try { userAudioPlayer.currentTime = seekSec; } catch (e) {}
+          } else {
+            stopSpeaking();
+            toggleQuestionVoicePlayback(idx, rec.url, playerBox, playBtn, slider, curTimeEl, totalTimeEl, totalSec);
+          }
+        });
+
+        // 재생/일시정지 토글
+        playBtn.addEventListener('click', () => {
+          stopSpeaking();
+          toggleQuestionVoicePlayback(idx, rec.url, playerBox, playBtn, slider, curTimeEl, totalTimeEl, totalSec);
+        });
       } else {
         const noRec = document.createElement('span');
         noRec.className = 'no-rec-label';
@@ -3199,14 +3400,17 @@ document.addEventListener('DOMContentLoaded', () => {
         actionsDiv.appendChild(noRec);
       }
 
-      // 3) 다시 풀기 (이 문제만 단독 재응시)
+      // 3) 다시 풀기 (이 문제만 단독 재응시) - 실수 방지를 위해 confirm 확인
       const retakeQBtn = document.createElement('button');
       retakeQBtn.type = 'button';
       retakeQBtn.className = 'btn-review-action btn-retake-q';
       retakeQBtn.innerHTML = `🎯 <span>${escapeHtml(t('speaking.result.retakeQuestion'))}</span>`;
       retakeQBtn.title = `Q${idx + 1} ${t('speaking.result.retakeQuestion')}`;
       retakeQBtn.addEventListener('click', () => {
-        retakeSingleQuestion(idx);
+        if (confirm(t('speaking.result.confirmRetakeQ', { num: idx + 1 }))) {
+          stopUserVoicePlayback();
+          retakeSingleQuestion(idx);
+        }
       });
       actionsDiv.appendChild(retakeQBtn);
 
@@ -3218,13 +3422,18 @@ document.addEventListener('DOMContentLoaded', () => {
       resetQBtn.title = `Q${idx + 1} ${t('speaking.result.resetQuestion')}`;
       resetQBtn.addEventListener('click', () => {
         if (confirm(t('speaking.result.confirmResetQ', { num: idx + 1 }))) {
+          stopUserVoicePlayback();
           resetQuestionData(idx);
           finishExam();
         }
       });
       actionsDiv.appendChild(resetQBtn);
 
-      item.append(mainDiv, actionsDiv);
+      if (playerBox) {
+        item.append(mainDiv, playerBox, actionsDiv);
+      } else {
+        item.append(mainDiv, actionsDiv);
+      }
       resQuestionList.appendChild(item);
     });
   }
@@ -3328,9 +3537,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (btnStopExam) btnStopExam.addEventListener('click', stopExamConfirm);
 
-  if (btnRetryExam) btnRetryExam.addEventListener('click', startExam);
+  if (btnRetryExam) {
+    btnRetryExam.addEventListener('click', () => {
+      if (confirm(t('speaking.result.confirmRetryExam'))) {
+        stopUserVoicePlayback();
+        startExam();
+      }
+    });
+  }
   if (btnBackToSetup) {
     btnBackToSetup.addEventListener('click', () => {
+      stopUserVoicePlayback();
       returnToSetupView();
     });
   }

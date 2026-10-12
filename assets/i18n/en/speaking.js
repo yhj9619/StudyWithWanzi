@@ -122,13 +122,18 @@
   'speaking.result.downloadMyVoice': 'Download',
   'speaking.result.resetQuestion': 'Reset',
   'speaking.result.retakeQuestion': 'Retake',
+  'speaking.result.confirmRetakeQ': 'Do you want to retake Question {num}? A new recording will begin.',
   'speaking.result.confirmResetQ': 'Do you want to reset the answer record for Question {num}?',
   'speaking.result.noRecording': 'No Recording',
   'speaking.result.timeSpentBadge': '⏱️ Time: {time}',
   'speaking.result.timeMinSec': '{min}m {sec}s',
   'speaking.result.timeSecOnly': '{sec}s',
   'speaking.result.retry': '🔄 Retake with same settings',
+  'speaking.result.confirmRetryExam': 'Do you want to retake the test with the same settings? Current recordings will be reset.',
   'speaking.result.backToSetup': '⚙️ Change questions & settings',
+  'speaking.result.playAudio': 'Play',
+  'speaking.result.pauseAudio': 'Pause',
+  'speaking.result.seekAudioAria': 'Seek audio position for Question {num}',
 
   // Additional keys: JSON backup, help link, browser tooltip
   'speaking.step1.helpLink': '❓ How to Use',

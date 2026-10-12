@@ -122,13 +122,18 @@
   'speaking.result.downloadMyVoice': '下载',
   'speaking.result.resetQuestion': '重置',
   'speaking.result.retakeQuestion': '重做此题',
+  'speaking.result.confirmRetakeQ': '确定要重新作答第 {num} 题吗？将重新开始该题录音。',
   'speaking.result.confirmResetQ': '确定要重置第 {num} 题的作答记录吗？',
   'speaking.result.noRecording': '无录音',
   'speaking.result.timeSpentBadge': '⏱️ 用时: {time}',
   'speaking.result.timeMinSec': '{min}分 {sec}秒',
   'speaking.result.timeSecOnly': '{sec}秒',
   'speaking.result.retry': '🔄 使用相同设置再练一次',
+  'speaking.result.confirmRetryExam': '确定要以相同设置重新开始考试吗？当前作答记录将被重置。',
   'speaking.result.backToSetup': '⚙️ 修改题目与设置',
+  'speaking.result.playAudio': '播放',
+  'speaking.result.pauseAudio': '暂停',
+  'speaking.result.seekAudioAria': '调整第 {num} 题播放进度',
 
   // 补充键值：JSON 备份、使用说明链接、浏览器语音提示
   'speaking.step1.helpLink': '❓ 使用说明',
