@@ -198,7 +198,8 @@ document.addEventListener('DOMContentLoaded', () => {
     activeDeckId: 'tour',
     customDecks: [],
     tourContent: '',
-    autoVoicePreferences: { ko: '', en: '', zh: '', ja: '' }
+    autoTargetLang: 'en',
+    autoVoicePreferences: { ko: '', en: '', zh: '', ja: '', fr: '', es: '', de: '', ru: '', it: '', vi: '' }
   };
 
   // =========================================================================
@@ -575,28 +576,78 @@ document.addEventListener('DOMContentLoaded', () => {
     'en-US': '🇺🇸 영어 (미국)',
     'en-GB': '🇬🇧 영어 (영국)',
     'en-AU': '🇦🇺 영어 (호주)',
+    'en-CA': '🇨🇦 영어 (캐나다)',
+    'en-IN': '🇮🇳 영어 (인도)',
     'ko': '🇰🇷 한국어',
     'ko-KR': '🇰🇷 한국어',
     'zh': '🇨🇳 중국어',
     'zh-CN': '🇨🇳 중국어 (보통화)',
     'zh-TW': '🇹🇼 중국어 (대만)',
+    'zh-HK': '🇭🇰 중국어 (홍콩/광둥어)',
     'ja': '🇯🇵 일본어',
     'ja-JP': '🇯🇵 일본어',
     'es': '🇪🇸 스페인어',
-    'es-ES': '🇪🇸 스페인어',
+    'es-ES': '🇪🇸 스페인어 (스페인)',
+    'es-MX': '🇲🇽 스페인어 (멕시코)',
     'fr': '🇫🇷 프랑스어',
-    'fr-FR': '🇫🇷 프랑스어',
+    'fr-FR': '🇫🇷 프랑스어 (프랑스)',
+    'fr-CA': '🇨🇦 프랑스어 (캐나다)',
     'de': '🇩🇪 독일어',
     'de-DE': '🇩🇪 독일어',
+    'nl': '🇳🇱 네덜란드어',
+    'nl-NL': '🇳🇱 네덜란드어 (네덜란드)',
+    'nl-BE': '🇧🇪 네덜란드어 (벨기에)',
     'it': '🇮🇹 이탈리아어',
-    'ru': '🇷🇺 러시아어'
+    'it-IT': '🇮🇹 이탈리아어',
+    'pt': '🇵🇹/🇧🇷 포투갈어',
+    'pt-BR': '🇧🇷 포르투갈어 (브라질)',
+    'pt-PT': '🇵🇹 포르투갈어 (포르투갈)',
+    'ru': '🇷🇺 러시아어',
+    'ru-RU': '🇷🇺 러시아어',
+    'vi': '🇻🇳 베트남어',
+    'vi-VN': '🇻🇳 베트남어',
+    'th': '🇹🇭 태국어',
+    'th-TH': '🇹🇭 태국어',
+    'id': '🇮🇩 인도네시아어',
+    'id-ID': '🇮🇩 인도네시아어',
+    'ms': '🇲🇾 말레이어',
+    'ms-MY': '🇲🇾 말레이어',
+    'ar': '🇸🇦 아랍어',
+    'ar-SA': '🇸🇦 아랍어',
+    'hi': '🇮🇳 힌디어',
+    'hi-IN': '🇮🇳 힌디어',
+    'tr': '🇹🇷 튀르키예어',
+    'tr-TR': '🇹🇷 튀르키예어',
+    'pl': '🇵🇱 폴란드어',
+    'pl-PL': '🇵🇱 폴란드어',
+    'sv': '🇸🇪 스웨덴어',
+    'sv-SE': '🇸🇪 스웨덴어',
+    'da': '🇩🇰 덴마크어',
+    'da-DK': '🇩🇰 덴마크어',
+    'no': '🇳🇴 노르웨이어',
+    'nb-NO': '🇳🇴 노르웨이어',
+    'fi': '🇫🇮 핀란드어',
+    'fi-FI': '🇫🇮 핀란드어',
+    'cs': '🇨🇿 체코어',
+    'cs-CZ': '🇨🇿 체코어',
+    'el': '🇬🇷 그리스어',
+    'el-GR': '🇬🇷 그리스어',
+    'he': '🇮🇱 히브리어',
+    'he-IL': '🇮🇱 히브리어',
+    'hu': '🇭🇺 헝가리어',
+    'hu-HU': '🇭🇺 헝가리어',
+    'ro': '🇷🇴 루마니아어',
+    'ro-RO': '🇷🇴 루마니아어',
+    'uk': '🇺🇦 우크라이나어',
+    'uk-UA': '🇺🇦 우크라이나어'
   };
 
   function getLangLabel(lang) {
     if (!lang) return '기타';
-    if (LANG_LABELS[lang]) return LANG_LABELS[lang];
-    const prefix = lang.slice(0, 2).toLowerCase();
-    return LANG_LABELS[prefix] || lang;
+    const normalized = lang.replace(/_/g, '-');
+    if (LANG_LABELS[normalized]) return LANG_LABELS[normalized];
+    const prefix = normalized.slice(0, 2).toLowerCase();
+    return LANG_LABELS[prefix] || normalized;
   }
 
   function getVoiceDisplayName(id) {
@@ -612,7 +663,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function getSortedVoiceList() {
-    const priorityPrefixes = ['ko', 'en', 'zh', 'ja', 'es', 'fr', 'de'];
+    const priorityPrefixes = ['ko', 'en', 'zh', 'ja', 'es', 'fr', 'de', 'nl', 'pt', 'it', 'ru', 'vi', 'th', 'id'];
     return availableVoices.slice().sort((a, b) => {
       const aLang = (a.lang || '').slice(0, 2).toLowerCase();
       const bLang = (b.lang || '').slice(0, 2).toLowerCase();
@@ -693,7 +744,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tag: 'AUTO',
       lang: 'auto',
       isAuto: true,
-      keywords: ['자동', 'auto', '감지', '한국어', '중국어', '영어', 'korean', 'chinese', 'english', '혼합', '스마트']
+      keywords: ['자동', 'auto', '감지', '한국어', '중국어', '영어', '일본어', '프랑스어', '스페인어', '독일어', '네덜란드어', 'korean', 'chinese', 'english', 'dutch', 'french', '혼합', '스마트', '1:1']
     };
 
     if (!q) {
@@ -837,7 +888,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const tagHtml = item.tag ? `<span class="lang-tag">${escapeHtml(item.tag)}</span>` : '';
     const subHtml = item.isAuto
-      ? `<div class="lang-alias" style="margin-top: 3px; font-size: 0.74rem; color: #15803d; font-weight: 500;">호환: 🇰🇷 한국어 · 🇨🇳 중국어 · 🇺🇸 영어 · 🇯🇵 일본어</div>`
+      ? `<div class="lang-alias" style="margin-top: 3px; font-size: 0.74rem; color: #15803d; font-weight: 500;">호환: 🇰🇷 한국어 + 모든 외국어 (🇺🇸·🇨🇳·🇯🇵·🇫🇷·🇪🇸·🇩🇪·🇳🇱 등) 1:1 매칭</div>`
       : '';
 
     li.innerHTML = `
@@ -959,7 +1010,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentVal = savedVoicePreference || voiceSelect.value || 'auto';
     voiceSelect.innerHTML = '';
 
-    // 1) 최상단 기본 옵션: 언어 자동 감지 & 혼합 낭독 (한국어·영어·중국어 등)
+    // 1) 최상단 기본 옵션: 언어 자동 감지 & 혼합 낭독 (모국어 + 외국어 1:1)
     const autoOpt = document.createElement('option');
     autoOpt.value = 'auto';
     autoOpt.textContent = t('speaking.step2.voiceAuto');
@@ -997,15 +1048,115 @@ document.addEventListener('DOMContentLoaded', () => {
     en: ['en-us', 'en-gb', 'en-ca', 'en-au', 'en'],
     zh: ['zh-cn', 'zh-sg', 'zh-tw', 'zh-hk', 'zh'],
     ko: ['ko-kr', 'ko'],
-    ja: ['ja-jp', 'ja']
+    ja: ['ja-jp', 'ja'],
+    fr: ['fr-fr', 'fr-ca', 'fr-ch', 'fr'],
+    es: ['es-es', 'es-mx', 'es-us', 'es'],
+    de: ['de-de', 'de-at', 'de-ch', 'de'],
+    nl: ['nl-nl', 'nl-be', 'nl'],
+    pt: ['pt-br', 'pt-pt', 'pt'],
+    ru: ['ru-ru', 'ru'],
+    it: ['it-it', 'it'],
+    vi: ['vi-vn', 'vi'],
+    th: ['th-th', 'th'],
+    id: ['id-id', 'id'],
+    ms: ['ms-my', 'ms'],
+    ar: ['ar-sa', 'ar-eg', 'ar'],
+    hi: ['hi-in', 'hi'],
+    tr: ['tr-tr', 'tr'],
+    pl: ['pl-pl', 'pl'],
+    sv: ['sv-se', 'sv']
   };
 
   const LANG_KEYWORDS = {
     zh: ['chinese', 'china', 'mandarin', 'xiaoxiao', 'yunxi', 'yunjian', 'yaoyao', 'huihui', 'kangkang', 'zhiwei', 'hanhan'],
     ko: ['korean', 'korea', 'sunhi', 'injoon', 'heami', 'yuna'],
     en: ['united states', 'david', 'zira', 'mark', 'jenny', 'guy', 'aria', 'english'],
-    ja: ['japanese', 'japan', 'haruka', 'ayumi', 'ichiro', 'sayaka', 'nanami', 'keita', 'kyoko', 'otoya']
+    ja: ['japanese', 'japan', 'haruka', 'ayumi', 'ichiro', 'sayaka', 'nanami', 'keita', 'kyoko', 'otoya'],
+    fr: ['french', 'france', 'hortense', 'paul', 'julie', 'denise', 'henri', 'thomas', 'amelie'],
+    es: ['spanish', 'spain', 'helena', 'laura', 'pablo', 'sabina', 'raul', 'elvira', 'alvaro', 'monica', 'paulina'],
+    de: ['german', 'germany', 'hedda', 'katja', 'stefan', 'conrad', 'anna'],
+    nl: ['dutch', 'netherlands', 'nederlands', 'colette', 'fenna', 'maarten', 'frank', 'xander', 'ellen'],
+    pt: ['portuguese', 'brazil', 'portugal', 'maria', 'daniel', 'francisca', 'antonio', 'luciana', 'joana'],
+    ru: ['russian', 'russia', 'irina', 'pavel', 'svetlana', 'dmitry', 'milena'],
+    it: ['italian', 'italy', 'elsa', 'cosimo', 'isabella', 'diego', 'alice'],
+    vi: ['vietnamese', 'vietnam', 'an', 'hoaimy', 'namminh', 'linh'],
+    th: ['thai', 'thailand', 'pattara', 'premwadee', 'niwat', 'kanya'],
+    id: ['indonesian', 'indonesia', 'andika', 'gadis', 'ardi', 'damayanti'],
+    ar: ['arabic', 'hoda', 'naayf', 'zariyah', 'hamdan', 'maged'],
+    hi: ['hindi', 'india', 'kalpana', 'hemant', 'swara', 'madhur'],
+    tr: ['turkish', 'turkey', 'tolga', 'emel', 'ahmet', 'yelda'],
+    pl: ['polish', 'poland', 'paulina', 'adam', 'zofia', 'marek'],
+    sv: ['swedish', 'sweden', 'hedvig', 'sofie', 'mattias', 'alva']
   };
+
+  const TARGET_LANG_META = {
+    ko: { code: 'ko', flag: '🇰🇷', name: '한국어', shortName: '한국어', defaultBcp: 'ko-KR', testPhrase: '안녕하세요! 완쯔 스피킹 한국어 음성입니다.' },
+    en: { code: 'en', flag: '🇺🇸', name: '영어 (미국 표준)', shortName: '영어', defaultBcp: 'en-US', testPhrase: 'Hello! This is Wanzi Speaking in English.' },
+    zh: { code: 'zh', flag: '🇨🇳', name: '중국어 (보통화)', shortName: '중국어', defaultBcp: 'zh-CN', testPhrase: '你好！这是丸子口语中文语音测试。' },
+    ja: { code: 'ja', flag: '🇯🇵', name: '일본어 (한자 통합)', shortName: '일본어', defaultBcp: 'ja-JP', testPhrase: 'こんにちは！ワンズ(丸子)スピーキング日本語音声です。' },
+    fr: { code: 'fr', flag: '🇫🇷', name: '프랑스어 (Français)', shortName: '프랑스어', defaultBcp: 'fr-FR', testPhrase: 'Bonjour ! Ceci est le test vocal en français.' },
+    es: { code: 'es', flag: '🇪🇸', name: '스페인어 (Español)', shortName: '스페인어', defaultBcp: 'es-ES', testPhrase: '¡Hola! Esta es una prueba de voz en español.' },
+    de: { code: 'de', flag: '🇩🇪', name: '독일어 (Deutsch)', shortName: '독일어', defaultBcp: 'de-DE', testPhrase: 'Hallo! Dies ist ein Sprachtest auf Deutsch.' },
+    nl: { code: 'nl', flag: '🇳🇱', name: '네덜란드어 (Nederlands)', shortName: '네덜란드어', defaultBcp: 'nl-NL', testPhrase: 'Hallo! Dit is een spraaktest in het Nederlands.' },
+    pt: { code: 'pt', flag: '🇧🇷', name: '포르투갈어 (Português)', shortName: '포르투갈어', defaultBcp: 'pt-BR', testPhrase: 'Olá! Este é um teste de voz em português.' },
+    ru: { code: 'ru', flag: '🇷🇺', name: '러시아어 (Русский)', shortName: '러시아어', defaultBcp: 'ru-RU', testPhrase: 'Привет! Это проверка голоса на русском языке.' },
+    it: { code: 'it', flag: '🇮🇹', name: '이탈리아어 (Italiano)', shortName: '이탈리아어', defaultBcp: 'it-IT', testPhrase: 'Ciao! Questo è un test vocale in italiano.' },
+    vi: { code: 'vi', flag: '🇻🇳', name: '베트남어 (Tiếng Việt)', shortName: '베트남어', defaultBcp: 'vi-VN', testPhrase: 'Xin chào! Đây là bài kiểm tra giọng nói tiếng Việt.' },
+    th: { code: 'th', flag: '🇹🇭', name: '태국어 (ไทย)', shortName: '태국어', defaultBcp: 'th-TH', testPhrase: 'สวัสดี! นี่คือการทดสอบเสียงภาษาไทย' },
+    id: { code: 'id', flag: '🇮🇩', name: '인도네시아어 (Indonesia)', shortName: '인도네시아어', defaultBcp: 'id-ID', testPhrase: 'Halo! Ini adalah tes suara bahasa Indonesia.' },
+    ar: { code: 'ar', flag: '🇸🇦', name: '아랍어 (العربية)', shortName: '아랍어', defaultBcp: 'ar-SA', testPhrase: 'مرحباً! هذا اختبار صوتي باللغة العربية.' },
+    hi: { code: 'hi', flag: '🇮🇳', name: '힌디어 (हिन्दी)', shortName: '힌디어', defaultBcp: 'hi-IN', testPhrase: 'नमस्ते! यह हिंदी आवाज परीक्षण है।' },
+    tr: { code: 'tr', flag: '🇹🇷', name: '튀르키예어 (Türkçe)', shortName: '튀르키예어', defaultBcp: 'tr-TR', testPhrase: 'Merhaba! Bu Türkçe ses testidir.' },
+    pl: { code: 'pl', flag: '🇵🇱', name: '폴란드어 (Polski)', shortName: '폴란드어', defaultBcp: 'pl-PL', testPhrase: 'Cześć! To jest test głosu w języku polskim.' },
+    sv: { code: 'sv', flag: '🇸🇪', name: '스웨덴어 (Svenska)', shortName: '스웨덴어', defaultBcp: 'sv-SE', testPhrase: 'Hej! Det här är ett rösttest på svenska.' }
+  };
+
+  function getLangMeta(langCode) {
+    const code = (langCode || 'en').toLowerCase().slice(0, 2);
+    if (TARGET_LANG_META[code]) return TARGET_LANG_META[code];
+    const label = getLangLabel(code);
+    const parts = label.split(' ');
+    const hasFlag = parts.length > 1 && !/[a-zA-Z가-힣]/.test(parts[0]);
+    const flag = hasFlag ? parts[0] : '🌐';
+    const shortName = hasFlag ? parts.slice(1).join(' ') : label;
+    return {
+      code,
+      flag,
+      name: `${shortName} (${code.toUpperCase()})`,
+      shortName,
+      defaultBcp: `${code}-${code.toUpperCase()}`,
+      testPhrase: 'Hello! 1, 2, 3.'
+    };
+  }
+
+  function getAvailableTargetOptions() {
+    // 기본 핵심 외국어 목록
+    const baseCodes = ['en', 'zh', 'ja', 'fr', 'es', 'de', 'nl', 'pt', 'ru', 'it', 'vi', 'th', 'id', 'ar', 'hi', 'tr', 'pl', 'sv'];
+    const discoveredCodes = new Set(baseCodes);
+
+    // 현재 선택된 외국어(안키 에디터/프롬프트 생성기에서 연동된 언어 포함)도 항상 목록에 보장
+    if (typeof state !== 'undefined' && state && state.autoTargetLang && state.autoTargetLang !== 'all' && state.autoTargetLang !== 'ko') {
+      discoveredCodes.add(state.autoTargetLang);
+    }
+
+    // 사용자 PC/브라우저에 설치된 모든 기타 외국어(예: 덴마크어, 핀란드어, 체코어 등)도 자동 스캔하여 추가!
+    if (availableVoices && availableVoices.length > 0) {
+      availableVoices.forEach(v => {
+        const prefix = (v.lang || '').slice(0, 2).toLowerCase();
+        if (prefix && prefix !== 'ko' && /^[a-z]{2}$/.test(prefix)) {
+          discoveredCodes.add(prefix);
+        }
+      });
+    }
+
+    const options = Array.from(discoveredCodes).map(code => {
+      const meta = getLangMeta(code);
+      return { value: code, label: `${meta.flag} ${meta.name}` };
+    });
+
+    options.push({ value: 'all', label: '🌐 한·영·중·일 4개국어 동시' });
+    return options;
+  }
 
   function getVoicesForLangPrefix(prefix) {
     if (!availableVoices || availableVoices.length === 0) return [];
@@ -1046,13 +1197,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function previewLanguageVoice(langCode) {
     if (!('speechSynthesis' in window)) return;
-    const testPhrases = {
-      ko: '안녕하세요! 완쯔 스피킹 한국어 음성입니다.',
-      en: 'Hello! This is Wanzi Speaking in English.',
-      zh: '你好！这是丸子口语中文语音测试。',
-      ja: 'こんにちは！ワンズ(丸子)スピーキング日本語音声です。'
-    };
-    const phrase = testPhrases[langCode] || 'Hello!';
+    const meta = getLangMeta(langCode);
+    const phrase = meta.testPhrase;
     const voice = getBestVoiceForLang(langCode);
     const rate = parseFloat(ttsRateSlider ? ttsRateSlider.value : '1.0') || 1.0;
 
@@ -1062,10 +1208,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const utterance = new SpeechSynthesisUtterance(phrase);
     if (voice) {
       utterance.voice = voice;
-      utterance.lang = voice.lang || 'en-US';
+      utterance.lang = voice.lang || meta.defaultBcp;
     } else {
-      const defaultLangs = { ko: 'ko-KR', en: 'en-US', zh: 'zh-CN', ja: 'ja-JP' };
-      utterance.lang = defaultLangs[langCode] || 'en-US';
+      utterance.lang = meta.defaultBcp;
     }
     utterance.rate = rate;
     window.speechSynthesis.speak(utterance);
@@ -1096,28 +1241,36 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!voiceStatusBadge) return;
     const selected = voiceSelect ? voiceSelect.value : 'auto';
     if (selected === 'auto') {
-      const supportedLangs = [
-        { code: 'ko', flag: '🇰🇷', name: t('speaking.step2.compatLangKo') || '한국어' },
-        { code: 'en', flag: '🇺🇸', name: t('speaking.step2.compatLangEn') || '영어 (미국 표준 우선)' },
-        { code: 'zh', flag: '🇨🇳', name: t('speaking.step2.compatLangZh') || '중국어 (보통화)' },
-        { code: 'ja', flag: '🇯🇵', name: t('speaking.step2.compatLangJa') || '일본어' }
-      ];
+      const targetLang = (typeof state !== 'undefined' && state && state.autoTargetLang) ? state.autoTargetLang : 'en';
+      const activeLangCodes = targetLang === 'all'
+        ? ['ko', 'en', 'zh', 'ja']
+        : ['ko', targetLang];
+
+      const supportedLangs = activeLangCodes.map(code => {
+        const meta = getLangMeta(code);
+        return { code: meta.code, flag: meta.flag, name: meta.name, shortName: meta.shortName || meta.name };
+      });
 
       // 기존 고급 설정 펼침 상태 보존
       const wasOpen = Boolean(voiceStatusBadge.querySelector('.compat-advanced-details[open]'));
 
-      // 1) 기본 요약 칩 (한눈에 현재 매칭된 음성 표시)
+      // 0) 모국어(한국어) + 외국어 1:1 매칭 선택 옵션 (네덜란드어 포함 + 기기에 설치된 모든 언어 자동 포함)
+      const targetSelectOptions = getAvailableTargetOptions()
+        .map(opt => `<option value="${opt.value}" ${targetLang === opt.value ? 'selected' : ''}>${escapeHtml(opt.label)}</option>`)
+        .join('');
+
+      // 1) 기본 요약 칩 (한눈에 현재 매칭된 음성 표시 - 2열 균등 그리드)
       const chipsHtml = supportedLangs.map(lang => {
         const best = getBestVoiceForLang(lang.code);
         const voiceLabel = best ? escapeHtml(best.name) : (t('speaking.step2.compatNoVoice') || '기본 엔진');
         const isMatched = Boolean(best);
         return `<span class="compat-chip ${isMatched ? '' : 'missing'}" title="${lang.name}: ${voiceLabel}">
-          <span>${lang.flag} ${escapeHtml(lang.name)}</span>
+          <span class="compat-chip-lang">${lang.flag} ${escapeHtml(lang.shortName)}</span>
           <span class="chip-voice-name">${voiceLabel}</span>
         </span>`;
       }).join('');
 
-      // 2) 고급 설정 내 언어별 세부 선택 카드
+      // 2) 고급 설정 내 언어별 세부 선택 카드 (한 줄 타이틀 + 하단 select 수평 일직선 정렬)
       const cardsHtml = supportedLangs.map(lang => {
         const voices = getVoicesForLangPrefix(lang.code);
         const currentBest = getBestVoiceForLang(lang.code);
@@ -1139,8 +1292,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return `
           <div class="compat-lang-card ${isMissing ? 'missing' : ''}">
-            <div class="compat-lang-title">
-              <span>${lang.flag} ${escapeHtml(lang.name)}</span>
+            <div class="compat-lang-title" title="${escapeHtml(lang.name)}">
+              <span class="compat-lang-name">${lang.flag} ${escapeHtml(lang.shortName)}</span>
               <button type="button" class="compat-preview-btn" data-lang="${lang.code}" title="${t('speaking.step2.previewVoice') || '미리듣기'}">
                 🔊 ${t('speaking.step2.previewVoice') || '미리듣기'}
               </button>
@@ -1152,28 +1305,65 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
       }).join('');
 
+      const targetMeta = getLangMeta(targetLang);
+      const pairDescText = targetLang === 'all'
+        ? '한국어·영어·중국어·일본어가 섞인 문제도 실시간으로 구분하여 각 언어 전용 음성으로 순차 낭독합니다.'
+        : targetLang === 'ja'
+          ? '한글은 한국어 음성으로, 히라가나·가타카나 및 한자(漢字)는 모두 일본어 음성으로 끊김 없이 자연스럽게 낭독합니다.'
+          : `질문 목록에 한국어와 ${targetMeta.shortName || '외국어'}가 함께 있거나 한 문장에 섞여 있어도 자동 구분하여 각각의 원어민 음성으로 낭독합니다.`;
+
       voiceStatusBadge.className = 'voice-status-box';
       voiceStatusBadge.innerHTML = `
         <div class="compat-header">
-          <span>🌐 ${t('speaking.step2.compatTitle') || '언어 자동 감지 (한국어 · 영어 · 중국어 · 일본어)'}</span>
-          <span class="compat-badge-pill">실시간 다국어 분리</span>
+          <span class="compat-header-title">🌐 언어 자동 감지 (모국어 + 외국어 1:1)</span>
+          <span class="compat-badge-pill">${targetLang === 'all' ? '4개국어 다중' : '1:1 정밀 매칭'}</span>
+        </div>
+        <div class="compat-pair-selector-row">
+          <div class="pair-lang-fixed">
+            <span class="pair-role-badge">모국어</span>
+            <span>🇰🇷 한국어</span>
+          </div>
+          <span class="pair-plus-icon">+</span>
+          <div class="pair-lang-target">
+            <span class="pair-role-badge target">외국어</span>
+            <select id="autoTargetLangSelect" class="pair-target-select" aria-label="매칭할 외국어 선택">
+              ${targetSelectOptions}
+            </select>
+          </div>
         </div>
         <div class="compat-chips-grid">
           ${chipsHtml}
         </div>
         <details class="compat-advanced-details" ${wasOpen ? 'open' : ''}>
           <summary class="compat-advanced-summary">
-            <span>⚙️ ${t('speaking.step2.compatAdvancedTitle') || '고급 설정: 언어별 음성 세부 지정 (직접 선택)'}</span>
+            <span>⚙️ ${t('speaking.step2.compatAdvancedTitle') || '고급 설정: 언어별 음성 세부 지정'}</span>
             <span class="advanced-arrow">▼</span>
           </summary>
           <div class="compat-advanced-body">
             <div class="compat-langs-grid">
               ${cardsHtml}
             </div>
-            <div class="compat-desc">${t('speaking.step2.compatSubtitle') || '한국어·영어·중국어·일본어가 섞인 문제도 감지하여 각 언어별 선택된 전용 음성으로 순차 전환하여 낭독합니다.'}</div>
+            <div class="compat-desc">${pairDescText}</div>
           </div>
         </details>
       `;
+
+      const targetSelectEl = voiceStatusBadge.querySelector('#autoTargetLangSelect');
+      if (targetSelectEl) {
+        targetSelectEl.addEventListener('change', () => {
+          state.autoTargetLang = targetSelectEl.value || 'en';
+          if (state.autoTargetLang !== 'all') {
+            try {
+              localStorage.setItem('swz_last_language', state.autoTargetLang);
+            } catch (e) {}
+          }
+          saveSettings();
+          updateVoiceStatusBadge();
+          if (state.autoTargetLang !== 'all') {
+            previewLanguageVoice(state.autoTargetLang);
+          }
+        });
+      }
 
       voiceStatusBadge.querySelectorAll('.compat-voice-select').forEach(sel => {
         sel.addEventListener('change', () => {
@@ -1209,14 +1399,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 문장을 언어별 세그먼트로 지능적 분리 (한국어 / 영어 / 중국어 / 일본어 혼합 완벽 지원)
+  // 문장을 언어별 세그먼트로 지능적 분리 (모국어 한국어 + 선택한 모든 외국어 1:1 매칭 및 다국어 혼합 완벽 지원)
   function segmentMixedText(text) {
     if (!text) return [];
+    const targetLang = (typeof state !== 'undefined' && state && state.autoTargetLang) ? state.autoTargetLang : 'en';
+
     const isHangul = ch => /[\uAC00-\uD7A3\u1100-\u11FF\u3130-\u318F]/.test(ch);
     const isKana = ch => /[\u3040-\u309F\u30A0-\u30FF]/.test(ch);
     // 한자 범위 (CJK Unified Ideographs + 확장)
     const isHanzi = ch => /[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]/.test(ch);
-    const isLatin = ch => /[a-zA-Z]/.test(ch);
+    // 기본 알파벳 + 유럽어/베트남어 악센트 확장 라틴 문자 모두 포함
+    const isLatin = ch => /[a-zA-Z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u024F\u1E00-\u1EFF]/.test(ch);
+    // 러시아어/우크라이나어 등 키릴 문자
+    const isCyrillic = ch => /[\u0400-\u04FF]/.test(ch);
+    // 태국어, 아랍어, 데바나가리(힌디어), 그리스어, 히브리어 등 비한글 외국 문자
+    const isOtherForeignLetter = ch => /[\u0370-\u03FF\u0590-\u05FF\u0600-\u06FF\u0900-\u097F\u0E00-\u0E7F]/.test(ch);
 
     const segments = [];
     let currentText = '';
@@ -1225,11 +1422,29 @@ document.addEventListener('DOMContentLoaded', () => {
     for (let i = 0; i < text.length; i++) {
       const ch = text[i];
       let chLang = '';
-      if (isHangul(ch)) chLang = 'ko';
-      else if (isKana(ch)) chLang = 'ja';
-      else if (isHanzi(ch)) chLang = 'zh';
-      else if (isLatin(ch)) chLang = 'en';
-      else chLang = 'neutral'; // 공백, 기호, 숫자 등
+      if (isHangul(ch)) {
+        chLang = 'ko';
+      } else if (targetLang !== 'all') {
+        // 1:1 매칭 모드: 한글이 아닌 외국어 문자는 선택된 targetLang으로 매칭!
+        if (targetLang === 'ja' && (isKana(ch) || isHanzi(ch))) {
+          chLang = 'ja';
+        } else if (isKana(ch)) {
+          chLang = (targetLang === 'ja') ? 'ja' : 'ja';
+        } else if (isHanzi(ch)) {
+          chLang = (targetLang === 'ja') ? 'ja' : 'zh';
+        } else if (isLatin(ch) || isCyrillic(ch) || isOtherForeignLetter(ch)) {
+          chLang = targetLang;
+        } else {
+          chLang = 'neutral';
+        }
+      } else {
+        // 'all' (한·영·중·일 4개국어 동시 감지 모드)
+        if (isKana(ch)) chLang = 'ja';
+        else if (isHanzi(ch)) chLang = 'zh';
+        else if (isCyrillic(ch)) chLang = 'ru';
+        else if (isLatin(ch)) chLang = 'en';
+        else chLang = 'neutral';
+      }
 
       if (chLang !== 'neutral') {
         if (!currentLang) {
@@ -1249,7 +1464,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     if (currentText.trim()) {
-      segments.push({ text: currentText.trim(), lang: currentLang || 'ko' });
+      const fallbackLang = (targetLang && targetLang !== 'all') ? targetLang : 'ko';
+      segments.push({ text: currentText.trim(), lang: currentLang || fallbackLang });
     }
     return segments;
   }
@@ -1304,19 +1520,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // 2) 'auto' 모드: 한국어·중국어·영어 등 문장 속 언어를 실시간 인식하여 각각의 원어민 전용 음성으로 순차 전환 낭독
+    // 2) 'auto' 모드: 모국어(한국어) + 외국어 문장 속 언어를 실시간 인식하여 각각의 원어민 전용 음성으로 순차 전환 낭독
     const segments = segmentMixedText(text);
     if (segments.length === 0) {
       if (onEnd) onEnd();
       return;
     }
-
-    const defaultLangCode = {
-      'zh': 'zh-CN',
-      'ko': 'ko-KR',
-      'en': 'en-US',
-      'ja': 'ja-JP'
-    };
 
     let currentSegIdx = 0;
     function playNextSegment() {
@@ -1332,13 +1541,12 @@ document.addEventListener('DOMContentLoaded', () => {
       utterance.rate = rate;
       utterance.pitch = 1.0;
 
-      // 해당 언어에 특화된 BCP 47 태그 지정 (음성 매핑 전에도 OS 레벨 언어 엔진이 중국어/한국어를 구분하도록)
-      utterance.lang = defaultLangCode[seg.lang] || 'ko-KR';
+      const meta = getLangMeta(seg.lang);
+      utterance.lang = meta.defaultBcp || 'ko-KR';
 
       const voice = getBestVoiceForLang(seg.lang);
       if (voice) {
         utterance.voice = voice;
-        // 음성의 실제 지원 언어로 덮어씌움
         utterance.lang = voice.lang || utterance.lang;
       }
 
@@ -1533,6 +1741,32 @@ document.addEventListener('DOMContentLoaded', () => {
   // 9. 로컬스토리지 자동 저장 / 복원
   // =========================================================================
   const STORAGE_KEY = 'wanzi_speaking_settings';
+  const SHARED_LANG_KEY = 'swz_last_language';
+
+  // 안키 서식 에디터 / AI 프롬프트 생성기에서 지정한 학습 언어 가져오기
+  function getSharedStudyLanguage() {
+    try {
+      const shared = localStorage.getItem(SHARED_LANG_KEY);
+      if (shared && shared !== 'ko') return shared;
+
+      const editorRaw = localStorage.getItem('anki_style_editor_content_v1');
+      if (editorRaw) {
+        const editorData = JSON.parse(editorRaw);
+        if (editorData && editorData.langId && editorData.langId !== 'ko') {
+          return editorData.langId;
+        }
+      }
+
+      const promptRaw = localStorage.getItem('wanzi_prompt_settings_v2');
+      if (promptRaw) {
+        const promptData = JSON.parse(promptRaw);
+        if (promptData && promptData.langId && promptData.langId !== 'ko') {
+          return promptData.langId;
+        }
+      }
+    } catch (e) {}
+    return null;
+  }
 
   function saveSettings() {
     saveActiveDeckContent(questionInput.value);
@@ -1540,12 +1774,13 @@ document.addEventListener('DOMContentLoaded', () => {
       activeDeckId: state.activeDeckId || 'tour',
       customDecks: state.customDecks || [],
       tourContent: state.tourContent || '',
-      autoVoicePreferences: state.autoVoicePreferences || { ko: '', en: '', zh: '', ja: '' },
+      autoTargetLang: state.autoTargetLang || 'en',
+      autoVoicePreferences: state.autoVoicePreferences || { ko: '', en: '', zh: '', ja: '', fr: '', es: '', de: '', ru: '', it: '', vi: '' },
       cleanNumbering: cleanNumberingCheck.checked,
       answerTime: answerTimeInput.value,
       breakTime: breakTimeInput.value,
       maxQuestions: maxQuestionsInput.value,
-      voice: voiceSelect ? voiceSelect.value : '',
+      voice: voiceSelect ? voiceSelect.value : 'auto',
       rate: ttsRateSlider ? ttsRateSlider.value : '1.0',
       ttsWait: ttsWaitCheck.checked,
       recordVoice: recordMyVoiceCheck ? recordMyVoiceCheck.checked : true,
@@ -1563,17 +1798,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function loadSettings() {
     try {
+      const sharedLang = getSharedStudyLanguage();
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) {
         state.activeDeckId = 'tour';
         state.customDecks = [];
         state.tourContent = SAMPLES.tour.join('\n');
-        state.autoVoicePreferences = { ko: '', en: '', zh: '', ja: '' };
+        state.autoTargetLang = sharedLang || 'en';
+        state.autoVoicePreferences = { ko: '', en: '', zh: '', ja: '', fr: '', es: '', de: '', ru: '', it: '', vi: '' };
+        savedVoicePreference = 'auto';
+        if (voiceSelect) voiceSelect.value = 'auto';
+        if (voiceSearchInput) voiceSearchInput.value = getVoiceDisplayName('auto');
         questionInput.value = state.tourContent;
         answerTimeInput.value = '120';
         breakTimeInput.value = '10';
         updatePresetPillsActive('answerTimeInput');
         updatePresetPillsActive('breakTimeInput');
+        updateVoiceStatusBadge();
         updateParsedStatus();
         renderDeckTabs();
         return;
@@ -1582,10 +1823,12 @@ document.addEventListener('DOMContentLoaded', () => {
       state.customDecks = Array.isArray(data.customDecks) ? data.customDecks : [];
       state.tourContent = data.tourContent !== undefined ? data.tourContent : SAMPLES.tour.join('\n');
       state.activeDeckId = data.activeDeckId || 'tour';
+      // 안키 에디터나 프롬프트 생성기에서 지정한 언어가 있으면 외국어(1:1 매칭 대상)로 자동 연동
+      state.autoTargetLang = sharedLang || data.autoTargetLang || 'en';
       if (data.autoVoicePreferences && typeof data.autoVoicePreferences === 'object') {
-        state.autoVoicePreferences = Object.assign({ ko: '', en: '', zh: '', ja: '' }, data.autoVoicePreferences);
+        state.autoVoicePreferences = Object.assign({ ko: '', en: '', zh: '', ja: '', fr: '', es: '', de: '', ru: '', it: '', vi: '' }, data.autoVoicePreferences);
       } else {
-        state.autoVoicePreferences = { ko: '', en: '', zh: '', ja: '' };
+        state.autoVoicePreferences = { ko: '', en: '', zh: '', ja: '', fr: '', es: '', de: '', ru: '', it: '', vi: '' };
       }
 
       // 구버전 마이그레이션: data.questions에 저장된 사용자 질문이 있고 customDecks가 비어있던 경우
@@ -2012,10 +2255,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   testVoiceBtn.addEventListener('click', () => {
     getAudioContext();
-    const testPhrase = voiceSelect && voiceSelect.value !== 'auto'
-      ? t('speaking.step2.testPhrase')
-      : '안녕하세요! Hello! 你好，这是语言自动识别测试。';
-    speakText(testPhrase);
+    if (voiceSelect && voiceSelect.value !== 'auto') {
+      speakText(t('speaking.step2.testPhrase'));
+      return;
+    }
+    const targetLang = state.autoTargetLang || 'en';
+    if (targetLang === 'all') {
+      speakText('안녕하세요! Hello! 你好，这是语言自动识别测试。');
+    } else {
+      const targetPhrase = (TARGET_LANG_META[targetLang] && TARGET_LANG_META[targetLang].testPhrase) || 'Hello!';
+      speakText(`안녕하세요, 완쯔 스피킹입니다! ${targetPhrase}`);
+    }
   });
 
   if (testSoundBtn) {

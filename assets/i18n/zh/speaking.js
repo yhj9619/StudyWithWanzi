@@ -40,8 +40,8 @@
   'speaking.step2.maxQuestionsHint': '从共 {total} 题中随机出题（超出总数时自动循环去重）',
   'speaking.step2.setAll': '选择全部 ({count} 题)',
   'speaking.step2.ttsVoice': '朗读语音 (TTS 语言)',
-  'speaking.step2.voiceAuto': '🌐 自动识别语言（支持中/英/韩混合朗读）',
-  'speaking.step2.voiceSearchPlaceholder': '搜索语音（例如：自动、中文、英语、韩语...）',
+  'speaking.step2.voiceAuto': '🌐 自动识别语言（母语 + 外语 1:1 匹配朗读）',
+  'speaking.step2.voiceSearchPlaceholder': '搜索语音（例如：自动、韩语、英语、荷兰语、法语...）',
   'speaking.step2.voiceCount': '共 {count} 个语音',
   'speaking.step2.voiceEmpty': '未找到与“{query}”匹配的语音。',
   'speaking.step2.voiceGroupAuto': '智能多语言合成',
@@ -77,6 +77,7 @@
   'speaking.step2.soundTest': '🔔 试听提示音',
   'speaking.step2.advancedOptions': '高级练习选项',
   'speaking.step2.recordVoice': '🎙️ 录制我的回答（在最终页面重听与下载）',
+  'speaking.step2.recordVoicePrivacyNotice': '🔒 录音数据绝不会上传至服务器，仅保留在您的设备浏览器中。录音文件不会共享给开发者，请放心使用。',
 
   // 动作
   'speaking.action.start': '🚀 开始口语模拟考试',

@@ -40,8 +40,8 @@
   'speaking.step2.maxQuestionsHint': 'Random selection from {total} (loops with repeats if exceeding total)',
   'speaking.step2.setAll': 'Select All ({count})',
   'speaking.step2.ttsVoice': 'Reading Voice (TTS Language)',
-  'speaking.step2.voiceAuto': '🌐 Auto-detect Language (Mixed multilingual reading)',
-  'speaking.step2.voiceSearchPlaceholder': 'Search voices (e.g. Auto, Korean, Chinese, English...)',
+  'speaking.step2.voiceAuto': '🌐 Auto-detect Language (1:1 Bilingual & Mixed)',
+  'speaking.step2.voiceSearchPlaceholder': 'Search voices (e.g. Auto, Korean, English, Dutch, French...)',
   'speaking.step2.voiceCount': '{count} voices',
   'speaking.step2.voiceEmpty': "No voices matching '{query}'.",
   'speaking.step2.voiceGroupAuto': 'Smart Multilingual Synthesis',
@@ -77,6 +77,7 @@
   'speaking.step2.soundTest': '🔔 Test Sound',
   'speaking.step2.advancedOptions': 'Advanced Practice Options',
   'speaking.step2.recordVoice': '🎙️ Record my answers (Replay & download on result screen)',
+  'speaking.step2.recordVoicePrivacyNotice': '🔒 Voice recordings are never sent to any server and stay only on your device. Your audio files are never shared with the creator, so you can practice with peace of mind.',
 
   // Action
   'speaking.action.start': '🚀 Start Speaking Test',
