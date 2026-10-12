@@ -71,7 +71,36 @@ document.addEventListener('DOMContentLoaded', () => {
     'speaking.result.noRecording': '녹음 없음',
     'speaking.result.timeSpentBadge': '⏱️ 소요: {time}',
     'speaking.result.timeMinSec': '{min}분 {sec}초',
-    'speaking.result.timeSecOnly': '{sec}초'
+    'speaking.result.timeSecOnly': '{sec}초',
+    'speaking.step1.exportJson': '💾 JSON 백업',
+    'speaking.step1.importJson': '📂 불러오기',
+    'speaking.step1.importSuccess': '백업 파일에서 목록을 성공적으로 불러왔습니다.',
+    'speaking.step1.importInvalid': '유효하지 않은 백업 파일 형식입니다.',
+    'shadow.deck.sample': '기본 샘플 대본',
+    'shadow.deck.defaultName': '내 스크립트',
+    'shadow.stat.estMinSec': '약 {min}분 {sec}초',
+    'shadow.stat.estSec': '약 {sec}초',
+    'shadow.stat.sentenceUnit': '{count}문장',
+    'shadow.stat.wordCharUnit': '{words}단어 · {chars}자',
+    'shadow.rec.compareBadge': '내 낭독: {mySec}초 vs TTS: {ttsSec}초 ({diff})',
+    'shadow.gauge.empty': '대본을 입력하면 목표 시간 대비 분량을 분석해 드립니다.',
+    'shadow.gauge.free': '시간 제한 없이 자유롭게 연습하는 모드입니다.',
+    'shadow.gauge.short': '💡 목표({target}초) 대비 약 {est}초({pct}%) — 내용을 조금 더 덧붙여도 좋습니다.',
+    'shadow.gauge.good': '✅ 목표({target}초) 대비 약 {est}초({pct}%) — 시험 답변으로 아주 이상적인 분량입니다!',
+    'shadow.gauge.over': '⚠️ 목표({target}초) 대비 약 {est}초({pct}%) — 제한 시간을 초과할 수 있으니 문장을 줄여보세요.',
+    'shadow.card.emptyHint': '위에 스크립트 대본을 입력하면 문장별 쉐도잉 카드가 여기에 생성됩니다.',
+    'shadow.card.vsCompare': '원어민 ~{tts}초 vs 나 {my}초',
+    'shadow.card.peek': '👁️ 살짝 보기',
+    'shadow.card.listen': '🔊 듣기',
+    'shadow.card.loopOne': '🔂 1문장 반복',
+    'shadow.card.looping': '🔁 반복 중',
+    'shadow.card.recSentenceTitle': '이 문장 따라 읽고 내 발음·속도 비교하기',
+    'shadow.card.myVoice': '내 발음',
+    'shadow.card.recSentence': '이 문장 따라 읽고 녹음하기',
+    'shadow.card.playMyRec': '내 발음 녹음 듣기',
+    'shadow.card.recCompare': '🎙️ 원어민 ~{native}초 vs 나 {mine}초',
+    'shadow.card.playOnce': '이 문장 1회 듣기',
+    'shadow.card.loopSingle': '이 문장만 집중 무한 반복'
   };
 
   const t = (key, params) => {
@@ -96,6 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnAddNewDeck = document.getElementById('btnAddNewDeck');
   const btnPasteQuestions = document.getElementById('btnPasteQuestions');
   const btnClearQuestions = document.getElementById('btnClearQuestions');
+  const btnExportDecks = document.getElementById('btnExportDecks');
+  const btnImportDecks = document.getElementById('btnImportDecks');
+  const importDecksFileInput = document.getElementById('importDecksFileInput');
   const parsedStatusBox = document.getElementById('parsedStatusBox');
   const parsedCountBadge = document.getElementById('parsedCountBadge');
   const togglePreviewBtn = document.getElementById('togglePreviewBtn');
@@ -174,6 +206,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const shadowSplitSentenceCheck = document.getElementById('shadowSplitSentenceCheck');
   const btnPasteShadowScript = document.getElementById('btnPasteShadowScript');
   const btnClearShadowScript = document.getElementById('btnClearShadowScript');
+  const btnExportShadowDecks = document.getElementById('btnExportShadowDecks');
+  const btnImportShadowDecks = document.getElementById('btnImportShadowDecks');
+  const importShadowDecksFileInput = document.getElementById('importShadowDecksFileInput');
 
   const shadowStatSentences = document.getElementById('shadowStatSentences');
   const shadowStatWords = document.getElementById('shadowStatWords');
@@ -389,15 +424,33 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function playSound(type) {
-    if (!soundToggle || !soundToggle.checked) return;
+    let soundEnabled = true;
+    let savedSoundType = 'triple';
+    let savedSoundDuration = 'normal';
+    if (soundToggle) {
+      soundEnabled = soundToggle.checked;
+      if (soundTypeSelect) savedSoundType = soundTypeSelect.value;
+      if (soundDurationSelect) savedSoundDuration = soundDurationSelect.value;
+    } else {
+      try {
+        const raw = localStorage.getItem('wanzi_speaking_settings');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.sound !== undefined) soundEnabled = Boolean(parsed.sound);
+          if (parsed && parsed.soundType) savedSoundType = parsed.soundType;
+          if (parsed && parsed.soundDuration) savedSoundDuration = parsed.soundDuration;
+        }
+      } catch (e) {}
+    }
+    if (!soundEnabled) return;
     try {
       const ctx = getAudioContext();
       if (!ctx) return;
       const now = ctx.currentTime;
 
       if (type === 'finish') {
-        const soundType = soundTypeSelect ? soundTypeSelect.value : 'triple';
-        const durationSetting = soundDurationSelect ? soundDurationSelect.value : 'normal';
+        const soundType = savedSoundType;
+        const durationSetting = savedSoundDuration;
         // speedFactor: short=0.6, normal=1.0, long=1.5
         const speedFactor = durationSetting === 'short' ? 0.6 : (durationSetting === 'long' ? 1.5 : 1.0);
 
@@ -1801,19 +1854,21 @@ document.addEventListener('DOMContentLoaded', () => {
       const shared = localStorage.getItem(SHARED_LANG_KEY);
       if (isSupported(shared)) return shared;
 
-      const editorRaw = localStorage.getItem('anki_style_editor_content_v1');
+      const editorRaw = localStorage.getItem('anki_card_editor_content') || localStorage.getItem('anki_style_editor_content_v1');
       if (editorRaw) {
         const editorData = JSON.parse(editorRaw);
-        if (editorData && isSupported(editorData.langId)) {
-          return editorData.langId;
+        const langCandidate = editorData && (editorData.langId || editorData.language);
+        if (isSupported(langCandidate)) {
+          return langCandidate;
         }
       }
 
-      const promptRaw = localStorage.getItem('wanzi_prompt_settings_v2');
+      const promptRaw = localStorage.getItem('anki_prompt_generator_settings') || localStorage.getItem('wanzi_prompt_settings_v2');
       if (promptRaw) {
         const promptData = JSON.parse(promptRaw);
-        if (promptData && isSupported(promptData.langId)) {
-          return promptData.langId;
+        const langCandidate = promptData && (promptData.langId || promptData.language);
+        if (isSupported(langCandidate)) {
+          return langCandidate;
         }
       }
     } catch (e) {}
@@ -2095,6 +2150,68 @@ document.addEventListener('DOMContentLoaded', () => {
         updateParsedStatus();
         renderDeckTabs();
       }
+    });
+  }
+
+  // 문제 목록 JSON 백업 저장 & 불러오기
+  if (btnExportDecks) {
+    btnExportDecks.addEventListener('click', () => {
+      if (questionInput) saveActiveDeckContent(questionInput.value);
+      saveSettings();
+      const payload = {
+        version: 1,
+        type: 'wanzi_speaking_questions',
+        exportedAt: new Date().toISOString(),
+        activeDeckId: state.activeDeckId,
+        tourContent: state.tourContent,
+        customDecks: state.customDecks
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      a.href = url;
+      a.download = `Wanzi_Speaking_Questions_${dateStr}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+  }
+
+  if (btnImportDecks && importDecksFileInput) {
+    btnImportDecks.addEventListener('click', () => {
+      importDecksFileInput.value = '';
+      importDecksFileInput.click();
+    });
+    importDecksFileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(String(reader.result || ''));
+          if (!parsed || (!Array.isArray(parsed.customDecks) && typeof parsed.tourContent !== 'string')) {
+            alert(t('speaking.step1.importInvalid') || '올바른 질문 목록 백업(JSON) 파일이 아닙니다.');
+            return;
+          }
+          if (typeof parsed.tourContent === 'string') {
+            state.tourContent = parsed.tourContent;
+          }
+          if (Array.isArray(parsed.customDecks)) {
+            state.customDecks = parsed.customDecks;
+          }
+          state.activeDeckId = parsed.activeDeckId || (state.customDecks.length > 0 ? state.customDecks[0].id : 'tour');
+          if (questionInput) questionInput.value = getActiveDeckContent();
+          updateParsedStatus();
+          saveSettings();
+          renderDeckTabs();
+          alert(t('speaking.step1.importSuccess') || '질문 목록 백업 파일을 성공적으로 불러왔습니다!');
+        } catch (err) {
+          alert(t('speaking.step1.importInvalid') || '파일을 읽는 중 오류가 발생했습니다. 올바른 JSON 파일인지 확인해 주세요.');
+        }
+      };
+      reader.readAsText(file, 'utf-8');
     });
   }
 
@@ -2400,7 +2517,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     for (const c of candidates) {
       if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(c.type)) {
-        return c;
+        return { mimeType: c.type, ext: c.ext };
       }
     }
     return { mimeType: '', ext: 'webm' };
@@ -3304,7 +3421,9 @@ document.addEventListener('DOMContentLoaded', () => {
     recStartTime: 0,
     recTimerInterval: null,
     recUrl: null,
-    recDurationSec: 0
+    recDurationSec: 0,
+    activeSentenceRecIdx: null,
+    sentenceRecordings: {}
   };
 
   function saveShadowSettings() {
@@ -3406,7 +3525,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sampleTab.type = 'button';
     sampleTab.className = `deck-tab ${shadowState.activeScriptId === 'sample' ? 'active' : ''}`;
     sampleTab.innerHTML = `
-      <span class="deck-tab-name">🎯 한·외 1:1 샘플 대본</span>
+      <span class="deck-tab-name">${escapeHtml(t('shadow.deck.sample'))}</span>
       <span class="deck-tab-count">${sampleSentences.length}</span>
     `;
     sampleTab.addEventListener('click', () => {
@@ -3421,7 +3540,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const nameSpan = document.createElement('span');
       nameSpan.className = 'deck-tab-name';
-      nameSpan.textContent = deck.name || '내 스크립트';
+      nameSpan.textContent = deck.name || t('shadow.deck.defaultName');
 
       const countSpan = document.createElement('span');
       countSpan.className = 'deck-tab-count';
@@ -3431,10 +3550,10 @@ document.addEventListener('DOMContentLoaded', () => {
       renameBtn.type = 'button';
       renameBtn.className = 'deck-tab-rename';
       renameBtn.innerHTML = '✏️';
-      renameBtn.title = '스크립트 이름 수정';
+      renameBtn.title = t('speaking.step1.renameList');
       renameBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const nextName = prompt('스크립트의 새 이름을 입력하세요:', deck.name || '');
+        const nextName = prompt(t('speaking.step1.renameListPrompt'), deck.name || '');
         if (nextName && nextName.trim()) {
           deck.name = nextName.trim();
           saveShadowSettings();
@@ -3446,10 +3565,10 @@ document.addEventListener('DOMContentLoaded', () => {
       delBtn.type = 'button';
       delBtn.className = 'deck-tab-del';
       delBtn.innerHTML = '&times;';
-      delBtn.title = '스크립트 삭제';
+      delBtn.title = t('speaking.step1.clear');
       delBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (!confirm(`"${deck.name}" 스크립트를 삭제할까요?`)) return;
+        if (!confirm(t('speaking.step1.confirmDeleteList', { name: deck.name }))) return;
         shadowState.customScripts = shadowState.customScripts.filter(d => d.id !== deck.id);
         if (shadowState.activeScriptId === deck.id) {
           shadowState.activeScriptId = shadowState.customScripts.length > 0
@@ -3490,13 +3609,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (shadowActiveVoiceBadge) {
       const selectedMode = voiceSelect ? voiceSelect.value : 'auto';
       if (selectedMode !== 'auto') {
-        shadowActiveVoiceBadge.textContent = `🎙️ 고정: ${selectedMode}`;
+        shadowActiveVoiceBadge.textContent = `🎙️ ${selectedMode}`;
       } else {
         const meta = getLangMeta(targetLang === 'all' ? 'en' : targetLang);
         const bestVoice = getBestVoiceForLang(targetLang === 'all' ? 'en' : targetLang);
-        const vName = bestVoice ? bestVoice.name.replace(/Microsoft |Google |Apple /gi, '') : '기본 음성';
+        const vName = bestVoice ? bestVoice.name.replace(/Microsoft |Google |Apple /gi, '') : 'Default';
         shadowActiveVoiceBadge.textContent = `${meta.flag} ${vName}`;
-        shadowActiveVoiceBadge.title = bestVoice ? bestVoice.name : '시스템 기본 음성';
+        shadowActiveVoiceBadge.title = bestVoice ? bestVoice.name : '';
       }
     }
   }
@@ -3514,11 +3633,17 @@ document.addEventListener('DOMContentLoaded', () => {
         rawSentences.push(cleaned);
         return;
       }
-      // 마침표, 물음표, 느낌표(동양권 구두점 포함) 기준 문장 분리 (소수점 1.5, 약어 Mr. 등은 보존)
-      const parts = cleaned
+      // 영어 약어(Mr., Mrs., Ms., Dr., Prof., St., Jr., Sr., vs., etc., e.g., i.e., No., Fig., U.S., U.K.)의 마침표 임시 치환
+      const DOT_TOKEN = '\uE000';
+      const protectedLine = cleaned
+        .replace(/\b(Mr|Mrs|Ms|Dr|Prof|St|Jr|Sr|vs|etc|No|Fig|Jan|Feb|Mar|Apr|Aug|Sept|Oct|Nov|Dec)\./gi, `$1${DOT_TOKEN}`)
+        .replace(/\b(e\.g|i\.e|U\.S|U\.K|a\.m|p\.m)\./gi, m => m.replace(/\./g, DOT_TOKEN));
+
+      // 마침표, 물음표, 느낌표(동양권 구두점 포함) 기준 문장 분리
+      const parts = protectedLine
         .replace(/([.?!。？！]+)(?=\s+|$)/g, '$1\u0000')
         .split('\u0000')
-        .map(s => s.trim())
+        .map(s => s.replace(/\uE000/g, '.').trim())
         .filter(Boolean);
       parts.forEach(p => rawSentences.push(p));
     });
@@ -3558,8 +3683,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const sec = Math.max(0, Math.round(totalSec));
     const m = Math.floor(sec / 60);
     const s = sec % 60;
-    if (m > 0) return `약 ${m}분 ${s}초`;
-    return `약 ${s}초`;
+    if (m > 0) return t('shadow.stat.estMinSec', { min: m, sec: s });
+    return t('shadow.stat.estSec', { sec: s });
   }
 
   function updateShadowStatsAndCards() {
@@ -3574,18 +3699,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalEstSec = sentences.reduce((acc, s) => acc + s.estSec, 0);
     shadowState.totalEstSec = totalEstSec;
 
-    if (shadowStatSentences) shadowStatSentences.textContent = `${sentences.length}문장`;
-    if (shadowStatWords) shadowStatWords.textContent = `${wordCount}어절 · ${charCount}자`;
-    if (shadowStatRateTag) shadowStatRateTag.textContent = `(${shadowState.rate.toFixed(1)}x 기준)`;
+    if (shadowStatSentences) shadowStatSentences.textContent = t('shadow.stat.sentenceUnit', { count: sentences.length });
+    if (shadowStatWords) shadowStatWords.textContent = t('shadow.stat.wordCharUnit', { words: wordCount, chars: charCount });
+    if (shadowStatRateTag) shadowStatRateTag.textContent = `(${shadowState.rate.toFixed(1)}x)`;
     if (shadowStatDuration) shadowStatDuration.textContent = formatDurationKo(totalEstSec);
 
     if (shadowRecStatsBadge) {
       if (shadowState.recDurationSec > 0) {
         const diff = Math.round(shadowState.recDurationSec - totalEstSec);
-        const diffStr = diff > 0 ? `+${diff}초` : `${diff}초`;
-        shadowRecStatsBadge.textContent = `내 기록: ${Math.round(shadowState.recDurationSec)}초 (TTS 약 ${Math.round(totalEstSec)}초 대비 ${diffStr})`;
+        const diffStr = diff > 0 ? `+${diff}s` : `${diff}s`;
+        shadowRecStatsBadge.textContent = t('shadow.rec.compareBadge', {
+          mySec: Math.round(shadowState.recDurationSec),
+          ttsSec: Math.round(totalEstSec),
+          diff: diffStr
+        });
       } else {
-        shadowRecStatsBadge.textContent = `TTS 예상: ${formatDurationKo(totalEstSec)}`;
+        shadowRecStatsBadge.textContent = `TTS: ${formatDurationKo(totalEstSec)}`;
       }
     }
 
@@ -3596,7 +3725,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (shadowTargetFeedback && shadowTargetProgressFill) {
       if (targetSec <= 0 || sentences.length === 0) {
         shadowTargetFeedback.className = 'shadow-target-feedback';
-        shadowTargetFeedback.textContent = sentences.length === 0 ? '대본을 입력하면 예상 시간을 계산합니다' : '자유 분량 연습 모드';
+        shadowTargetFeedback.textContent = sentences.length === 0 ? t('shadow.gauge.empty') : t('shadow.gauge.free');
         shadowTargetProgressFill.style.width = sentences.length === 0 ? '0%' : '100%';
         shadowTargetProgressFill.className = 'shadow-target-progress-fill';
       } else {
@@ -3607,15 +3736,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ratio < 0.7) {
           shadowTargetFeedback.className = 'shadow-target-feedback short';
           shadowTargetProgressFill.className = 'shadow-target-progress-fill short';
-          shadowTargetFeedback.textContent = `🟡 분량 부족 (목표 ${targetSec}초 중 약 ${Math.round(totalEstSec)}초 · ${Math.round(ratio * 100)}%)`;
+          shadowTargetFeedback.textContent = t('shadow.gauge.short', { target: targetSec, est: Math.round(totalEstSec), pct: Math.round(ratio * 100) });
         } else if (ratio <= 1.1) {
           shadowTargetFeedback.className = 'shadow-target-feedback good';
           shadowTargetProgressFill.className = 'shadow-target-progress-fill';
-          shadowTargetFeedback.textContent = `🟢 적정 분량! (목표 ${targetSec}초 중 약 ${Math.round(totalEstSec)}초 · ${Math.round(ratio * 100)}%)`;
+          shadowTargetFeedback.textContent = t('shadow.gauge.good', { target: targetSec, est: Math.round(totalEstSec), pct: Math.round(ratio * 100) });
         } else {
           shadowTargetFeedback.className = 'shadow-target-feedback over';
           shadowTargetProgressFill.className = 'shadow-target-progress-fill over';
-          shadowTargetFeedback.textContent = `🔴 시간 초과 주의 (목표 ${targetSec}초 대비 약 ${Math.round(totalEstSec)}초 · ${Math.round(ratio * 100)}%)`;
+          shadowTargetFeedback.textContent = t('shadow.gauge.over', { target: targetSec, est: Math.round(totalEstSec), pct: Math.round(ratio * 100) });
         }
       }
     }
@@ -3630,7 +3759,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (shadowState.sentences.length === 0) {
       shadowSentenceList.innerHTML = `
         <div style="text-align:center; padding: 2rem 1rem; color: #94a3b8; font-size: 0.9rem;">
-          위 입력창에 말하기 시험 스크립트를 입력하면 문장별 쉐도잉 카드가 생성됩니다.
+          ${escapeHtml(t('shadow.card.emptyHint'))}
         </div>
       `;
       return;
@@ -3659,12 +3788,16 @@ document.addEventListener('DOMContentLoaded', () => {
       textEl.className = `shadow-sentence-text ${shouldMask ? 'is-masked' : ''}`;
       textEl.textContent = item.text;
 
+      const sentRec = shadowState.sentenceRecordings && shadowState.sentenceRecordings[idx];
+      const recCompareHtml = sentRec
+        ? `<span>·</span><span style="color:#2563eb;font-weight:700;">🎙️ ${escapeHtml(t('shadow.card.vsCompare', { tts: item.estSec.toFixed(1), my: sentRec.durationSec.toFixed(1) }))}</span>`
+        : `<span>·</span><span>⏱️ ~${item.estSec.toFixed(1)}s</span>`;
+
       const metaRow = document.createElement('div');
       metaRow.className = 'shadow-sentence-meta';
       metaRow.innerHTML = `
         <span>${meta.flag} ${escapeHtml(meta.shortName || meta.name)}</span>
-        <span>·</span>
-        <span>⏱️ ~${item.estSec.toFixed(1)}초</span>
+        ${recCompareHtml}
       `;
 
       bodyDiv.append(textEl, metaRow);
@@ -3677,8 +3810,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const peekBtn = document.createElement('button');
         peekBtn.type = 'button';
         peekBtn.className = 'btn-shadow-card-action';
-        peekBtn.textContent = '👁️ 확인';
-        peekBtn.title = '문장 가림막 토글';
+        peekBtn.textContent = t('shadow.card.peek');
+        peekBtn.title = t('shadow.card.peek');
         peekBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           textEl.classList.toggle('peek');
@@ -3689,8 +3822,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const playFromHereBtn = document.createElement('button');
       playFromHereBtn.type = 'button';
       playFromHereBtn.className = 'btn-shadow-card-action';
-      playFromHereBtn.textContent = '🔊 듣기';
-      playFromHereBtn.title = '이 문장부터 낭독 시작';
+      playFromHereBtn.textContent = t('shadow.card.listen');
+      playFromHereBtn.title = t('shadow.card.listen');
       playFromHereBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         shadowState.singleLoopIdx = null;
@@ -3701,8 +3834,8 @@ document.addEventListener('DOMContentLoaded', () => {
       loopOneBtn.type = 'button';
       const isLoopingThis = shadowState.isPlaying && shadowState.singleLoopIdx === idx;
       loopOneBtn.className = `btn-shadow-card-action ${isLoopingThis ? 'loop-active' : ''}`;
-      loopOneBtn.textContent = isLoopingThis ? '🔁 반복 중' : '🔁 1문장 반복';
-      loopOneBtn.title = '이 문장만 집중적으로 무한 반복합니다';
+      loopOneBtn.textContent = isLoopingThis ? t('shadow.card.looping') : t('shadow.card.loopOne');
+      loopOneBtn.title = t('shadow.card.loopOne');
       loopOneBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         if (shadowState.isPlaying && shadowState.singleLoopIdx === idx) {
@@ -3714,7 +3847,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
-      actionsDiv.append(playFromHereBtn, loopOneBtn);
+      // 문장별 내 발음 녹음 버튼 (🎤)
+      const isRecThis = shadowState.isRecording && shadowState.activeSentenceRecIdx === idx;
+      const recSentenceBtn = document.createElement('button');
+      recSentenceBtn.type = 'button';
+      recSentenceBtn.className = `btn-shadow-card-action ${isRecThis ? 'loop-active' : ''}`;
+      recSentenceBtn.textContent = isRecThis ? '⏹' : '🎤';
+      recSentenceBtn.title = t('shadow.card.recSentenceTitle');
+      recSentenceBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleSentenceVoiceRecording(idx);
+      });
+
+      actionsDiv.append(playFromHereBtn, loopOneBtn, recSentenceBtn);
+
+      if (sentRec && sentRec.url) {
+        const playMySentBtn = document.createElement('button');
+        playMySentBtn.type = 'button';
+        playMySentBtn.className = 'btn-shadow-card-action';
+        playMySentBtn.innerHTML = `▶️ <span>${escapeHtml(t('shadow.card.myVoice'))}</span>`;
+        playMySentBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          stopShadowPlayback();
+          toggleUserVoicePlayback(sentRec.url, playMySentBtn);
+        });
+        actionsDiv.appendChild(playMySentBtn);
+      }
+
       card.append(leftDiv, actionsDiv);
 
       card.addEventListener('click', () => {
@@ -4248,7 +4407,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 쉐도잉 스튜디오 내 목소리 낭독 녹음 & 시간 측정
+  // 쉐도잉 스튜디오 내 목소리 낭독 녹음 & 시간 측정 (전체 낭독 및 문장별 낭독 겸용)
   async function toggleShadowVoiceRecording() {
     if (shadowState.isRecording) {
       stopShadowVoiceRecording();
@@ -4271,6 +4430,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const chunks = [];
       shadowState.recStartTime = Date.now();
       shadowState.isRecording = true;
+      shadowState.activeSentenceRecIdx = null;
 
       recorder.ondataavailable = (e) => {
         if (e.data && e.data.size > 0) chunks.push(e.data);
@@ -4313,9 +4473,67 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // 문장 카드 개별 발음 녹음 토글
+  async function toggleSentenceVoiceRecording(idx) {
+    if (shadowState.isRecording && shadowState.activeSentenceRecIdx === idx) {
+      stopShadowVoiceRecording();
+      return;
+    }
+    if (shadowState.isRecording) {
+      stopShadowVoiceRecording();
+    }
+
+    stopShadowPlayback();
+    stopUserVoicePlayback();
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert(t('speaking.sim.micDenied'));
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      shadowState.recStream = stream;
+      const { mimeType } = getSupportedAudioMimeType();
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      const chunks = [];
+      const recStart = Date.now();
+      shadowState.recStartTime = recStart;
+      shadowState.isRecording = true;
+      shadowState.activeSentenceRecIdx = idx;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunks.push(e.data);
+      };
+
+      recorder.onstop = () => {
+        if (chunks.length > 0) {
+          const blob = new Blob(chunks, { type: mimeType || recorder.mimeType || 'audio/webm' });
+          const prevRec = shadowState.sentenceRecordings[idx];
+          if (prevRec && prevRec.url) {
+            try { URL.revokeObjectURL(prevRec.url); } catch (e) {}
+          }
+          const url = URL.createObjectURL(blob);
+          const durationSec = Math.max(0.5, (Date.now() - recStart) / 1000);
+          shadowState.sentenceRecordings[idx] = { url, durationSec };
+        }
+        shadowState.activeSentenceRecIdx = null;
+        renderShadowSentenceCards();
+      };
+
+      recorder.start(250);
+      shadowState.recMediaRecorder = recorder;
+      renderShadowSentenceCards();
+    } catch (err) {
+      shadowState.activeSentenceRecIdx = null;
+      alert(t('speaking.sim.micDenied'));
+    }
+  }
+
   function stopShadowVoiceRecording() {
     clearInterval(shadowState.recTimerInterval);
     shadowState.isRecording = false;
+    shadowState.activeSentenceRecIdx = null;
     if (shadowState.recMediaRecorder && shadowState.recMediaRecorder.state !== 'inactive') {
       try { shadowState.recMediaRecorder.stop(); } catch (e) {}
     }
@@ -4341,6 +4559,126 @@ document.addEventListener('DOMContentLoaded', () => {
       toggleUserVoicePlayback(shadowState.recUrl, btnShadowRecPlay);
     });
   }
+
+  // 쉐도잉 대본 목록 JSON 파일 내보내기 / 불러오기 백업
+  if (btnExportShadowDecks) {
+    btnExportShadowDecks.addEventListener('click', () => {
+      saveShadowSettings();
+      const backupData = {
+        type: 'wanzi_shadowing_scripts_backup',
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        activeScriptId: shadowState.activeScriptId,
+        sampleContent: shadowState.sampleContent,
+        customScripts: shadowState.customScripts
+      };
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const dateStr = new Date().toISOString().slice(0, 10);
+      a.download = `wanzi_shadowing_scripts_${dateStr}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+  }
+
+  if (btnImportShadowDecks && importShadowDecksFileInput) {
+    btnImportShadowDecks.addEventListener('click', () => {
+      importShadowDecksFileInput.value = '';
+      importShadowDecksFileInput.click();
+    });
+
+    importShadowDecksFileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(String(ev.target.result || ''));
+          if (!data || (!Array.isArray(data.customScripts) && typeof data.sampleContent !== 'string')) {
+            alert(t('speaking.step1.importInvalid'));
+            return;
+          }
+          if (typeof data.sampleName === 'string' && data.sampleName.trim()) {
+            shadowState.sampleName = data.sampleName.trim();
+          }
+          if (typeof data.sampleContent === 'string') {
+            shadowState.sampleContent = data.sampleContent;
+          }
+          if (Array.isArray(data.customScripts)) {
+            shadowState.customScripts = data.customScripts
+              .filter(d => d && typeof d.id === 'string' && typeof d.name === 'string')
+              .map(d => ({
+                id: d.id,
+                name: d.name.trim() || '대본',
+                content: typeof d.content === 'string' ? d.content : ''
+              }));
+          }
+          shadowState.activeScriptId = data.activeScriptId || 'sample';
+          if (shadowState.activeScriptId !== 'sample' && !shadowState.customScripts.some(d => d.id === shadowState.activeScriptId)) {
+            shadowState.activeScriptId = 'sample';
+          }
+          if (shadowScriptInput) {
+            if (shadowState.activeScriptId === 'sample') {
+              shadowScriptInput.value = shadowState.sampleContent;
+            } else {
+              const found = shadowState.customScripts.find(d => d.id === shadowState.activeScriptId);
+              shadowScriptInput.value = found ? found.content : shadowState.sampleContent;
+            }
+          }
+          renderShadowDeckTabs();
+          updateShadowStatsAndCards();
+          saveShadowSettings();
+          alert(t('speaking.step1.importSuccess'));
+        } catch (err) {
+          alert(t('speaking.step1.importInvalid'));
+        }
+      };
+      reader.readAsText(file, 'utf-8');
+    });
+  }
+
+  // 쉐도잉 스튜디오 키보드 단축키 지원 (입력창 포커스 중이 아닐 때 Space / 좌우 방향키)
+  if (shadowSentenceList) {
+    window.addEventListener('keydown', (e) => {
+      const tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : '';
+      if (tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'SELECT' || (e.target && e.target.isContentEditable)) {
+        return;
+      }
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (!shadowState.isPlaying) {
+          shadowState.singleLoopIdx = null;
+          startShadowPlayback(0);
+        } else if (btnShadowPause) {
+          btnShadowPause.click();
+        }
+      } else if (e.code === 'ArrowLeft') {
+        if (shadowState.sentences.length > 0 && btnShadowPrev && !btnShadowPrev.disabled) {
+          e.preventDefault();
+          btnShadowPrev.click();
+        }
+      } else if (e.code === 'ArrowRight') {
+        if (shadowState.sentences.length > 0 && btnShadowNext && !btnShadowNext.disabled) {
+          e.preventDefault();
+          btnShadowNext.click();
+        }
+      }
+    });
+  }
+
+  // 페이지 이탈 / 새로고침 시 TTS 음성 낭독 및 마이크 스트림 즉시 해제 (잔류 방지)
+  const cleanupOnPageLeave = () => {
+    try { stopSpeaking(); } catch (e) {}
+    try { stopShadowPlayback(); } catch (e) {}
+    try { stopShadowVoiceRecording(); } catch (e) {}
+    try { releaseMicrophone(); } catch (e) {}
+  };
+  window.addEventListener('pagehide', cleanupOnPageLeave);
+  window.addEventListener('beforeunload', cleanupOnPageLeave);
 
   // =========================================================================
   // 12. 초기화 실행

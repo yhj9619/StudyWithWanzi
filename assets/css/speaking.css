@@ -2841,6 +2841,32 @@
   color: #ffffff;
 }
 
+.btn-shadow-card-action.recording {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
+  animation: pulseRec 1.4s infinite;
+}
+
+.btn-shadow-card-action.playing {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.shadow-rec-compare-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-weight: 700;
+  font-size: 0.71rem;
+  font-variant-numeric: tabular-nums;
+}
+
 /* 하단 내 목소리 실전 낭독 녹음 비교 미니 스튜디오 */
 .shadow-record-box {
   background: #f8fafc;

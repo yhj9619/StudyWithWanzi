@@ -12,8 +12,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/css/style.css?v=20261012k">
-  <link rel="stylesheet" href="../assets/css/guide.css?v=20261012k">
+  <link rel="stylesheet" href="../assets/css/style.css?v=20261012n">
+  <link rel="stylesheet" href="../assets/css/guide.css?v=20261012n">
 </head>
 <body>
   <!-- 모든 페이지 공통 메뉴줄 (i18n.js가 그림) -->
@@ -24,8 +24,8 @@
       <div class="logo-group">
         <span class="logo-icon">❓</span>
         <div>
-          <h1 class="logo-title">말하기 연습 사용 설명서</h1>
-          <p class="logo-subtitle">실전 면접 시뮬레이터와 쉐도잉 스튜디오 사용법 · 자주 묻는 질문을 모았어요</p>
+          <h1 class="logo-title" data-i18n="speakingManual.headerTitle">말하기 연습 사용 설명서</h1>
+          <p class="logo-subtitle" data-i18n="speakingManual.headerSubtitle">실전 면접 시뮬레이터와 쉐도잉 스튜디오 사용법 · 자주 묻는 질문을 모았어요</p>
         </div>
       </div>
     </div>
@@ -35,41 +35,41 @@
     <div class="guide-container">
 
       <section class="guide-hero">
-        <div class="guide-hero-tag">❓ 말하기 도구 사용법 · 자주 묻는 질문</div>
-        <h2 class="guide-hero-title">말하기 시험 준비 도구가 헷갈릴 때 여기서 찾아보세요</h2>
-        <p class="guide-hero-subtitle"><strong>🎯 실전 면접 시뮬레이터</strong>와 <strong>📜 스크립트 쉐도잉 스튜디오</strong>의 기능을 화면 순서대로 알기 쉽게 정리했어요. 아래 차례를 누르면 원하는 설명으로 바로 이동합니다.</p>
+        <div class="guide-hero-tag" data-i18n="speakingManual.heroTag">❓ 말하기 도구 사용법 · 자주 묻는 질문</div>
+        <h2 class="guide-hero-title" data-i18n="speakingManual.heroTitle">말하기 시험 준비 도구가 헷갈릴 때 여기서 찾아보세요</h2>
+        <p class="guide-hero-subtitle" data-i18n-html="speakingManual.heroSubtitle"><strong>🎯 실전 면접 시뮬레이터</strong>와 <strong>📜 스크립트 쉐도잉 스튜디오</strong>의 기능을 화면 순서대로 알기 쉽게 정리했어요. 아래 차례를 누르면 원하는 설명으로 바로 이동합니다.</p>
       </section>
 
       <!-- 차례 -->
       <nav class="guide-quickstart manual-toc" aria-label="말하기 사용 설명서 차례">
         <a href="#simulator" class="guide-quick-card">
           <span class="guide-quick-icon">🎯</span>
-          <strong>실전 면접 시뮬레이터</strong>
-          <span>질문 덱 관리 · 엑셀 붙여넣기 · 타이머 · 녹음 및 재응시</span>
+          <strong data-i18n="speakingManual.tocSimTitle">실전 면접 시뮬레이터</strong>
+          <span data-i18n="speakingManual.tocSimDesc">질문 덱 관리 · 엑셀 붙여넣기 · 타이머 · 녹음 및 재응시</span>
         </a>
         <a href="#shadowing" class="guide-quick-card">
           <span class="guide-quick-icon">📜</span>
-          <strong>스크립트 쉐도잉 스튜디오</strong>
-          <span>발화 시간 측정 · 배속/쉼 조절 · 암기 블러 · 내 발음 비교</span>
+          <strong data-i18n="speakingManual.tocShadowTitle">스크립트 쉐도잉 스튜디오</strong>
+          <span data-i18n="speakingManual.tocShadowDesc">발화 시간 측정 · 배속/쉼 조절 · 암기 블러 · 내 발음 비교</span>
         </a>
         <a href="#tts" class="guide-quick-card">
           <span class="guide-quick-icon">🌐</span>
-          <strong>1:1 다국어 음성(TTS) 설정</strong>
-          <span>모국어+외국어 자동 감지 · 브라우저별 원어민 음성 안내</span>
+          <strong data-i18n="speakingManual.tocTtsTitle">1:1 다국어 음성(TTS) 설정</strong>
+          <span data-i18n="speakingManual.tocTtsDesc">모국어+외국어 자동 감지 · 브라우저별 원어민 음성 안내</span>
         </a>
         <a href="#faq" class="guide-quick-card">
           <span class="guide-quick-icon">❓</span>
-          <strong>자주 묻는 질문 (FAQ)</strong>
-          <span>녹음 보안 · 비용 · 소리가 안 날 때 · 모바일 사용 팁</span>
+          <strong data-i18n="speakingManual.tocFaqTitle">자주 묻는 질문 (FAQ)</strong>
+          <span data-i18n="speakingManual.tocFaqDesc">녹음 보안 · 비용 · 소리가 안 날 때 · 모바일 사용 팁</span>
         </a>
       </nav>
 
       <!-- 도구 1: 실전 면접 시뮬레이터 -->
       <article class="guide-section-card" id="simulator">
         <header class="guide-section-header">
-          <span class="guide-section-badge">도구 1</span>
-          <h3 class="guide-section-title">🎯 실전 면접 시뮬레이터</h3>
-          <p class="guide-section-lead">OPIc · 토익스피킹 · 외국어 면접처럼 내 질문 리스트에서 문제를 뽑아 음성으로 들려주고, 제한 시간 안에 답변을 녹음해 복기하는 실전 모의고사 도구예요.</p>
+          <span class="guide-section-badge" data-i18n="speakingManual.sec1Badge">도구 1</span>
+          <h3 class="guide-section-title" data-i18n="speakingManual.sec1Title">🎯 실전 면접 시뮬레이터</h3>
+          <p class="guide-section-lead" data-i18n="speakingManual.sec1Lead">OPIc · 토익스피킹 · 외국어 면접처럼 내 질문 리스트에서 문제를 뽑아 음성으로 들려주고, 제한 시간 안에 답변을 녹음해 복기하는 실전 모의고사 도구예요.</p>
         </header>
 
         <div class="guide-prose">
@@ -100,10 +100,10 @@
 
           <div class="guide-cta-card">
             <div class="guide-cta-info">
-              <h5>🎯 실전 면접 시뮬레이터</h5>
-              <p>질문 리스트를 넣고 실제 시험장 같은 긴장감으로 모의면접을 시작해 보세요.</p>
+              <h5 data-i18n="speakingManual.sec1Title">🎯 실전 면접 시뮬레이터</h5>
+              <p data-i18n="speakingManual.sec1CtaDesc">질문 리스트를 넣고 실제 시험장 같은 긴장감으로 모의면접을 시작해 보세요.</p>
             </div>
-            <a href="speakingSimulator.html" class="guide-cta-btn">실전 시뮬레이터 열기 ➔</a>
+            <a href="speakingSimulator.html" class="guide-cta-btn" data-i18n="speakingHub.btnSim">실전 시뮬레이터 열기 ➔</a>
           </div>
         </div>
       </article>
@@ -111,9 +111,9 @@
       <!-- 도구 2: 스크립트 쉐도잉 스튜디오 -->
       <article class="guide-section-card" id="shadowing">
         <header class="guide-section-header">
-          <span class="guide-section-badge">도구 2</span>
-          <h3 class="guide-section-title">📜 스크립트 쉐도잉 스튜디오</h3>
-          <p class="guide-section-lead">내가 작성한 답변 스크립트가 시험 제한 시간에 맞는지 계산하고, 원어민 TTS 음성을 따라 말하며 입에 완전히 붙이는 스크립트 훈련소예요.</p>
+          <span class="guide-section-badge" data-i18n="speakingManual.sec2Badge">도구 2</span>
+          <h3 class="guide-section-title" data-i18n="speakingManual.sec2Title">📜 스크립트 쉐도잉 스튜디오</h3>
+          <p class="guide-section-lead" data-i18n="speakingManual.sec2Lead">내가 작성한 답변 스크립트가 시험 제한 시간에 맞는지 계산하고, 원어민 TTS 음성을 따라 말하며 입에 완전히 붙이는 스크립트 훈련소예요.</p>
         </header>
 
         <div class="guide-prose">
@@ -147,10 +147,10 @@
 
           <div class="guide-cta-card">
             <div class="guide-cta-info">
-              <h5>📜 스크립트 쉐도잉 스튜디오</h5>
-              <p>작성해 둔 답변 스크립트를 붙여넣고 예상 시간과 쉐도잉 연습을 시작해 보세요.</p>
+              <h5 data-i18n="speakingManual.sec2Title">📜 스크립트 쉐도잉 스튜디오</h5>
+              <p data-i18n="speakingManual.sec2CtaDesc">작성해 둔 답변 스크립트를 붙여넣고 예상 시간과 쉐도잉 연습을 시작해 보세요.</p>
             </div>
-            <a href="speakingShadowing.html" class="guide-cta-btn">쉐도잉 스튜디오 열기 ➔</a>
+            <a href="speakingShadowing.html" class="guide-cta-btn" data-i18n="speakingHub.btnShadow">쉐도잉 스튜디오 열기 ➔</a>
           </div>
         </div>
       </article>
@@ -158,9 +158,9 @@
       <!-- 1:1 다국어 음성(TTS) 설정 안내 -->
       <article class="guide-section-card" id="tts">
         <header class="guide-section-header">
-          <span class="guide-section-badge">음성 안내</span>
-          <h3 class="guide-section-title">🌐 모국어+외국어 1:1 자동 감지와 브라우저별 음성</h3>
-          <p class="guide-section-lead">한 줄에 한국어와 외국어가 섞여 있어도 구간별로 알맞은 원어민 목소리로 자연스럽게 나누어 읽어 줍니다.</p>
+          <span class="guide-section-badge" data-i18n="speakingManual.sec3Badge">음성 안내</span>
+          <h3 class="guide-section-title" data-i18n="speakingManual.sec3Title">🌐 모국어+외국어 1:1 자동 감지와 브라우저별 음성</h3>
+          <p class="guide-section-lead" data-i18n="speakingManual.sec3Lead">한 줄에 한국어와 외국어가 섞여 있어도 구간별로 알맞은 원어민 목소리로 자연스럽게 나누어 읽어 줍니다.</p>
         </header>
 
         <div class="guide-prose">
@@ -209,68 +209,68 @@
       <article class="guide-section-card" id="faq">
         <header class="guide-section-header">
           <span class="guide-section-badge">FAQ</span>
-          <h3 class="guide-section-title">❓ 자주 묻는 질문</h3>
-          <p class="guide-section-lead">궁금한 점이나 막히는 부분이 있다면 질문을 눌러 답을 확인해 보세요.</p>
+          <h3 class="guide-section-title" data-i18n="speakingManual.sec4Title">❓ 자주 묻는 질문</h3>
+          <p class="guide-section-lead" data-i18n="speakingManual.sec4Lead">궁금한 점이나 막히는 부분이 있다면 질문을 눌러 답을 확인해 보세요.</p>
         </header>
 
         <div class="guide-faq-list">
           <details class="guide-faq-item" id="faq-privacy">
-            <summary>내가 녹음한 목소리나 작성한 스크립트가 외부 서버로 전송되나요?</summary>
-            <div class="guide-faq-answer">아니요, <b>절대 외부로 전송되지 않습니다.</b> Study with Wanzi의 모든 말하기 도구는 100% 브라우저 안에서만 동작하는 정적(Static) 웹페이지입니다. 녹음된 음성은 현재 브라우저 탭의 메모리(Blob)에만 임시로 머물며, 탭을 닫거나 새로고침하면 완전히 사라집니다. 작성한 질문 리스트와 스크립트는 지금 쓰는 브라우저의 저장소(localStorage)에만 저장됩니다.</div>
+            <summary data-i18n="speakingManual.faq1Q">내가 녹음한 목소리나 작성한 스크립트가 외부 서버로 전송되나요?</summary>
+            <div class="guide-faq-answer" data-i18n-html="speakingManual.faq1A">아니요, <b>절대 외부로 전송되지 않습니다.</b> Study with Wanzi의 모든 말하기 도구는 100% 브라우저 안에서만 동작하는 정적(Static) 웹페이지입니다. 녹음된 음성은 현재 브라우저 탭의 메모리(Blob)에만 임시로 머물며, 탭을 닫거나 새로고침하면 완전히 사라집니다. 작성한 질문 리스트와 스크립트는 지금 쓰는 브라우저의 저장소(localStorage)에만 저장됩니다.</div>
           </details>
 
           <details class="guide-faq-item" id="faq-cost">
-            <summary>많이 들어도 무료인가요? 일일 사용량 제한이 있나요?</summary>
-            <div class="guide-faq-answer">네, <b>완전 무료이며 횟수나 시간 제한이 전혀 없습니다.</b> 외부 유료 AI API를 쓰지 않고 브라우저와 운영체제에 내장된 음성 합성(Web Speech API) 및 녹음(MediaRecorder API) 기능을 활용하므로 몇 시간씩 반복 재생하거나 쉐도잉을 해도 요금이나 할당량 걱정이 없습니다.</div>
+            <summary data-i18n="speakingManual.faq2Q">많이 들어도 무료인가요? 일일 사용량 제한이 있나요?</summary>
+            <div class="guide-faq-answer" data-i18n-html="speakingManual.faq2A">네, <b>완전 무료이며 횟수나 시간 제한이 전혀 없습니다.</b> 외부 유료 AI API를 쓰지 않고 브라우저와 운영체제에 내장된 음성 합성(Web Speech API) 및 녹음(MediaRecorder API) 기능을 활용하므로 몇 시간씩 반복 재생하거나 쉐도잉을 해도 요금이나 할당량 걱정이 없습니다.</div>
           </details>
 
           <details class="guide-faq-item" id="faq-no-sound">
-            <summary>🔊 재생 버튼을 눌러도 소리가 안 나거나 원하는 언어가 목록에 없어요</summary>
-            <div class="guide-faq-answer">아래 순서대로 확인해 보세요.<br>
+            <summary data-i18n="speakingManual.faq3Q">🔊 재생 버튼을 눌러도 소리가 안 나거나 원하는 언어가 목록에 없어요</summary>
+            <div class="guide-faq-answer" data-i18n-html="speakingManual.faq3A">아래 순서대로 확인해 보세요.<br>
               ① <b>브라우저 확인</b>: PC라면 고품질 음성이 가장 많이 내장된 <b>Microsoft Edge</b>나 <b>Google Chrome</b> 브라우저에서 열어 보세요.<br>
               ② <b>기기에 음성 추가 설치</b>: 윈도우 PC는 <b>[설정] ➔ [시간 및 언어] ➔ [언어 및 지역]</b>에서 해당 언어의 [텍스트 음성 변환] 팩을 추가할 수 있습니다. 아이폰/맥은 <b>[설정] ➔ [손쉬운 사용] ➔ [콘텐츠 말하기] ➔ [음성]</b>에서 음성을 내려받으세요.<br>
               ③ <b>모바일 매너모드/볼륨 확인</b>: 휴대폰 미디어 볼륨이 켜져 있는지 확인하고, 화면이 완전히 꺼진(잠금) 상태에서는 모바일 브라우저 정책상 다음 문장 재생이 멈출 수 있으니 화면 켜짐 시간을 늘려 두고 연습하세요.</div>
           </details>
 
           <details class="guide-faq-item" id="faq-mic-error">
-            <summary>마이크 녹음이 안 되거나 권한 오류가 떠요</summary>
-            <div class="guide-faq-answer">브라우저 주소창 왼쪽의 <b>🔒(자물쇠 또는 설정 아이콘)</b>을 눌러 <b>[마이크] 권한을 '허용'</b>으로 바꿔 주세요. 만약 마이크가 없는 데스크톱 PC이거나 조용한 도서관에서 연습 중이라면, 실전 시뮬레이터의 <b>[음성 녹음 및 파형 시각화]</b> 스위치를 끄고 타이머만으로 실전 연습을 진행할 수 있습니다.</div>
+            <summary data-i18n="speakingManual.faq4Q">마이크 녹음이 안 되거나 권한 오류가 떠요</summary>
+            <div class="guide-faq-answer" data-i18n-html="speakingManual.faq4A">브라우저 주소창 왼쪽의 <b>🔒(자물쇠 또는 설정 아이콘)</b>을 눌러 <b>[마이크] 권한을 '허용'</b>으로 바꿔 주세요. 만약 마이크가 없는 데스크톱 PC이거나 조용한 도서관에서 연습 중이라면, 실전 시뮬레이터의 <b>[음성 녹음 및 파형 시각화]</b> 스위치를 끄고 타이머만으로 실전 연습을 진행할 수 있습니다.</div>
           </details>
 
           <details class="guide-faq-item" id="faq-pc-mobile-diff">
-            <summary>PC와 휴대폰에서 보이는 외국어 선택지 개수가 왜 다른가요?</summary>
-            <div class="guide-faq-answer">이 도구는 <b>현재 접속한 기기와 브라우저가 실제로 소리 내어 읽을 수 있는 언어만</b> 감지해 목록에 보여줍니다. 안드로이드나 iOS 휴대폰은 운영체제 차원에서 수십 개의 다국어 TTS 엔진을 기본 탑재하고 있어 더 많은 언어가 표시되고, PC는 브라우저(Edge/Chrome 등)와 윈도우 언어 팩 설치 여부에 따라 지원 목록이 달라집니다. 어느 기기에서든 목록에 뜨는 언어는 정상적으로 읽어줄 수 있는 언어입니다.</div>
+            <summary data-i18n="speakingManual.faq5Q">PC와 휴대폰에서 보이는 외국어 선택지 개수가 왜 다른가요?</summary>
+            <div class="guide-faq-answer" data-i18n-html="speakingManual.faq5A">이 도구는 <b>현재 접속한 기기와 브라우저가 실제로 소리 내어 읽을 수 있는 언어만</b> 감지해 목록에 보여줍니다. 안드로이드나 iOS 휴대폰은 운영체제 차원에서 수십 개의 다국어 TTS 엔진을 기본 탑재하고 있어 더 많은 언어가 표시되고, PC는 브라우저(Edge/Chrome 등)와 윈도우 언어 팩 설치 여부에 따라 지원 목록이 달라집니다. 어느 기기에서든 목록에 뜨는 언어는 정상적으로 읽어줄 수 있는 언어입니다.</div>
           </details>
 
           <details class="guide-faq-item" id="faq-shadow-bilingual">
-            <summary>쉐도잉 스튜디오에 외국어 문장과 한국어 해석을 같이 넣어도 되나요?</summary>
-            <div class="guide-faq-answer">네, 아주 좋은 방법입니다! 상단 낭독 음성을 <b>[🌐 언어 자동 감지 (모국어 + 외국어 1:1)]</b>로 두고 스크립트에 외국어 문장과 한국어 해석을 함께 적어 두면, 외국어 문장은 외국어 원어민 음성으로 읽고 한국어 해석은 한국어 음성으로 구분해 읽어 줍니다. 특히 <b>[🙈 암기 가림막: 외국어만 가리기]</b>를 켜면 한국어 해석 줄은 그대로 보이고 외국어 문장만 가려져서, 한국어 뜻을 보고 즉시 외국어로 입을 여는 연습을 할 수 있습니다.</div>
+            <summary data-i18n="speakingManual.faq6Q">쉐도잉 스튜디오에 외국어 문장과 한국어 해석을 같이 넣어도 되나요?</summary>
+            <div class="guide-faq-answer" data-i18n-html="speakingManual.faq6A">네, 아주 좋은 방법입니다! 상단 낭독 음성을 <b>[🌐 언어 자동 감지 (모국어 + 외국어 1:1)]</b>로 두고 스크립트에 외국어 문장과 한국어 해석을 함께 적어 두면, 외국어 문장은 외국어 원어민 음성으로 읽고 한국어 해석은 한국어 음성으로 구분해 읽어 줍니다. 특히 <b>[🙈 암기 가림막: 외국어만 가리기]</b>를 켜면 한국어 해석 줄은 그대로 보이고 외국어 문장만 가려져서, 한국어 뜻을 보고 즉시 외국어로 입을 여는 연습을 할 수 있습니다.</div>
           </details>
 
           <details class="guide-faq-item" id="faq-backup">
-            <summary>다른 PC나 휴대폰에서도 내가 만든 질문/스크립트를 이어서 쓰고 싶어요</summary>
-            <div class="guide-faq-answer">서버 로그인 없이 개인정보를 보호하기 위해 데이터는 각 기기 브라우저에 따로 저장됩니다. 다른 기기로 옮기려면 질문 리스트의 <b>[💾 JSON 저장]</b> 버튼을 눌러 파일을 내려받은 뒤, 다른 기기에서 <b>[📂 불러오기]</b>를 눌러 파일을 선택하면 그대로 복원됩니다.</div>
+            <summary data-i18n="speakingManual.faq7Q">다른 PC나 휴대폰에서도 내가 만든 질문/스크립트를 이어서 쓰고 싶어요</summary>
+            <div class="guide-faq-answer" data-i18n-html="speakingManual.faq7A">서버 로그인 없이 개인정보를 보호하기 위해 데이터는 각 기기 브라우저에 따로 저장됩니다. 다른 기기로 옮기려면 질문 리스트나 스크립트의 <b>[💾 JSON 백업]</b> 버튼을 눌러 파일을 내려받은 뒤, 다른 기기에서 <b>[📂 불러오기]</b>를 눌러 파일을 선택하면 그대로 복원됩니다.</div>
           </details>
         </div>
       </article>
 
       <!-- 함께 보기 -->
-      <h3 class="manual-more-title">🔗 함께 보기</h3>
+      <h3 class="manual-more-title" data-i18n="speakingManual.moreTitle">🔗 함께 보기</h3>
       <nav class="guide-quickstart manual-toc" aria-label="함께 볼 페이지">
         <a href="speakingSimulator.html" class="guide-quick-card">
           <span class="guide-quick-icon">🎯</span>
-          <strong>실전 면접 시뮬레이터</strong>
-          <span>무작위 질문 출제 · 타이머 · 답변 녹음</span>
+          <strong data-i18n="speakingManual.tocSimTitle">실전 면접 시뮬레이터</strong>
+          <span data-i18n="speakingManual.moreSimDesc">무작위 질문 출제 · 타이머 · 답변 녹음</span>
         </a>
         <a href="speakingShadowing.html" class="guide-quick-card">
           <span class="guide-quick-icon">📜</span>
-          <strong>스크립트 쉐도잉 스튜디오</strong>
-          <span>예상 발화 시간 · 문장별 쉼 · 암기 블러</span>
+          <strong data-i18n="speakingManual.tocShadowTitle">스크립트 쉐도잉 스튜디오</strong>
+          <span data-i18n="speakingManual.moreShadowDesc">예상 발화 시간 · 문장별 쉼 · 암기 블러</span>
         </a>
         <a href="../anki/index.html" class="guide-quick-card">
           <span class="guide-quick-icon">🃏</span>
-          <strong>Anki 단어장 도구 모음</strong>
-          <span>카드 서식 에디터 · AI 단어장 생성기</span>
+          <strong data-i18n="speakingManual.moreAnkiTitle">Anki 단어장 도구 모음</strong>
+          <span data-i18n="speakingManual.moreAnkiDesc">카드 서식 에디터 · AI 단어장 생성기</span>
         </a>
       </nav>
 
@@ -291,10 +291,13 @@
       document.addEventListener('DOMContentLoaded', openTarget);
     })();
   </script>
-  <script src="../assets/js/i18n.js?v=20261012k"></script>
-  <script src="../assets/i18n/ko/common.js?v=20261012k"></script>
-  <script src="../assets/i18n/en/common.js?v=20261012k"></script>
-  <script src="../assets/i18n/zh/common.js?v=20261012k"></script>
+  <script src="../assets/js/i18n.js?v=20261012n"></script>
+  <script src="../assets/i18n/ko/common.js?v=20261012n"></script>
+  <script src="../assets/i18n/ko/speaking.js?v=20261012n"></script>
+  <script src="../assets/i18n/en/common.js?v=20261012n"></script>
+  <script src="../assets/i18n/en/speaking.js?v=20261012n"></script>
+  <script src="../assets/i18n/zh/common.js?v=20261012n"></script>
+  <script src="../assets/i18n/zh/speaking.js?v=20261012n"></script>
 </body>
 </html>
 
