@@ -12,8 +12,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/css/style.css?v=20261014a">
-  <link rel="stylesheet" href="../assets/css/speaking.css?v=20261014a">
+  <link rel="stylesheet" href="../assets/css/style.css?v=20261015c">
+  <link rel="stylesheet" href="../assets/css/speaking.css?v=20261015c">
 </head>
 <body>
   <!-- 공통 상단 메뉴줄 (i18n.js) -->
@@ -157,7 +157,7 @@
             </div>
 
             <!-- 음성 (TTS) 설정 -->
-            <div class="setting-item">
+            <div class="setting-item setting-item-full">
               <div class="setting-label voice-label-with-tooltip">
                 <label for="voiceSearchInput" data-i18n="speaking.step2.ttsVoice">낭독 음성 (TTS 언어)</label>
                 <div class="tts-browser-tooltip-wrap" id="ttsBrowserTooltipWrap">
@@ -285,6 +285,20 @@
                       <p class="record-privacy-notice" data-i18n="speaking.step2.recordVoicePrivacyNotice">
                         🔒 음성 녹음 데이터는 서버에 전달되지 않고 내 기기(브라우저)에만 임시 보관됩니다. 음성 녹음 파일이 제작자에게 공유되지 않으니 안심하세요.
                       </p>
+
+                      <!-- 녹음 파일 저장 형식 선택 (M4A / MP3 / WAV / WebM) -->
+                      <div class="audio-format-setting-row" id="audioFormatRow">
+                        <label for="audioFormatSelect" class="audio-format-label">
+                          <span data-i18n="speaking.step2.formatLabel">💾 녹음 파일 저장 형식:</span>
+                        </label>
+                        <select id="audioFormatSelect" class="select-input select-audio-format">
+                          <option value="auto" selected data-i18n="speaking.step2.formatAuto">🌐 자동 권장 (기기 최적화: 크롬 WebM / 사파리 M4A)</option>
+                          <option value="mp3" data-i18n="speaking.step2.formatMp3">🎵 MP3 (가장 범용적 · 모든 기기 호환)</option>
+                          <option value="m4a" data-i18n="speaking.step2.formatM4a">📱 M4A (고음질 AAC · 카톡/모바일 최적)</option>
+                          <option value="wav" data-i18n="speaking.step2.formatWav">🔊 WAV (무손실 원음 · 모든 프로그램 호환)</option>
+                          <option value="webm" data-i18n="speaking.step2.formatWebm">⚡ WebM (가장 가볍고 빠른 크롬 표준)</option>
+                        </select>
+                      </div>
                     </div>
 
                     <!-- 실시간 음성 텍스트 변환 (STT) 옵션 및 언어 선택 -->
@@ -451,11 +465,30 @@
         <div class="result-stats-row">
           <div class="stat-box">
             <div id="resTotalTime" class="stat-val">0분 0초</div>
-            <div class="stat-label">총 소요 시간</div>
+            <div class="stat-label" data-i18n="speaking.result.statTotalTime">총 소요 시간</div>
           </div>
           <div class="stat-box">
             <div id="resCompletedCount" class="stat-val">0개</div>
-            <div class="stat-label">완료한 문제 수</div>
+            <div class="stat-label" data-i18n="speaking.result.statCompletedCount">완료한 문제 수</div>
+          </div>
+        </div>
+
+        <!-- 녹음 파일 일괄 다운로드 바 (녹음 데이터가 1개 이상 있을 때 노출) -->
+        <div id="resultBatchDownloadBar" class="result-batch-download-bar hidden">
+          <div class="batch-bar-info">
+            <span class="batch-bar-icon">🎙️</span>
+            <div>
+              <div class="batch-bar-title"><span data-i18n="speaking.result.batchTitle">내 답변 녹음 파일 모음</span> (<span id="resRecordingsCount">0</span>개)</div>
+              <div class="batch-bar-desc" data-i18n="speaking.result.batchDesc">오늘 연습한 음성 녹음 파일들을 한 번에 모아서 다운로드할 수 있습니다.</div>
+            </div>
+          </div>
+          <div class="batch-bar-actions">
+            <button type="button" id="btnBatchDownloadZip" class="btn-batch-download btn-batch-zip" title="모든 녹음 파일을 1개의 ZIP 압축 파일로 다운로드">
+              <span class="batch-btn-icon">📦</span> <span class="batch-btn-text" data-i18n="speaking.result.downloadZip">ZIP으로 한 번에 받기</span>
+            </button>
+            <button type="button" id="btnBatchDownloadSeq" class="btn-batch-download btn-batch-seq" title="압축을 풀 필요 없이 개별 파일로 순차 다운로드">
+              <span class="batch-btn-icon">📄</span> <span class="batch-btn-text" data-i18n="speaking.result.downloadSeq">개별 순차 받기</span>
+            </button>
           </div>
         </div>
 
@@ -477,14 +510,15 @@
     <p data-i18n="common.footer">Study with Wanzi &copy; 2026. Made with care for language learners.</p>
   </footer>
 
-  <script src="../assets/js/i18n.js?v=20261014a"></script>
-  <script src="../assets/i18n/ko/common.js?v=20261014a"></script>
-  <script src="../assets/i18n/ko/speaking.js?v=20261014a"></script>
-  <script src="../assets/i18n/en/common.js?v=20261014a"></script>
-  <script src="../assets/i18n/en/speaking.js?v=20261014a"></script>
-  <script src="../assets/i18n/zh/common.js?v=20261014a"></script>
-  <script src="../assets/i18n/zh/speaking.js?v=20261014a"></script>
-  <script src="../assets/js/speakingApp.js?v=20261014a"></script>
+  <script src="../assets/js/i18n.js?v=20261015c"></script>
+  <script src="../assets/i18n/ko/common.js?v=20261015c"></script>
+  <script src="../assets/i18n/ko/speaking.js?v=20261015c"></script>
+  <script src="../assets/i18n/en/common.js?v=20261015c"></script>
+  <script src="../assets/i18n/en/speaking.js?v=20261015c"></script>
+  <script src="../assets/i18n/zh/common.js?v=20261015c"></script>
+  <script src="../assets/i18n/zh/speaking.js?v=20261015c"></script>
+  <script src="../assets/js/lame.min.js?v=20261015c"></script>
+  <script src="../assets/js/speakingApp.js?v=20261015c"></script>
 </body>
 </html>
 

@@ -82,6 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
     'speaking.result.confirmResetQ': 'Q{num}번 문제의 답변 기록을 초기화할까요?',
     'speaking.result.noRecording': '녹음 없음',
     'speaking.result.timeSpentBadge': '⏱️ 소요: {time}',
+    'speaking.result.statTotalTime': '총 소요 시간',
+    'speaking.result.statCompletedCount': '완료한 문제 수',
     'speaking.result.timeMinSec': '{min}분 {sec}초',
     'speaking.result.timeSecOnly': '{sec}초',
     'speaking.step1.exportJson': '💾 JSON 백업',
@@ -171,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sttExtractCheck = document.getElementById('sttExtractCheck');
   const sttLangSelect = document.getElementById('sttLangSelect');
   const sttUnsupportedBadge = document.getElementById('sttUnsupportedBadge');
+  const audioFormatSelect = document.getElementById('audioFormatSelect');
   const hideTextCheck = document.getElementById('hideTextCheck');
   const soundToggle = document.getElementById('soundToggle');
   const soundTypeSelect = document.getElementById('soundTypeSelect');
@@ -209,6 +212,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const resTotalTime = document.getElementById('resTotalTime');
   const resCompletedCount = document.getElementById('resCompletedCount');
   const resQuestionList = document.getElementById('resQuestionList');
+  const resultBatchDownloadBar = document.getElementById('resultBatchDownloadBar');
+  const resRecordingsCount = document.getElementById('resRecordingsCount');
+  const btnBatchDownloadZip = document.getElementById('btnBatchDownloadZip');
+  const btnBatchDownloadSeq = document.getElementById('btnBatchDownloadSeq');
   const btnRetryExam = document.getElementById('btnRetryExam');
   const btnBackToSetup = document.getElementById('btnBackToSetup');
 
@@ -1617,12 +1624,15 @@ document.addEventListener('DOMContentLoaded', () => {
   function startTtsHeartbeat() {
     if (!ttsHeartbeatInterval && 'speechSynthesis' in window) {
       ttsHeartbeatInterval = setInterval(() => {
-        if (window.speechSynthesis && window.speechSynthesis.speaking) {
-          // Chrome 15s freeze bug workaround: pause & resume keep-alive
-          window.speechSynthesis.pause();
-          window.speechSynthesis.resume();
+        if (window.speechSynthesis) {
+          // Chrome 15s freeze bug workaround:
+          // activeUtterances retains utterance objects in memory to prevent GC.
+          // Resume if the browser or OS backgrounding unexpectedly paused synthesis.
+          if (window.speechSynthesis.paused) {
+            try { window.speechSynthesis.resume(); } catch (e) {}
+          }
         }
-      }, 10000);
+      }, 4000);
     }
   }
 
@@ -1631,7 +1641,11 @@ document.addEventListener('DOMContentLoaded', () => {
     clearTtsTimers();
     activeUtterances = [];
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+      if (window.speechSynthesis.speaking || window.speechSynthesis.pending || window.speechSynthesis.paused) {
+        try {
+          window.speechSynthesis.cancel();
+        } catch (e) {}
+      }
     }
   }
 
@@ -1656,121 +1670,150 @@ document.addEventListener('DOMContentLoaded', () => {
       if (onEnd) onEnd();
       return;
     }
+
+    const wasSpeaking = window.speechSynthesis.speaking || window.speechSynthesis.pending || window.speechSynthesis.paused;
     stopSpeaking();
     isSpeakingCanceled = false;
 
-    const selectedVoiceName = voiceSelect ? voiceSelect.value : 'auto';
-    const rate = parseFloat(customRate !== undefined ? customRate : (ttsRateSlider ? ttsRateSlider.value : '1.0')) || 1.0;
-
-    // 1) 사용자가 드롭다운에서 특정 고정 음성을 수동 선택한 경우
-    if (selectedVoiceName && selectedVoiceName !== 'auto') {
-      const utterance = new SpeechSynthesisUtterance(text);
-      const voice = availableVoices.find(v => v.name === selectedVoiceName);
-      if (voice) {
-        utterance.voice = voice;
-        utterance.lang = voice.lang;
-      }
-      utterance.rate = rate;
-      utterance.pitch = 1.0;
-
-      activeUtterances.push(utterance);
-      startTtsHeartbeat();
-
-      let hasEnded = false;
-      let watchdogTimer = null;
-      const finish = () => {
-        if (!hasEnded && !isSpeakingCanceled) {
-          hasEnded = true;
-          if (watchdogTimer) {
-            clearTimeout(watchdogTimer);
-            watchdogTimer = null;
-          }
-          const uIdx = activeUtterances.indexOf(utterance);
-          if (uIdx !== -1) activeUtterances.splice(uIdx, 1);
-          if (activeUtterances.length === 0) clearTtsTimers();
-          if (onEnd) onEnd();
-        }
-      };
-      utterance.onend = finish;
-      utterance.onerror = finish;
-
-      // 크롬 GC 및 15초 멈춤 버그 방지용 안전 와치독 타임아웃
-      const estSec = Math.max(12, ((text || '').length / Math.max(0.5, rate)) * 0.45 + 10);
-      watchdogTimer = setTimeout(() => {
-        if (!hasEnded && !isSpeakingCanceled) {
-          console.warn('TTS safety watchdog timeout triggered');
-          finish();
-        }
-      }, estSec * 1000);
-
-      window.speechSynthesis.speak(utterance);
-      return;
-    }
-
-    // 2) 'auto' 모드: 모국어(한국어) + 외국어 문장 속 언어를 실시간 인식하여 각각의 원어민 전용 음성으로 순차 전환 낭독
-    const segments = segmentMixedText(text);
-    if (segments.length === 0) {
-      if (onEnd) onEnd();
-      return;
-    }
-
-    let currentSegIdx = 0;
-    function playNextSegment() {
+    const executeSpeak = () => {
       if (isSpeakingCanceled) return;
-      if (currentSegIdx >= segments.length) {
+      if (window.speechSynthesis.paused) {
+        try { window.speechSynthesis.resume(); } catch (e) {}
+      }
+
+      const selectedVoiceName = voiceSelect ? voiceSelect.value : 'auto';
+      const rate = parseFloat(customRate !== undefined ? customRate : (ttsRateSlider ? ttsRateSlider.value : '1.0')) || 1.0;
+
+      // 1) 사용자가 드롭다운에서 특정 고정 음성을 수동 선택한 경우
+      if (selectedVoiceName && selectedVoiceName !== 'auto') {
+        const utterance = new SpeechSynthesisUtterance(text);
+        const voice = availableVoices.find(v => v.name === selectedVoiceName);
+        if (voice) {
+          utterance.voice = voice;
+          utterance.lang = voice.lang;
+        }
+        utterance.rate = rate;
+        utterance.pitch = 1.0;
+
+        activeUtterances.push(utterance);
+        startTtsHeartbeat();
+
+        let hasEnded = false;
+        let watchdogTimer = null;
+        const finish = () => {
+          if (!hasEnded && !isSpeakingCanceled) {
+            hasEnded = true;
+            if (watchdogTimer) {
+              clearTimeout(watchdogTimer);
+              watchdogTimer = null;
+            }
+            const uIdx = activeUtterances.indexOf(utterance);
+            if (uIdx !== -1) activeUtterances.splice(uIdx, 1);
+            if (activeUtterances.length === 0) clearTtsTimers();
+            if (onEnd) onEnd();
+          }
+        };
+        utterance.onend = finish;
+        utterance.onerror = (e) => {
+          if (isSpeakingCanceled) return;
+          console.warn('TTS utterance error:', e);
+          finish();
+        };
+
+        // 크롬 GC 및 15초 멈춤 버그 방지용 안전 와치독 타임아웃
+        const estSec = Math.max(12, ((text || '').length / Math.max(0.5, rate)) * 0.45 + 10);
+        watchdogTimer = setTimeout(() => {
+          if (!hasEnded && !isSpeakingCanceled) {
+            console.warn('TTS safety watchdog timeout triggered');
+            try { window.speechSynthesis.cancel(); } catch (err) {}
+            finish();
+          }
+        }, estSec * 1000);
+
+        window.speechSynthesis.speak(utterance);
+        return;
+      }
+
+      // 2) 'auto' 모드: 모국어(한국어) + 외국어 문장 속 언어를 실시간 인식하여 각각의 원어민 전용 음성으로 순차 전환 낭독
+      const segments = segmentMixedText(text);
+      if (segments.length === 0) {
         if (onEnd) onEnd();
         return;
       }
-      const seg = segments[currentSegIdx];
-      currentSegIdx++;
 
-      const utterance = new SpeechSynthesisUtterance(seg.text);
-      utterance.rate = rate;
-      utterance.pitch = 1.0;
+      let currentSegIdx = 0;
+      function playNextSegment() {
+        if (isSpeakingCanceled) return;
+        if (currentSegIdx >= segments.length) {
+          if (onEnd) onEnd();
+          return;
+        }
+        if (window.speechSynthesis.paused) {
+          try { window.speechSynthesis.resume(); } catch (e) {}
+        }
 
-      const meta = getLangMeta(seg.lang);
-      utterance.lang = meta.defaultBcp || 'ko-KR';
+        const seg = segments[currentSegIdx];
+        currentSegIdx++;
 
-      const voice = getBestVoiceForLang(seg.lang);
-      if (voice) {
-        utterance.voice = voice;
-        utterance.lang = voice.lang || utterance.lang;
+        const utterance = new SpeechSynthesisUtterance(seg.text);
+        utterance.rate = rate;
+        utterance.pitch = 1.0;
+
+        const meta = getLangMeta(seg.lang);
+        utterance.lang = meta.defaultBcp || 'ko-KR';
+
+        const voice = getBestVoiceForLang(seg.lang);
+        if (voice) {
+          utterance.voice = voice;
+          utterance.lang = voice.lang || utterance.lang;
+        }
+
+        activeUtterances.push(utterance);
+        startTtsHeartbeat();
+
+        let segEnded = false;
+        let segWatchdog = null;
+        const handleDone = () => {
+          if (!segEnded && !isSpeakingCanceled) {
+            segEnded = true;
+            if (segWatchdog) {
+              clearTimeout(segWatchdog);
+              segWatchdog = null;
+            }
+            const uIdx = activeUtterances.indexOf(utterance);
+            if (uIdx !== -1) activeUtterances.splice(uIdx, 1);
+            if (activeUtterances.length === 0) clearTtsTimers();
+            setTimeout(playNextSegment, 70);
+          }
+        };
+
+        utterance.onend = handleDone;
+        utterance.onerror = (e) => {
+          if (isSpeakingCanceled) return;
+          console.warn('TTS segment error:', e);
+          handleDone();
+        };
+
+        const segEstSec = Math.max(8, ((seg.text || '').length / Math.max(0.5, rate)) * 0.45 + 8);
+        segWatchdog = setTimeout(() => {
+          if (!segEnded && !isSpeakingCanceled) {
+            console.warn('TTS segment watchdog timeout triggered');
+            try { window.speechSynthesis.cancel(); } catch (err) {}
+            handleDone();
+          }
+        }, segEstSec * 1000);
+
+        window.speechSynthesis.speak(utterance);
       }
 
-      activeUtterances.push(utterance);
-      startTtsHeartbeat();
+      playNextSegment();
+    };
 
-      let segEnded = false;
-      let segWatchdog = null;
-      const handleDone = () => {
-        if (!segEnded && !isSpeakingCanceled) {
-          segEnded = true;
-          if (segWatchdog) {
-            clearTimeout(segWatchdog);
-            segWatchdog = null;
-          }
-          const uIdx = activeUtterances.indexOf(utterance);
-          if (uIdx !== -1) activeUtterances.splice(uIdx, 1);
-          if (activeUtterances.length === 0) clearTtsTimers();
-          setTimeout(playNextSegment, 70);
-        }
-      };
-
-      utterance.onend = handleDone;
-      utterance.onerror = handleDone;
-
-      const segEstSec = Math.max(8, ((seg.text || '').length / Math.max(0.5, rate)) * 0.45 + 8);
-      segWatchdog = setTimeout(() => {
-        if (!segEnded && !isSpeakingCanceled) {
-          console.warn('TTS segment watchdog timeout triggered');
-          handleDone();
-        }
-      }, segEstSec * 1000);
-
-      window.speechSynthesis.speak(utterance);
+    if (wasSpeaking) {
+      setTimeout(executeSpeak, 25);
+    } else {
+      executeSpeak();
     }
-
-    playNextSegment();
   }
 
   // =========================================================================
@@ -2008,7 +2051,8 @@ document.addEventListener('DOMContentLoaded', () => {
       soundType: soundTypeSelect ? soundTypeSelect.value : (prev.soundType || 'triple'),
       soundDuration: soundDurationSelect ? soundDurationSelect.value : (prev.soundDuration || 'normal'),
       sttExtract: sttExtractCheck ? sttExtractCheck.checked : (prev.sttExtract !== undefined ? prev.sttExtract : false),
-      sttLang: sttLangSelect ? sttLangSelect.value : (prev.sttLang || 'auto')
+      sttLang: sttLangSelect ? sttLangSelect.value : (prev.sttLang || 'auto'),
+      audioFormat: audioFormatSelect ? audioFormatSelect.value : (prev.audioFormat || 'auto')
     });
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -2096,6 +2140,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (data.sttLang && sttLangSelect) {
         sttLangSelect.value = data.sttLang;
+      }
+      if (data.audioFormat && audioFormatSelect) {
+        audioFormatSelect.value = data.audioFormat;
       }
       if (hideTextCheck && data.hideText !== undefined) hideTextCheck.checked = data.hideText;
       if (soundToggle && data.sound !== undefined) soundToggle.checked = data.sound;
@@ -2434,7 +2481,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  [ttsWaitCheck, recordMyVoiceCheck, sttExtractCheck, sttLangSelect, hideTextCheck, soundToggle, soundTypeSelect, soundDurationSelect].forEach(el => {
+  [ttsWaitCheck, recordMyVoiceCheck, sttExtractCheck, sttLangSelect, audioFormatSelect, hideTextCheck, soundToggle, soundTypeSelect, soundDurationSelect].forEach(el => {
     if (el) el.addEventListener('change', () => {
       if (soundToggle && soundDetailPanel) {
         soundDetailPanel.style.opacity = soundToggle.checked ? '1' : '0.4';
@@ -2622,14 +2669,35 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   function getSupportedAudioMimeType() {
     if (typeof MediaRecorder === 'undefined') return { mimeType: '', ext: 'webm' };
-    const candidates = [
-      { type: 'audio/webm;codecs=opus', ext: 'webm' },
-      { type: 'audio/webm', ext: 'webm' },
+    const preferredFormat = audioFormatSelect ? audioFormatSelect.value : 'auto';
+
+    const m4aCandidates = [
       { type: 'audio/mp4;codecs=mp4a.40.2', ext: 'm4a' },
       { type: 'audio/mp4', ext: 'm4a' },
-      { type: 'audio/aac', ext: 'aac' },
+      { type: 'audio/aac', ext: 'm4a' }
+    ];
+    const webmCandidates = [
+      { type: 'audio/webm;codecs=opus', ext: 'webm' },
+      { type: 'audio/webm', ext: 'webm' },
       { type: 'audio/ogg;codecs=opus', ext: 'ogg' }
     ];
+
+    let candidates = [];
+    if (preferredFormat === 'm4a') {
+      candidates = [...m4aCandidates, ...webmCandidates];
+    } else if (preferredFormat === 'webm') {
+      candidates = [...webmCandidates, ...m4aCandidates];
+    } else {
+      candidates = [
+        { type: 'audio/webm;codecs=opus', ext: 'webm' },
+        { type: 'audio/webm', ext: 'webm' },
+        { type: 'audio/mp4;codecs=mp4a.40.2', ext: 'm4a' },
+        { type: 'audio/mp4', ext: 'm4a' },
+        { type: 'audio/aac', ext: 'm4a' },
+        { type: 'audio/ogg;codecs=opus', ext: 'ogg' }
+      ];
+    }
+
     for (const c of candidates) {
       if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(c.type)) {
         return { mimeType: c.type, ext: c.ext };
@@ -3248,6 +3316,264 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================================================
+  // 오디오 포맷 변환 (WAV / MP3) & ZIP 압축 생성기
+  // =========================================================================
+  function audioBufferToWavBlob(audioBuffer) {
+    const numChannels = audioBuffer.numberOfChannels;
+    const sampleRate = audioBuffer.sampleRate;
+    const bitDepth = 16;
+
+    let interleaved;
+    if (numChannels === 2) {
+      const left = audioBuffer.getChannelData(0);
+      const right = audioBuffer.getChannelData(1);
+      interleaved = new Float32Array(left.length + right.length);
+      let idx = 0;
+      for (let i = 0; i < left.length; i++) {
+        interleaved[idx++] = left[i];
+        interleaved[idx++] = right[i];
+      }
+    } else {
+      interleaved = audioBuffer.getChannelData(0);
+    }
+
+    const bytesPerSample = bitDepth / 8;
+    const blockAlign = numChannels * bytesPerSample;
+    const dataByteLength = interleaved.length * bytesPerSample;
+    const buffer = new ArrayBuffer(44 + dataByteLength);
+    const view = new DataView(buffer);
+
+    const writeStr = (offset, str) => {
+      for (let i = 0; i < str.length; i++) {
+        view.setUint8(offset + i, str.charCodeAt(i));
+      }
+    };
+
+    writeStr(0, 'RIFF');
+    view.setUint32(4, 36 + dataByteLength, true);
+    writeStr(8, 'WAVE');
+    writeStr(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true); // PCM
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * blockAlign, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitDepth, true);
+    writeStr(36, 'data');
+    view.setUint32(40, dataByteLength, true);
+
+    let offset = 44;
+    for (let i = 0; i < interleaved.length; i++) {
+      const s = Math.max(-1, Math.min(1, interleaved[i]));
+      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      offset += 2;
+    }
+
+    return new Blob([buffer], { type: 'audio/wav' });
+  }
+
+  function audioBufferToMp3Blob(audioBuffer) {
+    if (typeof lamejs === 'undefined' || !lamejs.Mp3Encoder) {
+      console.warn('lamejs not loaded, falling back to WAV');
+      return audioBufferToWavBlob(audioBuffer);
+    }
+    const channels = audioBuffer.numberOfChannels;
+    const sampleRate = audioBuffer.sampleRate;
+    const mp3encoder = new lamejs.Mp3Encoder(channels, sampleRate, 128);
+    const mp3Data = [];
+
+    const sampleBlockSize = 1152;
+    const left = audioBuffer.getChannelData(0);
+    const right = channels > 1 ? audioBuffer.getChannelData(1) : null;
+
+    const leftInt16 = new Int16Array(left.length);
+    for (let i = 0; i < left.length; i++) {
+      const s = Math.max(-1, Math.min(1, left[i]));
+      leftInt16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+    }
+
+    let rightInt16 = null;
+    if (right) {
+      rightInt16 = new Int16Array(right.length);
+      for (let i = 0; i < right.length; i++) {
+        const s = Math.max(-1, Math.min(1, right[i]));
+        rightInt16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+      }
+    }
+
+    for (let i = 0; i < leftInt16.length; i += sampleBlockSize) {
+      const leftChunk = leftInt16.subarray(i, i + sampleBlockSize);
+      let mp3buf;
+      if (channels === 2 && rightInt16) {
+        const rightChunk = rightInt16.subarray(i, i + sampleBlockSize);
+        mp3buf = mp3encoder.encodeBuffer(leftChunk, rightChunk);
+      } else {
+        mp3buf = mp3encoder.encodeBuffer(leftChunk);
+      }
+      if (mp3buf.length > 0) {
+        mp3Data.push(mp3buf);
+      }
+    }
+
+    const mp3end = mp3encoder.flush();
+    if (mp3end.length > 0) {
+      mp3Data.push(mp3end);
+    }
+
+    return new Blob(mp3Data, { type: 'audio/mp3' });
+  }
+
+  async function convertBlobToTargetFormat(recBlob, targetFormat, originalExt) {
+    if (!recBlob) return { blob: recBlob, ext: originalExt || 'webm' };
+    const srcExt = (originalExt || 'webm').toLowerCase();
+    const dstFormat = (targetFormat || 'auto').toLowerCase();
+
+    if (dstFormat === 'auto' || dstFormat === srcExt) {
+      return { blob: recBlob, ext: srcExt };
+    }
+
+    try {
+      const audioCtx = getAudioContext() || new (window.AudioContext || window.webkitAudioContext)();
+      const arrayBuffer = await recBlob.arrayBuffer();
+      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+      if (dstFormat === 'wav') {
+        const wavBlob = audioBufferToWavBlob(audioBuffer);
+        return { blob: wavBlob, ext: 'wav' };
+      }
+      if (dstFormat === 'mp3') {
+        const mp3Blob = audioBufferToMp3Blob(audioBuffer);
+        return { blob: mp3Blob, ext: 'mp3' };
+      }
+      if (dstFormat === 'm4a') {
+        if (srcExt === 'm4a') return { blob: recBlob, ext: 'm4a' };
+        const mp3Blob = audioBufferToMp3Blob(audioBuffer);
+        return { blob: mp3Blob, ext: 'mp3' };
+      }
+      if (dstFormat === 'webm') {
+        if (srcExt === 'webm') return { blob: recBlob, ext: 'webm' };
+        const wavBlob = audioBufferToWavBlob(audioBuffer);
+        return { blob: wavBlob, ext: 'wav' };
+      }
+    } catch (err) {
+      console.warn('Audio format conversion error, using original blob:', err);
+    }
+    return { blob: recBlob, ext: srcExt };
+  }
+
+  const CRC32_TABLE = (() => {
+    const table = [];
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) {
+        c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      }
+      table[n] = c >>> 0;
+    }
+    return table;
+  })();
+
+  function calculateCrc32(uint8Array) {
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < uint8Array.length; i++) {
+      c = (c >>> 8) ^ CRC32_TABLE[(c ^ uint8Array[i]) & 0xFF];
+    }
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function createZipBlob(files) {
+    const utf8Encoder = new TextEncoder();
+    const parts = [];
+    const cdEntries = [];
+    let offset = 0;
+
+    const now = new Date();
+    const dosTime = ((now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1)) & 0xFFFF;
+    const dosDate = (((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate()) & 0xFFFF;
+
+    for (const f of files) {
+      const nameBytes = utf8Encoder.encode(f.name);
+      const dataBytes = (f.data instanceof Uint8Array) ? f.data : new Uint8Array(f.data);
+      const crc = calculateCrc32(dataBytes);
+      const size = dataBytes.length;
+
+      // Local file header (30 bytes)
+      const lfh = new Uint8Array(30);
+      const lfhView = new DataView(lfh.buffer);
+      lfhView.setUint32(0, 0x04034b50, true);
+      lfhView.setUint16(4, 20, true); // v2.0
+      lfhView.setUint16(6, 0x0800, true); // UTF-8 filename flag
+      lfhView.setUint16(8, 0, true); // compression method 0 (store)
+      lfhView.setUint16(10, dosTime, true);
+      lfhView.setUint16(12, dosDate, true);
+      lfhView.setUint32(14, crc, true);
+      lfhView.setUint32(18, size, true);
+      lfhView.setUint32(22, size, true);
+      lfhView.setUint16(26, nameBytes.length, true);
+      lfhView.setUint16(28, 0, true);
+
+      parts.push(lfh, nameBytes, dataBytes);
+
+      // Central directory header (46 bytes)
+      const cdh = new Uint8Array(46);
+      const cdhView = new DataView(cdh.buffer);
+      cdhView.setUint32(0, 0x02014b50, true);
+      cdhView.setUint16(4, 20, true);
+      cdhView.setUint16(6, 20, true);
+      cdhView.setUint16(8, 0x0800, true); // UTF-8 flag
+      cdhView.setUint16(10, 0, true);
+      cdhView.setUint16(12, dosTime, true);
+      cdhView.setUint16(14, dosDate, true);
+      cdhView.setUint32(16, crc, true);
+      cdhView.setUint32(20, size, true);
+      cdhView.setUint32(24, size, true);
+      cdhView.setUint16(28, nameBytes.length, true);
+      cdhView.setUint16(30, 0, true);
+      cdhView.setUint16(32, 0, true);
+      cdhView.setUint16(34, 0, true);
+      cdhView.setUint16(36, 0, true);
+      cdhView.setUint32(38, 0, true);
+      cdhView.setUint32(42, offset, true);
+
+      cdEntries.push(cdh, nameBytes);
+      offset += lfh.length + nameBytes.length + dataBytes.length;
+    }
+
+    const cdOffset = offset;
+    let cdSize = 0;
+    for (const b of cdEntries) cdSize += b.length;
+
+    // End of central directory record (22 bytes)
+    const eocd = new Uint8Array(22);
+    const eocdView = new DataView(eocd.buffer);
+    eocdView.setUint32(0, 0x06054b50, true);
+    eocdView.setUint16(4, 0, true);
+    eocdView.setUint16(6, 0, true);
+    eocdView.setUint16(8, files.length, true);
+    eocdView.setUint16(10, files.length, true);
+    eocdView.setUint32(12, cdSize, true);
+    eocdView.setUint32(16, cdOffset, true);
+    eocdView.setUint16(20, 0, true);
+
+    return new Blob([...parts, ...cdEntries, eocd], { type: 'application/zip' });
+  }
+
+  function downloadBlobAsFile(blob, fileName) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      if (a.parentNode) a.parentNode.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 1200);
+  }
+
+  // =========================================================================
   // 11. 시뮬레이터 실행 로직 (Engine)
   // =========================================================================
   function formatSeconds(ms) {
@@ -3276,102 +3602,169 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  async function startExam() {
-    getAudioContext();
-    updateParsedStatus();
-    if (state.pool.length === 0) {
-      alert(t('speaking.step1.noQuestionsWarn'));
-      questionInput.focus();
-      return;
-    }
+  // =========================================================================
+  // Screen Wake Lock API (모바일 시험 도중 화면 꺼짐 방지)
+  // =========================================================================
+  let wakeLockSentinel = null;
 
-    stopUserVoicePlayback();
-    releaseMicrophone();
-
-    // 이전 시험 녹음 메모리 해제
-    revokeAllRecordings();
-    state.recordings = {};
-    state.transcripts = {};
-    state.transcriptLangs = {};
-    state.hasSttHardwareCollision = false;
-    state.questionSpentMs = {};
-    state.speakingStartTime = null;
-    state.isStoppedEarly = false;
-    state.singleRetryIndex = null;
-
-    // 마이크 권한 요청 (녹음 옵션 켜져 있을 때)
-    if (recordMyVoiceCheck && recordMyVoiceCheck.checked) {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          state.micStream = stream;
-        } catch (err) {
-          console.warn('Microphone permission denied or error:', err);
-          state.micStream = null;
-          if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-            alert(t('speaking.step2.micDeniedGuide'));
-          } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-            alert(t('speaking.step2.micNotFound'));
-          } else {
-            alert(t('speaking.sim.micDenied'));
-          }
-        }
-      } else {
-        alert(t('speaking.sim.micDenied'));
+  async function requestWakeLock() {
+    if ('wakeLock' in navigator && !wakeLockSentinel) {
+      try {
+        wakeLockSentinel = await navigator.wakeLock.request('screen');
+        wakeLockSentinel.addEventListener('release', () => {
+          wakeLockSentinel = null;
+        });
+      } catch (err) {
+        wakeLockSentinel = null;
       }
     }
+  }
 
-    const answerSec = Math.max(5, parseInt(answerTimeInput.value, 10) || 120);
-    const breakSec = Math.max(0, parseInt(breakTimeInput.value, 10) || 10);
-    const maxCount = Math.max(1, parseInt(maxQuestionsInput.value, 10) || state.pool.length);
+  function releaseWakeLock() {
+    if (wakeLockSentinel) {
+      try { wakeLockSentinel.release(); } catch (e) {}
+      wakeLockSentinel = null;
+    }
+  }
 
-    // 질문 큐 생성 (무작위 셔플 + 중복 방지 순환)
-    state.queue = buildQuestionQueue(state.pool, maxCount);
-    state.currentIndex = 0;
-    state.history = [];
-    state.examStartTime = Date.now();
-    state.isTextHidden = hideTextCheck.checked;
-    state.fontSize = window.innerWidth <= 640 ? 1.1 : 1.35;
-    if (simQuestionText) {
-      simQuestionText.style.fontSize = `${state.fontSize}rem`;
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      const isExamActive = Boolean(state && state.phase && state.phase !== 'SETUP' && state.phase !== 'FINISHED' && simulatorView && !simulatorView.classList.contains('hidden'));
+      const isShadowActive = Boolean(shadowState && shadowState.isPlaying && !shadowState.isPaused);
+      if (isExamActive || isShadowActive) {
+        requestWakeLock();
+        if ('speechSynthesis' in window && window.speechSynthesis.paused) {
+          try { window.speechSynthesis.resume(); } catch (e) {}
+        }
+      }
+    }
+  });
+
+  let isStartingExam = false;
+
+  async function startExam() {
+    if (isStartingExam) return;
+    isStartingExam = true;
+    if (startExamBtn) {
+      startExamBtn.disabled = true;
+      startExamBtn.classList.add('loading');
     }
 
-    // 화면 전환 (브라우저 뒤로가기 지원)
-    showSimulatorView();
     try {
-      history.pushState({ view: 'simulator' }, '', '#exam');
-    } catch (e) {}
+      getAudioContext();
+      updateParsedStatus();
+      if (state.pool.length === 0) {
+        alert(t('speaking.step1.noQuestionsWarn'));
+        questionInput.focus();
+        return;
+      }
 
-    applyTextHiddenState();
-    loadQuestion(0);
+      stopUserVoicePlayback();
+      releaseMicrophone();
+
+      // 이전 시험 녹음 메모리 해제
+      revokeAllRecordings();
+      state.recordings = {};
+      state.transcripts = {};
+      state.transcriptLangs = {};
+      state.hasSttHardwareCollision = false;
+      state.questionSpentMs = {};
+      state.speakingStartTime = null;
+      state.isStoppedEarly = false;
+      state.singleRetryIndex = null;
+
+      // 마이크 권한 요청 (녹음 옵션 켜져 있을 때)
+      if (recordMyVoiceCheck && recordMyVoiceCheck.checked) {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            state.micStream = stream;
+          } catch (err) {
+            console.warn('Microphone permission denied or error:', err);
+            state.micStream = null;
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+              alert(t('speaking.step2.micDeniedGuide'));
+            } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+              alert(t('speaking.step2.micNotFound'));
+            } else {
+              alert(t('speaking.sim.micDenied'));
+            }
+          }
+        } else {
+          alert(t('speaking.sim.micDenied'));
+        }
+      }
+
+      const answerSec = Math.max(5, parseInt(answerTimeInput.value, 10) || 120);
+      const breakSec = Math.max(0, parseInt(breakTimeInput.value, 10) || 10);
+      const maxCount = Math.max(1, parseInt(maxQuestionsInput.value, 10) || state.pool.length);
+
+      // 질문 큐 생성 (무작위 셔플 + 중복 방지 순환)
+      state.queue = buildQuestionQueue(state.pool, maxCount);
+      state.currentIndex = 0;
+      state.history = [];
+      state.examStartTime = Date.now();
+      state.isTextHidden = hideTextCheck.checked;
+      state.fontSize = window.innerWidth <= 640 ? 1.1 : 1.35;
+      if (simQuestionText) {
+        simQuestionText.style.fontSize = `${state.fontSize}rem`;
+      }
+
+      // 화면 꺼짐 방지 활성화
+      await requestWakeLock();
+
+      // 화면 전환 (브라우저 뒤로가기 지원)
+      showSimulatorView();
+      try {
+        history.pushState({ view: 'simulator' }, '', '#exam');
+      } catch (e) {}
+
+      applyTextHiddenState();
+      loadQuestion(0);
+    } finally {
+      isStartingExam = false;
+      if (startExamBtn) {
+        startExamBtn.disabled = false;
+        startExamBtn.classList.remove('loading');
+      }
+    }
   }
 
   // 특정 문제 1개만 단독 다시 풀기
+  let isRetakingSingleQ = false;
   async function retakeSingleQuestion(idx) {
+    if (isRetakingSingleQ) return;
     if (idx < 0 || idx >= state.queue.length) return;
-    unlockAudioAndTtsForIOS();
-    stopUserVoicePlayback();
-    resetQuestionData(idx);
+    isRetakingSingleQ = true;
 
-    if (recordMyVoiceCheck && recordMyVoiceCheck.checked && !state.micStream) {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        try {
-          state.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        } catch (err) {
-          console.warn('Microphone error on retake:', err);
-          state.micStream = null;
-          if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-            alert(t('speaking.step2.micDeniedGuide'));
-          } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-            alert(t('speaking.step2.micNotFound'));
+    try {
+      unlockAudioAndTtsForIOS();
+      stopUserVoicePlayback();
+      resetQuestionData(idx);
+
+      if (recordMyVoiceCheck && recordMyVoiceCheck.checked && !state.micStream) {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          try {
+            state.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          } catch (err) {
+            console.warn('Microphone error on retake:', err);
+            state.micStream = null;
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+              alert(t('speaking.step2.micDeniedGuide'));
+            } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+              alert(t('speaking.step2.micNotFound'));
+            }
           }
         }
       }
-    }
 
-    state.singleRetryIndex = idx;
-    showSimulatorView();
-    loadQuestion(idx);
+      await requestWakeLock();
+      state.singleRetryIndex = idx;
+      showSimulatorView();
+      loadQuestion(idx);
+    } finally {
+      isRetakingSingleQ = false;
+    }
   }
 
   function showSimulatorView() {
@@ -3382,6 +3775,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function returnToSetupView(skipHistory = false) {
+    releaseWakeLock();
     stopSpeaking();
     recordSpeakingTime(state.currentIndex);
     stopQuestionRecording();
@@ -3619,6 +4013,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function finishExam() {
+    releaseWakeLock();
     stopSpeaking();
     recordSpeakingTime(state.currentIndex);
     await stopQuestionRecording();
@@ -3650,6 +4045,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if (resultTitle) resultTitle.textContent = t('speaking.result.title');
       if (resultSubtitle) resultSubtitle.textContent = t('speaking.result.subtitle');
       resCompletedCount.textContent = `${state.queue.length}개`;
+    }
+
+    // 녹음 파일 일괄 다운로드 바 업데이트
+    const validRecCount = state.recordings ? Object.values(state.recordings).filter(r => r && r.blob).length : 0;
+    if (resultBatchDownloadBar) {
+      if (validRecCount > 0) {
+        resultBatchDownloadBar.classList.remove('hidden');
+        if (resRecordingsCount) resRecordingsCount.textContent = validRecCount;
+      } else {
+        resultBatchDownloadBar.classList.add('hidden');
+      }
     }
 
     resQuestionList.innerHTML = '';
@@ -3743,11 +4149,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const downloadLink = document.createElement('a');
         downloadLink.className = 'btn-audio-download';
         downloadLink.href = rec.url;
-        const fileName = buildAudioDownloadFilename(q, idx, rec.ext);
+        const initialFormat = audioFormatSelect ? audioFormatSelect.value : 'auto';
+        const initialExt = (initialFormat && initialFormat !== 'auto') ? initialFormat : rec.ext;
+        const fileName = buildAudioDownloadFilename(q, idx, initialExt);
         downloadLink.download = fileName;
         downloadLink.setAttribute('download', fileName);
         downloadLink.innerHTML = `💾 <span>${escapeHtml(t('speaking.result.downloadMyVoice'))}</span>`;
         downloadLink.title = `${t('speaking.result.downloadMyVoice')} (${fileName})`;
+
+        downloadLink.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const targetFormat = audioFormatSelect ? audioFormatSelect.value : 'auto';
+          const targetExt = (targetFormat && targetFormat !== 'auto') ? targetFormat : rec.ext;
+          const origHtml = downloadLink.innerHTML;
+          try {
+            downloadLink.innerHTML = `⏳ <span>${t('speaking.result.converting', { current: 1, total: 1 }) || '변환 중...'}</span>`;
+            const { blob: outBlob, ext: outExt } = await convertBlobToTargetFormat(rec.blob, targetExt, rec.ext);
+            const targetFileName = buildAudioDownloadFilename(q, idx, outExt);
+            downloadBlobAsFile(outBlob, targetFileName);
+          } catch (err) {
+            console.warn('Audio conversion failed:', err);
+            downloadBlobAsFile(rec.blob, fileName);
+          } finally {
+            downloadLink.innerHTML = origHtml;
+          }
+        });
 
         playerBox.append(playBtn, curTimeEl, sliderWrap, totalTimeEl, downloadLink);
 
@@ -4071,6 +4497,106 @@ document.addEventListener('DOMContentLoaded', () => {
     btnBackToSetup.addEventListener('click', () => {
       stopUserVoicePlayback();
       returnToSetupView();
+    });
+  }
+
+  // 녹음 일괄 다운로드: ZIP 압축 파일
+  if (btnBatchDownloadZip) {
+    btnBatchDownloadZip.addEventListener('click', async () => {
+      if (!state.recordings) return;
+      const recEntries = Object.entries(state.recordings)
+        .filter(([idx, rec]) => rec && rec.blob)
+        .map(([idx, rec]) => ({
+          idx: parseInt(idx, 10),
+          rec,
+          question: (state.queue && state.queue[idx]) ? state.queue[idx] : `Question_${parseInt(idx, 10) + 1}`
+        }))
+        .sort((a, b) => a.idx - b.idx);
+
+      if (recEntries.length === 0) {
+        alert(t('speaking.result.noRecording') || '다운로드할 녹음 파일이 없습니다.');
+        return;
+      }
+
+      const originalHtml = btnBatchDownloadZip.innerHTML;
+      btnBatchDownloadZip.disabled = true;
+      if (btnBatchDownloadSeq) btnBatchDownloadSeq.disabled = true;
+
+      const targetFormat = audioFormatSelect ? audioFormatSelect.value : 'auto';
+
+      try {
+        const filesForZip = [];
+        for (let i = 0; i < recEntries.length; i++) {
+          const item = recEntries[i];
+          btnBatchDownloadZip.innerHTML = `<span class="batch-btn-icon">⏳</span> <span class="batch-btn-text">${t('speaking.result.converting', { current: i + 1, total: recEntries.length })}</span>`;
+          const targetExt = (targetFormat && targetFormat !== 'auto') ? targetFormat : item.rec.ext;
+          const { blob: outBlob, ext: outExt } = await convertBlobToTargetFormat(item.rec.blob, targetExt, item.rec.ext);
+          const fileName = buildAudioDownloadFilename(item.question, item.idx, outExt);
+          const arrayBuffer = await outBlob.arrayBuffer();
+          filesForZip.push({
+            name: fileName,
+            data: new Uint8Array(arrayBuffer)
+          });
+        }
+
+        const zipBlob = createZipBlob(filesForZip);
+        const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        downloadBlobAsFile(zipBlob, `Wanzi_Speaking_Recordings_${dateStr}.zip`);
+      } catch (err) {
+        console.error('ZIP generation error:', err);
+        alert('ZIP 파일 압축 중 오류가 발생했습니다: ' + (err.message || err));
+      } finally {
+        btnBatchDownloadZip.innerHTML = originalHtml;
+        btnBatchDownloadZip.disabled = false;
+        if (btnBatchDownloadSeq) btnBatchDownloadSeq.disabled = false;
+      }
+    });
+  }
+
+  // 녹음 일괄 다운로드: 개별 파일 순차 다운로드
+  if (btnBatchDownloadSeq) {
+    btnBatchDownloadSeq.addEventListener('click', async () => {
+      if (!state.recordings) return;
+      const recEntries = Object.entries(state.recordings)
+        .filter(([idx, rec]) => rec && rec.blob)
+        .map(([idx, rec]) => ({
+          idx: parseInt(idx, 10),
+          rec,
+          question: (state.queue && state.queue[idx]) ? state.queue[idx] : `Question_${parseInt(idx, 10) + 1}`
+        }))
+        .sort((a, b) => a.idx - b.idx);
+
+      if (recEntries.length === 0) {
+        alert(t('speaking.result.noRecording') || '다운로드할 녹음 파일이 없습니다.');
+        return;
+      }
+
+      const originalHtml = btnBatchDownloadSeq.innerHTML;
+      btnBatchDownloadSeq.disabled = true;
+      if (btnBatchDownloadZip) btnBatchDownloadZip.disabled = true;
+
+      const targetFormat = audioFormatSelect ? audioFormatSelect.value : 'auto';
+
+      try {
+        for (let i = 0; i < recEntries.length; i++) {
+          const item = recEntries[i];
+          btnBatchDownloadSeq.innerHTML = `<span class="batch-btn-icon">⏳</span> <span class="batch-btn-text">${t('speaking.result.downloadingSeq', { current: i + 1, total: recEntries.length })}</span>`;
+          const targetExt = (targetFormat && targetFormat !== 'auto') ? targetFormat : item.rec.ext;
+          const { blob: outBlob, ext: outExt } = await convertBlobToTargetFormat(item.rec.blob, targetExt, item.rec.ext);
+          const fileName = buildAudioDownloadFilename(item.question, item.idx, outExt);
+          downloadBlobAsFile(outBlob, fileName);
+          // 브라우저 팝업 차단 방지 및 파일 디스패처 여유를 위한 450ms 지연
+          if (i < recEntries.length - 1) {
+            await new Promise(r => setTimeout(r, 450));
+          }
+        }
+      } catch (err) {
+        console.error('Sequential download error:', err);
+      } finally {
+        btnBatchDownloadSeq.innerHTML = originalHtml;
+        btnBatchDownloadSeq.disabled = false;
+        if (btnBatchDownloadZip) btnBatchDownloadZip.disabled = false;
+      }
     });
   }
 
@@ -4671,6 +5197,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function stopShadowPlayback(customMessage) {
+    releaseWakeLock();
     stopSpeaking();
     clearShadowWaitTimers();
     stopShadowMaxTimer();
@@ -4693,13 +5220,17 @@ document.addEventListener('DOMContentLoaded', () => {
     renderShadowSentenceCards();
   }
 
-  function startShadowPlayback(startIdx = 0) {
+  async function startShadowPlayback(startIdx = 0) {
     updateShadowStatsAndCards();
     if (shadowState.sentences.length === 0) {
       alert('낭독할 스크립트 대본을 먼저 입력해주세요.');
       if (shadowScriptInput) shadowScriptInput.focus();
       return;
     }
+
+    try {
+      await requestWakeLock();
+    } catch (e) {}
 
     stopSpeaking();
     clearShadowWaitTimers();
@@ -5104,14 +5635,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (btnShadowPause) {
-    btnShadowPause.addEventListener('click', () => {
+    btnShadowPause.addEventListener('click', async () => {
       if (!shadowState.isPlaying) return;
       if (shadowState.isPaused) {
         shadowState.isPaused = false;
+        try { await requestWakeLock(); } catch (e) {}
         btnShadowPause.textContent = '⏸ 일시정지';
         playCurrentShadowSentence();
       } else {
         shadowState.isPaused = true;
+        releaseWakeLock();
         stopSpeaking();
         clearShadowWaitTimers();
         btnShadowPause.textContent = '▶ 이어서 듣기';
