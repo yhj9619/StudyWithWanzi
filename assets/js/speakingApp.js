@@ -114,7 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
     'shadow.card.playMyRec': '내 발음 녹음 듣기',
     'shadow.card.recCompare': '🎙️ 원어민 ~{native}초 vs 나 {mine}초',
     'shadow.card.playOnce': '이 문장 1회 듣기',
-    'shadow.card.loopSingle': '이 문장만 집중 무한 반복'
+    'shadow.card.loopSingle': '이 문장만 집중 무한 반복',
+    'shadow.step2.pauseHint': '💡 [🎧 본문만 연속 듣기] 버튼을 누르면 이 대기 시간과 관계없이 쉼 없이 바로 다음 문장을 읽어줍니다.',
+    'shadow.step3.listenAll': '🎧 본문만 연속 듣기',
+    'shadow.step3.shadowAll': '🗣️ 쉐도잉 따라 말하기',
+    'shadow.step3.listeningActive': '🔊 듣는 중 (처음부터)',
+    'shadow.step3.shadowingActive': '🎙️ 쉐도잉 중 (처음부터)'
   };
 
   const t = (key, params) => {
@@ -255,6 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const shadowMaxTimeSelect = document.getElementById('shadowMaxTimeSelect');
   const shadowMaxTimerCountdown = document.getElementById('shadowMaxTimerCountdown');
 
+  const btnShadowListenAll = document.getElementById('btnShadowListenAll');
   const btnShadowPlayAll = document.getElementById('btnShadowPlayAll');
   const btnShadowPause = document.getElementById('btnShadowPause');
   const btnShadowStop = document.getElementById('btnShadowStop');
@@ -4052,7 +4058,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (resultBatchDownloadBar) {
       if (validRecCount > 0) {
         resultBatchDownloadBar.classList.remove('hidden');
-        if (resRecordingsCount) resRecordingsCount.textContent = validRecCount;
+        if (resRecordingsCount) {
+          resRecordingsCount.textContent = t('speaking.result.batchCount', { count: validRecCount }) || `${validRecCount}개`;
+        }
       } else {
         resultBatchDownloadBar.classList.add('hidden');
       }
@@ -4658,7 +4666,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sampleContent: '',
     customScripts: [],
     splitBySentence: true,
-    targetSec: 60,
+    targetSec: 120,
     rate: 1.0,
     pauseMode: 'auto',
     sentenceRepeat: 1,
@@ -4668,6 +4676,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sentences: [],
     totalEstSec: 0,
     // Playback runtime state
+    playMode: 'shadow', // 'shadow' | 'listen'
     isPlaying: false,
     isPaused: false,
     isWaitingShadow: false,
@@ -4706,7 +4715,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sampleContent: shadowState.sampleContent,
       customScripts: shadowState.customScripts,
       splitBySentence: shadowSplitSentenceCheck ? shadowSplitSentenceCheck.checked : true,
-      targetSec: shadowTargetSecSelect ? parseInt(shadowTargetSecSelect.value, 10) : 60,
+      targetSec: shadowTargetSecSelect ? parseInt(shadowTargetSecSelect.value, 10) : 120,
       rate: shadowRateSlider ? parseFloat(shadowRateSlider.value) : 1.0,
       pauseMode: shadowPauseSelect ? shadowPauseSelect.value : 'auto',
       sentenceRepeat: shadowSentenceRepeatSelect ? parseInt(shadowSentenceRepeatSelect.value, 10) : 1,
@@ -4730,7 +4739,7 @@ document.addEventListener('DOMContentLoaded', () => {
         shadowState.sampleContent = data.sampleContent !== undefined ? data.sampleContent : getDefaultShadowSample(state.autoTargetLang);
         shadowState.customScripts = Array.isArray(data.customScripts) ? data.customScripts : [];
         shadowState.splitBySentence = data.splitBySentence !== undefined ? Boolean(data.splitBySentence) : true;
-        shadowState.targetSec = data.targetSec !== undefined ? Number(data.targetSec) : 60;
+        shadowState.targetSec = data.targetSec !== undefined ? Number(data.targetSec) : 120;
         shadowState.rate = data.rate !== undefined ? Number(data.rate) : (ttsRateSlider ? parseFloat(ttsRateSlider.value) : 1.0);
         shadowState.pauseMode = data.pauseMode !== undefined ? String(data.pauseMode) : 'auto';
         shadowState.sentenceRepeat = data.sentenceRepeat !== undefined ? Number(data.sentenceRepeat) : 1;
@@ -5206,8 +5215,12 @@ document.addEventListener('DOMContentLoaded', () => {
     shadowState.isWaitingShadow = false;
     shadowState.singleLoopIdx = null;
 
+    if (btnShadowListenAll) {
+      btnShadowListenAll.textContent = t('shadow.step3.listenAll');
+      btnShadowListenAll.classList.remove('is-playing');
+    }
     if (btnShadowPlayAll) {
-      btnShadowPlayAll.textContent = '▶ 전체 낭독 시작';
+      btnShadowPlayAll.textContent = t('shadow.step3.shadowAll');
       btnShadowPlayAll.classList.remove('is-playing');
     }
     if (btnShadowPause) btnShadowPause.classList.add('hidden');
@@ -5215,17 +5228,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (shadowStatusBanner) shadowStatusBanner.classList.remove('waiting');
     if (shadowWaitBarWrap) shadowWaitBarWrap.classList.add('hidden');
     if (shadowStatusText) {
-      shadowStatusText.innerHTML = customMessage || '아래 문장 카드를 클릭하거나 <strong>[▶ 전체 낭독 시작]</strong>을 눌러보세요.';
+      shadowStatusText.innerHTML = customMessage || t('shadow.step3.readyBanner');
     }
     renderShadowSentenceCards();
   }
 
-  async function startShadowPlayback(startIdx = 0) {
+  async function startShadowPlayback(startIdx = 0, mode = null) {
     updateShadowStatsAndCards();
     if (shadowState.sentences.length === 0) {
       alert('낭독할 스크립트 대본을 먼저 입력해주세요.');
       if (shadowScriptInput) shadowScriptInput.focus();
       return;
+    }
+
+    if (mode === 'listen' || mode === 'shadow') {
+      shadowState.playMode = mode;
     }
 
     try {
@@ -5246,10 +5263,26 @@ document.addEventListener('DOMContentLoaded', () => {
     shadowState.currentIdx = Math.max(0, Math.min(shadowState.sentences.length - 1, startIdx));
     shadowState.currentRepeatCount = 0;
 
-    if (btnShadowPlayAll) {
-      btnShadowPlayAll.textContent = '🔊 낭독 중 (처음부터 다시)';
-      btnShadowPlayAll.classList.add('is-playing');
+    if (shadowState.playMode === 'listen') {
+      if (btnShadowListenAll) {
+        btnShadowListenAll.textContent = t('shadow.step3.listeningActive');
+        btnShadowListenAll.classList.add('is-playing');
+      }
+      if (btnShadowPlayAll) {
+        btnShadowPlayAll.textContent = t('shadow.step3.shadowAll');
+        btnShadowPlayAll.classList.remove('is-playing');
+      }
+    } else {
+      if (btnShadowPlayAll) {
+        btnShadowPlayAll.textContent = t('shadow.step3.shadowingActive');
+        btnShadowPlayAll.classList.add('is-playing');
+      }
+      if (btnShadowListenAll) {
+        btnShadowListenAll.textContent = t('shadow.step3.listenAll');
+        btnShadowListenAll.classList.remove('is-playing');
+      }
     }
+
     if (btnShadowPause) {
       btnShadowPause.classList.remove('hidden');
       btnShadowPause.textContent = '⏸ 일시정지';
@@ -5281,7 +5314,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const totalRepeat = shadowSentenceRepeatSelect ? parseInt(shadowSentenceRepeatSelect.value, 10) || 1 : 1;
     const repeatLabel = totalRepeat > 1 ? ` (${shadowState.currentRepeatCount + 1}/${totalRepeat}회)` : '';
-    const modeLabel = shadowState.singleLoopIdx !== null ? '🔁 [1문장 집중 반복]' : `🔊 문장 ${idx + 1} / ${shadowState.sentences.length}`;
+    const modeBadge = shadowState.playMode === 'listen' ? '🎧 [본문만 듣기]' : '🗣️ [쉐도잉 모드]';
+    const modeLabel = shadowState.singleLoopIdx !== null ? '🔁 [1문장 집중 반복]' : `${modeBadge} 문장 ${idx + 1} / ${shadowState.sentences.length}`;
 
     if (shadowStatusText) {
       shadowStatusText.innerHTML = `<strong>${modeLabel}${repeatLabel}</strong> 원어민 음성 낭독 중...`;
@@ -5297,6 +5331,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function handleAfterShadowSentenceSpoken(spokenMs, item) {
     if (!shadowState.isPlaying || shadowState.isPaused) return;
+
+    // 본문만 연속 듣기 모드: 쉬는 시간 없이 자연스러운 180ms 호흡 후 바로 다음 문장으로 진행
+    if (shadowState.playMode === 'listen') {
+      shadowState.waitTimeout = setTimeout(() => {
+        advanceToNextShadowStep();
+      }, 180);
+      return;
+    }
 
     const pauseVal = shadowPauseSelect ? shadowPauseSelect.value : 'auto';
     let waitMs = 120;
@@ -5627,10 +5669,17 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 플레이어 마스터 컨트롤 버튼
+  if (btnShadowListenAll) {
+    btnShadowListenAll.addEventListener('click', () => {
+      shadowState.singleLoopIdx = null;
+      startShadowPlayback(0, 'listen');
+    });
+  }
+
   if (btnShadowPlayAll) {
     btnShadowPlayAll.addEventListener('click', () => {
       shadowState.singleLoopIdx = null;
-      startShadowPlayback(0);
+      startShadowPlayback(0, 'shadow');
     });
   }
 

@@ -3375,7 +3375,80 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* 3. 인터랙티브 쉐도잉 플레이어 & 문장 카드 */
+/* 쉐도잉 스튜디오 고급 재생 설정 아코디언 */
+.shadow-advanced-details {
+  margin: 1rem 0 1.25rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.shadow-advanced-details[open] {
+  border-color: #94a3b8;
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+.shadow-advanced-details > summary {
+  padding: 0.85rem 1.25rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #334155;
+  border-radius: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  user-select: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.shadow-advanced-details > summary:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.shadow-advanced-details[open] > summary {
+  border-bottom: 1px solid #e2e8f0;
+  border-radius: 11px 11px 0 0;
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+.shadow-adv-summary-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: inherit;
+}
+
+.shadow-advanced-details > .advanced-body {
+  padding: 1.25rem 1.25rem 1.4rem;
+  border-top: none;
+  background: #ffffff;
+  border-radius: 0 0 11px 11px;
+}
+
+/* PC 2열 균등 분할 그리드 (모바일 1열) */
+.shadow-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .shadow-settings-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+/* 2. 인터랙티브 쉐도잉 플레이어 & 문장 카드 */
 .shadow-memorize-pills {
   display: flex;
   align-items: center;
@@ -3426,8 +3499,8 @@
 }
 
 .btn-shadow-main-play {
-  padding: 0.6rem 1.25rem;
-  font-size: 0.92rem;
+  padding: 0.6rem 1.15rem;
+  font-size: 0.9rem;
   font-weight: 800;
   border-radius: 8px;
   border: none;
@@ -3436,6 +3509,9 @@
   cursor: pointer;
   transition: all 0.15s ease;
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .btn-shadow-main-play:hover {
@@ -3446,6 +3522,47 @@
 .btn-shadow-main-play.is-playing {
   background: #059669;
   box-shadow: 0 2px 8px rgba(5, 150, 105, 0.4);
+}
+
+/* 본문만 연속 듣기 전용 스타일 */
+.btn-shadow-listen {
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
+}
+
+.btn-shadow-listen:hover {
+  background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%);
+  transform: translateY(-1px);
+}
+
+.btn-shadow-listen.is-playing {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5), 0 2px 10px rgba(2, 132, 199, 0.55);
+  animation: pulseListenBtn 1.8s infinite ease-in-out;
+}
+
+/* 쉐도잉 따라 말하기 전용 스타일 */
+.btn-shadow-practice {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.35);
+}
+
+.btn-shadow-practice:hover {
+  background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+  transform: translateY(-1px);
+}
+
+.btn-shadow-practice.is-playing {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5), 0 2px 10px rgba(16, 185, 129, 0.55);
+  animation: pulseListenBtn 1.8s infinite ease-in-out;
+}
+
+@keyframes pulseListenBtn {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.88; }
 }
 
 .btn-shadow-ctrl {

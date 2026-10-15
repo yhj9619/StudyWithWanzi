@@ -102,9 +102,9 @@
                   <option value="0" data-i18n="shadow.stat.target0">제한 없음 (자유 분량)</option>
                   <option value="30" data-i18n="shadow.stat.target30">30초 (단답형 / 파트1·2)</option>
                   <option value="45" data-i18n="shadow.stat.target45">45초 (토스 / 중급 답변)</option>
-                  <option value="60" selected data-i18n="shadow.stat.target60">60초 (1분 표준 답변)</option>
+                  <option value="60" data-i18n="shadow.stat.target60">60초 (1분 표준 답변)</option>
                   <option value="90" data-i18n="shadow.stat.target90">90초 (1분 30초 · 오픽/면접)</option>
-                  <option value="120" data-i18n="shadow.stat.target120">120초 (2분 심층 답변)</option>
+                  <option value="120" selected data-i18n="shadow.stat.target120">120초 (2분 심층 답변)</option>
                 </select>
               </div>
               <div id="shadowTargetFeedback" class="shadow-target-feedback"></div>
@@ -115,147 +115,153 @@
           </div>
         </article>
 
-        <!-- 카드 2: TTS 음성 & 쉐도잉 훈련 설정 -->
-        <article class="speaking-card">
-          <div class="speaking-card-header">
-            <h2 class="speaking-card-title" data-i18n="shadow.step2.title">🎚️ 2. TTS 음성 &amp; 쉐도잉 재생 설정</h2>
-          </div>
+        <!-- 2. TTS 음성 & 쉐도잉 재생 설정 (고급 옵션 접기/펼치기) -->
+        <details class="advanced-settings shadow-advanced-details" id="shadowAdvancedSettings">
+          <summary>
+            <span class="shadow-adv-summary-title" data-i18n="shadow.step2.title">⚙️ 고급 설정 (TTS 음성 &amp; 쉐도잉 재생 옵션)</span>
+            <span class="advanced-hint" data-i18n="common.advanced.hint">기본값 그대로 써도 괜찮아요</span>
+          </summary>
 
-          <div class="settings-grid">
-            <!-- 1) 낭독 음성 (TTS 언어) & 브라우저별 안내 툴팁 -->
-            <div class="setting-item">
-              <div class="setting-label voice-label-with-tooltip">
-                <label for="voiceSearchInput" data-i18n="speaking.step2.ttsVoice">낭독 음성 (TTS 언어)</label>
-                <div class="tts-browser-tooltip-wrap" id="ttsBrowserTooltipWrap">
-                  <button type="button" id="ttsBrowserInfoBtn" class="tts-info-badge" aria-expanded="false" aria-controls="ttsBrowserPopover">
-                    <span>ⓘ</span>
-                    <span data-i18n="speaking.step2.browserTipBtn">브라우저별 음성 안내</span>
-                  </button>
-                  <div id="ttsBrowserPopover" class="tts-browser-popover hidden" role="tooltip">
-                    <div class="tts-popover-header">
-                      <span data-i18n="speaking.step2.browserTipTitle">🌐 브라우저별 다국어 음성(TTS) 지원 안내</span>
-                      <button type="button" id="ttsBrowserPopoverClose" class="tts-popover-close" aria-label="닫기">&times;</button>
+          <div class="advanced-body">
+            <div class="shadow-settings-grid">
+              <!-- 1) 낭독 음성 (TTS 언어) & 브라우저별 안내 툴팁 -->
+              <div class="setting-item">
+                <div class="setting-label voice-label-with-tooltip">
+                  <label for="voiceSearchInput" data-i18n="speaking.step2.ttsVoice">낭독 음성 (TTS 언어)</label>
+                  <div class="tts-browser-tooltip-wrap" id="ttsBrowserTooltipWrap">
+                    <button type="button" id="ttsBrowserInfoBtn" class="tts-info-badge" aria-expanded="false" aria-controls="ttsBrowserPopover">
+                      <span>ⓘ</span>
+                      <span data-i18n="speaking.step2.browserTipBtn">브라우저별 음성 안내</span>
+                    </button>
+                    <div id="ttsBrowserPopover" class="tts-browser-popover hidden" role="tooltip">
+                      <div class="tts-popover-header">
+                        <span data-i18n="speaking.step2.browserTipTitle">🌐 브라우저별 다국어 음성(TTS) 지원 안내</span>
+                        <button type="button" id="ttsBrowserPopoverClose" class="tts-popover-close" aria-label="닫기">&times;</button>
+                      </div>
+                      <ul class="tts-popover-list">
+                        <li>
+                          <strong>🥇 Edge (엣지) · 가장 추천</strong>
+                          <p>별도 설치 없이 고품질 다국어 원어민 음성(Neural)을 가장 폭넓게 기본 지원합니다.</p>
+                        </li>
+                        <li>
+                          <strong>🥈 Chrome (크롬) · 추천</strong>
+                          <p>Google 다국어 온라인 음성(영어·중국어·일본어·프랑스어·스페인어·독일어·네덜란드어 등 약 18개국)을 기본 지원합니다.</p>
+                        </li>
+                        <li>
+                          <strong>🍎 Safari (아이폰 · 아이패드 · 맥)</strong>
+                          <p>Apple / Siri 내장 다국어 음성을 기본으로 폭넓게 지원합니다.</p>
+                        </li>
+                        <li>
+                          <strong>⚠️ 네이버 웨일(Whale) · 파이어폭스 등</strong>
+                          <p>브라우저 자체 온라인 음성이 없어 <strong>PC에 설치된 기본 음성(한국어·영어)만 표시</strong>될 수 있습니다. 다른 외국어가 안 나오면 <strong>Chrome / Edge</strong>를 쓰시거나 Windows/Mac 설정에서 언어 음성 팩을 추가해 주세요.</p>
+                        </li>
+                      </ul>
                     </div>
-                    <ul class="tts-popover-list">
-                      <li>
-                        <strong>🥇 Edge (엣지) · 가장 추천</strong>
-                        <p>별도 설치 없이 고품질 다국어 원어민 음성(Neural)을 가장 폭넓게 기본 지원합니다.</p>
-                      </li>
-                      <li>
-                        <strong>🥈 Chrome (크롬) · 추천</strong>
-                        <p>Google 다국어 온라인 음성(영어·중국어·일본어·프랑스어·스페인어·독일어·네덜란드어 등 약 18개국)을 기본 지원합니다.</p>
-                      </li>
-                      <li>
-                        <strong>🍎 Safari (아이폰 · 아이패드 · 맥)</strong>
-                        <p>Apple / Siri 내장 다국어 음성을 기본으로 폭넓게 지원합니다.</p>
-                      </li>
-                      <li>
-                        <strong>⚠️ 네이버 웨일(Whale) · 파이어폭스 등</strong>
-                        <p>브라우저 자체 온라인 음성이 없어 <strong>PC에 설치된 기본 음성(한국어·영어)만 표시</strong>될 수 있습니다. 다른 외국어가 안 나오면 <strong>Chrome / Edge</strong>를 쓰시거나 Windows/Mac 설정에서 언어 음성 팩을 추가해 주세요.</p>
-                      </li>
-                    </ul>
                   </div>
                 </div>
-              </div>
-              <div class="voice-control-row">
-                <div class="searchable-combobox" id="voiceSelectContainer" style="flex: 1; min-width: 0;">
-                  <select id="voiceSelect" class="visually-hidden" tabindex="-1" aria-hidden="true"></select>
-                  <div class="combobox-input-wrapper">
-                    <span class="combobox-search-icon">🔍</span>
-                    <input type="text" id="voiceSearchInput"
-                           class="form-input combobox-input"
-                           placeholder="음성 검색 (예: 자동, 한국어, 중국어, English...)"
-                           data-i18n-attr="placeholder:speaking.step2.voiceSearchPlaceholder"
-                           autocomplete="off"
-                           role="combobox"
-                           aria-autocomplete="list"
-                           aria-expanded="false"
-                           aria-controls="voiceDropdownList">
-                    <button type="button" id="voiceClearBtn" class="combobox-clear-btn hidden" title="검색어 지우기">&times;</button>
-                    <button type="button" id="voiceToggleBtn" class="combobox-toggle-btn" title="음성 목록 펼치기/접기">▼</button>
+                <div class="voice-control-row">
+                  <div class="searchable-combobox" id="voiceSelectContainer" style="flex: 1; min-width: 0;">
+                    <select id="voiceSelect" class="visually-hidden" tabindex="-1" aria-hidden="true"></select>
+                    <div class="combobox-input-wrapper">
+                      <span class="combobox-search-icon">🔍</span>
+                      <input type="text" id="voiceSearchInput"
+                             class="form-input combobox-input"
+                             placeholder="음성 검색 (예: 자동, 한국어, 중국어, English...)"
+                             data-i18n-attr="placeholder:speaking.step2.voiceSearchPlaceholder"
+                             autocomplete="off"
+                             role="combobox"
+                             aria-autocomplete="list"
+                             aria-expanded="false"
+                             aria-controls="voiceDropdownList">
+                      <button type="button" id="voiceClearBtn" class="combobox-clear-btn hidden" title="검색어 지우기">&times;</button>
+                      <button type="button" id="voiceToggleBtn" class="combobox-toggle-btn" title="음성 목록 펼치기/접기">▼</button>
+                    </div>
+                    <div id="voiceDropdownWrapper" class="combobox-dropdown hidden">
+                      <div class="dropdown-header-info"><span id="filteredVoiceCount"></span></div>
+                      <ul id="voiceDropdownList" class="dropdown-list" role="listbox" aria-label="음성 목록"></ul>
+                    </div>
                   </div>
-                  <div id="voiceDropdownWrapper" class="combobox-dropdown hidden">
-                    <div class="dropdown-header-info"><span id="filteredVoiceCount"></span></div>
-                    <ul id="voiceDropdownList" class="dropdown-list" role="listbox" aria-label="음성 목록"></ul>
+                  <button type="button" id="shadowTestVoiceBtn" class="btn-voice-test" data-i18n="speaking.step2.testVoice">음성 테스트</button>
+                </div>
+                <div id="voiceStatusBadge" class="voice-status-box"></div>
+              </div>
+
+              <!-- 2) 말하기 속도 조절 & 쉬는 시간 & 반복 & 최대 시간 -->
+              <div class="setting-item" style="gap: 0.9rem;">
+                <div>
+                  <div class="setting-label" style="margin-bottom: 0.35rem;">
+                    <label for="shadowRateSlider" data-i18n="shadow.step2.rateLabel">말하기 속도 (배속 조절)</label>
+                    <span id="shadowRateVal" class="speed-val-badge">1.0x</span>
+                  </div>
+                  <input type="range" id="shadowRateSlider" class="speed-slider" min="0.6" max="1.5" step="0.1" value="1.0" style="width: 100%;">
+                  <div class="preset-pills" id="shadowRatePills">
+                    <button type="button" class="preset-pill" data-shadow-rate="0.7" data-i18n="shadow.step2.rateSlow">0.7x 느리게</button>
+                    <button type="button" class="preset-pill" data-shadow-rate="0.8">0.8x</button>
+                    <button type="button" class="preset-pill" data-shadow-rate="0.9">0.9x</button>
+                    <button type="button" class="preset-pill active" data-shadow-rate="1.0" data-i18n="shadow.step2.rateStd">1.0x 표준</button>
+                    <button type="button" class="preset-pill" data-shadow-rate="1.1">1.1x</button>
+                    <button type="button" class="preset-pill" data-shadow-rate="1.2" data-i18n="shadow.step2.rateFast">1.2x 빠르게</button>
+                    <button type="button" class="preset-pill" data-shadow-rate="1.4">1.4x</button>
                   </div>
                 </div>
-                <button type="button" id="shadowTestVoiceBtn" class="btn-voice-test" data-i18n="speaking.step2.testVoice">음성 테스트</button>
-              </div>
-              <div id="voiceStatusBadge" class="voice-status-box"></div>
-            </div>
 
-            <!-- 2) 말하기 속도 조절 & 쉬는 시간 & 반복 & 최대 시간 -->
-            <div class="setting-item" style="gap: 0.9rem;">
-              <div>
-                <div class="setting-label" style="margin-bottom: 0.35rem;">
-                  <label for="shadowRateSlider" data-i18n="shadow.step2.rateLabel">말하기 속도 (배속 조절)</label>
-                  <span id="shadowRateVal" class="speed-val-badge">1.0x</span>
-                </div>
-                <input type="range" id="shadowRateSlider" class="speed-slider" min="0.6" max="1.5" step="0.1" value="1.0" style="width: 100%;">
-                <div class="preset-pills" id="shadowRatePills">
-                  <button type="button" class="preset-pill" data-shadow-rate="0.7" data-i18n="shadow.step2.rateSlow">0.7x 느리게</button>
-                  <button type="button" class="preset-pill" data-shadow-rate="0.8">0.8x</button>
-                  <button type="button" class="preset-pill" data-shadow-rate="0.9">0.9x</button>
-                  <button type="button" class="preset-pill active" data-shadow-rate="1.0" data-i18n="shadow.step2.rateStd">1.0x 표준</button>
-                  <button type="button" class="preset-pill" data-shadow-rate="1.1">1.1x</button>
-                  <button type="button" class="preset-pill" data-shadow-rate="1.2" data-i18n="shadow.step2.rateFast">1.2x 빠르게</button>
-                  <button type="button" class="preset-pill" data-shadow-rate="1.4">1.4x</button>
-                </div>
-              </div>
-
-              <div>
-                <label for="shadowPauseSelect" class="setting-label" style="margin-bottom: 0.35rem;">
-                  <span data-i18n="shadow.step2.pauseLabel">문장 간 쉬는 시간 (따라 말하기 대기)</span>
-                </label>
-                <select id="shadowPauseSelect" class="select-input">
-                  <option value="auto" selected data-i18n="shadow.step2.pauseAuto">🎯 문장 길이만큼 자동 대기 (1:1 따라 말하기 추천)</option>
-                  <option value="0" data-i18n="shadow.step2.pause0">0초 (쉬지 않고 연속 낭독)</option>
-                  <option value="1.5" data-i18n="shadow.step2.pause1_5">1.5초 대기 (짧은 호흡)</option>
-                  <option value="3" data-i18n="shadow.step2.pause3">3초 대기 (보통 호흡)</option>
-                  <option value="5" data-i18n="shadow.step2.pause5">5초 대기 (여유 있게 생각하며 말하기)</option>
-                </select>
-              </div>
-
-              <div>
-                <label for="shadowSentenceRepeatSelect" class="setting-label" style="margin-bottom: 0.35rem;">
-                  <span data-i18n="shadow.step2.repeatLabel">문장별 반복 &amp; 전체 반복</span>
-                </label>
-                <div class="shadow-dual-select-row">
-                  <select id="shadowSentenceRepeatSelect" class="select-input" title="한 문장당 반복 횟수">
-                    <option value="1" selected data-i18n="shadow.step2.sentRep1">문장당 1회 읽기</option>
-                    <option value="2" data-i18n="shadow.step2.sentRep2">문장당 2회 연속 읽기</option>
-                    <option value="3" data-i18n="shadow.step2.sentRep3">문장당 3회 연속 읽기</option>
+                <div>
+                  <label for="shadowPauseSelect" class="setting-label" style="margin-bottom: 0.35rem;">
+                    <span data-i18n="shadow.step2.pauseLabel">문장 간 쉬는 시간 (따라 말하기 대기)</span>
+                  </label>
+                  <select id="shadowPauseSelect" class="select-input">
+                    <option value="auto" selected data-i18n="shadow.step2.pauseAuto">🎯 문장 길이만큼 자동 대기 (1:1 따라 말하기 추천)</option>
+                    <option value="0" data-i18n="shadow.step2.pause0">0초 (쉬지 않고 연속 낭독)</option>
+                    <option value="1.5" data-i18n="shadow.step2.pause1_5">1.5초 대기 (짧은 호흡)</option>
+                    <option value="3" data-i18n="shadow.step2.pause3">3초 대기 (보통 호흡)</option>
+                    <option value="5" data-i18n="shadow.step2.pause5">5초 대기 (여유 있게 생각하며 말하기)</option>
                   </select>
-                  <select id="shadowLoopSelect" class="select-input" title="대본 전체 반복 설정">
-                    <option value="1" selected data-i18n="shadow.step2.loop1">전체 1회 재생</option>
-                    <option value="3" data-i18n="shadow.step2.loop3">전체 3회 반복</option>
-                    <option value="0" data-i18n="shadow.step2.loopInf">🔁 전체 무한 반복</option>
+                  <p class="setting-hint" style="margin-top: 0.35rem; font-size: 0.74rem; color: #64748b;" data-i18n="shadow.step2.pauseHint">
+                    💡 [🎧 본문만 연속 듣기] 버튼을 누르면 이 대기 시간과 관계없이 쉼 없이 바로 다음 문장을 읽어줍니다.
+                  </p>
+                </div>
+
+                <div>
+                  <label for="shadowSentenceRepeatSelect" class="setting-label" style="margin-bottom: 0.35rem;">
+                    <span data-i18n="shadow.step2.repeatLabel">문장별 반복 &amp; 전체 반복</span>
+                  </label>
+                  <div class="shadow-dual-select-row">
+                    <select id="shadowSentenceRepeatSelect" class="select-input" title="한 문장당 반복 횟수">
+                      <option value="1" selected data-i18n="shadow.step2.sentRep1">문장당 1회 읽기</option>
+                      <option value="2" data-i18n="shadow.step2.sentRep2">문장당 2회 연속 읽기</option>
+                      <option value="3" data-i18n="shadow.step2.sentRep3">문장당 3회 연속 읽기</option>
+                    </select>
+                    <select id="shadowLoopSelect" class="select-input" title="대본 전체 반복 설정">
+                      <option value="1" selected data-i18n="shadow.step2.loop1">전체 1회 재생</option>
+                      <option value="3" data-i18n="shadow.step2.loop3">전체 3회 반복</option>
+                      <option value="0" data-i18n="shadow.step2.loopInf">🔁 전체 무한 반복</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="setting-label" style="margin-bottom: 0.35rem;">
+                    <label for="shadowMaxTimeSelect" data-i18n="shadow.step2.maxTimeLabel">⏳ 최대 재생 시간 제한 (자동 종료 타이머)</label>
+                    <span id="shadowMaxTimerCountdown" class="shadow-timer-countdown hidden">00:00</span>
+                  </div>
+                  <select id="shadowMaxTimeSelect" class="select-input">
+                    <option value="0" selected data-i18n="shadow.step2.maxTime0">제한 없음 (끝까지 재생)</option>
+                    <option value="180" data-i18n="shadow.step2.maxTime3">3분 동안만 재생</option>
+                    <option value="300" data-i18n="shadow.step2.maxTime5">5분 동안만 재생</option>
+                    <option value="600" data-i18n="shadow.step2.maxTime10">10분 동안만 재생</option>
+                    <option value="900" data-i18n="shadow.step2.maxTime15">15분 동안만 재생</option>
+                    <option value="1800" data-i18n="shadow.step2.maxTime30">30분 동안만 재생</option>
                   </select>
                 </div>
-              </div>
-
-              <div>
-                <div class="setting-label" style="margin-bottom: 0.35rem;">
-                  <label for="shadowMaxTimeSelect" data-i18n="shadow.step2.maxTimeLabel">⏳ 최대 재생 시간 제한 (자동 종료 타이머)</label>
-                  <span id="shadowMaxTimerCountdown" class="shadow-timer-countdown hidden">00:00</span>
-                </div>
-                <select id="shadowMaxTimeSelect" class="select-input">
-                  <option value="0" selected data-i18n="shadow.step2.maxTime0">제한 없음 (끝까지 재생)</option>
-                  <option value="180" data-i18n="shadow.step2.maxTime3">3분 동안만 재생</option>
-                  <option value="300" data-i18n="shadow.step2.maxTime5">5분 동안만 재생</option>
-                  <option value="600" data-i18n="shadow.step2.maxTime10">10분 동안만 재생</option>
-                  <option value="900" data-i18n="shadow.step2.maxTime15">15분 동안만 재생</option>
-                  <option value="1800" data-i18n="shadow.step2.maxTime30">30분 동안만 재생</option>
-                </select>
               </div>
             </div>
           </div>
-        </article>
+        </details>
 
-        <!-- 카드 3: 인터랙티브 문장 카드 & 쉐도잉 플레이어 -->
+        <!-- 플레이어 카드: 인터랙티브 문장 카드 & 쉐도잉 플레이어 -->
         <article class="speaking-card shadow-player-card">
           <div class="speaking-card-header">
-            <h2 class="speaking-card-title" data-i18n="shadow.step3.title">🎧 3. 문장별 쉐도잉 플레이어 &amp; 실전 암기</h2>
+            <h2 class="speaking-card-title" data-i18n="shadow.step3.title">🎧 2. 문장별 쉐도잉 플레이어 &amp; 실전 암기</h2>
             <div class="shadow-memorize-pills" role="group" aria-label="암기 가림막 모드">
               <button type="button" class="shadow-mask-pill active" data-mask="none" data-i18n="shadow.step3.maskNone">👁️ 전체 보기</button>
               <button type="button" class="shadow-mask-pill" data-mask="foreign" title="한국어 해석은 남기고 외국어 문장만 가립니다 (한→외 통역 연습)" data-i18n="shadow.step3.maskForeign">🌐 외국어만 가리기</button>
@@ -266,7 +272,8 @@
           <!-- 마스터 컨트롤 바 -->
           <div class="shadow-master-bar">
             <div class="shadow-master-btns">
-              <button type="button" id="btnShadowPlayAll" class="btn-shadow-main-play" data-i18n="shadow.step3.playAll">▶ 전체 낭독 시작</button>
+              <button type="button" id="btnShadowListenAll" class="btn-shadow-main-play btn-shadow-listen" data-i18n="shadow.step3.listenAll" title="대기 시간 없이 본문 전체를 물 흐르듯 연속으로 듣습니다">🎧 본문만 연속 듣기</button>
+              <button type="button" id="btnShadowPlayAll" class="btn-shadow-main-play btn-shadow-practice" data-i18n="shadow.step3.shadowAll" title="한 문장씩 듣고 따라 말하는 쉐도잉 훈련을 진행합니다">🗣️ 쉐도잉 따라 말하기</button>
               <button type="button" id="btnShadowPause" class="btn-shadow-ctrl hidden" data-i18n="speaking.sim.pause">⏸ 일시정지</button>
               <button type="button" id="btnShadowStop" class="btn-shadow-ctrl btn-shadow-stop" disabled data-i18n="shadow.step3.stop">⏹ 정지</button>
               <div class="shadow-step-btns">
@@ -312,14 +319,14 @@
     <p data-i18n="common.footer">Study with Wanzi &copy; 2026. Made with care for language learners.</p>
   </footer>
 
-  <script src="../assets/js/i18n.js?v=20261015c"></script>
-  <script src="../assets/i18n/ko/common.js?v=20261015c"></script>
-  <script src="../assets/i18n/ko/speaking.js?v=20261015c"></script>
-  <script src="../assets/i18n/en/common.js?v=20261015c"></script>
-  <script src="../assets/i18n/en/speaking.js?v=20261015c"></script>
-  <script src="../assets/i18n/zh/common.js?v=20261015c"></script>
-  <script src="../assets/i18n/zh/speaking.js?v=20261015c"></script>
-  <script src="../assets/js/speakingApp.js?v=20261015c"></script>
+  <script src="../assets/js/i18n.js?v=20261015g"></script>
+  <script src="../assets/i18n/ko/common.js?v=20261015g"></script>
+  <script src="../assets/i18n/ko/speaking.js?v=20261015g"></script>
+  <script src="../assets/i18n/en/common.js?v=20261015g"></script>
+  <script src="../assets/i18n/en/speaking.js?v=20261015g"></script>
+  <script src="../assets/i18n/zh/common.js?v=20261015g"></script>
+  <script src="../assets/i18n/zh/speaking.js?v=20261015g"></script>
+  <script src="../assets/js/speakingApp.js?v=20261015g"></script>
 </body>
 </html>
 
