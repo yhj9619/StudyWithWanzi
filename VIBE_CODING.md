@@ -124,7 +124,7 @@ studyWithWanzi/
 │   └── ankiManual.html               # Anki 도구 화면별 사용 설명서 & FAQ
 │
 ├── speaking/                         # 🎙️ 말하기 시험 연습 도구 폴더
-│   ├── index.html                    # 말하기 허브 (3단계 연습 여정 & 3개 도구 카드)
+│   ├── index.html                    # 말하기 허브 (2단계 연습 여정 & 2개 도구 카드 + 사용 설명서)
 │   ├── speakingSimulator.html        # 🎯 실전 면접 시뮬레이터 화면
 │   ├── speakingShadowing.html        # 📜 스크립트 쉐도잉 스튜디오 화면
 │   └── speakingManual.html           # ❓ 말하기 연습 사용 설명서 & FAQ

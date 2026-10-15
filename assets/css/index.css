@@ -148,6 +148,101 @@
   color: #0f172a;
 }
 
+/* 사용 설명서 & 자주 묻는 질문 보조 배너 카드 */
+.portal-manual-card {
+  max-width: 680px;
+  margin: -1rem auto 2.5rem;
+  padding: 0 1rem;
+}
+
+.manual-card-inner {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-lg, 12px);
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.manual-card-inner:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.manual-card-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.manual-card-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.manual-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.manual-card-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.manual-card-desc {
+  font-size: 0.84rem;
+  color: var(--text-muted, #64748b);
+  line-height: 1.5;
+}
+
+.btn-manual-launch {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.15rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #334155;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-md, 8px);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.btn-manual-launch:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .manual-card-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  .manual-card-info {
+    align-items: flex-start;
+  }
+  .btn-manual-launch {
+    width: 100%;
+    text-align: center;
+  }
+}
+
 @media (max-width: 768px) {
   .start-path {
     margin: 0 1rem 2rem;

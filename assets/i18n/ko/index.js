@@ -72,7 +72,7 @@ i18nRegister('ko', {
   'portal.anki.feature3': '초보자 4단계 Anki 완벽 가이드 & 사용 설명서',
   'portal.anki.btn': 'Anki 도구 모음 열기 ➔',
   'portal.speaking.title': '말하기 시험 연습 도구',
-  'portal.speaking.badge': '● 3개 올인원 도구',
+  'portal.speaking.badge': '● 2개 올인원 도구',
   'portal.speaking.desc': 'OPIc · 토익스피킹 · 외국어 면접 실전 대비! 답변 스크립트 발화 시간 측정과 쉐도잉 암기부터 무작위 질문 출제 · 음성 녹음 모의고사까지 한 번에 연습하세요.',
   'portal.speaking.feature1': '실전 면접 시뮬레이터 (무작위 질문 · 답변 타이머 · 녹음 복기)',
   'portal.speaking.feature2': '스크립트 쉐도잉 스튜디오 (발화 시간 계산 · 문장 쉼 · 암기 블러)',
