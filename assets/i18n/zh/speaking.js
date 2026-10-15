@@ -288,7 +288,7 @@
   'shadow.step3.maskAll': '🙈 全部模糊',
   'shadow.step3.playAll': '▶ 开始全篇朗读',
   'shadow.step3.listenAll': '🎧 仅听原文 (连续朗读)',
-  'shadow.step3.shadowAll': '🗣️ 跟读演练 (影子跟读)',
+  'shadow.step3.shadowAll': '🗣️ 听后跟读',
   'shadow.step3.listeningActive': '🔊 聆听中 (从头再来)',
   'shadow.step3.shadowingActive': '🎙️ 跟读中 (从头再来)',
   'shadow.step3.stop': '⏹ 停止',

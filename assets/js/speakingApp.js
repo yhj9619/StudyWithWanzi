@@ -117,9 +117,9 @@ document.addEventListener('DOMContentLoaded', () => {
     'shadow.card.loopSingle': '이 문장만 집중 무한 반복',
     'shadow.step2.pauseHint': '💡 [🎧 본문만 연속 듣기] 버튼을 누르면 이 대기 시간과 관계없이 쉼 없이 바로 다음 문장을 읽어줍니다.',
     'shadow.step3.listenAll': '🎧 본문만 연속 듣기',
-    'shadow.step3.shadowAll': '🗣️ 쉐도잉 따라 말하기',
+    'shadow.step3.shadowAll': '🗣️ 듣고 따라하기',
     'shadow.step3.listeningActive': '🔊 듣는 중 (처음부터)',
-    'shadow.step3.shadowingActive': '🎙️ 쉐도잉 중 (처음부터)'
+    'shadow.step3.shadowingActive': '🎙️ 따라하는 중 (처음부터)'
   };
 
   const t = (key, params) => {
@@ -5314,7 +5314,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const totalRepeat = shadowSentenceRepeatSelect ? parseInt(shadowSentenceRepeatSelect.value, 10) || 1 : 1;
     const repeatLabel = totalRepeat > 1 ? ` (${shadowState.currentRepeatCount + 1}/${totalRepeat}회)` : '';
-    const modeBadge = shadowState.playMode === 'listen' ? '🎧 [본문만 듣기]' : '🗣️ [쉐도잉 모드]';
+    const modeBadge = shadowState.playMode === 'listen' ? '🎧 [본문만 듣기]' : '🗣️ [듣고 따라하기]';
     const modeLabel = shadowState.singleLoopIdx !== null ? '🔁 [1문장 집중 반복]' : `${modeBadge} 문장 ${idx + 1} / ${shadowState.sentences.length}`;
 
     if (shadowStatusText) {
