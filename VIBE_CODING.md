@@ -144,7 +144,8 @@ studyWithWanzi/
     │   ├── i18n.js                   # 다국어 치환 및 2대 대분류 드롭다운 헤더 렌더링 엔진
     │   ├── app.js                    # Anki 에디터 코어 로직
     │   ├── promptApp.js              # Anki 프롬프트 생성기 & CSV 파서 코어 로직
-    │   └── speakingApp.js            # 말하기 시뮬레이터 & 쉐도잉 스튜디오 코어 로직
+    │   ├── speakingApp.js            # 말하기 시뮬레이터 & 쉐도잉 스튜디오 코어 로직
+    │   └── include.js                # 사이트 전역 웹로그·애널리틱스 공통 인클루드 모듈
     │
     └── i18n/
         └── {ko,en,zh}/{common,index,editor,prompt,guide,manual}.js
