@@ -17,7 +17,7 @@ i18nRegister('en', {
   'manual.toc.faq.desc': '12 things to check first when you get stuck',
 
   'manual.editor.badge': 'Tool 1',
-  'manual.editor.title': '🌄 Card Template Editor',
+  'manual.editor.title': '🎨 Card Template Editor',
   'manual.editor.lead': 'Choose your language and fields, design the card, then copy ① Front template ② Back template ③ Styling and paste them into Anki.',
   'manual.editor.layoutTitle': '🖥️ Screen layout',
   'manual.editor.layout1': '<strong>Left = settings</strong>: ① language → ② fields → ⚙️ Advanced settings, in that order.',
@@ -93,7 +93,7 @@ i18nRegister('en', {
   'manual.copy.item2': 'After copying, <b>✓ Copied</b> appears next to the button, and once all three are copied you\'ll see a 🎉 message. To check what will be pasted, press <b>[Show what will be pasted]</b>.',
   'manual.copy.item3': 'If you changed the theme or the fields, copy and paste <b>all three again</b>. Replacing just one can make the card look wrong.',
   'manual.copy.item4': 'Where to open the [Card Template] window (PC · AnkiDroid · AnkiMobile) is shown with pictures in <a href="ankiGuide.html#templates">Anki Guide Step 2</a>.',
-  'manual.editor.cta.title': '🌄 Anki Card Template Editor',
+  'manual.editor.cta.title': '🎨 Anki Card Template Editor',
   'manual.editor.cta.desc': 'Read enough? Go ahead and design your card. Your settings are saved automatically.',
   'manual.editor.cta.button': 'Open the Card Template Editor ➔',
 

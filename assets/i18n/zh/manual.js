@@ -17,7 +17,7 @@ i18nRegister('zh', {
   'manual.toc.faq.desc': '遇到问题时先确认的 12 件事',
 
   'manual.editor.badge': '工具 1',
-  'manual.editor.title': '🌄 卡片模板编辑器',
+  'manual.editor.title': '🎨 卡片模板编辑器',
   'manual.editor.lead': '选好学习语言和字段、设计好卡片后，复制 ① 正面模板 ② 背面模板 ③ 样式，粘贴到 Anki 的工具。',
   'manual.editor.layoutTitle': '🖥️ 画面布局',
   'manual.editor.layout1': '<strong>左边 = 设置</strong>：依次是 ① 学习语言 → ② 字段 → ⚙️ 高级设置。',
@@ -93,7 +93,7 @@ i18nRegister('zh', {
   'manual.copy.item2': '复制后按钮旁会显示 <b>✓ 已复制</b>，三栏都复制完会出现 🎉 提示。点 <b>[查看要粘贴的内容]</b> 可以确认要粘贴的内容。',
   'manual.copy.item3': '如果改了主题或字段，请把<b>三个全部重新</b>复制粘贴。只替换其中一个，卡片外观可能会错乱。',
   'manual.copy.item4': '打开 [卡片模板] 窗口的位置（电脑 · AnkiDroid · AnkiMobile）在 <a href="ankiGuide.html#templates">Anki 指南 Step 2</a> 中有配图说明。',
-  'manual.editor.cta.title': '🌄 Anki 卡片模板编辑器',
+  'manual.editor.cta.title': '🎨 Anki 卡片模板编辑器',
   'manual.editor.cta.desc': '看完说明就来设计卡片吧。设置会自动保存。',
   'manual.editor.cta.button': '打开卡片模板编辑器 ➔',
 

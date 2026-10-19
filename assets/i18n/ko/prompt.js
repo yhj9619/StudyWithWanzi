@@ -8,7 +8,7 @@ i18nRegister('ko', {
   'prompt.header.backToHubTitle': 'Study with Wanzi 메인 메뉴로 이동',
   'prompt.header.title': 'Anki AI 프롬프트 생성기',
   'prompt.header.subtitle': 'AI에게 보낼 단어장 요청문을 만들고, AI 답변을 Anki용 파일로 바꿔 줍니다',
-  'prompt.header.navEditor': '🌄 카드 서식 에디터',
+  'prompt.header.navEditor': '🎨 카드 서식 에디터',
   'prompt.header.autoSavedTitle': '설정은 이 브라우저에 자동으로 저장돼요',
   'prompt.header.resetAllTitle': '모든 설정을 초기화해요',
 

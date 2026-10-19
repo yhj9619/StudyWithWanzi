@@ -167,6 +167,7 @@
 
     return {
       homeHref: rootHref,
+      faviconHref: isSub ? '../assets/favicon.svg' : 'assets/favicon.svg',
       navGroups,
       journeySteps: [
         { key: 'common.journey.step1', href: ankiPrefix + 'ankiGuide.html#fields' },
@@ -192,7 +193,19 @@
       home.className = 'site-nav-home';
       home.href = navPaths.homeHref;
       home.title = t('common.backToHubTitle');
-      home.textContent = '🌄 Study with Wanzi';
+
+      const logoImg = document.createElement('img');
+      logoImg.src = navPaths.faviconHref;
+      logoImg.alt = '';
+      logoImg.className = 'site-nav-logo-img';
+      logoImg.width = 22;
+      logoImg.height = 22;
+
+      const brandText = document.createElement('span');
+      brandText.className = 'site-nav-brand-text';
+      brandText.textContent = 'Study with Wanzi';
+
+      home.append(logoImg, brandText);
       if (current === 'home') home.setAttribute('aria-current', 'page');
 
       const menuId = 'siteNavMenu';

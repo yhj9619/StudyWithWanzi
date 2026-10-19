@@ -9,7 +9,7 @@ i18nRegister('en', {
   'prompt.header.backToHubTitle': 'Go to the Study with Wanzi main menu',
   'prompt.header.title': 'Anki AI Prompt Generator',
   'prompt.header.subtitle': 'Build a word-list request for AI, then turn the AI\'s answer into a file for Anki',
-  'prompt.header.navEditor': '🌄 Card Template Editor',
+  'prompt.header.navEditor': '🎨 Card Template Editor',
   'prompt.header.autoSavedTitle': 'Your settings are saved automatically in this browser',
   'prompt.header.resetAllTitle': 'Reset all settings',
 

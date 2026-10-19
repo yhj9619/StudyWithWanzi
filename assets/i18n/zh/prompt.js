@@ -9,7 +9,7 @@ i18nRegister('zh', {
   'prompt.header.backToHubTitle': '前往 Study with Wanzi 主菜单',
   'prompt.header.title': 'Anki AI 提示词生成器',
   'prompt.header.subtitle': '生成发给 AI 的单词表请求，并把 AI 的回答转换成 Anki 文件',
-  'prompt.header.navEditor': '🌄 卡片模板编辑器',
+  'prompt.header.navEditor': '🎨 卡片模板编辑器',
   'prompt.header.autoSavedTitle': '设置会自动保存在此浏览器中',
   'prompt.header.resetAllTitle': '重置所有设置',
 

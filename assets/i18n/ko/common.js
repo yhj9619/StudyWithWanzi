@@ -8,7 +8,7 @@
   'common.navAnkiHubItem': '🏠 Anki 도구 홈 (모아보기)',
   'common.navGuide': '📖 Anki 가이드',
   'common.navGuideTitle': 'Anki 가이드로 이동 (설치부터 복습까지 4단계)',
-  'common.navEditor': '🌄 카드 서식 에디터',
+  'common.navEditor': '🎨 카드 서식 에디터',
   'common.navEditorTitle': 'Anki 카드 서식 에디터로 이동',
   'common.navPrompt': '🤖 AI 프롬프트 생성기',
   'common.navPromptTitle': 'Anki AI 프롬프트 생성기로 이동',

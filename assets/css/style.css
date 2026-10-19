@@ -63,6 +63,9 @@ body {
 }
 
 .site-nav-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   color: #ffffff;
   font-weight: 800;
   font-size: 0.95rem;
@@ -70,8 +73,22 @@ body {
   white-space: nowrap;
 }
 
+.site-nav-logo-img {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  display: block;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: transform 0.18s ease;
+}
+
 .site-nav-home:hover {
   color: #bfdbfe;
+}
+
+.site-nav-home:hover .site-nav-logo-img {
+  transform: scale(1.08);
 }
 
 .site-nav-menu {

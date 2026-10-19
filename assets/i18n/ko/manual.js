@@ -17,9 +17,9 @@ i18nRegister('ko', {
   'manual.toc.faq.title': '자주 묻는 질문',
   'manual.toc.faq.desc': '막혔을 때 먼저 확인할 12가지',
 
-  // 🌄 카드 서식 에디터
+  // 🎨 카드 서식 에디터
   'manual.editor.badge': '도구 1',
-  'manual.editor.title': '🌄 카드 서식 에디터',
+  'manual.editor.title': '🎨 카드 서식 에디터',
   'manual.editor.lead': '배우는 언어와 필드를 정하고 카드를 꾸민 뒤, ① 앞면 서식 ② 뒷면 서식 ③ 스타일을 복사해 Anki에 붙여넣는 도구예요.',
   'manual.editor.layoutTitle': '🖥️ 화면 구성',
   'manual.editor.layout1': '<strong>왼쪽 = 설정</strong>: ① 배우는 언어 → ② 필드 → ⚙️ 고급 설정 순서로 있어요.',
@@ -100,7 +100,7 @@ i18nRegister('ko', {
   'manual.copy.item2': '복사하면 버튼 옆에 <b>✓ 복사했어요</b>가 보이고, 세 칸을 모두 복사하면 🎉 안내가 나와요. 붙여넣을 내용은 <b>[붙여넣을 내용 보기]</b>를 눌러 확인할 수 있어요.',
   'manual.copy.item3': '테마나 필드를 바꿨다면 <b>세 개 모두 다시</b> 복사해서 붙여넣으세요. 하나만 바꿔 넣으면 카드 모양이 어긋날 수 있어요.',
   'manual.copy.item4': '[카드 유형] 창을 여는 곳(PC · AnkiDroid · AnkiMobile)은 <a href="ankiGuide.html#templates">Anki 가이드 Step 2</a>에 그림과 함께 있어요.',
-  'manual.editor.cta.title': '🌄 Anki 카드 서식 에디터',
+  'manual.editor.cta.title': '🎨 Anki 카드 서식 에디터',
   'manual.editor.cta.desc': '설명을 읽었다면 바로 카드를 꾸며 보세요. 설정은 자동으로 저장돼요.',
   'manual.editor.cta.button': '카드 서식 에디터 열기 ➔',
 
