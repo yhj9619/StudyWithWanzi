@@ -263,7 +263,7 @@
 
 /* 메인 포털 2대 대분류 카드 스타일 (Study with Wanzi Hub) */
 .pillar-grid {
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   max-width: 820px;
   margin: 0 auto 2.5rem;
   gap: 1.5rem;
@@ -325,7 +325,7 @@
 
 /* 서브 허브(말하기 · Anki) 간결 선택 화면 레이아웃 */
 .speaking-grid {
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   max-width: 820px;
   margin: 0 auto 2rem;
   gap: 1.5rem;
