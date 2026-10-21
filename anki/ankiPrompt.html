@@ -2,7 +2,9 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title data-i18n="prompt.pageTitle">Anki AI 프롬프트 생성기 - Study with Wanzi</title>
   <meta name="description" content="외국어 텍스트나 주제로부터 원하는 난이도(HSK, JLPT, CEFR) 단어를 Anki용 CSV로 추출하는 AI 맞춤형 프롬프트 생성기" data-i18n-attr="content:prompt.metaDescription">
   <!-- Favicon -->
@@ -13,8 +15,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
-  <link rel="stylesheet" href="../assets/css/style.css?v=20261012k">
-  <link rel="stylesheet" href="../assets/css/prompt.css?v=20261012k">
+  <link rel="stylesheet" href="../assets/css/style.css?v=20261021p">
+  <link rel="stylesheet" href="../assets/css/prompt.css?v=20261021p">
 </head>
 <body>
   <!-- Header -->
@@ -30,7 +32,8 @@
           <p class="logo-subtitle" data-i18n="prompt.header.subtitle">AI에게 보낼 단어장 요청문을 만들고, AI 답변을 Anki용 파일로 바꿔 줍니다</p>
         </div>
       </div>
-      <div class="header-actions">
+      <div class="header-actions">
+
         <span id="saveStatusIndicator" class="save-status-badge" title="설정은 이 브라우저에 자동으로 저장돼요" data-i18n="common.autoSaved" data-i18n-attr="title:prompt.header.autoSavedTitle">✓ 자동 저장됨</span>
         <button type="button" id="resetPromptSettingsBtn" class="btn-outline-danger" title="모든 설정을 초기화해요" data-i18n="common.resetAll" data-i18n-attr="title:prompt.header.resetAllTitle">
           🔄 설정 초기화
@@ -118,7 +121,10 @@
                 <span data-i18n="prompt.step1.textLabel">단어를 뽑을 글 (기사, 대본, 시험 지문 등)</span>
                 <span class="helper-text" style="display:inline; margin-left:6px;" data-i18n="prompt.step1.textHelper">(비워 두면 요청문에 '여기에 글을 붙여넣으세요' 자리만 남아요)</span>
               </label>
-              <button type="button" id="btnClearSourceText" class="paste-csv-clear-btn" data-i18n="prompt.paste.clear">🧹 지우기</button>
+              <div class="paste-csv-btn-group">
+                <button type="button" id="btnPasteSourceText" class="paste-csv-clear-btn btn-paste-action" data-i18n="prompt.step1.pasteBtn">📋 붙여넣기</button>
+                <button type="button" id="btnClearSourceText" class="paste-csv-clear-btn" data-i18n="prompt.paste.clear">🧹 지우기</button>
+              </div>
             </div>
             <textarea id="sourceTextInput" class="form-input" rows="4" placeholder="여기에 외국어 문장이나 대본, 기사를 붙여넣으세요. 한국어 글을 넣으면 그 내용을 외국어로 말할 때 필요한 단어를 뽑습니다." data-i18n-attr="placeholder:prompt.step1.textPlaceholder"></textarea>
             <div class="source-lang-row">
@@ -405,7 +411,10 @@
 
           <div class="paste-csv-label-row">
             <label for="aiAnswerInput" class="form-label" data-i18n="prompt.paste.label">AI 답변</label>
-            <button type="button" id="btnClearAiAnswer" class="paste-csv-clear-btn" data-i18n="prompt.paste.clear">🧹 지우기</button>
+            <div class="paste-csv-btn-group">
+              <button type="button" id="btnPasteAiAnswer" class="paste-csv-clear-btn btn-paste-action" data-i18n="prompt.paste.pasteBtn">📋 붙여넣기</button>
+              <button type="button" id="btnClearAiAnswer" class="paste-csv-clear-btn" data-i18n="prompt.paste.clear">🧹 지우기</button>
+            </div>
           </div>
           <textarea id="aiAnswerInput" class="form-input paste-csv-input" rows="7" spellcheck="false" autocomplete="off" placeholder="AI 답변을 여기에 그대로 붙여넣으세요" data-i18n-attr="placeholder:prompt.paste.placeholder"></textarea>
           <p class="paste-csv-expect" id="pasteExpectText"></p>
@@ -454,14 +463,14 @@
   <!-- 파일을 고치면 아래 ?v= 값을 모든 페이지에서 함께 올려 주세요 (브라우저가 예전 파일을 쓰지 않게) -->
   <script src="../assets/js/i18n.js?v=20261012k"></script>
   <script src="../assets/i18n/ko/common.js?v=20261012k"></script>
-  <script src="../assets/i18n/ko/prompt.js?v=20261012k"></script>
+  <script src="../assets/i18n/ko/prompt.js?v=20261021m"></script>
   <script src="../assets/i18n/en/common.js?v=20261012k"></script>
-  <script src="../assets/i18n/en/prompt.js?v=20261012k"></script>
+  <script src="../assets/i18n/en/prompt.js?v=20261021m"></script>
   <script src="../assets/i18n/zh/common.js?v=20261012k"></script>
-  <script src="../assets/i18n/zh/prompt.js?v=20261012k"></script>
+  <script src="../assets/i18n/zh/prompt.js?v=20261021m"></script>
   <script src="../assets/js/languages.js?v=20261012k"></script>
   <script src="../assets/js/langCombobox.js?v=20261012k"></script>
-  <script src="../assets/js/promptApp.js?v=20261012k"></script>
+  <script src="../assets/js/promptApp.js?v=20261021m"></script>
   <script src="../assets/js/include.js?v=20261016"></script>
 </body>
 </html>

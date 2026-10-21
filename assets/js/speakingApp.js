@@ -3857,6 +3857,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // 인앱 브라우저(카카오톡, 네이버, 인스타그램 등) 감지 및 안내 헬퍼
+  function isInAppBrowser() {
+    const ua = (navigator.userAgent || navigator.vendor || window.opera || '').toLowerCase();
+    return /kakaotalk|naver|inapp|instagram|fb_iab|fbav|line|daumapps|band\//i.test(ua);
+  }
+
+  function getInAppBrowserNotice() {
+    if (!isInAppBrowser()) return '';
+    return '\n\n💡 카카오톡/인앱 브라우저에서는 마이크 접근이 제한될 수 있습니다. 우측 상단 메뉴(⋮)에서 [다른 브라우저로 열기(Safari / Chrome)]를 선택해 주세요.';
+  }
+
   // 마이크 연결 및 브라우저 권한 테스트
   let micTestTimer = null;
   async function testMicrophonePermission() {
@@ -3873,7 +3884,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       micTestStatus.className = 'mic-status-badge error';
       micTestStatus.textContent = t('speaking.step2.micNotFound');
-      alert(t('speaking.step2.micNotFound'));
+      alert(t('speaking.step2.micNotFound') + getInAppBrowserNotice());
       return;
     }
 
@@ -3891,15 +3902,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         micTestStatus.className = 'mic-status-badge error';
         micTestStatus.textContent = t('speaking.step2.micDenied');
-        alert(t('speaking.step2.micDeniedGuide'));
+        alert(t('speaking.step2.micDeniedGuide') + getInAppBrowserNotice());
       } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
         micTestStatus.className = 'mic-status-badge error';
         micTestStatus.textContent = t('speaking.step2.micNotFound');
-        alert(t('speaking.step2.micNotFound'));
+        alert(t('speaking.step2.micNotFound') + getInAppBrowserNotice());
       } else {
         micTestStatus.className = 'mic-status-badge error';
         micTestStatus.textContent = t('speaking.step2.micDenied');
-        alert(t('speaking.sim.micDenied'));
+        alert(t('speaking.sim.micDenied') + getInAppBrowserNotice());
       }
     }
   }
@@ -4550,15 +4561,15 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn('Microphone permission denied or error:', err);
             state.micStream = null;
             if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-              alert(t('speaking.step2.micDeniedGuide'));
+              alert(t('speaking.step2.micDeniedGuide') + getInAppBrowserNotice());
             } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-              alert(t('speaking.step2.micNotFound'));
+              alert(t('speaking.step2.micNotFound') + getInAppBrowserNotice());
             } else {
-              alert(t('speaking.sim.micDenied'));
+              alert(t('speaking.sim.micDenied') + getInAppBrowserNotice());
             }
           }
         } else {
-          alert(t('speaking.sim.micDenied'));
+          alert(t('speaking.sim.micDenied') + getInAppBrowserNotice());
         }
       }
 
@@ -4617,9 +4628,9 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn('Microphone error on retake:', err);
             state.micStream = null;
             if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-              alert(t('speaking.step2.micDeniedGuide'));
+              alert(t('speaking.step2.micDeniedGuide') + getInAppBrowserNotice());
             } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-              alert(t('speaking.step2.micNotFound'));
+              alert(t('speaking.step2.micNotFound') + getInAppBrowserNotice());
             }
           }
         }
@@ -5195,6 +5206,9 @@ document.addEventListener('DOMContentLoaded', () => {
               document.body.removeChild(ta);
             }
             if (copied) {
+              if ('vibrate' in navigator) {
+                try { navigator.vibrate(35); } catch (e) {}
+              }
               const originalHtml = copyBtn.innerHTML;
               copyBtn.innerHTML = `✅ <span>${escapeHtml(t('speaking.result.copied'))}</span>`;
               copyBtn.style.color = '#10b981';
@@ -6605,7 +6619,7 @@ document.addEventListener('DOMContentLoaded', () => {
     stopUserVoicePlayback();
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert(t('speaking.sim.micDenied'));
+      alert(t('speaking.sim.micDenied') + getInAppBrowserNotice());
       return;
     }
 
@@ -6643,6 +6657,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       recorder.start(250);
       shadowState.recMediaRecorder = recorder;
+      requestWakeLock();
 
       if (btnShadowRecToggle) {
         btnShadowRecToggle.textContent = '⏹ 녹음 완료 (시간 측정 종료)';
@@ -6656,7 +6671,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (shadowRecClock) shadowRecClock.textContent = formatSeconds(elapsedMs);
       }, 250);
     } catch (err) {
-      alert(t('speaking.sim.micDenied'));
+      alert(t('speaking.sim.micDenied') + getInAppBrowserNotice());
     }
   }
 
@@ -6674,7 +6689,7 @@ document.addEventListener('DOMContentLoaded', () => {
     stopUserVoicePlayback();
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert(t('speaking.sim.micDenied'));
+      alert(t('speaking.sim.micDenied') + getInAppBrowserNotice());
       return;
     }
 
@@ -6710,10 +6725,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       recorder.start(250);
       shadowState.recMediaRecorder = recorder;
+      requestWakeLock();
       renderShadowSentenceCards();
     } catch (err) {
       shadowState.activeSentenceRecIdx = null;
-      alert(t('speaking.sim.micDenied'));
+      alert(t('speaking.sim.micDenied') + getInAppBrowserNotice());
     }
   }
 
@@ -6732,6 +6748,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnShadowRecToggle) {
       btnShadowRecToggle.textContent = '🎙️ 내 낭독 녹음 시작';
       btnShadowRecToggle.classList.remove('recording');
+    }
+    if (!shadowState.isPlaying) {
+      releaseWakeLock();
     }
   }
 

@@ -2,7 +2,9 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Study with Wanzi - 스크립트 TTS &amp; 쉐도잉 스튜디오</title>
   <meta name="description" content="말하기 시험 답변 스크립트(대본) TTS 낭독, 예상 발화 시간 계산기, 문장별 구간 반복, 따라 말하기 대기 및 암기 가림막 스튜디오">
   <!-- Favicon -->
@@ -12,8 +14,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/css/style.css?v=20261015a">
-  <link rel="stylesheet" href="../assets/css/speaking.css?v=20261015a">
+  <link rel="stylesheet" href="../assets/css/style.css?v=20261021p">
+  <link rel="stylesheet" href="../assets/css/speaking.css?v=20261021p">
 </head>
 <body>
   <!-- 공통 상단 메뉴줄 (i18n.js) -->
@@ -53,6 +55,19 @@
             <button type="button" id="btnAddShadowDeck" class="deck-tab-add" data-i18n="shadow.step1.newScript">+ 새 스크립트 추가</button>
           </div>
 
+          <!-- 입력창 상단 툴바: 대본 붙여넣기 / 삭제 / 백업 (TEXTAREA 바로 상단 배치) -->
+          <div class="textarea-top-toolbar">
+            <div class="textarea-top-primary">
+              <button type="button" id="btnPasteShadowScript" class="chip-btn btn-paste-text" data-i18n="shadow.step1.paste">📋 대본 붙여넣기</button>
+              <button type="button" id="btnClearShadowScript" class="chip-btn btn-clear-text" data-i18n="shadow.step1.clear">🗑️ 대본 삭제</button>
+            </div>
+            <div class="textarea-top-secondary">
+              <button type="button" id="btnExportShadowDecks" class="chip-btn" data-i18n="speaking.step1.exportJson">💾 JSON 백업</button>
+              <button type="button" id="btnImportShadowDecks" class="chip-btn" data-i18n="speaking.step1.importJson">📂 불러오기</button>
+              <input type="file" id="importShadowDecksFileInput" accept=".json,application/json" class="hidden">
+            </div>
+          </div>
+
           <!-- 스크립트 입력 텍스트 영역 -->
           <div class="textarea-wrapper" id="shadowInputWrapper">
             <textarea id="shadowScriptInput" class="question-textarea" rows="6" placeholder="외우고 싶은 말하기 시험 답변 대본을 여기에 붙여넣으세요.&#10;&#10;(예시: 한국어 뜻과 외국어 문장을 번갈아 적어도 각각 알맞은 음성으로 읽어줍니다)&#10;제가 가장 좋아하는 여행지는 제주도입니다.&#10;My favorite travel destination is Jeju Island in South Korea.&#10;작년 여름에 가족들과 함께 3박 4일로 다녀왔습니다.&#10;I went there with my family last summer for four days." data-i18n-attr="placeholder:shadow.step1.placeholder"></textarea>
@@ -61,19 +76,12 @@
             </div>
           </div>
 
-          <!-- 본문 하단 툴바 -->
-          <div class="action-chips-row">
+          <!-- 본문 하단 옵션: 문장 자동 쪼개기 -->
+          <div class="action-chips-row textarea-bottom-options">
             <label class="speaking-checkbox">
               <input type="checkbox" id="shadowSplitSentenceCheck" checked>
               <span data-i18n="shadow.step1.splitSentence">마침표(. ? !) 및 줄바꿈 기준으로 문장 자동 쪼개기 (해제 시 줄바꿈 단위로만 분리)</span>
             </label>
-            <div class="text-actions-group">
-              <button type="button" id="btnPasteShadowScript" class="chip-btn btn-paste-text" data-i18n="shadow.step1.paste">📋 대본 붙여넣기</button>
-              <button type="button" id="btnExportShadowDecks" class="chip-btn" data-i18n="speaking.step1.exportJson">💾 JSON 백업</button>
-              <button type="button" id="btnImportShadowDecks" class="chip-btn" data-i18n="speaking.step1.importJson">📂 불러오기</button>
-              <input type="file" id="importShadowDecksFileInput" accept=".json,application/json" class="hidden">
-              <button type="button" id="btnClearShadowScript" class="chip-btn btn-clear-text" data-i18n="shadow.step1.clear">🗑️ 대본 삭제</button>
-            </div>
           </div>
 
           <!-- 실시간 분량 & 예상 낭독 시간 분석 대시보드 -->
@@ -326,7 +334,7 @@
   <script src="../assets/i18n/en/speaking.js?v=20261015m"></script>
   <script src="../assets/i18n/zh/common.js?v=20261015m"></script>
   <script src="../assets/i18n/zh/speaking.js?v=20261015m"></script>
-  <script src="../assets/js/speakingApp.js?v=20261015m"></script>
+  <script src="../assets/js/speakingApp.js?v=20261021m"></script>
   <script src="../assets/js/include.js?v=20261016"></script>
 </body>
 </html>

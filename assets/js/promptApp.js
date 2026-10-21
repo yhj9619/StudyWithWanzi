@@ -1252,6 +1252,27 @@ document.addEventListener('DOMContentLoaded', () => {
     sourceTopicInput.addEventListener('input', () => updatePromptAndPreview());
 
     // '단어를 뽑을 글' 지우기 → 새 글로 다른 단어장을 바로 만들 수 있게 (프롬프트 · 언어 감지 · 저장도 함께 갱신)
+    const btnPasteSourceText = document.getElementById('btnPasteSourceText');
+    if (btnPasteSourceText) {
+      btnPasteSourceText.addEventListener('click', async () => {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          try {
+            const text = await navigator.clipboard.readText();
+            if (text && text.trim()) {
+              sourceTextInput.value = text;
+              updatePromptAndPreview();
+              sourceTextInput.focus();
+              if ('vibrate' in navigator) try { navigator.vibrate(35); } catch (e) {}
+              return;
+            }
+          } catch (e) {
+            console.warn('Clipboard paste error:', e);
+          }
+        }
+        sourceTextInput.focus();
+      });
+    }
+
     if (btnClearSourceText) {
       btnClearSourceText.addEventListener('click', () => {
         sourceTextInput.value = '';
@@ -1828,6 +1849,27 @@ document.addEventListener('DOMContentLoaded', () => {
   function initPasteCsv() {
     if (!aiAnswerInput) return;
     aiAnswerInput.addEventListener('input', renderPasteCheck);
+    const btnPasteAiAnswer = document.getElementById('btnPasteAiAnswer');
+    if (btnPasteAiAnswer) {
+      btnPasteAiAnswer.addEventListener('click', async () => {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          try {
+            const text = await navigator.clipboard.readText();
+            if (text && text.trim()) {
+              aiAnswerInput.value = text;
+              renderPasteCheck();
+              aiAnswerInput.focus();
+              if ('vibrate' in navigator) try { navigator.vibrate(35); } catch (e) {}
+              return;
+            }
+          } catch (e) {
+            console.warn('Clipboard paste error:', e);
+          }
+        }
+        aiAnswerInput.focus();
+      });
+    }
+
     if (btnClearAiAnswer) {
       btnClearAiAnswer.addEventListener('click', () => {
         aiAnswerInput.value = '';
@@ -1840,6 +1882,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 클립보드 복사 헬퍼
   function copyToClipboard(text, label) {
+    if ('vibrate' in navigator) {
+      try { navigator.vibrate(35); } catch (e) {}
+    }
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(text).then(() => {
         showToast(i18n.t('common.copied', { label }));

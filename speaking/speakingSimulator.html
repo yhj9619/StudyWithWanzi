@@ -2,7 +2,9 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title data-i18n="speaking.meta.title">Study with Wanzi - 실전 면접 시뮬레이터 (스피킹 타이머)</title>
   <meta name="description" content="OPIc, 토익스피킹, HSKK, TSC, 외국어 면접 등 실전 대비! 엑셀 문제 붙여넣기, 음성(TTS) 낭독, 답변 타이머 & 알림음 시뮬레이터" data-i18n-attr="content:speaking.meta.description">
   <!-- Favicon -->
@@ -12,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/css/style.css?v=20261015c">
+  <link rel="stylesheet" href="../assets/css/style.css?v=20261021p">
   <link rel="stylesheet" href="../assets/css/speaking.css?v=20261015c">
 </head>
 <body>
@@ -53,6 +55,19 @@
               <!-- JS 동적 렌더링: 관광통역안내사 탭 및 사용자 커스텀 목록 탭들 -->
             </div>
             <button type="button" id="btnAddNewDeck" class="deck-tab-add" data-i18n="speaking.step1.newList">+ 새 목록 추가</button>
+          </div>
+
+          <!-- 입력창 상단 툴바: 붙여넣기 / 삭제 / 백업 (TEXTAREA 바로 상단 배치) -->
+          <div class="textarea-top-toolbar">
+            <div class="textarea-top-primary">
+              <button type="button" id="btnPasteQuestions" class="chip-btn btn-paste-text" data-i18n="speaking.step1.paste">📋 본문 붙여넣기</button>
+              <button type="button" id="btnClearQuestions" class="chip-btn btn-clear-text" data-i18n="speaking.step1.clearText">🗑️ 본문 삭제</button>
+            </div>
+            <div class="textarea-top-secondary">
+              <button type="button" id="btnExportDecks" class="chip-btn" data-i18n="speaking.step1.exportJson">💾 파일로 백업 (.json)</button>
+              <button type="button" id="btnImportDecks" class="chip-btn" data-i18n="speaking.step1.importJson">📂 백업 파일 불러오기</button>
+              <input type="file" id="importDecksFileInput" accept=".json,application/json" class="hidden">
+            </div>
           </div>
 
           <!-- 본문 입력 영역 -->
@@ -518,7 +533,7 @@
   <script src="../assets/i18n/zh/common.js?v=20261015m"></script>
   <script src="../assets/i18n/zh/speaking.js?v=20261015m"></script>
   <script src="../assets/js/lame.min.js?v=20261015m"></script>
-  <script src="../assets/js/speakingApp.js?v=20261015m"></script>
+  <script src="../assets/js/speakingApp.js?v=20261021m"></script>
   <script src="../assets/js/include.js?v=20261016"></script>
 </body>
 </html>

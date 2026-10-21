@@ -41,6 +41,58 @@ body {
   line-height: 1.5;
   accent-color: var(--primary);
   -webkit-font-smoothing: antialiased;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+
+/* 전역 Textarea 스타일: 좌우(가로) 조절 원천 차단, 오직 상하(세로) 조절만 허용 */
+textarea,
+.form-input[rows],
+.paste-csv-input {
+  resize: vertical !important;
+  max-width: 100% !important;
+  min-width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* 우측 하단 브라우저 기본 투박한 대각선 빗금 대신 세련된 상하 미니멀 인디케이터(↕) */
+textarea::-webkit-resizer,
+.form-input[rows]::-webkit-resizer,
+.paste-csv-input::-webkit-resizer {
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' width='10' height='10'%3E%3Cpath d='M8 2.5 L10.8 5.5 L8.8 5.5 L8.8 10.5 L10.8 10.5 L8 13.5 L5.2 10.5 L7.2 10.5 L7.2 5.5 L5.2 5.5 Z' fill='%2394a3b8'/%3E%3C/svg%3E");
+  background-position: bottom 2px right 2px;
+  background-repeat: no-repeat;
+}
+
+/* 모바일 화면(<= 768px): 터치 시 오작동 및 미관을 해치는 우측 하단 핸들 완전 제거 */
+@media (max-width: 768px) {
+  textarea,
+  .form-input[rows],
+  .paste-csv-input {
+    resize: none !important;
+  }
+  textarea::-webkit-resizer,
+  .form-input[rows]::-webkit-resizer,
+  .paste-csv-input::-webkit-resizer {
+    display: none !important;
+  }
+}
+
+/* 모바일 터치 최적화: 300ms 탭 딜레이 방지 및 탭 하이라이트 */
+button,
+a,
+input,
+select,
+textarea,
+.btn,
+.tool-card,
+.btn-tool-launch,
+.start-path-step,
+.stepper-btn,
+.preset-tag {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.06);
 }
 
 /* 공통 메뉴줄 (모든 페이지 맨 위, i18n.js가 그림): PC는 한 줄로 고정, 좁은 화면은 ☰로 여닫기

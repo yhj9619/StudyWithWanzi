@@ -136,6 +136,53 @@
 }
 
 /* 도구 버튼 줄 */
+/* 텍스트 입력창 상단 바로가기 툴바 (모바일 스크롤 없이 바로 붙여넣기/삭제) */
+.textarea-top-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.textarea-top-primary {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.textarea-top-secondary {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.chip-btn.btn-paste-text {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.chip-btn.btn-paste-text:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1e40af;
+}
+
+.chip-btn.btn-clear-text:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+.textarea-bottom-options {
+  margin-top: 0.65rem;
+}
+
 .action-chips-row {
   display: flex;
   align-items: center;
@@ -2720,6 +2767,35 @@
 
   .deck-tab-name {
     max-width: 120px;
+  }
+
+
+  .textarea-top-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.45rem;
+  }
+
+  .textarea-top-primary {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 0.45rem;
+  }
+
+  .textarea-top-secondary {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem;
+  }
+
+  .textarea-top-primary .chip-btn,
+  .textarea-top-secondary .chip-btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    padding: 0.48rem 0.45rem;
   }
 
   .action-chips-row {

@@ -4026,6 +4026,9 @@ ${indentDecls(deco.divider === 'obang' ? [getDividerDecls(night.dividerColor, de
   // 클립보드 복사 헬퍼
   // onSuccess: 복사에 성공했을 때만 호출 (붙여넣기 단계 ✓ 표시용)
   function copyToClipboard(text, label, onSuccess) {
+    if ('vibrate' in navigator) {
+      try { navigator.vibrate(35); } catch (e) {}
+    }
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(text).then(() => {
         showToast(t('common.copied', { label }));
