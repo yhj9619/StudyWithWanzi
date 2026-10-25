@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css?v=20261021p">
-  <link rel="stylesheet" href="../assets/css/speaking.css?v=20261015c">
+  <link rel="stylesheet" href="../assets/css/speaking.css?v=20261021p">
 </head>
 <body>
   <!-- 공통 상단 메뉴줄 (i18n.js) -->
@@ -78,25 +78,18 @@
             </div>
           </div>
 
-          <!-- 엑셀 복사 안내 팁 -->
-          <div class="excel-copy-tip" id="excelCopyTip">
-            <span class="excel-copy-tip-icon">💡</span>
-            <span class="excel-copy-tip-text" data-i18n="speaking.step1.excelTip">엑셀에서 복사할 때는 질문 열만 선택하여 복사하거나, 질문이 첫 번째 열(A열)에 오도록 해주세요.</span>
-          </div>
-
-          <!-- 본문 하단 툴바: 번호 자동 정리 (좌) + 본문 붙여넣기 / 백업 / 본문 삭제 (우) -->
-          <div class="action-chips-row">
+          <!-- 본문 하단 옵션: 번호 자동 정리 -->
+          <div class="action-chips-row textarea-bottom-options">
             <label class="speaking-checkbox">
               <input type="checkbox" id="cleanNumberingCheck" checked>
               <span data-i18n="speaking.step1.cleanNumbering">문제 앞 번호(1., Q1: 등) 자동 정리</span>
             </label>
-            <div class="text-actions-group">
-              <button type="button" id="btnPasteQuestions" class="chip-btn btn-paste-text" data-i18n="speaking.step1.paste">📋 본문 붙여넣기</button>
-              <button type="button" id="btnExportDecks" class="chip-btn" data-i18n="speaking.step1.exportJson">💾 파일로 백업 (.json)</button>
-              <button type="button" id="btnImportDecks" class="chip-btn" data-i18n="speaking.step1.importJson">📂 백업 파일 불러오기</button>
-              <input type="file" id="importDecksFileInput" accept=".json,application/json" class="hidden">
-              <button type="button" id="btnClearQuestions" class="chip-btn btn-clear-text" data-i18n="speaking.step1.clearText">🗑️ 본문 삭제</button>
-            </div>
+          </div>
+
+          <!-- 엑셀 복사 안내 팁 -->
+          <div class="excel-copy-tip" id="excelCopyTip">
+            <span class="excel-copy-tip-icon">💡</span>
+            <span class="excel-copy-tip-text" data-i18n="speaking.step1.excelTip">엑셀에서 복사할 때는 질문 열만 선택하여 복사하거나, 질문이 첫 번째 열(A열)에 오도록 해주세요.</span>
           </div>
 
           <!-- 인식된 문제 상태 배지 & 미리보기 토글 -->
