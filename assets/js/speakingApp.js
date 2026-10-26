@@ -326,13 +326,38 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   // 2. 프리셋 샘플 문제 목록
   // =========================================================================
-  const PRESET_DECKS = [
-    { id: 'tour', nameKey: 'speaking.step1.sampleTourKo', defaultName: '관광통역 (한국어)', sampleKey: 'tour', targetLang: 'ko' },
-    { id: 'tour_en', nameKey: 'speaking.step1.sampleTourEn', defaultName: '관광통역 (한·영)', sampleKey: 'tour_en', targetLang: 'en' },
-    { id: 'tour_ja', nameKey: 'speaking.step1.sampleTourJa', defaultName: '관광통역 (한·일)', sampleKey: 'tour_ja', targetLang: 'ja' },
-    { id: 'tour_zh', nameKey: 'speaking.step1.sampleTourZh', defaultName: '관광통역 (한·중)', sampleKey: 'tour_zh', targetLang: 'zh' },
-    { id: 'tour_es', nameKey: 'speaking.step1.sampleTourEs', defaultName: '관광통역 (한·스페인어)', sampleKey: 'tour_es', targetLang: 'es' }
+  const TOUR_SAMPLE_VERSION = '20261026_v6';
+
+  const PRESET_GROUPS = [
+    {
+      id: 'tour',
+      nameKey: 'speaking.step1.tourGroupTitle',
+      defaultName: '관광통역 기출',
+      icon: '🏛️',
+      languages: [
+        { lang: 'ko', id: 'tour', nameKey: 'speaking.step1.langKo', defaultName: '한국어', sampleKey: 'tour', targetLang: 'ko', flag: '🇰🇷' },
+        { lang: 'en', id: 'tour_en', nameKey: 'speaking.step1.langEn', defaultName: '한·영', sampleKey: 'tour_en', targetLang: 'en', flag: '🇺🇸' },
+        { lang: 'zh', id: 'tour_zh', nameKey: 'speaking.step1.langZh', defaultName: '한·중', sampleKey: 'tour_zh', targetLang: 'zh', flag: '🇨🇳' },
+        { lang: 'ja', id: 'tour_ja', nameKey: 'speaking.step1.langJa', defaultName: '한·일', sampleKey: 'tour_ja', targetLang: 'ja', flag: '🇯🇵' },
+        { lang: 'es', id: 'tour_es', nameKey: 'speaking.step1.langEs', defaultName: '한·스페인어', sampleKey: 'tour_es', targetLang: 'es', flag: '🇪🇸' }
+      ]
+    },
+    {
+      id: 'pred',
+      nameKey: 'speaking.step1.predGroupTitle',
+      defaultName: '올해 예상문제',
+      icon: '🎯',
+      languages: [
+        { lang: 'ko', id: 'pred_ko', nameKey: 'speaking.step1.langKo', defaultName: '한국어', sampleKey: 'pred_ko', targetLang: 'ko', flag: '🇰🇷' },
+        { lang: 'en', id: 'pred_en', nameKey: 'speaking.step1.langEn', defaultName: '한·영', sampleKey: 'pred_en', targetLang: 'en', flag: '🇺🇸' },
+        { lang: 'zh', id: 'pred_zh', nameKey: 'speaking.step1.langZh', defaultName: '한·중', sampleKey: 'pred_zh', targetLang: 'zh', flag: '🇨🇳' },
+        { lang: 'ja', id: 'pred_ja', nameKey: 'speaking.step1.langJa', defaultName: '한·일', sampleKey: 'pred_ja', targetLang: 'ja', flag: '🇯🇵' },
+        { lang: 'es', id: 'pred_es', nameKey: 'speaking.step1.langEs', defaultName: '한·스페인어', sampleKey: 'pred_es', targetLang: 'es', flag: '🇪🇸' }
+      ]
+    }
   ];
+
+  const PRESET_DECKS = PRESET_GROUPS.flatMap(g => g.languages.map(l => Object.assign({}, l, { groupId: g.id })));
 
   const SAMPLES = {
     tour: [
@@ -1245,26 +1270,376 @@ document.addEventListener('DOMContentLoaded', () => {
       "음식 알레르기가 있는 관광객이 있을 경우, 관광통역안내사로서 어떻게 대응하시겠습니까?",
       "Si hay un turista con alergias alimentarias, ¿cómo actuaría como guía turístico?"
     ],
-    opic: [
-      "Let's start the interview now. Tell me a little bit about yourself.",
-      "You indicated in the survey that you like going to movies. What kind of movies do you like to watch, and why?",
-      "Tell me about a memorable trip you took in the past. Where did you go, who did you go with, and what made it so special?",
-      "Can you describe your typical workday or school day from the moment you wake up until you go to sleep?",
-      "Have you ever experienced an unexpected problem while traveling? What happened, and how did you resolve it?"
-    ],
-    toeic: [
-      "Describe the picture: Two people are having a meeting in an office with a whiteboard in the background.",
-      "How often do you go shopping for clothes, and what is the most important factor when you choose them?",
-      "If you could learn a new skill this year, what would it be and why would you choose it?",
-      "Respond to a customer complaint regarding a delayed delivery of an online order.",
-      "Do you agree or disagree that working remotely is more productive than working in an office? Provide reasons."
-    ],
-    hskk: [
-      "请简单做个自我介绍。（你的名字、专业或工作、兴趣爱好）",
-      "谈谈你最喜欢的一个季节，并说明你喜欢它的理由。",
-      "你平时是怎样安排假期的？请详细说一说。",
-      "在学习外语的过程中，你遇到过什么困难？你是如何克服的？"
-    ]
+    pred_ko: [
+      "치유관광(웰니스 관광)이란 무엇인가?",
+      "치유관광과 의료관광의 차이점은 무엇인가?",
+      "치유관광의 대표적인 자원에는 어떤 것들이 있는가?",
+      "오버투어리즘(과잉관광)이란 무엇인가?",
+      "북촌한옥마을 같은 주거지 관광지에서 관광객을 안내할 때 주의할 점은 무엇인가?",
+      "관광지 주민의 일상생활과 사생활을 보호하는 것이 왜 중요한가?",
+      "관광지나 택시에서 바가지요금 문제가 발생하면 어떻게 대처하겠는가?",
+      "호텔에서 초과 예약(오버부킹)이나 일방적 예약 취소가 발생하면 어떻게 해결하겠는가?",
+      "식당이나 상점에서 카드 결제를 거부당했을 때 가이드로서 어떻게 하겠는가?",
+      "관광불편신고 대표전화(1330)에 대해 알고 있는가?",
+      "관광객이 한복이나 김치의 유래에 대해 잘못 알고 있다면 어떻게 설명하겠는가?",
+      "관광객과 역사 문제로 이견이 생겼을 때 어떻게 대처하겠는가?",
+      "가이드에게 올바른 국가관이 왜 중요한가?",
+      "인공지능(AI)과 번역기가 가이드를 대체할 수 있다고 생각하는가?",
+      "스마트 관광 기술이 관광객에게 주는 장점은 무엇인가?",
+      "AI 안내 앱이나 지도에 잘못된 정보가 나와 있다면 가이드로서 어떻게 대처하겠는가?",
+      "수도권에 집중된 관광객을 지방으로 분산시키려면 어떻게 해야 하는가?",
+      "서울 외에 외국인 관광객에게 추천하고 싶은 한국의 지방 도시는 어디인가?",
+      "외국인 관광객의 한국 재방문율을 높이기 위해 어떤 노력을 해야 하는가?",
+      "외국인 관광객에게 추천하고 싶은 한국의 대표적인 전통 음식은 무엇인가?",
+      "채식주의자(비건)나 무슬림(할랄) 관광객을 위해 어떤 음식을 추천하겠는가?",
+      "관광객이 한국 음식 특유의 냄새나 매운맛 때문에 식사를 못 하면 어떻게 하겠는가?",
+      "관광 도중 관광객이 갑자기 다치거나 아프면 어떻게 대처하겠는가?",
+      "관광객이 여행 중 여권을 분실했을 때 처리 절차는 무엇인가?",
+      "공항에서 관광객의 짐(수하물)이 분실되었을 때 어떻게 도와주겠는가?",
+      "교통 체증으로 인해 다음 일정이 늦어질 경우 어떻게 해결하겠는가?",
+      "교통 체증으로 비행기를 놓쳤을 때 가이드는 어떻게 해야 하는가?",
+      "항공편이 지연되어 관광객이 크게 불만을 표시할 때 어떻게 대처하겠는가?",
+      "관광지나 박물관이 임시 휴관일인 것을 뒤늦게 알았을 때 어떻게 하겠는가?",
+      "관광객이 일정을 벗어나 개별 행동을 원할 때 어떻게 대처하겠는가?",
+      "상습적으로 지각하여 다른 사람에게 피해를 주는 관광객은 어떻게 대처하겠는가?",
+      "관광지에서 관광객이 소란을 피우거나 관람 규정을 어길 때 어떻게 하겠는가?",
+      "관광객이 문화재를 훼손하려고 할 때 가이드로서 어떻게 대처하겠는가?",
+      "대형 축제나 행사 현장에서 인파가 몰릴 때 관광객 안전을 어떻게 지키겠는가?",
+      "대형 행사나 축제가 지역 경제에 미치는 긍정적 영향과 부정적 영향은 무엇인가?",
+      "외국인 관광객에게 추천하고 싶은 한국의 대표적인 전통 축제는 무엇인가?",
+      "지속가능한 관광(생태관광)이란 무엇이며 현장에서 어떻게 실천할 수 있는가?",
+      "공익관광(볼런투어리즘/자원봉사 여행)이란 무엇인가?",
+      "안보관광이란 무엇이며 DMZ 관람 시 주의사항은 무엇인가?",
+      "가이드로서 지녀야 할 가장 중요한 자질이나 태도는 무엇이라고 생각하는가?"
+],
+    pred_en: [
+      "치유관광(웰니스 관광)이란 무엇인가?",
+      "What is wellness tourism?",
+      "치유관광과 의료관광의 차이점은 무엇인가?",
+      "What is the difference between wellness tourism and medical tourism?",
+      "치유관광의 대표적인 자원에는 어떤 것들이 있는가?",
+      "What are the representative resources of wellness tourism?",
+      "오버투어리즘(과잉관광)이란 무엇인가?",
+      "What is overtourism?",
+      "북촌한옥마을 같은 주거지 관광지에서 관광객을 안내할 때 주의할 점은 무엇인가?",
+      "What precautions should be taken when guiding tourists in residential destinations like Bukchon Hanok Village?",
+      "관광지 주민의 일상생활과 사생활을 보호하는 것이 왜 중요한가?",
+      "Why is it important to protect the daily lives and privacy of local residents in tourist areas?",
+      "관광지나 택시에서 바가지요금 문제가 발생하면 어떻게 대처하겠는가?",
+      "How would you handle overcharging issues in tourist spots or taxis?",
+      "호텔에서 초과 예약(오버부킹)이나 일방적 예약 취소가 발생하면 어떻게 해결하겠는가?",
+      "How would you resolve a situation involving hotel overbooking or unilateral reservation cancellations?",
+      "식당이나 상점에서 카드 결제를 거부당했을 때 가이드로서 어떻게 하겠는가?",
+      "As a guide, what would you do if a restaurant or shop refuses credit card payment?",
+      "관광불편신고 대표전화(1330)에 대해 알고 있는가?",
+      "Are you familiar with the 1330 Korea Travel Helpline for reporting tourist complaints?",
+      "관광객이 한복이나 김치의 유래에 대해 잘못 알고 있다면 어떻게 설명하겠는가?",
+      "How would you explain if a tourist has misconceptions about the origins of Hanbok or Kimchi?",
+      "관광객과 역사 문제로 이견이 생겼을 때 어떻게 대처하겠는가?",
+      "How would you handle disagreements with tourists regarding historical issues?",
+      "가이드에게 올바른 국가관이 왜 중요한가?",
+      "Why is having a sound national perspective important for a tour guide?",
+      "인공지능(AI)과 번역기가 가이드를 대체할 수 있다고 생각하는가?",
+      "Do you think artificial intelligence (AI) and translation apps can replace tour guides?",
+      "스마트 관광 기술이 관광객에게 주는 장점은 무엇인가?",
+      "What are the benefits of smart tourism technology for tourists?",
+      "AI 안내 앱이나 지도에 잘못된 정보가 나와 있다면 가이드로서 어떻게 대처하겠는가?",
+      "How would you handle incorrect information displayed on AI guide apps or maps as a guide?",
+      "수도권에 집중된 관광객을 지방으로 분산시키려면 어떻게 해야 하는가?",
+      "What measures should be taken to disperse tourists concentrated in the capital area to regional areas?",
+      "서울 외에 외국인 관광객에게 추천하고 싶은 한국의 지방 도시는 어디인가?",
+      "Which regional city outside of Seoul would you recommend to foreign tourists?",
+      "외국인 관광객의 한국 재방문율을 높이기 위해 어떤 노력을 해야 하는가?",
+      "What efforts are needed to increase the revisit rate of foreign tourists to Korea?",
+      "외국인 관광객에게 추천하고 싶은 한국의 대표적인 전통 음식은 무엇인가?",
+      "What representative Korean traditional food would you recommend to foreign tourists?",
+      "채식주의자(비건)나 무슬림(할랄) 관광객을 위해 어떤 음식을 추천하겠는가?",
+      "What foods would you recommend for vegetarian (vegan) or Muslim (halal) tourists?",
+      "관광객이 한국 음식 특유의 냄새나 매운맛 때문에 식사를 못 하면 어떻게 하겠는가?",
+      "What would you do if a tourist cannot eat Korean food due to its unique aroma or spiciness?",
+      "관광 도중 관광객이 갑자기 다치거나 아프면 어떻게 대처하겠는가?",
+      "How would you handle a situation where a tourist is suddenly injured or falls ill during a tour?",
+      "관광객이 여행 중 여권을 분실했을 때 처리 절차는 무엇인가?",
+      "What is the procedure when a tourist loses their passport during a trip?",
+      "공항에서 관광객의 짐(수하물)이 분실되었을 때 어떻게 도와주겠는가?",
+      "How would you assist a tourist whose baggage is lost at the airport?",
+      "교통 체증으로 인해 다음 일정이 늦어질 경우 어떻게 해결하겠는가?",
+      "How would you handle delays in subsequent itineraries caused by heavy traffic?",
+      "교통 체증으로 비행기를 놓쳤을 때 가이드는 어떻게 해야 하는가?",
+      "What should a guide do when tourists miss their flight due to traffic congestion?",
+      "항공편이 지연되어 관광객이 크게 불만을 표시할 때 어떻게 대처하겠는가?",
+      "How would you appease tourists expressing strong dissatisfaction over flight delays?",
+      "관광지나 박물관이 임시 휴관일인 것을 뒤늦게 알았을 때 어떻게 하겠는가?",
+      "What would you do upon finding out that a destination or museum is temporarily closed?",
+      "관광객이 일정을 벗어나 개별 행동을 원할 때 어떻게 대처하겠는가?",
+      "How would you handle a tourist who wants to detach from the group for individual activities?",
+      "상습적으로 지각하여 다른 사람에게 피해를 주는 관광객은 어떻게 대처하겠는가?",
+      "How would you deal with a tourist who is habitually late and causes inconvenience to others?",
+      "관광지에서 관광객이 소란을 피우거나 관람 규정을 어길 때 어떻게 하겠는가?",
+      "What would you do if a tourist causes a disturbance or violates visiting regulations at a tourist spot?",
+      "관광객이 문화재를 훼손하려고 할 때 가이드로서 어떻게 대처하겠는가?",
+      "How would you prevent and respond as a guide if a tourist attempts to damage cultural heritage?",
+      "대형 축제나 행사 현장에서 인파가 몰릴 때 관광객 안전을 어떻게 지키겠는가?",
+      "How would you ensure tourist safety when crowds gather at large festivals or events?",
+      "대형 행사나 축제가 지역 경제에 미치는 긍정적 영향과 부정적 영향은 무엇인가?",
+      "What are the positive and negative impacts of mega-events and festivals on the local economy?",
+      "외국인 관광객에게 추천하고 싶은 한국의 대표적인 전통 축제는 무엇인가?",
+      "What representative Korean traditional festival would you recommend to foreign tourists?",
+      "지속가능한 관광(생태관광)이란 무엇이며 현장에서 어떻게 실천할 수 있는가?",
+      "What is sustainable tourism (ecotourism), and how can it be practiced on-site?",
+      "공익관광(볼런투어리즘/자원봉사 여행)이란 무엇인가?",
+      "What is voluntourism (volunteer tourism)?",
+      "안보관광이란 무엇이며 DMZ 관람 시 주의사항은 무엇인가?",
+      "What is security tourism, and what are the precautions when visiting the DMZ?",
+      "가이드로서 지녀야 할 가장 중요한 자질이나 태도는 무엇이라고 생각하는가?",
+      "What do you consider the most essential quality or attitude for a tour guide?"
+],
+    pred_zh: [
+      "치유관광(웰니스 관광)이란 무엇인가?",
+      "什么是康养旅游（Wellness观光）？",
+      "치유관광과 의료관광의 차이점은 무엇인가?",
+      "康养旅游与医疗观光有什么区别？",
+      "치유관광의 대표적인 자원에는 어떤 것들이 있는가?",
+      "康养旅游的代表性资源有哪些？",
+      "오버투어리즘(과잉관광)이란 무엇인가?",
+      "什么是过度旅游（Over-tourism）？",
+      "북촌한옥마을 같은 주거지 관광지에서 관광객을 안내할 때 주의할 점은 무엇인가?",
+      "在北村韩屋村等居住区景点引导游客时需要注意什么？",
+      "관광지 주민의 일상생활과 사생활을 보호하는 것이 왜 중요한가?",
+      "为什么保护景区居民的日常生活与隐私非常重要？",
+      "관광지나 택시에서 바가지요금 문제가 발생하면 어떻게 대처하겠는가?",
+      "在景区或乘坐出租车遇到乱收费（宰客）问题时该如何应对？",
+      "호텔에서 초과 예약(오버부킹)이나 일방적 예약 취소가 발생하면 어떻게 해결하겠는가?",
+      "酒店出现超额预订（Overbooking）或单方面取消预订时该如何解决？",
+      "식당이나 상점에서 카드 결제를 거부당했을 때 가이드로서 어떻게 하겠는가?",
+      "在餐厅或商铺被拒绝刷卡结账时，作为导游该怎么办？",
+      "관광불편신고 대표전화(1330)에 대해 알고 있는가?",
+      "了解旅游不便投诉专线（1330）吗？",
+      "관광객이 한복이나 김치의 유래에 대해 잘못 알고 있다면 어떻게 설명하겠는가?",
+      "如果游客对韩服或辛奇的起源存在误解，该如何解释？",
+      "관광객과 역사 문제로 이견이 생겼을 때 어떻게 대처하겠는가?",
+      "与游客在历史问题上出现分歧时该如何应对？",
+      "가이드에게 올바른 국가관이 왜 중요한가?",
+      "为什么正确的国家观对导游来说至关重要？",
+      "인공지능(AI)과 번역기가 가이드를 대체할 수 있다고 생각하는가?",
+      "你认为人工智能（AI）和翻译软件会取代导游吗？",
+      "스마트 관광 기술이 관광객에게 주는 장점은 무엇인가?",
+      "智慧旅游技术为游客带来了哪些优势？",
+      "AI 안내 앱이나 지도에 잘못된 정보가 나와 있다면 가이드로서 어떻게 대처하겠는가?",
+      "如果AI导览软件或地图显示错误信息，作为导游该如何处理？",
+      "수도권에 집중된 관광객을 지방으로 분산시키려면 어떻게 해야 하는가?",
+      "如何将集中在首都圈的游客分流到地方？",
+      "서울 외에 외국인 관광객에게 추천하고 싶은 한국의 지방 도시는 어디인가?",
+      "除首尔外，你想向外国游客推荐哪座韩国地方城市？",
+      "외국인 관광객의 한국 재방문율을 높이기 위해 어떤 노력을 해야 하는가?",
+      "为提高外国游客对韩国的重游率，应该做出哪些努力？",
+      "외국인 관광객에게 추천하고 싶은 한국의 대표적인 전통 음식은 무엇인가?",
+      "你想向外国游客推荐的韩国代表性传统美食是什么？",
+      "채식주의자(비건)나 무슬림(할랄) 관광객을 위해 어떤 음식을 추천하겠는가?",
+      "为素食主义者（Vegan）或穆斯林（清真）游客推荐哪些美食？",
+      "관광객이 한국 음식 특유의 냄새나 매운맛 때문에 식사를 못 하면 어떻게 하겠는가?",
+      "游客因韩国饮食特有的气味或辛辣而无法进食时该怎么办？",
+      "관광 도중 관광객이 갑자기 다치거나 아프면 어떻게 대처하겠는가?",
+      "游览途中游客突发受伤或生病该如何应对？",
+      "관광객이 여행 중 여권을 분실했을 때 처리 절차는 무엇인가?",
+      "游客在旅行途中丢失护照时的处理流程是什么？",
+      "공항에서 관광객의 짐(수하물)이 분실되었을 때 어떻게 도와주겠는가?",
+      "在机场游客行李丢失时该如何提供协助？",
+      "교통 체증으로 인해 다음 일정이 늦어질 경우 어떻게 해결하겠는가?",
+      "因交通拥堵导致后续行程延误时该如何解决？",
+      "교통 체증으로 비행기를 놓쳤을 때 가이드는 어떻게 해야 하는가?",
+      "因交通堵塞错过航班时，导游应该怎么办？",
+      "항공편이 지연되어 관광객이 크게 불만을 표시할 때 어떻게 대처하겠는가?",
+      "航班延误导致游客强烈不满时该如何安抚？",
+      "관광지나 박물관이 임시 휴관일인 것을 뒤늦게 알았을 때 어떻게 하겠는가?",
+      "到达后才发现景点或博物馆临时休馆时该怎么办？",
+      "관광객이 일정을 벗어나 개별 행동을 원할 때 어떻게 대처하겠는가?",
+      "游客想要脱离团队单独行动时该如何应对？",
+      "상습적으로 지각하여 다른 사람에게 피해를 주는 관광객은 어떻게 대처하겠는가?",
+      "经常迟到并给他人带来困扰的游客该如何处理？",
+      "관광지에서 관광객이 소란을 피우거나 관람 규정을 어길 때 어떻게 하겠는가?",
+      "游客在景区大声喧哗或违反参观规定时该怎么办？",
+      "관광객이 문화재를 훼손하려고 할 때 가이드로서 어떻게 대처하겠는가?",
+      "游客试图损坏文物时，作为导游该如何制止与应对？",
+      "대형 축제나 행사 현장에서 인파가 몰릴 때 관광객 안전을 어떻게 지키겠는가?",
+      "在大型节庆或活动现场人流拥挤时，如何保障游客安全？",
+      "대형 행사나 축제가 지역 경제에 미치는 긍정적 영향과 부정적 영향은 무엇인가?",
+      "大型活动或节庆对当地经济有哪些正面和负面影响？",
+      "외국인 관광객에게 추천하고 싶은 한국의 대표적인 전통 축제는 무엇인가?",
+      "你想向外国游客推荐的韩国代表性传统节庆是什么？",
+      "지속가능한 관광(생태관광)이란 무엇이며 현장에서 어떻게 실천할 수 있는가?",
+      "什么是可持续旅游（生态旅游）？在现场应如何践行？",
+      "공익관광(볼런투어리즘/자원봉사 여행)이란 무엇인가?",
+      "什么是公益旅游（Voluntourism / 志愿旅游）？",
+      "안보관광이란 무엇이며 DMZ 관람 시 주의사항은 무엇인가?",
+      "什么是安保观光？参观非军事区（DMZ）时的注意事项有哪些？",
+      "가이드로서 지녀야 할 가장 중요한 자질이나 태도는 무엇이라고 생각하는가?",
+      "你认为作为导游应具备的最重要的品质或态度是什么？"
+],
+    pred_ja: [
+      "치유관광(웰니스 관광)이란 무엇인가?",
+      "ウェルネス観光（治癒観光）とは何ですか？",
+      "치유관광과 의료관광의 차이점은 무엇인가?",
+      "ウェルネス観光と医療観光の違いは何ですか？",
+      "치유관광의 대표적인 자원에는 어떤 것들이 있는가?",
+      "ウェルネス観光の代表的な資源にはどのようなものがありますか？",
+      "오버투어리즘(과잉관광)이란 무엇인가?",
+      "オーバーツーリズム（観光公害）とは何ですか？",
+      "북촌한옥마을 같은 주거지 관광지에서 관광객을 안내할 때 주의할 점은 무엇인가?",
+      "北村韓屋村のような住宅街の観光地で観光客を案内する際の注意点は何ですか？",
+      "관광지 주민의 일상생활과 사생활을 보호하는 것이 왜 중요한가?",
+      "観光地の住民の日常生活やプライバシーを守ることがなぜ重要ですか？",
+      "관광지나 택시에서 바가지요금 문제가 발생하면 어떻게 대처하겠는가?",
+      "観光地やタクシーでぼったくり被害が発生した場合、どのように対処しますか？",
+      "호텔에서 초과 예약(오버부킹)이나 일방적 예약 취소가 발생하면 어떻게 해결하겠는가?",
+      "ホテルでオーバーブッキングや一方的な予約キャンセルが発生した場合、どう解決しますか？",
+      "식당이나 상점에서 카드 결제를 거부당했을 때 가이드로서 어떻게 하겠는가?",
+      "飲食店や店舗でカード決済を拒否された場合、ガイドとしてどうしますか？",
+      "관광불편신고 대표전화(1330)에 대해 알고 있는가?",
+      "観光苦情申告の専用電話（1330）について知っていますか？",
+      "관광객이 한복이나 김치의 유래에 대해 잘못 알고 있다면 어떻게 설명하겠는가?",
+      "観光客が韓服やキムチの由来について誤解している場合、どのように説明しますか？",
+      "관광객과 역사 문제로 이견이 생겼을 때 어떻게 대처하겠는가?",
+      "観光客と歴史認識の違いが生じた場合、どのように対応しますか？",
+      "가이드에게 올바른 국가관이 왜 중요한가?",
+      "ガイドにとって正しい国家観を持つことがなぜ重要ですか？",
+      "인공지능(AI)과 번역기가 가이드를 대체할 수 있다고 생각하는가?",
+      "人工知能（AI）や翻訳機がガイドに取って代わることができると思いますか？",
+      "스마트 관광 기술이 관광객에게 주는 장점은 무엇인가?",
+      "スマート観光技術が観光客にもたらすメリットは何ですか？",
+      "AI 안내 앱이나 지도에 잘못된 정보가 나와 있다면 가이드로서 어떻게 대처하겠는가?",
+      "AI案内アプリや地図に誤った情報がある場合、ガイドとしてどう対応しますか？",
+      "수도권에 집중된 관광객을 지방으로 분산시키려면 어떻게 해야 하는가?",
+      "首都圏に集中する観光客を地方へ分散させるにはどうすればよいですか？",
+      "서울 외에 외국인 관광객에게 추천하고 싶은 한국의 지방 도시는 어디인가?",
+      "ソウル以外で外国人観光客におすすめしたい韓国の地方都市はどこですか？",
+      "외국인 관광객의 한국 재방문율을 높이기 위해 어떤 노력을 해야 하는가?",
+      "外国人観光客のリピート率（再訪問率）を高めるためにはどのような努力が必要ですか？",
+      "외국인 관광객에게 추천하고 싶은 한국의 대표적인 전통 음식은 무엇인가?",
+      "外国人観光客におすすめしたい韓国の代表的な伝統料理は何ですか？",
+      "채식주의자(비건)나 무슬림(할랄) 관광객을 위해 어떤 음식을 추천하겠는가?",
+      "ベジタリアン（ヴィーガン）やムスリム（ハラール）の観光客にはどんな料理を勧めますか？",
+      "관광객이 한국 음식 특유의 냄새나 매운맛 때문에 식사를 못 하면 어떻게 하겠는가?",
+      "観光客が韓国料理特有の匂いや辛さで食事ができない場合、どう対応しますか？",
+      "관광 도중 관광객이 갑자기 다치거나 아프면 어떻게 대처하겠는가?",
+      "ツアー中に観光客が突然怪我をしたり病気になった場合、どのように対処しますか？",
+      "관광객이 여행 중 여권을 분실했을 때 처리 절차는 무엇인가?",
+      "観光客が旅行中にパスポートを紛失した場合の対応手順は何ですか？",
+      "공항에서 관광객의 짐(수하물)이 분실되었을 때 어떻게 도와주겠는가?",
+      "空港で観光客の手荷物が紛失した場合、どのように支援しますか？",
+      "교통 체증으로 인해 다음 일정이 늦어질 경우 어떻게 해결하겠는가?",
+      "交通渋滞によりその後の日程が遅れる場合、どのように解決しますか？",
+      "교통 체증으로 비행기를 놓쳤을 때 가이드는 어떻게 해야 하는가?",
+      "渋滞で飛行機に乗り遅れてしまった場合、ガイドはどうすべきですか？",
+      "항공편이 지연되어 관광객이 크게 불만을 표시할 때 어떻게 대처하겠는가?",
+      "フライトの遅延で観光客が強い不満を示した場合、どのように落ち着かせますか？",
+      "관광지나 박물관이 임시 휴관일인 것을 뒤늦게 알았을 때 어떻게 하겠는가?",
+      "目的地や博物館が臨時休館であることを後から知った場合、どうしますか？",
+      "관광객이 일정을 벗어나 개별 행동을 원할 때 어떻게 대처하겠는가?",
+      "観光客がツアーを離れて個人行動を希望した場合、どのように対応しますか？",
+      "상습적으로 지각하여 다른 사람에게 피해를 주는 관광객은 어떻게 대처하겠는가?",
+      "度重なる遅刻で他の観光客に迷惑をかける人にはどのように対処しますか？",
+      "관광지에서 관광객이 소란을 피우거나 관람 규정을 어길 때 어떻게 하겠는가?",
+      "観光地で騒いだり見学規則を破ったりする観光客にはどう対応しますか？",
+      "관광객이 문화재를 훼손하려고 할 때 가이드로서 어떻게 대처하겠는가?",
+      "観光客が文化財を傷つけようとした場合、ガイドとしてどう制止・対処しますか？",
+      "대형 축제나 행사 현장에서 인파가 몰릴 때 관광객 안전을 어떻게 지키겠는가?",
+      "大型の祭りやイベントで混雑する中、観光客の安全をどのように確保しますか？",
+      "대형 행사나 축제가 지역 경제에 미치는 긍정적 영향과 부정적 영향은 무엇인가?",
+      "大型イベントや祭りが地域経済に与えるプラスとマイナスの影響は何ですか？",
+      "외국인 관광객에게 추천하고 싶은 한국의 대표적인 전통 축제는 무엇인가?",
+      "外国人観光客におすすめしたい韓国の代表的な伝統的な祭りは何ですか？",
+      "지속가능한 관광(생태관광)이란 무엇이며 현장에서 어떻게 실천할 수 있는가?",
+      "持続可能な観光（エコツーリズム）とは何であり、現場でどう実践できますか？",
+      "공익관광(볼런투어리즘/자원봉사 여행)이란 무엇인가?",
+      "公益観光（ボランツーリズム／ボランティア旅行）とは何ですか？",
+      "안보관광이란 무엇이며 DMZ 관람 시 주의사항은 무엇인가?",
+      "安保観光とは何であり、DMZ見学時の注意事項は何ですか？",
+      "가이드로서 지녀야 할 가장 중요한 자질이나 태도는 무엇이라고 생각하는가?",
+      "ガイドとして備えるべき最も重要な資質や態度とは何だと思いますか？"
+],
+    pred_es: [
+      "치유관광(웰니스 관광)이란 무엇인가?",
+      "¿Qué es el turismo de bienestar (wellness)?",
+      "치유관광과 의료관광의 차이점은 무엇인가?",
+      "¿Cuál es la diferencia entre el turismo de bienestar y el turismo médico?",
+      "치유관광의 대표적인 자원에는 어떤 것들이 있는가?",
+      "¿Cuáles son los recursos representativos del turismo de bienestar?",
+      "오버투어리즘(과잉관광)이란 무엇인가?",
+      "¿Qué es el sobreturismo (overtourism)?",
+      "북촌한옥마을 같은 주거지 관광지에서 관광객을 안내할 때 주의할 점은 무엇인가?",
+      "¿Qué precauciones se deben tomar al guiar turistas en zonas residenciales como la aldea Hanok de Bukchon?",
+      "관광지 주민의 일상생활과 사생활을 보호하는 것이 왜 중요한가?",
+      "¿Por qué es importante proteger la vida cotidiana y la privacidad de los residentes locales en zonas turísticas?",
+      "관광지나 택시에서 바가지요금 문제가 발생하면 어떻게 대처하겠는가?",
+      "¿Cómo actuaría ante un cobro excesivo en un punto turístico o en un taxi?",
+      "호텔에서 초과 예약(오버부킹)이나 일방적 예약 취소가 발생하면 어떻게 해결하겠는가?",
+      "¿Cómo resolvería un caso de sobreventa (overbooking) o cancelación unilateral por parte del hotel?",
+      "식당이나 상점에서 카드 결제를 거부당했을 때 가이드로서 어떻게 하겠는가?",
+      "Como guía, ¿qué haría si un restaurante o tienda se niega a aceptar el pago con tarjeta?",
+      "관광불편신고 대표전화(1330)에 대해 알고 있는가?",
+      "¿Conoce la línea de atención para quejas y asistencia turística 1330?",
+      "관광객이 한복이나 김치의 유래에 대해 잘못 알고 있다면 어떻게 설명하겠는가?",
+      "Si un turista tiene una idea equivocada sobre el origen del Hanbok o del Kimchi, ¿cómo se lo explicaría?",
+      "관광객과 역사 문제로 이견이 생겼을 때 어떻게 대처하겠는가?",
+      "¿Cómo manejaría una discrepancia con los turistas respecto a temas históricos?",
+      "가이드에게 올바른 국가관이 왜 중요한가?",
+      "¿Por qué es importante que un guía turístico tenga una perspectiva nacional adecuada?",
+      "인공지능(AI)과 번역기가 가이드를 대체할 수 있다고 생각하는가?",
+      "¿Cree que la inteligencia artificial (IA) y las aplicaciones de traducción puedan reemplazar a los guías turísticos?",
+      "스마트 관광 기술이 관광객에게 주는 장점은 무엇인가?",
+      "¿Cuáles son las ventajas que la tecnología de turismo inteligente ofrece a los turistas?",
+      "AI 안내 앱이나 지도에 잘못된 정보가 나와 있다면 가이드로서 어떻게 대처하겠는가?",
+      "Si una aplicación de guía por IA o un mapa muestra información incorrecta, ¿cómo lo solucionaría como guía?",
+      "수도권에 집중된 관광객을 지방으로 분산시키려면 어떻게 해야 하는가?",
+      "¿Qué se debe hacer para dispersar hacia las provincias a los turistas concentrados en el área metropolitana?",
+      "서울 외에 외국인 관광객에게 추천하고 싶은 한국의 지방 도시는 어디인가?",
+      "Además de Seúl, ¿qué ciudad provincial de Corea recomendaría a los turistas extranjeros?",
+      "외국인 관광객의 한국 재방문율을 높이기 위해 어떤 노력을 해야 하는가?",
+      "¿Qué esfuerzos se deben realizar para aumentar la tasa de visitas repetidas de turistas extranjeros a Corea?",
+      "외국인 관광객에게 추천하고 싶은 한국의 대표적인 전통 음식은 무엇인가?",
+      "¿Qué comida tradicional representativa de Corea recomendaría a los turistas extranjeros?",
+      "채식주의자(비건)나 무슬림(할랄) 관광객을 위해 어떤 음식을 추천하겠는가?",
+      "¿Qué platos recomendaría para turistas vegetarianos (veganos) o musulmanes (halal)?",
+      "관광객이 한국 음식 특유의 냄새나 매운맛 때문에 식사를 못 하면 어떻게 하겠는가?",
+      "¿Qué haría si un turista no puede comer debido al aroma peculiar o al picante de la comida coreana?",
+      "관광 도중 관광객이 갑자기 다치거나 아프면 어떻게 대처하겠는가?",
+      "¿Cómo actuaría si un turista se lesiona o enferma repentinamente durante el recorrido?",
+      "관광객이 여행 중 여권을 분실했을 때 처리 절차는 무엇인가?",
+      "¿Cuál es el procedimiento si un turista pierde su pasaporte durante el viaje?",
+      "공항에서 관광객의 짐(수하물)이 분실되었을 때 어떻게 도와주겠는가?",
+      "¿Cómo ayudaría a un turista cuyo equipaje se extravió en el aeropuerto?",
+      "교통 체증으로 인해 다음 일정이 늦어질 경우 어떻게 해결하겠는가?",
+      "¿Cómo resolvería un retraso en el itinerario posterior debido a una congestión de tráfico?",
+      "교통 체증으로 비행기를 놓쳤을 때 가이드는 어떻게 해야 하는가?",
+      "¿Qué debe hacer el guía si los turistas pierden su vuelo por causa del tráfico?",
+      "항공편이 지연되어 관광객이 크게 불만을 표시할 때 어떻게 대처하겠는가?",
+      "¿Cómo calmaría a los turistas que expresan gran descontento por el retraso de un vuelo?",
+      "관광지나 박물관이 임시 휴관일인 것을 뒤늦게 알았을 때 어떻게 하겠는가?",
+      "¿Qué haría si descubre tarde que un sitio turístico o museo está cerrado temporalmente?",
+      "관광객이 일정을 벗어나 개별 행동을 원할 때 어떻게 대처하겠는가?",
+      "¿Cómo gestionaría la situación si un turista desea separarse del grupo para realizar actividades individuales?",
+      "상습적으로 지각하여 다른 사람에게 피해를 주는 관광객은 어떻게 대처하겠는가?",
+      "¿Cómo trataría a un turista que llega tarde habitualmente y perjudica a los demás?",
+      "관광지에서 관광객이 소란을 피우거나 관람 규정을 어길 때 어떻게 하겠는가?",
+      "¿Qué haría si un turista hace ruido o incumple las normas de visita en un sitio turístico?",
+      "관광객이 문화재를 훼손하려고 할 때 가이드로서 어떻게 대처하겠는가?",
+      "Como guía, ¿cómo intervendría si un turista intenta dañar el patrimonio cultural?",
+      "대형 축제나 행사 현장에서 인파가 몰릴 때 관광객 안전을 어떻게 지키겠는가?",
+      "¿Cómo garantizaría la seguridad de los turistas ante grandes aglomeraciones en festivales o eventos?",
+      "대형 행사나 축제가 지역 경제에 미치는 긍정적 영향과 부정적 영향은 무엇인가?",
+      "¿Cuáles son los impactos positivos y negativos de los grandes eventos o festivales en la economía local?",
+      "외국인 관광객에게 추천하고 싶은 한국의 대표적인 전통 축제는 무엇인가?",
+      "¿Cuál festival tradicional coreano recomendaría a los turistas extranjeros?",
+      "지속가능한 관광(생태관광)이란 무엇이며 현장에서 어떻게 실천할 수 있는가?",
+      "¿Qué es el turismo sostenible (ecoturismo) y cómo se puede poner en práctica sobre el terreno?",
+      "공익관광(볼런투어리즘/자원봉사 여행)이란 무엇인가?",
+      "¿Qué es el volunturismo (turismo de voluntariado)?",
+      "안보관광이란 무엇이며 DMZ 관람 시 주의사항은 무엇인가?",
+      "¿Qué es el turismo de seguridad y cuáles son las precauciones al visitar la DMZ?",
+      "가이드로서 지녀야 할 가장 중요한 자질이나 태도는 무엇이라고 생각하는가?",
+      "¿Cuál considera que es la cualidad o actitud más importante que debe poseer un guía turístico?"
+]
   };
 
   // =========================================================================
@@ -2650,6 +3025,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   // 8. 문제 세트 목록(덱) 탭 관리 및 전환
   // =========================================================================
+  function getPresetContent(deckId) {
+    const preset = PRESET_DECKS.find(d => d.id === deckId);
+    if (!preset) return '';
+    if (state.presetContents && state.presetContents[preset.id] !== undefined && state.presetContents[preset.id] !== '') {
+      return state.presetContents[preset.id];
+    }
+    if (preset.id === 'tour' && state.tourContent !== undefined && state.tourContent !== '') {
+      return state.tourContent;
+    }
+    return SAMPLES[preset.sampleKey] ? SAMPLES[preset.sampleKey].join('\n') : '';
+  }
+
   function getActiveDeckContent() {
     const preset = PRESET_DECKS.find(d => d.id === state.activeDeckId);
     if (preset) {
@@ -2683,22 +3070,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!deckTabsList) return;
     deckTabsList.innerHTML = '';
 
-    // 1. 프리셋 5대 기본 탭 (한국어, 한·영, 한·일, 한·중, 한·스페인어)
-    PRESET_DECKS.forEach(preset => {
-      const content = (state.presetContents && state.presetContents[preset.id] !== undefined && state.presetContents[preset.id] !== '')
-        ? state.presetContents[preset.id]
-        : (preset.id === 'tour' && state.tourContent ? state.tourContent : (SAMPLES[preset.sampleKey] || []).join('\n'));
+    // 1. 프리셋 2대 그룹 탭 (관광통역 기출, 올해 예상문제)
+    PRESET_GROUPS.forEach(group => {
+      // 현재 활성화된 덱이 이 그룹에 속해 있다면 해당 언어를 기억
+      const activeInGroup = group.languages.find(l => l.id === state.activeDeckId);
+      if (activeInGroup) {
+        state[group.id + '_lang'] = activeInGroup.lang;
+      }
+      let currentLangCode = state[group.id + '_lang'] || 'ko';
+      const currentLangOption = group.languages.find(l => l.lang === currentLangCode) || group.languages[0];
+      const content = getPresetContent(currentLangOption.id);
       const questions = parseExcelQuestions(content, cleanNumberingCheck ? cleanNumberingCheck.checked : true);
+      const isGroupActive = group.languages.some(l => l.id === state.activeDeckId);
 
       const tab = document.createElement('button');
       tab.type = 'button';
-      tab.className = `deck-tab ${state.activeDeckId === preset.id ? 'active' : ''}`;
+      tab.className = `deck-tab deck-tab-preset ${isGroupActive ? 'active' : ''}`;
+      tab.setAttribute('data-group-id', group.id);
+      tab.title = `${t(group.nameKey, group.defaultName)} (${t(currentLangOption.nameKey, currentLangOption.defaultName)}) - ${t('speaking.step1.clickToSelectLang', '클릭하여 언어 선택')}`;
       tab.innerHTML = `
-        <span class="deck-tab-name">${escapeHtml(t(preset.nameKey, preset.defaultName))}</span>
+        <span class="deck-tab-icon">${group.icon}</span>
+        <span class="deck-tab-name">${escapeHtml(t(group.nameKey, group.defaultName))}</span>
+        <span class="deck-tab-lang-badge">${escapeHtml(t(currentLangOption.nameKey, currentLangOption.defaultName))} <span class="arrow">▾</span></span>
         <span class="deck-tab-count">${questions.length}</span>
       `;
       tab.addEventListener('click', () => {
-        switchDeck(preset.id);
+        openPresetLangModal(group.id);
       });
       deckTabsList.appendChild(tab);
     });
@@ -2748,6 +3145,99 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       deckTabsList.appendChild(tab);
     });
+  }
+
+  function openPresetLangModal(groupId) {
+    const dialog = document.getElementById('presetLangModal');
+    if (!dialog) return;
+
+    const group = PRESET_GROUPS.find(g => g.id === groupId);
+    if (!group) return;
+
+    const titleEl = document.getElementById('presetLangDialogTitle');
+    const descEl = document.getElementById('presetLangDialogDesc');
+    const listEl = document.getElementById('presetLangOptionsList');
+
+    if (titleEl) {
+      titleEl.innerHTML = `${group.icon} ${escapeHtml(t(group.nameKey, group.defaultName))} - ${escapeHtml(t('speaking.step1.selectLangTitle', '언어 선택'))}`;
+    }
+    if (descEl) {
+      descEl.textContent = t('speaking.step1.selectLangDesc', '연습할 언어를 선택하세요. 외국어 선택 시 모국어(한국어)와 1:1 번갈아 출제되며 음성이 자동 설정됩니다.');
+    }
+
+    if (listEl) {
+      listEl.innerHTML = '';
+      group.languages.forEach(l => {
+        const content = getPresetContent(l.id);
+        const questions = parseExcelQuestions(content, cleanNumberingCheck ? cleanNumberingCheck.checked : true);
+        const isSelected = (state.activeDeckId === l.id);
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `preset-lang-option-btn ${isSelected ? 'selected' : ''}`;
+        btn.innerHTML = `
+          <div class="preset-lang-option-left">
+            <span class="preset-lang-option-flag">${l.flag}</span>
+            <div class="preset-lang-option-text">
+              <span class="preset-lang-option-title">${escapeHtml(t(l.nameKey, l.defaultName))}</span>
+              <span class="preset-lang-option-desc">${escapeHtml(t('speaking.step1.langDesc_' + l.lang, l.desc || ''))}</span>
+            </div>
+          </div>
+          <div class="preset-lang-option-right">
+            <span class="preset-lang-option-count">${questions.length} ${escapeHtml(t('speaking.step1.parsedCountUnit', '문항'))}</span>
+            ${isSelected ? '<span class="preset-lang-option-check">✓</span>' : ''}
+          </div>
+        `;
+
+        btn.addEventListener('click', () => {
+          state[group.id + '_lang'] = l.lang;
+          if (typeof dialog.close === 'function') {
+            dialog.close();
+          } else {
+            dialog.removeAttribute('open');
+          }
+          switchDeck(l.id);
+        });
+
+        listEl.appendChild(btn);
+      });
+    }
+
+    if (typeof dialog.showModal === 'function') {
+      dialog.showModal();
+    } else {
+      dialog.setAttribute('open', '');
+    }
+  }
+
+  function initPresetLangModal() {
+    const dialog = document.getElementById('presetLangModal');
+    if (!dialog) return;
+
+    const btnClose = document.getElementById('btnClosePresetLangModal');
+    if (btnClose) {
+      btnClose.addEventListener('click', () => {
+        if (typeof dialog.close === 'function') dialog.close();
+        else dialog.removeAttribute('open');
+      });
+    }
+
+    // Modern Web Guidance: fallback for light-dismiss on browsers without closedBy support
+    if (!('closedBy' in HTMLDialogElement.prototype)) {
+      dialog.addEventListener('click', (event) => {
+        if (event.target !== dialog) return;
+        const rect = dialog.getBoundingClientRect();
+        const isDialogContent = (
+          rect.top <= event.clientY &&
+          event.clientY <= rect.top + rect.height &&
+          rect.left <= event.clientX &&
+          event.clientX <= rect.left + rect.width
+        );
+        if (!isDialogContent) {
+          dialog.close();
+        }
+      });
+    }
   }
 
   function switchDeck(deckId) {
@@ -2883,9 +3373,11 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {}
 
     const data = Object.assign({}, prev, {
-      tourVersion: '20261015_v4',
+      tourVersion: TOUR_SAMPLE_VERSION,
       presetContents: state.presetContents || prev.presetContents || {},
       activeDeckId: state.activeDeckId || prev.activeDeckId || 'tour',
+      tour_lang: state.tour_lang || prev.tour_lang || 'ko',
+      pred_lang: state.pred_lang || prev.pred_lang || 'ko',
       customDecks: state.customDecks || prev.customDecks || [],
       tourContent: state.tourContent || prev.tourContent || '',
       autoTargetLang: state.autoTargetLang || prev.autoTargetLang || 'en',
@@ -2941,7 +3433,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = JSON.parse(raw);
       state.customDecks = Array.isArray(data.customDecks) ? data.customDecks : [];
       state.presetContents = (data.presetContents && typeof data.presetContents === 'object') ? data.presetContents : {};
-      const TOUR_SAMPLE_VERSION = '20261015_v4';
+      state.tour_lang = data.tour_lang || 'ko';
+      state.pred_lang = data.pred_lang || 'ko';
       if (data.tourVersion !== TOUR_SAMPLE_VERSION) {
         state.tourContent = SAMPLES.tour.join('\n');
         PRESET_DECKS.forEach(p => {
@@ -6890,6 +7383,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   // 12. 초기화 실행
   // =========================================================================
+  initPresetLangModal();
   loadSettings();
   updateMicOptionsUi();
   loadShadowSettings();

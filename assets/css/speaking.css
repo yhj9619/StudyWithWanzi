@@ -4098,3 +4098,208 @@
 
 
 
+
+
+/* =========================================================================
+   프리셋 언어 선택 네이티브 다이얼로그 & 탭 배지 스타일 (Modern Web Guidance 준수)
+   ========================================================================= */
+.deck-tab-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.deck-tab-lang-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.12rem 0.42rem;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #2563eb;
+  border: 1px solid #cbd5e1;
+  transition: all 0.15s ease;
+}
+
+.deck-tab.active .deck-tab-lang-badge {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.deck-tab-lang-badge .arrow {
+  font-size: 0.65rem;
+  opacity: 0.85;
+}
+
+.preset-lang-dialog {
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  max-width: 460px;
+  width: calc(100% - 2rem);
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+  animation: presetDialogFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  margin: auto;
+}
+
+@keyframes presetDialogFadeIn {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.preset-lang-dialog::backdrop {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.preset-lang-dialog-body {
+  padding: 1.25rem 1.25rem 1.5rem;
+}
+
+.preset-lang-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.preset-lang-dialog-title {
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.preset-lang-dialog-close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  transition: all 0.15s;
+}
+
+.preset-lang-dialog-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.preset-lang-dialog-desc {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0 0 1rem;
+  line-height: 1.45;
+}
+
+.preset-lang-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.preset-lang-option-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.preset-lang-option-btn:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  transform: translateY(-1px);
+}
+
+.preset-lang-option-btn.selected {
+  background: #f0fdf4;
+  border-color: #16a34a;
+  box-shadow: 0 0 0 1px #16a34a;
+}
+
+.preset-lang-option-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.preset-lang-option-flag {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.preset-lang-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.preset-lang-option-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.preset-lang-option-desc {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.preset-lang-option-right {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.preset-lang-option-count {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+}
+
+.preset-lang-option-btn.selected .preset-lang-option-count {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.preset-lang-option-check {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #16a34a;
+}
+
+@media (max-width: 768px) {
+  .preset-lang-dialog {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    position: fixed;
+    bottom: 0;
+  }
+}
