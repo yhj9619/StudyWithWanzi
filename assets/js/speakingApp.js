@@ -332,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
     {
       id: 'tour',
       nameKey: 'speaking.step1.tourGroupTitle',
-      defaultName: '관광통역 기출',
+      defaultName: '관광통역 문제',
       icon: '🏛️',
       languages: [
         { lang: 'ko', id: 'tour', nameKey: 'speaking.step1.langKo', defaultName: '한국어', sampleKey: 'tour', targetLang: 'ko', flag: '🇰🇷' },
